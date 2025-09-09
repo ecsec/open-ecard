@@ -2,19 +2,12 @@ package org.openecard.addons.tr03124.transport
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.HttpClient
-import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
-import io.ktor.client.request.get
-import io.ktor.client.request.headers
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.serialization.kotlinx.xml.xml
+import kotlinx.io.IOException
 import okhttp3.ConnectionSpec
 import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.TlsVersion
 import okio.ByteString.Companion.toByteString
 import org.bchateau.pskfactories.BcPskSSLSocketFactory
@@ -22,12 +15,9 @@ import org.bchateau.pskfactories.BcPskTlsParams
 import org.bouncycastle.tls.BasicTlsPSKIdentity
 import org.bouncycastle.tls.CipherSuite
 import org.bouncycastle.tls.ProtocolVersion
-import org.bouncycastle.tls.TlsPSKIdentity
 import org.openecard.addons.tr03124.Tr03124Config
 import org.openecard.addons.tr03124.transport.EidServerPaos.Companion.registerPaosNegotiation
 import org.openecard.addons.tr03124.xml.TcToken
-import org.openecard.addons.tr03124.xml.TcToken.Companion.toTcToken
-import org.openecard.addons.tr03124.xml.eacXml
 import java.security.cert.Certificate
 import java.security.cert.X509Certificate
 import javax.net.ssl.SSLContext
@@ -42,7 +32,7 @@ private val log = KotlinLogging.logger { }
 class CertTrackingClientBuilder(
 	certTracker: EserviceCertTracker,
 ) : KtorClientBuilder {
-	private val tm = SslSettings.getTrustManager(certTracker)
+	private val tm = SslSettings.getTrustAllCertsManager()
 	private val sslCtx = SslSettings.getSslContext(tm)
 	private val sslSessions = mutableSetOf<SSLSession>()
 
@@ -51,9 +41,32 @@ class CertTrackingClientBuilder(
 		OkHttpClient
 			.Builder()
 			.sslSocketFactory(sslCtx.socketFactory, tm)
-			.followRedirects(false)
+			.addNetworkInterceptor { chain ->
+				// record TLS cert
+				chain.connection()!!.let { con ->
+					when (val sock = con.socket()) {
+						is SSLSocket -> {
+							sock.session.peerCertificates.firstOrNull()?.let { cert ->
+								val hash = cert.contentSha256()
+								if (cert is X509Certificate) {
+									log.debug { "Recording certificate <${cert.subjectX500Principal}>" }
+								}
+								certTracker.addCertHash(hash.toUByteArray())
+							}
+						}
+						else -> {
+							throw IllegalStateException("Non TLS socket used in eID Process")
+						}
+					}
+				}
+
+				val req = chain.request()
+				val resp = chain.proceed(req)
+				resp
+			}.followRedirects(false)
 			.build()
 
+	@OptIn(ExperimentalUnsignedTypes::class)
 	override val tokenClient: HttpClient by lazy {
 		HttpClient(OkHttp) {
 			engine {
@@ -112,29 +125,20 @@ class CertTrackingClientBuilder(
 	class ClientAbort : Exception()
 
 	override val checkCertClient: CertValidationClient by lazy {
-		val cl =
-			HttpClient(OkHttp) {
-				engine {
-					preconfigured =
-						httpClientBase
-							.newBuilder()
-							.addNetworkInterceptor { chain ->
-								// add network interceptor stopping before the HTTP request is made
-								throw ClientAbort()
-							}.build()
-				}
-
-				Tr03124Config.httpLog?.let {
-					install(Logging, it)
-				}
-
-				followRedirects = false
-			}
+		val okHttpClient =
+			httpClientBase
+				.newBuilder()
+				.addNetworkInterceptor { chain ->
+					// add network interceptor stopping before the HTTP request is made
+					throw ClientAbort()
+				}.build()
 
 		object : CertValidationClient {
+			@Throws(IOException::class)
 			override suspend fun checkCert(url: String) {
 				try {
-					val resp = cl.get(url)
+					val req = Request.Builder().url(url).build()
+					okHttpClient.newCall(req).execute()
 					throw IllegalStateException("HTTP request has been executed, but was not intended to be")
 				} catch (ex: ClientAbort) {
 					return
@@ -256,7 +260,7 @@ object SslSettings {
 		)
 
 	@OptIn(ExperimentalUnsignedTypes::class)
-	fun getTrustManager(certTracker: EserviceCertTracker): X509TrustManager =
+	fun getTrustAllCertsManager(): X509TrustManager =
 		@Suppress("CustomX509TrustManager")
 		object : X509TrustManager {
 			override fun checkClientTrusted(
@@ -264,15 +268,11 @@ object SslSettings {
 				authType: String?,
 			): Unit = throw UnsupportedOperationException("Client certificates are not permitted in TR-03124")
 
+			@Suppress("TrustAllX509TrustManager")
 			override fun checkServerTrusted(
 				chain: Array<out X509Certificate>,
 				authType: String,
 			) {
-				chain.firstOrNull()?.let {
-					val hash = it.contentSha256()
-					log.debug { "Recording certificate <${it.subjectX500Principal}>" }
-					certTracker.addCertHash(hash.toUByteArray())
-				}
 			}
 
 			override fun getAcceptedIssuers(): Array<out X509Certificate> = arrayOf()

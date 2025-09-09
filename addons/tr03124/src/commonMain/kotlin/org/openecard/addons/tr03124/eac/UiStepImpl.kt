@@ -51,6 +51,7 @@ internal class UiStepImpl(
 		val eac1Input: Eac1Input,
 		val cvcs: List<CardVerifiableCertificate>,
 		val certDesc: CertificateDescription,
+		val terminalCertChat: AuthenticationTerminalChat,
 		val requiredChat: AuthenticationTerminalChat,
 		val optionalChat: AuthenticationTerminalChat,
 		private var _terminalName: String?,
@@ -75,6 +76,7 @@ internal class UiStepImpl(
 	override val guiData: EacUiData =
 		EacUiData(
 			ctx.certDesc,
+			ctx.terminalCertChat.copy(),
 			ctx.requiredChat.copy(),
 			ctx.optionalChat.copy(),
 			ctx.eac1Input.transactionInfo,
@@ -223,16 +225,16 @@ internal class UiStepImpl(
 			eserviceClient.certTracker.setCertDesc(certDesc)
 
 			// find chats
+			val terminalCert =
+				requireNotNull(certs.find { it.isTerminalCertificate }) { "No terminal certificate in received certificates" }
+			val terminalCertChat =
+				requireNotNull(
+					terminalCert.chat.cast<AuthenticationTerminalChat>(),
+				) { "CHAT in terminal certificate is of the wrong type" }
+
 			val optChat =
 				eac1Input.optionalChat?.toAuthenticationTerminalChat()
-					?: run {
-						// use CHAT from certificate as upper bound, if there is no optional chat specified
-						val cert =
-							requireNotNull(certs.find { it.isTerminalCertificate }) { "No terminal certificate in received certificates" }
-						requireNotNull(
-							cert.chat.cast<AuthenticationTerminalChat>(),
-						) { "CHAT in terminal certificate is of the wrong type" }
-					}
+					?: terminalCertChat
 			// use optional chat as lower bound, when there is nothing specified
 			val reqChat =
 				eac1Input.requiredChat?.toAuthenticationTerminalChat()
@@ -249,6 +251,7 @@ internal class UiStepImpl(
 					eac1Input,
 					certs,
 					certDesc,
+					terminalCertChat,
 					reqChat,
 					optChat,
 					terminalName,

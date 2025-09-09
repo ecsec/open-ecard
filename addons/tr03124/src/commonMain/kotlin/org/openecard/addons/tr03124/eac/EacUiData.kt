@@ -5,6 +5,7 @@ import org.openecard.sc.pace.cvc.CertificateDescription
 
 class EacUiData(
 	val certificateDescription: CertificateDescription,
+	val terminalCertChat: AuthenticationTerminalChat,
 	val requiredChat: AuthenticationTerminalChat,
 	val optionalChat: AuthenticationTerminalChat,
 	val transactionInfo: String?,

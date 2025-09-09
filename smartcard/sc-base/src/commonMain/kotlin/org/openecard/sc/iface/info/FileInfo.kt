@@ -2,11 +2,13 @@ package org.openecard.sc.iface.info
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.sc.iface.LifeCycleStatus
+import org.openecard.sc.tlv.Tag
 import org.openecard.sc.tlv.Tlv
 import org.openecard.sc.tlv.TlvException
 import org.openecard.sc.tlv.findPrimitive
 import org.openecard.sc.tlv.findTlv
 import org.openecard.sc.tlv.toTlvBer
+import org.openecard.sc.tlv.toULong
 import org.openecard.utils.common.doIf
 import org.openecard.utils.common.enlargeToLong
 import org.openecard.utils.common.toULong
@@ -57,11 +59,8 @@ class Fcp(
 	 */
 	@OptIn(ExperimentalUnsignedTypes::class)
 	val numBytes: ULong? by lazy {
-		dos
-			.findPrimitive(0x80u)
-			?.contentAsBytesBer
-			?.enlargeToLong()
-			?.toULong(0)
+		val tag = Tag.forTagNumWithClass(0x80u)
+		dos.findPrimitive(tag)?.toULong(tag)
 	}
 
 	/**

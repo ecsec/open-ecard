@@ -9,6 +9,7 @@ import org.openecard.sal.iface.Dataset
 import org.openecard.sal.iface.MissingAuthentication
 import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.sc.acl.missingAuthentications
+import org.openecard.sc.apdu.ApduProcessingError
 import org.openecard.sc.apdu.command.FileControlInformation
 import org.openecard.sc.apdu.command.ReadBinary
 import org.openecard.sc.apdu.command.ReadRecord
@@ -18,6 +19,7 @@ import org.openecard.sc.iface.CardChannel
 import org.openecard.sc.iface.info.EfStructure
 import org.openecard.sc.iface.info.Fcp
 import org.openecard.sc.iface.info.FileInfo
+import org.openecard.utils.common.mergeToArray
 import org.openecard.utils.common.throwIf
 import org.openecard.utils.common.toUShort
 import org.openecard.utils.serialization.toPrintable
@@ -152,7 +154,56 @@ class SmartcardEf
 				} else {
 					ReadBinary.readCurrentEf(forceExtendedLength = extLen)
 				}
-			return apdu.transmit(channel)
+			return readUntilEof(apdu)
+		}
+
+		@OptIn(ExperimentalUnsignedTypes::class)
+		private fun readUntilEof(apdu: ReadBinary): UByteArray {
+			val numBytes =
+				when (fileInfo) {
+					is Fcp -> (fileInfo as Fcp).numBytes
+					else -> null
+				}
+
+			var readBytes = 0L
+			val resultBytes = mutableListOf<UByteArray>()
+			var nextApdu = apdu
+			do {
+				try {
+					val nextBytes = nextApdu.transmit(channel)
+					resultBytes.add(nextBytes)
+					readBytes += nextBytes.size
+					if (readBytes == 0L) {
+						// file is empty
+						break
+					}
+
+					if (readBytes == (numBytes ?: -1)) {
+						// we read all bytes the file claims to contain
+						break
+					} else {
+						// maybe there is more, build successive apdu
+						nextApdu = nextApdu.copy(offset = readBytes.toULong())
+					}
+				} catch (ex: ApduProcessingError) {
+					// APDU could not be executed
+					if (readBytes == 0L) {
+						// no data means the first read failed, which should definitely not the case
+						throw ex
+					} else if (readBytes > 0) {
+						// we could read some bytes, but then we hit the error
+						// we assume this is EOF, but in reality there is no clear error in this case, so this is guesswork
+						// some cards raise 6B00 (P1-P2 error)
+						// what I really don't get is why the file size of the FCP is incorrect
+						break
+					} else {
+						// no good case left, signal the error
+						throw ex
+					}
+				}
+			} while (true)
+
+			return resultBytes.mergeToArray()
 		}
 
 		@OptIn(ExperimentalUnsignedTypes::class)

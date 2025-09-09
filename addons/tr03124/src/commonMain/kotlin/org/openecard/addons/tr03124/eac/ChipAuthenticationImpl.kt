@@ -1,6 +1,7 @@
 package org.openecard.addons.tr03124.eac
 
 import org.openecard.cif.bundled.NpaDefinitions
+import org.openecard.cif.definition.dataset.DatasetType
 import org.openecard.sal.sc.SmartcardDataset
 import org.openecard.sal.sc.SmartcardDeviceConnection
 import org.openecard.sal.sc.SmartcardEf
@@ -18,6 +19,7 @@ import org.openecard.sc.tlv.findTlv
 import org.openecard.sc.tlv.tlvCustom
 import org.openecard.sc.tlv.toTlv
 import org.openecard.sc.tlv.toTlvBer
+import org.openecard.utils.common.hex
 import org.openecard.utils.serialization.toPrintable
 import java.lang.IllegalArgumentException
 
@@ -29,11 +31,14 @@ class ChipAuthenticationImpl(
 	@OptIn(ExperimentalUnsignedTypes::class)
 	private fun readEfCardSecurity(): UByteArray {
 		// TODO: make search for EF.CardSecurity dataset more generic
-		val ds: SmartcardDataset =
-			paceDid.application.datasets.find { it.name == NpaDefinitions.Apps.Mf.Datasets.efCardSecurity }
-				?: throw IllegalArgumentException("Provided card does not define EF.CardSecurity in its CIF")
+		// TODO: fix ACL in npa cif, so the dataset can be used
+// 		val ds: SmartcardDataset =
+// 			paceDid.application.datasets.find { it.name == NpaDefinitions.Apps.Mf.Datasets.efCardSecurity }
+// 				?: throw IllegalArgumentException("Provided card does not define EF.CardSecurity in its CIF")
 		// don't use dataset directly to circumvent acl
-		val file = SmartcardEf(card.channel, ds.ds.path.v, ds.ds.shortEf, ds.ds.type, ds)
+		// val file = SmartcardEf(card.channel, ds.ds.path.v, ds.ds.shortEf, ds.ds.type, ds)
+
+		val file = SmartcardEf(card.channel, hex("011D"), null, DatasetType.TRANSPARENT, null)
 		val efcsData = file.read()
 		return efcsData
 	}

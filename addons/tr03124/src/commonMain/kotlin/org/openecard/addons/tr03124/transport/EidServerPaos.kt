@@ -151,6 +151,7 @@ internal class EidServerPaos(
 		// response is transmit
 		res.body.transmitRequest?.let {
 			this.firstTransmit = it
+			return null
 		}
 
 		// server terminated the connection

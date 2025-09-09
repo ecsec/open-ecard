@@ -6,8 +6,6 @@ import org.openecard.sc.pace.crypto.BcDomainParameterResolver.resolveDomainParam
 
 private val log = KotlinLogging.logger { }
 
-actual fun eacCryptoUtils(): EacCryptoUtils = JvmEacCryptoUtils()
-
 internal class JvmEacCryptoUtils : EacCryptoUtils {
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override fun compressKey(

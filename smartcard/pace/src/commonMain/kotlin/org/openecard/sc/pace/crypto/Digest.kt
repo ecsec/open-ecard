@@ -1,5 +1,8 @@
 package org.openecard.sc.pace.crypto
 
+import org.openecard.sc.pace.crypto.whyoleg.crypto
+import org.openecard.sc.pace.crypto.whyoleg.digest
+
 interface Digest {
 	fun update(data: ByteArray)
 
@@ -11,4 +14,4 @@ interface Digest {
 	}
 }
 
-expect fun digest(algo: Digest.Algorithms): Digest
+fun digest(algo: Digest.Algorithms): Digest = crypto.digest(algo)

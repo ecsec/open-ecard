@@ -5,23 +5,32 @@ import io.ktor.http.CacheControl
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.charset
 import io.ktor.http.content.OutgoingContent
+import io.ktor.http.content.TextContent
 import io.ktor.http.withCharset
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.serialization.kotlinx.xml.xml
 import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.createApplicationPlugin
 import io.ktor.server.application.install
 import io.ktor.server.cio.CIO
+import io.ktor.server.cio.CIOApplicationEngine
+import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.html.respondHtmlTemplate
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.response.respondRedirect
 import io.ktor.server.routing.Routing
+import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
+import kotlinx.coroutines.runBlocking
 import org.openecard.i18n.I18N
+import java.nio.charset.StandardCharsets
 
 private val logger = KotlinLogging.logger { }
 
@@ -30,8 +39,11 @@ fun extractContent(content: OutgoingContent): String? =
 		is OutgoingContent.ContentWrapper -> {
 			extractContent(content.delegate())
 		}
+		is TextContent -> {
+			content.text
+		}
 		is OutgoingContent.ByteArrayContent -> {
-			content.bytes().toString()
+			content.bytes().toString(content.contentType?.charset() ?: StandardCharsets.UTF_8)
 		}
 		else -> {
 			logger.warn { "Unhandled outgoing of outgoing type: ${content.javaClass}" }
@@ -91,6 +103,20 @@ val SecurityHeader =
 		}
 	}
 
+suspend fun ApplicationCall.respondOecHtmlError(
+	status: HttpStatusCode,
+	title: String = "Error",
+	message: String,
+) {
+	val htmlUtf8ContentType = ContentType.Text.Html.withCharset(Charsets.UTF_8)
+	respondHtmlTemplate(ErrorTemplate(), status) {
+		errorTitle { +title }
+		headline { +status.description }
+		message { +message }
+	}
+	response.headers.append(HttpHeaders.ContentType, htmlUtf8ContentType.toString())
+}
+
 fun Application.configureServer(
 	port: Int,
 	host: String,
@@ -115,13 +141,10 @@ fun Application.configureServer(
 	install(StatusPages) {
 		val codes = generateErrorCodes().toTypedArray()
 
-		val htmlUtf8ContentType = ContentType.Text.Html.withCharset(Charsets.UTF_8)
-
 		status(*codes) { statusCode ->
-			val headers = content.headers
-			val currentContentType = headers[HttpHeaders.ContentType]
+			val currentContentType = content.contentType
 			var message =
-				if (currentContentType != null && currentContentType.contains("text/plain")) {
+				if (currentContentType != null && currentContentType.match("text/plain")) {
 					extractContent(content)
 				} else {
 					null
@@ -139,12 +162,7 @@ fun Application.configureServer(
 						else -> "no message"
 					}
 			}
-			call.respondHtmlTemplate(ErrorTemplate(), statusCode) {
-				errorTitle { +"Error" }
-				headline { +statusCode.description }
-				message { +message }
-			}
-			call.response.headers.append(HttpHeaders.ContentType, htmlUtf8ContentType.toString())
+			call.respondOecHtmlError(statusCode, message = message)
 		}
 	}
 
@@ -155,38 +173,58 @@ fun Application.configureServer(
 	routing {
 		staticResources("/", "www") {
 			enableAutoHeadResponse()
-			default("index.html")
 			cacheControl {
 				listOf(CacheControl.NoStore(null))
 			}
 		}
+		get("/") { call.respondRedirect("index.html") }
 		configuration()
 	}
 }
 
-class HttpService {
+class HttpService(
+	private val ktorInst: EmbeddedServer<CIOApplicationEngine, CIOApplicationEngine.Configuration>,
+) {
+	fun stop(
+		gracePeriodMillis: Long = 1000L,
+		timeoutMillis: Long = 1000L,
+	) {
+		ktorInst.stop(gracePeriodMillis, timeoutMillis)
+	}
+
+	val port by lazy {
+		runBlocking {
+			ktorInst.application.engine
+				.resolvedConnectors()
+				.first()
+				.port
+		}
+	}
+
 	companion object {
-		fun create(
+		fun start(
 			port: Int = 24727,
 			host: String = "localhost",
 			wait: Boolean = true,
 			serverAgent: UserAgent? = null,
 			corsOrigins: Set<String> = setOf("service.skidentity.de"),
 			configuration: Routing.() -> Unit,
-		) {
-			embeddedServer(
-				CIO,
-				port = port, // This is the port on which Ktor is listening
-				host = host,
-			) {
-				configureServer(
-					port = port,
+		): HttpService {
+			val inst =
+				embeddedServer(
+					CIO,
+					port = port, // This is the port on which Ktor is listening
 					host = host,
-					corsOrigins = corsOrigins,
-					serverAgent = serverAgent?.toHeaderValue(),
-					configuration = configuration,
-				)
-			}.start(wait = wait)
+				) {
+					configureServer(
+						port = port,
+						host = host,
+						corsOrigins = corsOrigins,
+						serverAgent = serverAgent?.toHeaderValue(),
+						configuration = configuration,
+					)
+				}.start(wait = wait)
+			return HttpService(inst)
 		}
 	}
 }

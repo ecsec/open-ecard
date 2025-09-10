@@ -151,7 +151,7 @@ internal class EserviceClientImpl(
 		token?.communicationErrorAddress?.let {
 			BindingResponse.RedirectResponse(HttpStatusCode.SeeOther.value, it.addError("communicationError"))
 		}
-			?: BindingResponse.ContentResponse(
+			?: BindingResponse.ReferencedContentResponse(
 				HttpStatusCode.BadRequest.value,
 				BindingResponse.ContentCode.COMMUNICATION_ERROR,
 			)

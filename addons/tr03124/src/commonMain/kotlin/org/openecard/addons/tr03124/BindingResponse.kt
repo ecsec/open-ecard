@@ -1,6 +1,6 @@
 package org.openecard.addons.tr03124
 
-interface BindingResponse {
+sealed interface BindingResponse {
 	val status: Int
 
 	class RedirectResponse(
@@ -8,12 +8,23 @@ interface BindingResponse {
 		val redirectUrl: String,
 	) : BindingResponse
 
-	class ContentResponse(
+	class ReferencedContentResponse(
 		override val status: Int,
 		val payload: ContentCode,
 	) : BindingResponse
 
+	class ContentResponse(
+		override val status: Int,
+		val contentType: String,
+		val payload: ByteArray,
+	) : BindingResponse
+
+	class NoContent(
+		override val status: Int = 204,
+	) : BindingResponse
+
 	enum class ContentCode {
+		INVALID_REQUEST_PARAMETERS,
 		TC_TOKEN_RETRIEVAL_ERROR,
 		COMMUNICATION_ERROR,
 	}

@@ -1,13 +1,12 @@
 package org.openecard.addons.tr03124.eac
 
-import kotlinx.coroutines.CancellationException
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.yield
 import org.openecard.addons.tr03124.BindingException
 import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.addons.tr03124.InvalidServerData
@@ -18,7 +17,6 @@ import org.openecard.addons.tr03124.transport.EserviceClient
 import org.openecard.addons.tr03124.xml.ECardConstants
 import org.openecard.addons.tr03124.xml.InputAPDUInfoType
 import org.openecard.addons.tr03124.xml.RequestType
-import org.openecard.addons.tr03124.xml.ResponseType
 import org.openecard.addons.tr03124.xml.Result
 import org.openecard.addons.tr03124.xml.TransmitRequest
 import org.openecard.addons.tr03124.xml.TransmitResponse
@@ -27,6 +25,8 @@ import org.openecard.sc.apdu.ResponseApdu
 import org.openecard.sc.apdu.toCommandApdu
 import org.openecard.utils.common.toUShort
 import org.openecard.utils.serialization.toPrintable
+
+private val log = KotlinLogging.logger { }
 
 internal class EidServerStepImpl(
 	val eserviceClient: EserviceClient,
@@ -37,6 +37,7 @@ internal class EidServerStepImpl(
 
 	override suspend fun cancel(): BindingResponse =
 		try {
+			log.info { "EAC eID-Server Step cancelled" }
 			runEacCatching(eserviceClient) {
 				processingJob?.cancelAndJoin()
 
@@ -49,6 +50,7 @@ internal class EidServerStepImpl(
 
 	override suspend fun processEidServerLogic(): BindingResponse =
 		runEacCatching(eserviceClient) {
+			log.info { "Processing eID-Server logic" }
 			coroutineScope {
 				val res =
 					async {

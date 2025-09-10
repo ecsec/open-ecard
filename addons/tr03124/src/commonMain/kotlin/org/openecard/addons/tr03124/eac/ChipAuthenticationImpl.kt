@@ -1,8 +1,6 @@
 package org.openecard.addons.tr03124.eac
 
-import org.openecard.cif.bundled.NpaDefinitions
 import org.openecard.cif.definition.dataset.DatasetType
-import org.openecard.sal.sc.SmartcardDataset
 import org.openecard.sal.sc.SmartcardDeviceConnection
 import org.openecard.sal.sc.SmartcardEf
 import org.openecard.sal.sc.dids.SmartcardPaceDid
@@ -21,7 +19,6 @@ import org.openecard.sc.tlv.toTlv
 import org.openecard.sc.tlv.toTlvBer
 import org.openecard.utils.common.hex
 import org.openecard.utils.serialization.toPrintable
-import java.lang.IllegalArgumentException
 
 class ChipAuthenticationImpl(
 	val card: SmartcardDeviceConnection,

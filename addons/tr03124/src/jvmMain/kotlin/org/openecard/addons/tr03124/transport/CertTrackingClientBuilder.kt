@@ -150,8 +150,14 @@ class CertTrackingClientBuilder(
 	override fun buildEidServerClient(token: TcToken): HttpClient {
 		val params = token.securityParameters
 		return when (token.securityProtocol) {
-			null if params == null -> buildAttachedClient()
-			TcToken.SecurityProtocolType.TLS_PSK if params != null -> buildPskClient(token.sessionIdentifier, params)
+			null if params == null -> {
+				log.info { "Building attached eID-Server PAOS client" }
+				buildAttachedClient()
+			}
+			TcToken.SecurityProtocolType.TLS_PSK if params != null -> {
+				log.info { "Building PSK PAOS client" }
+				buildPskClient(token.sessionIdentifier, params)
+			}
 			else -> throw IllegalArgumentException("TCToken contains invalid combination of eID-Server coordinates")
 		}
 	}

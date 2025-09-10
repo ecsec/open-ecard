@@ -1,8 +1,7 @@
 package org.openecard.addons.tr03124.eac
 
-import org.openecard.addons.tr03124.BindingException
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.addons.tr03124.BindingResponse
-import org.openecard.addons.tr03124.ClientError
 import org.openecard.addons.tr03124.InvalidServerData
 import org.openecard.addons.tr03124.UserCanceled
 import org.openecard.addons.tr03124.runEacCatching
@@ -36,7 +35,8 @@ import org.openecard.sc.tlv.toTlvBer
 import org.openecard.utils.common.cast
 import org.openecard.utils.serialization.PrintableUByteArray
 import org.openecard.utils.serialization.toPrintable
-import java.lang.IllegalStateException
+
+private val log = KotlinLogging.logger { }
 
 internal class UiStepImpl(
 	private val ctx: UiStepCtx,
@@ -84,6 +84,7 @@ internal class UiStepImpl(
 		)
 
 	override suspend fun cancel(): BindingResponse {
+		log.info { "EAC UI Step cancelled" }
 		disconnectCard()
 		return UserCanceled(ctx.eserviceClient).toResponse()
 	}
@@ -131,6 +132,7 @@ internal class UiStepImpl(
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override suspend fun processAuthentication(paceResponse: PaceEstablishChannelResponse): EidServerStep =
 		runEacCatching(ctx.eserviceClient) {
+			log.info { "Processing PACE response" }
 			val pace = getPaceDid()
 			check(pace.missingAuthAuthentications.isSolved)
 
@@ -215,6 +217,7 @@ internal class UiStepImpl(
 			eidServer: EidServerInterface,
 			eac1InputReq: DidAuthenticateRequest,
 		): UiStep {
+			log.info { "Creating EAC UI Step" }
 			val eac1Input: Eac1Input = eac1InputReq.data as Eac1Input
 			val certsRaw = eac1Input.certificates
 			val certs = certsRaw.map { it.v.toCardVerifiableCertificate() }

@@ -1,5 +1,6 @@
 package org.openecard.addons.tr03124.eac
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.sal.sc.SmartcardDeviceConnection
 import org.openecard.sc.apdu.command.ExternalAuthenticate
 import org.openecard.sc.apdu.command.GetChallenge
@@ -19,12 +20,15 @@ import org.openecard.sc.tlv.TlvPrimitive
 import org.openecard.sc.tlv.tlvCustom
 import org.openecard.utils.serialization.toPrintable
 
+private val log = KotlinLogging.logger { }
+
 class TerminalAuthenticationImpl(
 	val card: SmartcardDeviceConnection,
 	val efCa: EfCardAccess,
 ) : TerminalAuthentication {
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override val challenge: UByteArray by lazy {
+		log.info { "Getting challenge from card" }
 		GetChallenge
 			.forAlgorithm(0u)
 			// read only 8 bytes

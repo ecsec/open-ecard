@@ -1,5 +1,6 @@
 package org.openecard.addons.tr03124.transport
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
@@ -32,6 +33,8 @@ import org.openecard.addons.tr03124.xml.toBody
 import org.openecard.utils.common.generateSessionId
 import org.openecard.utils.common.throwIf
 import kotlin.random.Random
+
+private val log = KotlinLogging.logger { }
 
 internal class EidServerPaos(
 	val serviceClient: EserviceClient,
@@ -71,6 +74,7 @@ internal class EidServerPaos(
 	private var connectionTerminated: Boolean = false
 
 	private suspend fun deliverMessage(soapEnv: Envelope): Envelope {
+		log.info { "Delivering PAOS request message" }
 		val resp =
 			httpClient.post(serverUrl) {
 				setBody(soapEnv)
@@ -83,6 +87,7 @@ internal class EidServerPaos(
 			InvalidServerData(serviceClient, "Server returned with status code ${resp.status.value}")
 		}
 		val respMsg: Envelope = resp.body()
+		log.info { "Received PAOS response message" }
 
 		// update terminated status
 		if (respMsg.body.startPaosResponse != null) {
@@ -117,6 +122,7 @@ internal class EidServerPaos(
 	}
 
 	override suspend fun start(): DidAuthenticateRequest {
+		log.info { "Sending StartPAOS message" }
 		val req = startPaos.toBody().wrapWithSoapEnv()
 		val res = deliverMessage(req)
 

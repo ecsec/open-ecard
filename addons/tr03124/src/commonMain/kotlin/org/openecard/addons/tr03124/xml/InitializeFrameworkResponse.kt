@@ -7,6 +7,6 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @XmlSerialName("InitializeFrameworkResponse", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
 data class InitializeFrameworkResponse(
 	override val result: Result,
-	override val requestId: String?,
-	override val profile: String?,
+	override val requestId: String? = null,
+	override val profile: String? = ECardConstants.Profile.ECARD_1_1,
 ) : ResponseType

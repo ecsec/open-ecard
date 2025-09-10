@@ -11,8 +11,8 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 data class PathSecurityType(
 	@SerialName("Protocol")
 	@XmlElement
-	val pathSecurityProtocol: String?,
+	val pathSecurityProtocol: String? = null,
 	@SerialName("Parameters")
 	@XmlElement
-	val parameters: SerializableElement?,
+	val parameters: SerializableElement? = null,
 )

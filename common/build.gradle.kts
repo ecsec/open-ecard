@@ -26,8 +26,6 @@ kotlin {
 				api(libs.bc.oec.prov)
 				api(libs.bc.oec.tls)
 				api(libs.httpcore)
-
-				implementation(libs.annotations)
 			}
 		}
 		val jvmTest by getting {

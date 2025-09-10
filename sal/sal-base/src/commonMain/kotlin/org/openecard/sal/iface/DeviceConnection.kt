@@ -8,6 +8,12 @@ DeviceConnection {
 	val connectionId: String
 	val session: SalSession
 
+	/**
+	 * An identifier of the connected device.
+	 * When dealing with smartcards, this is the card-type as defined in the CIF.
+	 */
+	val deviceType: String
+
 	val applications: List<Application>
 	val authenticatedDids: List<AuthenticationDid>
 

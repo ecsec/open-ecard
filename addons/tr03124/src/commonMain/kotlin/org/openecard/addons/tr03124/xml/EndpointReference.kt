@@ -18,9 +18,9 @@ data class EndpointReference(
 	@SerialName("PortType")
 	@XmlElement
 	@Serializable(with = QNameSerializer::class)
-	val portType: QName?,
+	val portType: QName? = null,
 	@SerialName("ServiceName")
-	val serviceName: ServiceName?,
+	val serviceName: ServiceName? = null,
 )
 
 @Serializable

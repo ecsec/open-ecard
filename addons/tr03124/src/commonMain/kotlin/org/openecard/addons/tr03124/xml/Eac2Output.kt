@@ -14,13 +14,13 @@ data class Eac2Output(
 	override val protocol: String,
 	@SerialName("EFCardSecurity")
 	@XmlElement
-	val efCardSecurity: PrintableUByteArray,
+	val efCardSecurity: PrintableUByteArray?,
 	@SerialName("AuthenticationToken")
 	@XmlElement
-	val authenticationToken: PrintableUByteArray,
+	val authenticationToken: PrintableUByteArray?,
 	@SerialName("Nonce")
 	@XmlElement
-	val nonce: PrintableUByteArray,
+	val nonce: PrintableUByteArray?,
 	@SerialName("Challenge")
 	@XmlElement
 	val challenge: PrintableUByteArray?,

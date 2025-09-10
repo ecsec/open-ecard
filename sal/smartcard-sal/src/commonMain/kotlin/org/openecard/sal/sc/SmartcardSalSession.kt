@@ -4,6 +4,7 @@ import org.openecard.sal.iface.DeviceUnavailable
 import org.openecard.sal.iface.DeviceUnsupported
 import org.openecard.sal.iface.SalSession
 import org.openecard.sc.iface.CardCapabilities
+import org.openecard.sc.iface.ShareMode
 import org.openecard.sc.iface.TerminalConnection
 import org.openecard.sc.iface.info.SmartcardInfoRetriever
 import org.openecard.utils.common.generateSessionId
@@ -64,8 +65,13 @@ class SmartcardSalSession internal constructor(
 				// update in card
 				card.capabilities = capabilities
 
+				// lock card if requested
+				if (isExclusive) {
+					terminalCon.beginTransaction()
+				}
+				// and return the sal object
 				val connectionId = sal.random.generateSessionId()
-				SmartcardDeviceConnection(connectionId, this, channel, cif)
+				SmartcardDeviceConnection(connectionId, this, channel, cif, isExclusive)
 			}.onFailure {
 				terminalCon?.disconnect()
 			}.getOrThrow()

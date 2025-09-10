@@ -37,7 +37,6 @@ import org.openecard.common.WSHelper.checkResult
 import org.openecard.common.WSHelper.createException
 import org.openecard.common.WSHelper.makeResultError
 import org.openecard.common.interfaces.Dispatcher
-import javax.annotation.Nonnull
 
 /**
  * Utility class for easier selection of DataSets and Applications.
@@ -111,7 +110,7 @@ class SALFileUtils
 		 */
 		fun selectAppByDID(
 			didName: String?,
-			@Nonnull handle: ConnectionHandleType,
+			handle: ConnectionHandleType,
 		): ConnectionHandleType {
 			// copy handle so that the given handle is not damaged
 			var handle = handle
@@ -156,7 +155,7 @@ class SALFileUtils
 		 */
 		fun selectApplication(
 			appId: ByteArray?,
-			@Nonnull handle: ConnectionHandleType,
+			handle: ConnectionHandleType,
 		): ConnectionHandleType {
 			val appConnectReq = CardApplicationConnect()
 			// copy path part of the handle and use it to identify the card

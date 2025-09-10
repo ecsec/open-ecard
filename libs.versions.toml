@@ -81,13 +81,15 @@ moko-resourcesTest = { module = "dev.icerock.moko:resources-test", version.ref =
 
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-client-java = { module = "io.ktor:ktor-client-java", version.ref = "ktor" }
+ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-apache = { module = "io.ktor:ktor-client-apache5", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 ktor-client-websocket = { module = "io.ktor:ktor-client-websockets", version.ref = "ktor" }
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
 ktor-client-nego = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
-ktor-serde-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
-ktor-serde-xml = { module = "io.ktor:ktor-serialization-kotlinx-xml", version.ref = "ktor" }
+
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
 ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }
 ktor-server-cors = { module = "io.ktor:ktor-server-cors", version.ref = "ktor" }
@@ -96,6 +98,9 @@ ktor-server-html-builder = { module = "io.ktor:ktor-server-html-builder", versio
 ktor-server-status-pages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor" }
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
 
+ktor-serde-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-serde-xml = { module = "io.ktor:ktor-serialization-kotlinx-xml", version.ref = "ktor" }
+
 # logging
 slf4j-api = { group = "org.slf4j", name = "slf4j-api", version = "2.0.17" }
 slf4j-jdk14 = { group = "org.slf4j", name = "slf4j-jdk14", version = "2.0.17" }
@@ -103,7 +108,6 @@ logback-classic = { group = "ch.qos.logback", name = "logback-classic", version 
 slf4j-android = { group = "uk.uuid.slf4j", name = "slf4j-android", version = "2.0.+" }
 
 # utilities
-annotations = { group = "com.google.code.findbugs", name = "annotations", version = "3.0.1u2" }
 kotlinPoet = { group = "com.squareup", name = "kotlinpoet-jvm", version.ref = "kotlinPoet" }
 
 # testing

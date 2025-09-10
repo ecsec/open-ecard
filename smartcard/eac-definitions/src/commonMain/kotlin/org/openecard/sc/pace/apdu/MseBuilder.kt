@@ -4,10 +4,12 @@ import org.openecard.sc.apdu.command.Mse
 import org.openecard.sc.iface.feature.PacePinId
 import org.openecard.sc.pace.asn1.EfCardAccess
 import org.openecard.sc.pace.asn1.MseTags
+import org.openecard.sc.tlv.TlvConstructed
 import org.openecard.sc.tlv.TlvPrimitive
 import org.openecard.sc.tlv.tlvCustom
 import org.openecard.sc.tlv.toTlv
 import org.openecard.sc.tlv.toTlvBer
+import org.openecard.utils.common.mergeToArray
 import org.openecard.utils.common.toUByteArray
 import org.openecard.utils.serialization.toPrintable
 
@@ -16,7 +18,7 @@ fun paceMseSetAt(
 	paceInfos: EfCardAccess.PaceInfos,
 	pinId: PacePinId,
 	chat: UByteArray?,
-	certDesc: UByteArray?,
+	certExtensions: UByteArray?,
 ): Mse {
 	val dos =
 		buildList {
@@ -26,8 +28,8 @@ fun paceMseSetAt(
 				?.toTlv(MseTags.sessionKeyComputationReference)
 				?.let { add(it) }
 			chat?.toTlvBer()?.tlv?.let { add(it) }
-			certDesc?.let {
-				add(TlvPrimitive(MseTags.certExtensions, certDesc.toPrintable()))
+			certExtensions?.let {
+				add(TlvPrimitive(MseTags.certExtensions, it.toPrintable()))
 			}
 		}
 

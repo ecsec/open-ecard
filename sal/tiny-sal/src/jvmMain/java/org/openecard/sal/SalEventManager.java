@@ -22,8 +22,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.event.EventType;
@@ -132,7 +130,6 @@ public class SalEventManager {
 	    stopped = true;
 	}
 
-	@Nonnull
 	private List<IFDStatusType> ifdStatus() throws WSHelper.WSException {
 	    LOG.debug("Requesting terminal names.");
 	    ListIFDs listReq = new ListIFDs();
@@ -162,8 +159,7 @@ public class SalEventManager {
 	    return result;
 	}
 
-	@Nonnull
-	private List<IFDStatusType> wait(@Nonnull List<IFDStatusType> lastKnown) throws WSHelper.WSException {
+	private List<IFDStatusType> wait(List<IFDStatusType> lastKnown) throws WSHelper.WSException {
 	    LOG.info("Waiting for IFD changes");
 		try {
 	    Wait wait = new Wait();
@@ -261,7 +257,7 @@ public class SalEventManager {
 	    return h;
 	}
 
-	private void handleEvents(@Nonnull List<IFDStatusType> diff) {
+	private void handleEvents(List<IFDStatusType> diff) {
 	    for (IFDStatusType term : diff) {
 		String ifdName = term.getIFDName();
 
@@ -373,7 +369,6 @@ public class SalEventManager {
 	    salStates.removeCard(ctx, ifdName, idx);
 	}
 
-	@Nullable
 	private IFDCapabilitiesType getCapabilities(String ifdName) {
 	    try {
 		GetIFDCapabilities req = new GetIFDCapabilities();
@@ -405,7 +400,7 @@ public class SalEventManager {
 	    throw new IllegalStateException("No protocol found in slot capabilities.");
 	}
 
-	private boolean hasKeypad(@Nullable IFDCapabilitiesType capabilities) {
+	private boolean hasKeypad(IFDCapabilitiesType capabilities) {
 	    if (capabilities != null) {
 		List<KeyPadCapabilityType> keyCaps = capabilities.getKeyPadCapability();
 		// the presence of the element is sufficient to know whether it has a pinpad

@@ -44,11 +44,11 @@ class SerializationTest {
 
 	fun assertEac1InputData(obj: Eac1Input) {
 		assertEquals("urn:oid:1.3.162.15480.3.0.14", obj.protocol)
-		assertEquals(7, obj.certificate.size)
-		assertContentEquals(hex("7F218201487F4E8201005F29010042"), obj.certificate[0].v.sliceArray(0 until 15))
+		assertEquals(7, obj.certificates.size)
+		assertContentEquals(hex("7F218201487F4E8201005F29010042"), obj.certificates[0].v.sliceArray(0 until 15))
 		assertContentEquals(
 			hex("7F218201B67F4E82016E5F290100420E44454356434165494430303130327F4982011D06"),
-			obj.certificate[6].v.sliceArray(0 until 36),
+			obj.certificates[6].v.sliceArray(0 until 36),
 		)
 		assertContentEquals(
 			hex("3082027C060A04007F00070301030101A10E0C0C442D547275737420476D6248A21913"),
@@ -56,17 +56,17 @@ class SerializationTest {
 		)
 		assertContentEquals(
 			hex("7F4C12060904007F00070301020253050000000004"),
-			obj.requiredCHAT?.v,
+			obj.requiredChat?.v,
 		)
 		assertContentEquals(
 			hex("7F4C12060904007F00070301020253050000000000"),
-			obj.optionalCHAT?.v,
+			obj.optionalChat?.v,
 		)
 		assertContentEquals(
 			hex("67177315060904007F00070301040253083230323530373232"),
 			obj.authenticatedAuxiliaryData?.v,
 		)
-		assertTrue(obj.acceptedEIDType.isEmpty())
+		assertTrue(obj.acceptedEidType.isEmpty())
 	}
 
 	fun assertEac1InputXml(
@@ -195,13 +195,10 @@ class SerializationTest {
 
 	fun assertEac2InputData(obj: Eac2Input) {
 		assertEquals("urn:oid:1.3.162.15480.3.0.14", obj.protocol)
-		assertEquals(1, obj.certificate?.size)
+		assertEquals(1, obj.certificates.size)
 		assertContentEquals(
 			hex("7F2181E77F4E81A05F290100420E44"),
-			obj.certificate
-				?.get(0)
-				?.v
-				?.sliceArray(0 until 15),
+			obj.certificates[0].v.sliceArray(0 until 15),
 		)
 		assertContentEquals(
 			hex("048C74138C3CFEF38DDE206A5FF4244E79741E20"),
@@ -259,15 +256,15 @@ class SerializationTest {
 		assertEquals("urn:oid:1.3.162.15480.3.0.14", obj.protocol)
 		assertContentEquals(
 			hex("3082075206092A864886F70D010702"),
-			obj.efCardSecurity.v.sliceArray(0 until 15),
+			obj.efCardSecurity?.v?.sliceArray(0 until 15),
 		)
 		assertContentEquals(
 			hex("C22F01A10CED5BD3"),
-			obj.authenticationToken.v,
+			obj.authenticationToken?.v,
 		)
 		assertContentEquals(
 			hex("5AC24DE83C7D10B2"),
-			obj.nonce.v,
+			obj.nonce?.v,
 		)
 		assertTrue(obj.challenge?.v.isNullOrEmpty())
 	}
@@ -447,7 +444,7 @@ class SerializationTest {
 
 	fun assertStartPaosResponseData(obj: StartPaosResponse) {
 		assertTrue(obj.requestId.isNullOrEmpty())
-		assertTrue(obj.profile.isNullOrEmpty())
+		assertEquals(ECardConstants.Profile.ECARD_1_1, obj.profile)
 		assertEquals(
 			"http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok",
 			obj.result.major,

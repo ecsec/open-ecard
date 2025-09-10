@@ -42,7 +42,7 @@ class AuthenticationToken
 					buildTlv(Tag(TagClass.APPLICATION, false, 0x49u)) {
 						generic(paceInfo.protocol.tlvStandard)
 						primitive(
-							GeneralAuthenticateResponseTags.authenticationToken,
+							GeneralAuthenticateResponseTags.paceAuthenticationToken,
 							key.toUByteArray().removeLeadingZeros(),
 						)
 					}

@@ -27,8 +27,6 @@ kotlin {
 				api(project(":ifd:scio-backend:ios-nfc"))
 
 				implementation(libs.xerces.imp)
-
-				implementation(libs.annotations)
 			}
 		}
 		val jvmTest by getting {

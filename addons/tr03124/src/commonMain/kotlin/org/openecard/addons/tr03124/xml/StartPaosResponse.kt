@@ -9,8 +9,8 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @XmlSerialName("StartPAOSResponse", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
 data class StartPaosResponse(
 	override val result: Result,
-	override val requestId: String?,
+	override val requestId: String? = null,
 	@SerialName("Profile")
 	@XmlElement(false)
-	override val profile: String?,
+	override val profile: String? = ECardConstants.Profile.ECARD_1_1,
 ) : ResponseType

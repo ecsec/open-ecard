@@ -5,6 +5,7 @@ import nl.adaptivity.xmlutil.serialization.XML
 val eacXml =
 	XML {
 		defaultPolicy {
+			indentString = "  "
 			ignoreUnknownChildren()
 		}
 	}

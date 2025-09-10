@@ -22,8 +22,6 @@ kotlin {
 				api(project(":i18n"))
 				api(project(":addon"))
 				api(project(":crypto:crypto-common"))
-
-				implementation(libs.annotations)
 			}
 		}
 		val jvmTest by getting {

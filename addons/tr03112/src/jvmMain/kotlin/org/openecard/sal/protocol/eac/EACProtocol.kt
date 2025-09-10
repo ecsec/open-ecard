@@ -31,7 +31,6 @@ import org.openecard.common.DynamicContext
 import org.openecard.common.util.Promise
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import javax.annotation.Nonnull
 
 /**
  * Implementation of the EACProtocol using only DIDAuthenticate messages.
@@ -119,9 +118,7 @@ class EACProtocol : SALProtocolBaseImpl() {
 		val SCHEMA_VALIDATOR: String = PREFIX + "schema_validator"
 		val AUTHENTICATION_DONE: String = PREFIX + "authentication_done"
 
-		fun setEmptyResponseData(
-			@Nonnull resp: DIDAuthenticateResponse,
-		): DIDAuthenticateResponse {
+		fun setEmptyResponseData(resp: DIDAuthenticateResponse): DIDAuthenticateResponse {
 			val d = EmptyResponseDataType()
 			d.setProtocol("urn:oid:1.3.162.15480.3.0.14.2")
 			resp.setAuthenticationProtocolData(d)

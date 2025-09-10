@@ -6,6 +6,7 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.runBlocking
 import org.openecard.cif.definition.acl.CifAclOr
 import org.openecard.cif.definition.acl.DidStateReference
+import org.openecard.cif.definition.acl.PaceAclQualifier
 import org.openecard.cif.definition.did.PaceDidDefinition
 import org.openecard.sal.iface.MissingAuthentication
 import org.openecard.sal.iface.MissingAuthentications
@@ -45,6 +46,9 @@ class SmartcardPaceDid(
 	PaceDid {
 	override val pinType: PacePinId = did.parameters.passwordRef.toSalType()
 
+	@OptIn(ExperimentalUnsignedTypes::class)
+	private var activeChat: UByteArray? = null
+
 	override val missingAuthAuthentications: MissingAuthentications
 		get() = missingAuthentications(authAcl)
 
@@ -69,8 +73,15 @@ class SmartcardPaceDid(
 		hardwarePace ?: factory.create(channel, efCardAccess.efCaData)
 	}
 
-	// TODO: implement and add state qualifier
-	override fun toStateReference(): DidStateReference = super.toStateReference()
+	@OptIn(ExperimentalUnsignedTypes::class)
+	override fun toStateReference(): DidStateReference =
+		DidStateReference(
+			name,
+			application.device.authenticatedDids.any {
+				it.name == this.name
+			},
+			activeChat?.toPrintable()?.let { PaceAclQualifier(chat = it) },
+		)
 
 	override fun capturePasswordInHardware(): Boolean = mapSmartcardError { hardwarePace != null }
 
@@ -101,6 +112,7 @@ class SmartcardPaceDid(
 				val resp = paceFeature.establishChannel(req)
 				unsetAuthOfOtherPaceDids()
 				setDidFulfilled()
+				activeChat = chat
 				resp
 			}
 		}
@@ -117,6 +129,7 @@ class SmartcardPaceDid(
 			val resp = paceFeature.establishChannel(req)
 			unsetAuthOfOtherPaceDids()
 			setDidFulfilled()
+			activeChat = chat
 			resp
 		}
 
@@ -129,17 +142,21 @@ class SmartcardPaceDid(
 		return pass
 	}
 
+	@OptIn(ExperimentalUnsignedTypes::class)
 	override fun closeChannel() =
 		mapSmartcardError {
 			if (paceFeature.canCloseChannel()) {
 				paceFeature.destroyChannel()
 			}
 			setDidUnfulfilled()
+			activeChat = null
 		}
 
+	@OptIn(ExperimentalUnsignedTypes::class)
 	private fun unsetAuthOfOtherPaceDids() {
 		application.device.authenticatedDids.filterIsInstance<SmartcardPaceDid>().forEach { did ->
 			did.setDidUnfulfilled()
+			did.activeChat = null
 		}
 	}
 }

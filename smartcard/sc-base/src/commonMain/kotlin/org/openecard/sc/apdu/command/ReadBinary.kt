@@ -31,6 +31,20 @@ class ReadBinary(
 			)
 		}
 
+	fun copy(
+		offset: ULong = this.offset,
+		efIdentifier: UShort = this.efIdentifier,
+		le: UShort = this.le,
+		forceExtendedLength: Boolean = this.forceExtendedLength,
+		proprietaryDataObject: Boolean = this.proprietaryDataObject,
+	) = ReadBinary(
+		offset = offset,
+		efIdentifier = efIdentifier,
+		le = le,
+		forceExtendedLength = forceExtendedLength,
+		proprietaryDataObject = proprietaryDataObject,
+	)
+
 	companion object {
 		fun readCurrentEf(
 			offset: ULong = 0u,

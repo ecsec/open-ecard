@@ -99,6 +99,19 @@ data class Tag(
 		val SEQUENCE_TAG: Tag = Tag(TagClass.UNIVERSAL, false, 16u)
 		val SET_TAG: Tag = Tag(TagClass.UNIVERSAL, false, 17u)
 
+		// string types
+		val STRING_UTF8_TAG: Tag = Tag(TagClass.UNIVERSAL, true, 12u)
+		val STRING_NUMERIC_TAG: Tag = Tag(TagClass.UNIVERSAL, true, 18u)
+		val STRING_PRINTABLE_TAG: Tag = Tag(TagClass.UNIVERSAL, true, 19u)
+		val STRING_TELETEX_TAG: Tag = Tag(TagClass.UNIVERSAL, true, 20u)
+		val STRING_VIDEOTEX_TAG: Tag = Tag(TagClass.UNIVERSAL, true, 21u)
+		val STRING_IA5_TAG: Tag = Tag(TagClass.UNIVERSAL, true, 22u)
+		val STRING_GRAPHIC_TAG: Tag = Tag(TagClass.UNIVERSAL, true, 25u)
+		val STRING_VISIBLE_TAG: Tag = Tag(TagClass.UNIVERSAL, true, 26u)
+		val STRING_GENERAL_TAG: Tag = Tag(TagClass.UNIVERSAL, true, 27u)
+		val STRING_UNIVERSAL_TAG: Tag = Tag(TagClass.UNIVERSAL, true, 28u)
+		val STRING_BMP_TAG: Tag = Tag(TagClass.UNIVERSAL, true, 30u)
+
 		// char strings 18-22, 25-30
 		// public static final Tag UTCTimeTag = new Tag(TagClass.UNIVERSAL, true, 23);
 		// public static final Tag GeneralizedTimeTag = new Tag(TagClass.UNIVERSAL, true, 24);

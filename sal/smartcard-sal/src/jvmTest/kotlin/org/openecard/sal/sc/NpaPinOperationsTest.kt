@@ -57,7 +57,7 @@ class NpaPinOperationsTest {
 
 			val session = sal.startSession()
 			val con = session.connect(terminal.name)
-			Assumptions.assumeTrue(NpaCif.metadata.id == con.cardType) { "Recognized card is not an nPA" }
+			Assumptions.assumeTrue(NpaCif.metadata.id == con.deviceType) { "Recognized card is not an nPA" }
 			val mf = assertNotNull(con.applications.find { it.name == Mf.name })
 			mf.connect()
 
@@ -116,7 +116,7 @@ class NpaPinOperationsTest {
 
 			val session = sal.startSession()
 			val con = session.connect(terminal.name)
-			Assumptions.assumeTrue(NpaCif.metadata.id == con.cardType) { "Recognized card is not an nPA" }
+			Assumptions.assumeTrue(NpaCif.metadata.id == con.deviceType) { "Recognized card is not an nPA" }
 			val mf = assertNotNull(con.applications.find { it.name == Mf.name })
 			mf.connect()
 
@@ -189,7 +189,7 @@ class NpaPinOperationsTest {
 
 			val session = sal.startSession()
 			val con = session.connect(terminal.name)
-			Assumptions.assumeTrue(NpaCif.metadata.id == con.cardType) { "Recognized card is not an nPA" }
+			Assumptions.assumeTrue(NpaCif.metadata.id == con.deviceType) { "Recognized card is not an nPA" }
 			val mf = assertNotNull(con.applications.find { it.name == Mf.name })
 			mf.connect()
 

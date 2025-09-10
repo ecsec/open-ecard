@@ -1,26 +1,11 @@
 package org.openecard.addons.tr03124
 
 interface Tr03124Binding {
-	suspend fun activate(tcTokenUrl: String): Response
+	suspend fun activate(tcTokenUrl: String): BindingResponse
 
-	suspend fun status(): Response
+	suspend fun status(): BindingResponse
 
 	suspend fun showUi(module: Parameter.ShowUi.ShowUiModules)
-
-	class Response(
-		val status: Int,
-		val payload: Payload? = null,
-		val redirectUrl: String? = null,
-	) {
-		companion object {
-			// fun makeResponse(redirectUrl: String)
-		}
-	}
-
-	class Payload(
-		val mimeType: String,
-		val data: String,
-	)
 
 	object Parameter {
 		val serverPath = "/eID-Client"

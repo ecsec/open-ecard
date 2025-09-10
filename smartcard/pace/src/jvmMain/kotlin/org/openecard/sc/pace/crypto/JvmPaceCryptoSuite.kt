@@ -12,11 +12,6 @@ import java.nio.charset.StandardCharsets
 
 private val log = KotlinLogging.logger { }
 
-actual fun cryptoSuite(
-	paceInfos: EfCardAccess.PaceInfos,
-	password: String,
-): PaceCryptoSuite = JvmPaceCryptoSuite(paceInfos, password)
-
 internal class JvmPaceCryptoSuite(
 	override val paceInfos: EfCardAccess.PaceInfos,
 	private val password: String,
@@ -113,7 +108,7 @@ internal class JvmPaceCryptoSuite(
 				encKey.toUByteArray(),
 				authResponse.curCar,
 				authResponse.prevCar,
-				iccKey.encoded,
+				iccKey.encodedCompressed,
 			)
 		}
 	}

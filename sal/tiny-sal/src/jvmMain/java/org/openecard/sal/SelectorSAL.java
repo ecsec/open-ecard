@@ -117,7 +117,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import javax.annotation.Nonnull;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.CardRecognition;
@@ -215,7 +214,7 @@ public class SelectorSAL implements SAL, CIFProvider, SalSelector {
 
 
     @Override
-    public CardInfoType getCardInfo(@Nonnull ConnectionHandleType type, String cardType) {
+    public CardInfoType getCardInfo(ConnectionHandleType type, String cardType) {
 	LOG.debug("Looking up responsible SAL for handle with, ctx={}, slot={}",
 		ByteUtils.toHexString(type.getContextHandle()), ByteUtils.toHexString(type.getSlotHandle()));
 	SAL sal = getSalForHandle(type);

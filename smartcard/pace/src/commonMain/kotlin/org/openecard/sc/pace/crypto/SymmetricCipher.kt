@@ -1,5 +1,9 @@
 package org.openecard.sc.pace.crypto
 
+import org.openecard.sc.pace.crypto.whyoleg.aesCbcKey
+import org.openecard.sc.pace.crypto.whyoleg.aesEcbKey
+import org.openecard.sc.pace.crypto.whyoleg.crypto
+
 interface AesKey<C : SymmetricCipher> {
 	fun cipher(padding: Boolean): C
 }
@@ -24,6 +28,6 @@ interface SymmetricCipherIv : SymmetricCipher {
 	): ByteArray
 }
 
-expect fun aesEcbKey(key: ByteArray): AesKey<SymmetricCipherPlain>
+fun aesEcbKey(key: ByteArray): AesKey<SymmetricCipherPlain> = crypto.aesEcbKey(key)
 
-expect fun aesCbcKey(key: ByteArray): AesKey<SymmetricCipherIv>
+fun aesCbcKey(key: ByteArray): AesKey<SymmetricCipherIv> = crypto.aesCbcKey(key)

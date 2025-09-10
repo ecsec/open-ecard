@@ -24,6 +24,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @Serializable
 @XmlSerialName("PAOS", prefix = Namespaces.PAOS.PREFIX, namespace = Namespaces.PAOS.NS)
 data class Paos(
+	// TODO: make sure the value is marshalled to 0 or 1, not false or true
 	@XmlSerialName("mustUnderstand", namespace = Namespaces.SOAP.NS, prefix = Namespaces.SOAP.PREFIX)
 	@XmlElement(false)
 	val mustUnderstand: Boolean,

@@ -29,8 +29,6 @@ kotlin {
 				api(project(":addons:cardlink"))
 
 				implementation(libs.xerces.imp)
-
-				implementation(libs.annotations)
 			}
 		}
 		val jvmTest by getting {

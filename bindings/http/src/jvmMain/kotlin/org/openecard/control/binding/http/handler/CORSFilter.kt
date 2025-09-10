@@ -29,7 +29,6 @@ import org.openecard.control.binding.http.common.Http11Method
 import org.openecard.control.binding.http.common.Http11Response
 import java.net.URI
 import java.net.URISyntaxException
-import javax.annotation.Nonnull
 
 /**
  * Class adding functionality to answer CORS preflight requests and to add the relevant CORS headers.
@@ -94,9 +93,7 @@ class CORSFilter {
 		}
 	}
 
-	private fun getOrigin(
-		@Nonnull httpRequest: HttpRequest,
-	): URI? {
+	private fun getOrigin(httpRequest: HttpRequest): URI? {
 		try {
 			val origin = httpRequest.getFirstHeader("Origin")
 			if (origin != null) {
@@ -112,9 +109,7 @@ class CORSFilter {
 		return null
 	}
 
-	private fun getMethod(
-		@Nonnull httpRequest: HttpRequest,
-	): String? {
+	private fun getMethod(httpRequest: HttpRequest): String? {
 		val acrm = httpRequest.getFirstHeader("Access-Control-Request-Method")
 		var acrmStr: String? = null
 		if (acrm != null) {

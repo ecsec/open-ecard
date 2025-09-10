@@ -1,5 +1,8 @@
 package org.openecard.sc.pace.crypto
 
+import org.openecard.sc.pace.crypto.whyoleg.cmacKey
+import org.openecard.sc.pace.crypto.whyoleg.crypto
+
 interface CmacKey {
 	fun signer(): Cmac
 }
@@ -10,4 +13,4 @@ interface Cmac {
 	fun sign(): ByteArray
 }
 
-expect fun cmacKey(key: ByteArray): CmacKey
+fun cmacKey(key: ByteArray): CmacKey = crypto.cmacKey(key)

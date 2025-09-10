@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nonnull;
 import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.EventCallback;
@@ -110,11 +109,8 @@ public class InsertCardStepAction extends StepAction implements EventCallback {
     /**
      * Checks whether a card according to the input list is connected.
      *
-     * @param insertableCards List of {@link ConnectionHandleType} object which identify card which may be present in the
-     * cardStateMap.
      * @return A list with matching entries or an empty list.
      */
-    @Nonnull
     private List<ConnectionHandleType> checkAvailability() {
 	return knownCards;
     }

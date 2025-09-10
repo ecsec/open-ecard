@@ -14,11 +14,11 @@ import kotlin.time.Instant
 data class RecognitionInfoType(
 	@SerialName("CardType")
 	@XmlElement
-	val cardType: String?,
+	val cardType: String? = null,
 	@SerialName("CardIdentifier")
 	@XmlElement
-	val cardIdentifier: PrintableUByteArray?,
+	val cardIdentifier: PrintableUByteArray? = null,
 	@SerialName("CaptureTime")
 	@XmlElement
-	val captureTime: Instant?,
+	val captureTime: Instant? = null,
 )

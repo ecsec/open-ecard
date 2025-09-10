@@ -1,5 +1,7 @@
 package org.openecard.utils.common
 
+import kotlin.math.absoluteValue
+
 class BitSet internal constructor(
 	private val bytes: MutableList<UByte>,
 	val bitSize: Long,
@@ -43,6 +45,27 @@ class BitSet internal constructor(
 		}
 	}
 
+	@OptIn(ExperimentalUnsignedTypes::class)
+	fun slice(range: IntProgression): BitSet {
+		val numBits = range.count()
+		val numBytes = if ((numBits % 8) == 0) (numBits / 8) else (numBits / 8) + 1
+		val result = bitSetOf(*UByteArray(numBytes))
+
+		val posRange =
+			if (range.step < 0) {
+				range.reversed()
+			} else {
+				range
+			}
+		var resultIdx = 0
+		posRange.forEach { i ->
+			result[resultIdx] = this[i]
+			resultIdx++
+		}
+
+		return result
+	}
+
 	override fun iterator(): Iterator<Boolean> =
 		sequence {
 			// this is very simple and has a lot of room for improvement
@@ -53,6 +76,8 @@ class BitSet internal constructor(
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	fun toUByteArray(): UByteArray = bytes.toUByteArray()
+
+	fun copy(): BitSet = BitSet(bytes.toMutableList(), bitSize)
 }
 
 /**

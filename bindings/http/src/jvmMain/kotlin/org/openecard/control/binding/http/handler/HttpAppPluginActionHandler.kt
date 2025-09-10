@@ -50,7 +50,6 @@ import java.io.IOException
 import java.net.URI
 import java.nio.charset.Charset
 import java.nio.charset.UnsupportedCharsetException
-import javax.annotation.Nonnull
 
 private val logger = KotlinLogging.logger {}
 private const val METHOD_HDR: String = "X-OeC-Method"
@@ -155,9 +154,7 @@ class HttpAppPluginActionHandler(
 		return headers
 	}
 
-	private fun isMultiValueHeaderType(
-		@Nonnull name: String,
-	): Boolean {
+	private fun isMultiValueHeaderType(name: String): Boolean {
 		// TODO: add further header types
 		return when (name) {
 			"Accept", "Accept-Language", "Accept-Encoding" -> true

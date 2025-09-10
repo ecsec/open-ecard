@@ -149,8 +149,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonNotFoundException;
 import org.openecard.addon.AddonSelector;
@@ -2319,8 +2317,8 @@ public class TinySAL implements SAL {
 	}
     }
 
-    private SALProtocol getProtocol(@Nonnull ConnectionHandleType handle, @Nullable DIDScopeType scope,
-	    @Nonnull String protocolURI) throws UnknownProtocolException, UnknownConnectionHandleException,
+    private SALProtocol getProtocol(ConnectionHandleType handle, DIDScopeType scope,
+	    String protocolURI) throws UnknownProtocolException, UnknownConnectionHandleException,
 	    IncorrectParameterException, NoSuchSession {
 	// CardStateEntry entry = SALUtils.getCardStateEntry(states, handle, scope != DIDScopeType.GLOBAL);
 	StateEntry stateEntry = SALUtils.getStateBySession(handle, salStates);
@@ -2354,7 +2352,7 @@ public class TinySAL implements SAL {
     }
 
     // TODO: remove function when state tracking is implemented
-    private void setPinNotAuth(@Nullable ConnectedCardEntry cardStateEntry) {
+    private void setPinNotAuth(ConnectedCardEntry cardStateEntry) {
 	if (cardStateEntry != null) {
 	    LOG.info("Unauthenticate Card PIN (state=false).");
 

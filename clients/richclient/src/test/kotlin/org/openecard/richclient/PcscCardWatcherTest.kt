@@ -13,23 +13,20 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
-import org.openecard.richclient.sc.PcscCardWatcher
-import org.openecard.richclient.sc.PcscCardWatcherCallbacks
+import org.openecard.richclient.sc.CardState
+import org.openecard.richclient.sc.CardWatcher
+import org.openecard.richclient.sc.CardWatcherCallback
+import org.openecard.richclient.sc.CardWatcherCallback.Companion.registerWith
 import org.openecard.sal.sc.recognition.CardRecognition
 import org.openecard.sc.iface.Card
 import org.openecard.sc.iface.Terminal
 import org.openecard.sc.iface.TerminalConnection
 import org.openecard.sc.iface.TerminalFactory
 import org.openecard.sc.iface.Terminals
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PcscCardWatcherTest {
-	private val callbacks = mock<PcscCardWatcherCallbacks>()
-	private val factory = mock<TerminalFactory>()
-	private val factoryLoad = mock<Terminals>()
-
 	private fun mockTerminal(
 		name: String,
 		waitForCard: Boolean = false,
@@ -62,25 +59,12 @@ class PcscCardWatcherTest {
 		every { connection.disconnect() } returns Unit
 	}
 
-	@BeforeTest
-	fun setup() {
-		every { factory.load() } returns factoryLoad
-		every { factoryLoad.establishContext() } returns Unit
-		every { factoryLoad.releaseContext() } returns Unit
-
-		every { callbacks.onTerminalAdded(any()) } returns Unit
-		every { callbacks.onCardInserted(any()) } returns Unit
-		every { callbacks.onCardRecognized(any(), any()) } returns Unit
-		every { callbacks.onCardRemoved(any()) } returns Unit
-		every { callbacks.onTerminalRemoved(any()) } returns Unit
-	}
-
 	@Test
 	fun `should detect a single terminal without cards`() =
 		runTest {
 			val terminal = mockTerminal("mockTerminal")
 
-			val factoryLoad =
+			val terminals =
 				mock<Terminals> {
 					every { list() } returns listOf(terminal)
 					every { establishContext() } returns Unit
@@ -89,25 +73,30 @@ class PcscCardWatcherTest {
 
 			val factory =
 				mock<TerminalFactory> {
-					every { load() } returns factoryLoad
+					every { load() } returns terminals
 				}
 
 			val callbacks =
-				mock<PcscCardWatcherCallbacks> {
+				mock<CardWatcherCallback> {
+					every { onInitialState(any()) } returns Unit
 					every { onTerminalAdded(any()) } returns Unit
 					every { onTerminalRemoved(any()) } returns Unit
 				}
 
 			val recognizeCard = mock<CardRecognition>()
 
-			val sut = PcscCardWatcher(callbacks, this, recognizeCard, factory)
+			val sut = CardWatcher(this, recognizeCard, factory)
+			callbacks.registerWith(sut, this)
 			sut.start()
 			advanceTimeBy(2000)
 
-			verify { callbacks.onTerminalAdded("mockTerminal") }
+			verify {
+				callbacks.onInitialState(CardState.ImmutableCardState.Empty)
+				callbacks.onTerminalAdded("mockTerminal")
+			}
 			verifyNoMoreCalls(callbacks)
 
-			sut.stop()
+			sut.stopSuspending()
 		}
 
 	@Test
@@ -133,13 +122,15 @@ class PcscCardWatcherTest {
 				}
 
 			val callbacks =
-				mock<PcscCardWatcherCallbacks> {
+				mock<CardWatcherCallback> {
+					every { onInitialState(any()) } returns Unit
 					every { onTerminalAdded(any()) } returns Unit
 				}
 
 			val recognizeCard = mock<CardRecognition>()
 
-			val sut = PcscCardWatcher(callbacks, this, recognizeCard, factory)
+			val sut = CardWatcher(this, recognizeCard, factory)
+			callbacks.registerWith(sut, this)
 			sut.start()
 			advanceTimeBy(2000)
 
@@ -149,7 +140,7 @@ class PcscCardWatcherTest {
 				callbacks.onTerminalAdded("terminal3")
 			}
 
-			sut.stop()
+			sut.stopSuspending()
 		}
 
 	@Test
@@ -179,20 +170,22 @@ class PcscCardWatcherTest {
 				}
 
 			val callbacks =
-				mock<PcscCardWatcherCallbacks> {
+				mock<CardWatcherCallback> {
+					every { onInitialState(any()) } returns Unit
 					every { onTerminalAdded(any()) } returns Unit
 				}
 
 			val recognizeCard = mock<CardRecognition>()
 
-			val sut = PcscCardWatcher(callbacks, this, recognizeCard, factory)
+			val sut = CardWatcher(this, recognizeCard, factory)
+			callbacks.registerWith(sut, this)
 			sut.start()
 			advanceTimeBy(4000)
 
 			verify { callbacks.onTerminalAdded("terminal1") }
 			verify { callbacks.onTerminalAdded("terminal2") }
 
-			sut.stop()
+			sut.stopSuspending()
 		}
 
 	@Test
@@ -221,20 +214,22 @@ class PcscCardWatcherTest {
 				}
 
 			val callbacks =
-				mock<PcscCardWatcherCallbacks> {
+				mock<CardWatcherCallback> {
+					every { onInitialState(any()) } returns Unit
 					every { onTerminalAdded(any()) } returns Unit
 					every { onTerminalRemoved(any()) } returns Unit
 				}
 
 			val recognizeCard = mock<CardRecognition>()
 
-			val sut = PcscCardWatcher(callbacks, this, recognizeCard, factory)
+			val sut = CardWatcher(this, recognizeCard, factory)
+			callbacks.registerWith(sut, this)
 			sut.start()
 			advanceTimeBy(3000)
 
 			verify { callbacks.onTerminalRemoved("terminal2") }
 
-			sut.stop()
+			sut.stopSuspending()
 		}
 
 	@Test
@@ -255,7 +250,8 @@ class PcscCardWatcherTest {
 				}
 
 			val callbacks =
-				mock<PcscCardWatcherCallbacks> {
+				mock<CardWatcherCallback> {
+					every { onInitialState(any()) } returns Unit
 					every { onTerminalAdded(any()) } returns Unit
 					every { onCardInserted(any()) } returns Unit
 					every { onCardRecognized(any(), any()) } returns Unit
@@ -268,7 +264,8 @@ class PcscCardWatcherTest {
 
 			mockCardRecognition(terminal, connection, card, recognizeCard)
 
-			val sut = PcscCardWatcher(callbacks, this, recognizeCard, factory)
+			val sut = CardWatcher(this, recognizeCard, factory)
+			callbacks.registerWith(sut, this)
 			sut.start()
 			advanceTimeBy(2000)
 
@@ -279,6 +276,6 @@ class PcscCardWatcherTest {
 				callbacks.onCardRemoved("mockTerminal")
 			}
 
-			sut.stop()
+			sut.stopSuspending()
 		}
 }

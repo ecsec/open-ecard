@@ -30,16 +30,19 @@ import javafx.stage.Stage
 import javafx.stage.WindowEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.openecard.addon.AddonManager
 import org.openecard.common.AppVersion.name
 import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.manage.ManagementDialog
 import org.openecard.richclient.gui.update.UpdateWindow
+import org.openecard.richclient.sc.CardStateEvent
+import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.sc.CifDb
-import org.openecard.richclient.sc.PcscCardWatcher
-import org.openecard.richclient.sc.PcscCardWatcherCallbacks
 import org.openecard.richclient.updater.VersionUpdateChecker
-import org.openecard.sc.iface.TerminalFactory
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -74,7 +77,6 @@ private val LOG = KotlinLogging.logger { }
  */
 class Status(
 	private val appTray: AppTray,
-	private val terminalFactory: TerminalFactory,
 	private val manager: AddonManager,
 	private val withControls: Boolean,
 	private val cifDb: CifDb,
@@ -303,51 +305,49 @@ class Status(
 		return label
 	}
 
-	lateinit var watcher: PcscCardWatcher
+	lateinit var watcher: Job
 
-	fun startCardWatcher(callbacks: List<PcscCardWatcherCallbacks> = listOf()) {
+	fun startCardWatcher(cardWatcher: CardWatcher) {
 		val recognizeCard = cifDb.getCardRecognition()
 		val scope = CoroutineScope(Dispatchers.Default)
-
-		val statusCb =
-			object : PcscCardWatcherCallbacks {
-				override fun onTerminalAdded(terminalName: String) {
-					addInfo(terminalName, null)
-				}
-
-				override fun onTerminalRemoved(terminalName: String) {
-					removeInfo(terminalName)
-					updateInfo(terminalName, null)
-				}
-
-				override fun onCardInserted(terminalName: String) {
-					addInfo(terminalName, null)
-					updateInfo(terminalName, null)
-				}
-
-				override fun onCardRecognized(
-					terminalName: String,
-					cardType: String,
-				) {
-					addInfo(terminalName, cardType)
-					updateInfo(terminalName, cardType)
-				}
-
-				override fun onCardRemoved(terminalName: String) {
-					updateInfo(terminalName, null)
+		watcher =
+			scope.launch {
+				val events = cardWatcher.registerSink()
+				events.collect { evt ->
+					when (evt) {
+						is CardStateEvent.InitialCardState -> {
+							evt.cardState.terminals.forEach { addInfo(it, null) }
+							evt.cardState.terminalsWithCard.forEach { updateInfo(it, null) }
+							evt.cardState.recognizedCards.forEach { updateInfo(it.terminal, it.cardType) }
+						}
+						is CardStateEvent.TerminalAdded -> {
+							addInfo(evt.terminalName, null)
+						}
+						is CardStateEvent.TerminalRemoved -> {
+							removeInfo(evt.terminalName)
+							// updateInfo(evt.terminalName, null)
+						}
+						is CardStateEvent.CardInserted -> {
+							// addInfo(evt.terminalName, null)
+							updateInfo(evt.terminalName, null)
+						}
+						is CardStateEvent.CardRemoved -> {
+							updateInfo(evt.terminalName, null)
+						}
+						is CardStateEvent.CardRecognized -> {
+							// addInfo(evt.terminalName, evt.cardType)
+							updateInfo(evt.terminalName, evt.cardType)
+						}
+					}
 				}
 			}
-
-		// combine all callbacks we need
-		val batchCbs = PcscCardWatcherCallbacks.BatchPcscCardWatcherCallbacks(callbacks + statusCb)
-
-		watcher = PcscCardWatcher(batchCbs, scope, recognizeCard, terminalFactory)
-		watcher.start()
 	}
 
-	fun stopCardWatcher() {
-		watcher.stop()
-	}
+	fun stopCardWatcher() =
+		// TODO: check if runBlocking is correct here
+		runBlocking {
+			watcher.cancelAndJoin()
+		}
 
 	fun showUpdateIcon(checker: VersionUpdateChecker) {
 		if (updateLabel != null) {

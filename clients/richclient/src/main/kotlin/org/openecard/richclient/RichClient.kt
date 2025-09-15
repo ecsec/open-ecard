@@ -34,6 +34,8 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContext
 import iso.std.iso_iec._24727.tech.schema.Initialize
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext
 import iso.std.iso_iec._24727.tech.schema.Terminate
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import org.apache.http.HttpException
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
@@ -67,11 +69,12 @@ import org.openecard.recognition.CardRecognitionImpl
 import org.openecard.recognition.RepoCifProvider
 import org.openecard.richclient.gui.AppTray
 import org.openecard.richclient.gui.SettingsAndDefaultViewWrapper
-import org.openecard.richclient.sc.CardStateManager
+import org.openecard.richclient.sc.CardWatcher
+import org.openecard.richclient.sc.CardWatcherCallback.Companion.registerWith
 import org.openecard.richclient.sc.CifDb
+import org.openecard.richclient.sc.EventCardRecognition
 import org.openecard.richclient.updater.VersionUpdateChecker
 import org.openecard.sal.TinySAL
-import org.openecard.sal.sc.recognition.SettableCardRecognition
 import org.openecard.sc.iface.TerminalFactory
 import org.openecard.sc.pcsc.PcscTerminalFactory
 import org.openecard.transport.dispatcher.MessageDispatcher
@@ -106,6 +109,7 @@ class RichClient {
 	private var env = ClientEnv()
 
 	private var terminalFactory: TerminalFactory? = null
+	private var cardWatcher: CardWatcher? = null
 
 	// Interface Device Layer (IFD)
 	private var ifd: IFD? = null
@@ -168,9 +172,15 @@ class RichClient {
 			recognition = CardRecognitionImpl(env)
 			env.recognition = recognition
 
-			// Set up the IFD
+			// Set up the IFD and card watcher
 			val terminalFactory = PcscTerminalFactory.instance
 			this.terminalFactory = terminalFactory
+
+			val cifDb = CifDb.Companion.Bundled
+			val cardWatcher = CardWatcher(CoroutineScope(Dispatchers.Default), cifDb.getCardRecognition(), terminalFactory)
+			this.cardWatcher = cardWatcher
+			cardWatcher.start()
+
 			ifd = IFD()
 			ifd!!.addProtocol(ECardConstants.Protocol.PACE, PACEProtocolFactory())
 			ifd!!.setEnvironment(env)
@@ -194,8 +204,9 @@ class RichClient {
 // 		}
 // 	    }
 
-			val settableCardRecognition = SettableCardRecognition()
-			val cardStateManager = CardStateManager()
+			val settableCardRecognition = EventCardRecognition()
+			settableCardRecognition.registerWith(cardWatcher)
+			// val cardStateManager = CardStateManager()
 
 			// Start up control interface
 			val guiWrapper = SettingsAndDefaultViewWrapper()
@@ -257,8 +268,7 @@ class RichClient {
 				throw e
 			}
 
-			val cifDb = CifDb.Companion.Bundled
-			tray!!.endSetup(terminalFactory, cifDb, manager!!, listOf(cardStateManager))
+			tray!!.endSetup(cifDb, manager!!, cardWatcher)
 
 			// Initialize the EventManager
 // 			eventDispatcher!!.add(
@@ -349,6 +359,8 @@ class RichClient {
 
 	fun teardown() {
 		try {
+			cardWatcher?.stop()
+
 			if (eventDispatcher != null) {
 				eventDispatcher!!.terminate()
 			}

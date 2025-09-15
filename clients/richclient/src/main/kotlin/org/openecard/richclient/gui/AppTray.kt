@@ -35,9 +35,8 @@ import org.openecard.richclient.RichClient
 import org.openecard.richclient.gui.graphics.OecIconType
 import org.openecard.richclient.gui.graphics.oecImage
 import org.openecard.richclient.gui.manage.ManagementDialog
+import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.sc.CifDb
-import org.openecard.richclient.sc.PcscCardWatcherCallbacks
-import org.openecard.sc.iface.TerminalFactory
 import java.awt.Color
 import java.awt.Container
 import java.awt.Dimension
@@ -116,26 +115,23 @@ class AppTray(
 	 * Finishes the setup process.
 	 * The loading icon is replaced with the eCard logo.
 	 *
-	 * @param terminalFactory
 	 * @param manager
 	 */
 	fun endSetup(
-		terminalFactory: TerminalFactory,
 		cifDb: CifDb,
 		manager: AddonManager,
-		stateCallbacks: List<PcscCardWatcherCallbacks>,
+		cardWatcher: CardWatcher,
 	) {
 		val statusObj =
 			Status(
 				this,
-				terminalFactory,
 				manager,
 				tray == null,
 				cifDb,
 			)
 
 		status = statusObj
-		statusObj.startCardWatcher(stateCallbacks)
+		statusObj.startCardWatcher(cardWatcher)
 
 		tray?.let { tray ->
 			tray.setImage(tray.getTrayIconImage(ICON_LOGO))

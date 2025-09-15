@@ -6,8 +6,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.openecard.cif.bundled.CompleteTree
-import org.openecard.richclient.sc.PcscCardWatcher
-import org.openecard.richclient.sc.PcscCardWatcherCallbacks
+import org.openecard.richclient.sc.CardState
+import org.openecard.richclient.sc.CardWatcher
+import org.openecard.richclient.sc.CardWatcherCallback
+import org.openecard.richclient.sc.CardWatcherCallback.Companion.registerWith
 import org.openecard.sal.sc.recognition.DirectCardRecognition
 import org.openecard.sc.pcsc.PcscTerminalFactory
 import kotlin.test.Ignore
@@ -16,7 +18,6 @@ import kotlin.test.Test
 private val logger = KotlinLogging.logger { }
 
 class PcscCardWatcherIntegrationTest {
-	private lateinit var watcher: PcscCardWatcher
 	private val dispatcher = Dispatchers.IO
 	private val testScope = CoroutineScope(dispatcher)
 
@@ -25,7 +26,11 @@ class PcscCardWatcherIntegrationTest {
 	fun `should detect card via watcher`() =
 		runBlocking {
 			val callbacks =
-				object : PcscCardWatcherCallbacks {
+				object : CardWatcherCallback {
+					override fun onInitialState(cardState: CardState) {
+						logger.warn { "Initial state: $cardState" }
+					}
+
 					override fun onTerminalAdded(terminalName: String) {
 						logger.warn { "Terminal added: $terminalName" }
 					}
@@ -51,9 +56,10 @@ class PcscCardWatcherIntegrationTest {
 				}
 
 			val recognizeCard = DirectCardRecognition(CompleteTree.calls)
-			watcher = PcscCardWatcher(callbacks, testScope, recognizeCard, PcscTerminalFactory.Companion.instance)
+			val watcher = CardWatcher(testScope, recognizeCard, PcscTerminalFactory.instance)
 
 			watcher.start()
+			callbacks.registerWith(watcher)
 
 			println("Please insert or remove card")
 			delay(15000)

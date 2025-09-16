@@ -146,7 +146,7 @@ class AndroidEgkPaceTest {
 					terminals.androidTerminal.waitForCardPresent()
 					val con = session.connect(terminals.androidTerminal.name)
 
-					assert(EgkCif.metadata.id == con.cardType) { "Recognized card is not an eGK" }
+					assert(EgkCif.metadata.id == con.deviceType) { "Recognized card is not an eGK" }
 
 					val mf = assertNotNull(con.applications.find { it.name == EgkCifDefinitions.Apps.Mf.name })
 					val app = assertNotNull(con.applications.find { it.name == EgkCifDefinitions.Apps.ESign.name })

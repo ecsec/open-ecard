@@ -1,10 +1,14 @@
 package org.openecard.sc.pace.cvc
 
+import kotlinx.datetime.LocalDate
+import org.openecard.sc.pace.cvc.AuthenticatedAuxiliaryData.Companion.toAuthenticatedAuxiliariyData
 import org.openecard.sc.pace.cvc.CardVerifiableCertificate.Companion.toCardVerifiableCertificate
 import org.openecard.sc.pace.cvc.CertificateDescription.Companion.toCertificateDescription
 import org.openecard.sc.pace.cvc.CvcChain.Companion.toChain
 import org.openecard.sc.pace.cvc.CvcDate.Companion.isBetween
+import org.openecard.sc.tlv.ObjectIdentifier
 import org.openecard.utils.common.hex
+import kotlin.collections.emptyMap
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -153,5 +157,16 @@ class CvcTest {
 		}
 		assertEquals(3, cd.commCertificates?.size)
 		cd.commCertificates?.forEach { assertTrue { it.size == 32 } }
+	}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	@Test
+	fun `parse AAD`() {
+		val aad = authenticatedAuxiliaryData.toAuthenticatedAuxiliariyData()
+		assertEquals(LocalDate(2025, 7, 22), aad.documentValidityVerification)
+		assertNull(aad.ageVerification)
+		assertNull(aad.communityIdVerification)
+		assertNull(aad.pseudonymousSignatureVerification)
+		assertTrue(aad.dataGroupValidation.isEmpty())
 	}
 }

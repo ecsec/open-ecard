@@ -22,7 +22,10 @@ import org.openecard.sal.sc.SmartcardSalSession
 import org.openecard.sal.sc.dids.SmartcardPaceDid
 import org.openecard.sc.iface.CardDisposition
 import org.openecard.sc.iface.feature.PaceEstablishChannelResponse
+import org.openecard.sc.iface.feature.PacePinId
 import org.openecard.sc.pace.asn1.EfCardAccess.Companion.toEfCardAccess
+import org.openecard.sc.pace.cvc.AuthenticatedAuxiliaryData
+import org.openecard.sc.pace.cvc.AuthenticatedAuxiliaryData.Companion.toAuthenticatedAuxiliariyData
 import org.openecard.sc.pace.cvc.AuthenticationTerminalChat
 import org.openecard.sc.pace.cvc.CardVerifiableCertificate
 import org.openecard.sc.pace.cvc.CardVerifiableCertificate.Companion.toCardVerifiableCertificate
@@ -50,10 +53,13 @@ internal class UiStepImpl(
 		val eac1InputReq: DidAuthenticateRequest,
 		val eac1Input: Eac1Input,
 		val cvcs: List<CardVerifiableCertificate>,
+		val terminalCert: CardVerifiableCertificate,
 		val certDesc: CertificateDescription,
 		val terminalCertChat: AuthenticationTerminalChat,
 		val requiredChat: AuthenticationTerminalChat,
 		val optionalChat: AuthenticationTerminalChat,
+		val aad: AuthenticatedAuxiliaryData?,
+		val paceDid: PacePinId,
 		private var _terminalName: String?,
 	) {
 		var terminalName: String
@@ -75,11 +81,14 @@ internal class UiStepImpl(
 
 	override val guiData: EacUiData =
 		EacUiData(
+			ctx.terminalCert,
 			ctx.certDesc,
 			ctx.terminalCertChat.copy(),
 			ctx.requiredChat.copy(),
 			ctx.optionalChat.copy(),
+			ctx.aad,
 			ctx.eac1Input.transactionInfo,
+			ctx.paceDid,
 			ctx.eac1Input.acceptedEidType,
 		)
 
@@ -243,6 +252,10 @@ internal class UiStepImpl(
 				eac1Input.requiredChat?.toAuthenticationTerminalChat()
 					?: optChat
 
+			val aad = eac1Input.authenticatedAuxiliaryData?.v?.toAuthenticatedAuxiliariyData()
+
+			val paceDid = eac1InputReq.didName.didNameToPinId()
+
 			val ctx =
 				UiStepCtx(
 					session,
@@ -253,14 +266,25 @@ internal class UiStepImpl(
 					eac1InputReq,
 					eac1Input,
 					certs,
+					terminalCert,
 					certDesc,
 					terminalCertChat,
 					reqChat,
 					optChat,
+					aad,
+					paceDid,
 					terminalName,
 				)
 			return UiStepImpl(ctx)
 		}
+
+		private fun String.didNameToPinId(): PacePinId =
+			when (this) {
+				"PIN" -> PacePinId.PIN
+				"CAN" -> PacePinId.CAN
+				"PUK" -> PacePinId.PUK
+				else -> throw IllegalArgumentException("Unknown DID name received from eID-Server")
+			}
 	}
 }
 

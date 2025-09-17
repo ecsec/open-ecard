@@ -45,24 +45,12 @@ class PcscCardWatcherTest {
 		return terminal
 	}
 
-	private fun mockCardRecognition(
-		terminal: Terminal,
-		connection: TerminalConnection,
-		card: Card,
-		recognizeCard: CardRecognition,
-		cardType: String = "mockCardType",
-	) {
-		every { terminal.connect() } returns connection
-		every { connection.card } returns card
-		every { card.basicChannel } returns mock()
-		every { recognizeCard.recognizeCard(any()) } returns cardType
-		every { connection.disconnect() } returns Unit
-	}
-
 	@Test
 	fun `should detect a single terminal without cards`() =
 		runTest {
-			val terminal = mockTerminal("mockTerminal")
+			val terminal = mock<Terminal>()
+			every { terminal.name } returns "mockTerminal"
+			everySuspend { terminal.waitForCardAbsent() } calls { delay(100) }
 
 			val terminals =
 				mock<Terminals> {
@@ -102,23 +90,24 @@ class PcscCardWatcherTest {
 	@Test
 	fun `should detect three terminals`() =
 		runTest {
-			val terminals =
-				listOf(
-					mockTerminal("terminal1"),
-					mockTerminal("terminal2"),
-					mockTerminal("terminal3"),
-				)
+			val terminal1 = mock<Terminal> { every { name } returns "terminal1" }
+			val terminal2 = mock<Terminal> { every { name } returns "terminal2" }
+			val terminal3 = mock<Terminal> { every { name } returns "terminal3" }
 
-			val factoryLoad =
+			listOf(terminal1, terminal2, terminal3).forEach {
+				everySuspend { it.waitForCardAbsent() } calls { delay(100) }
+			}
+
+			val terminals =
 				mock<Terminals> {
-					every { list() } returns terminals
+					every { list() } returns listOf(terminal1, terminal2, terminal3)
 					every { establishContext() } returns Unit
 					every { releaseContext() } returns Unit
 				}
 
 			val factory =
 				mock<TerminalFactory> {
-					every { load() } returns factoryLoad
+					every { load() } returns terminals
 				}
 
 			val callbacks =
@@ -146,8 +135,12 @@ class PcscCardWatcherTest {
 	@Test
 	fun `should detect added terminal`() =
 		runTest {
-			val terminal1 = mockTerminal("terminal1")
-			val terminal2 = mockTerminal("terminal2")
+			val terminal1 = mock<Terminal> { every { name } returns "terminal1" }
+			val terminal2 = mock<Terminal> { every { name } returns "terminal2" }
+
+			listOf(terminal1, terminal2).forEach {
+				everySuspend { it.waitForCardAbsent() } calls { delay(100) }
+			}
 
 			val sequence =
 				listOf(
@@ -157,7 +150,7 @@ class PcscCardWatcherTest {
 					listOf(terminal1, terminal2),
 				)
 
-			val factoryLoad =
+			val terminals =
 				mock<Terminals> {
 					every { list() } sequentiallyReturns sequence
 					every { establishContext() } returns Unit
@@ -166,7 +159,7 @@ class PcscCardWatcherTest {
 
 			val factory =
 				mock<TerminalFactory> {
-					every { load() } returns factoryLoad
+					every { load() } returns terminals
 				}
 
 			val callbacks =
@@ -191,26 +184,28 @@ class PcscCardWatcherTest {
 	@Test
 	fun `should detect removed terminal`() =
 		runTest {
-			val terminal1 = mockTerminal("terminal1")
-			val terminal2 = mockTerminal("terminal2")
+			val terminal1 = mock<Terminal> { every { name } returns "terminal1" }
+			val terminal2 = mock<Terminal> { every { name } returns "terminal2" }
 
-			val sequence =
-				listOf(
-					listOf(terminal1, terminal2),
-					listOf(terminal1),
-					listOf(terminal1),
-				)
+			listOf(terminal1, terminal2).forEach {
+				everySuspend { it.waitForCardAbsent() } calls { delay(100) }
+			}
 
-			val factoryLoad =
+			val terminals =
 				mock<Terminals> {
-					every { list() } sequentiallyReturns sequence
+					every { list() } sequentiallyReturns
+						listOf(
+							listOf(terminal1, terminal2),
+							listOf(terminal1),
+							listOf(terminal1),
+						)
 					every { establishContext() } returns Unit
 					every { releaseContext() } returns Unit
 				}
 
 			val factory =
 				mock<TerminalFactory> {
-					every { load() } returns factoryLoad
+					every { load() } returns terminals
 				}
 
 			val callbacks =
@@ -235,9 +230,22 @@ class PcscCardWatcherTest {
 	@Test
 	fun `should recognize card and call callbacks`() =
 		runTest {
-			val terminal = mockTerminal("mockTerminal", waitForCard = true)
+			val terminal = mock<Terminal>()
+			every { terminal.name } returns "mockTerminal"
+			everySuspend { terminal.waitForCardPresent() } calls { delay(100) }
+			everySuspend { terminal.waitForCardAbsent() } calls { delay(100) }
 
-			val factoryLoad =
+			val connection = mock<TerminalConnection>()
+			val card = mock<Card>()
+			val recognizeCard = mock<CardRecognition>()
+
+			every { terminal.connect() } returns connection
+			every { connection.card } returns card
+			every { card.basicChannel } returns mock()
+			every { recognizeCard.recognizeCard(any()) } returns "mockCardType"
+			every { connection.disconnect() } returns Unit
+
+			val terminals =
 				mock<Terminals> {
 					every { list() } returns listOf(terminal)
 					every { establishContext() } returns Unit
@@ -246,7 +254,7 @@ class PcscCardWatcherTest {
 
 			val factory =
 				mock<TerminalFactory> {
-					every { load() } returns factoryLoad
+					every { load() } returns terminals
 				}
 
 			val callbacks =
@@ -257,12 +265,6 @@ class PcscCardWatcherTest {
 					every { onCardRecognized(any(), any()) } returns Unit
 					every { onCardRemoved(any()) } returns Unit
 				}
-
-			val recognizeCard = mock<CardRecognition>()
-			val connection = mock<TerminalConnection>()
-			val card = mock<Card>()
-
-			mockCardRecognition(terminal, connection, card, recognizeCard)
 
 			val sut = CardWatcher(this, recognizeCard, factory)
 			callbacks.registerWith(sut, this)

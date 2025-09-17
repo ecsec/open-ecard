@@ -17,7 +17,7 @@ import kotlin.test.Test
 
 private val logger = KotlinLogging.logger { }
 
-class PcscCardWatcherIntegrationTest {
+class CardWatcherIntegrationTest {
 	private val dispatcher = Dispatchers.IO
 	private val testScope = CoroutineScope(dispatcher)
 

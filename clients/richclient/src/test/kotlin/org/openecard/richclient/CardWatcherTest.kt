@@ -26,7 +26,7 @@ import org.openecard.sc.iface.Terminals
 import kotlin.test.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class PcscCardWatcherTest {
+class CardWatcherTest {
 	private fun mockTerminal(
 		name: String,
 		waitForCard: Boolean = false,

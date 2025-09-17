@@ -1,6 +1,7 @@
 package org.openecard.richclient.sc
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
@@ -192,10 +193,14 @@ class CardWatcher(
 						val evt = CardStateEvent.CardRemoved(terminal.name)
 						receivers.values.forEach { it.send(evt) }
 					}
+				} catch (ex: CancellationException) {
+					logger.info { "Cancel received in card watcher job of terminal ${terminal.name}" }
+					throw ex
 				} catch (e: Exception) {
-					// TODO: handle terminal removed and stop this job
+					// handle cancellation of our job
 					logger.warn { "${terminal.name}: ${e.message}" }
-					delay(1000)
+					// wait and try again, if the terminal is removed, someone will cancel us
+					delay(1000.milliseconds)
 				} finally {
 					try {
 						connection?.disconnect()

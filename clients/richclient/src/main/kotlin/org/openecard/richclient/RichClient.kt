@@ -53,7 +53,7 @@ import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.checkResult
 import org.openecard.common.event.EventDispatcherImpl
 import org.openecard.common.sal.CombinedCIFProvider
-import org.openecard.control.binding.http.HttpBinding
+import org.openecard.control.binding.ktor.HttpService
 import org.openecard.gui.message.DialogType
 import org.openecard.gui.swing.SwingDialogWrapper
 import org.openecard.gui.swing.SwingUserConsent
@@ -103,7 +103,7 @@ class RichClient {
 	private var tray: AppTray? = null
 
 	// Control interface
-	private var httpBinding: HttpBinding? = null
+	private var httpBinding: HttpService? = null
 
 	// Client environment
 	private var env = ClientEnv()
@@ -242,9 +242,9 @@ class RichClient {
 				}
 
 				// start HTTP server
-				httpBinding = HttpBinding(port)
-				httpBinding!!.setAddonManager(manager!!)
-				httpBinding!!.start()
+				httpBinding =
+					HttpService.start(wait = false, port = port) {
+					}
 
 				if (dispatcherMode) {
 					val waitTime = getRegInt(hk, regPath, "Retry_Wait_Time", 5000L)!!
@@ -371,8 +371,9 @@ class RichClient {
 			}
 
 			// shutdown control modules
-			if (httpBinding != null) {
-				httpBinding!!.stop()
+			httpBinding?.let {
+				it.stop()
+				httpBinding = null
 			}
 
 			// shutdown SAL
@@ -402,6 +403,7 @@ class RichClient {
 		private val timeout: Long,
 	) : Runnable {
 		override fun run() {
+			// TODO: replace with ktor
 			val startTime = System.currentTimeMillis()
 			val exec = HttpRequestExecutor()
 			val httpCtx: HttpContext = BasicHttpContext()

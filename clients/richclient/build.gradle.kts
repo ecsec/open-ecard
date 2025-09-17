@@ -42,7 +42,7 @@ dependencies {
 	implementation(project(":ifd:ifd-protocols:pace"))
 	implementation(project(":sal:tiny-sal"))
 	implementation(project(":management"))
-	implementation(project(":bindings:http"))
+	implementation(project(":bindings:ktor"))
 	implementation(project(":gui:swing"))
 	implementation(project(":gui:graphics"))
 

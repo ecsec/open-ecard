@@ -31,7 +31,7 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
-val logger = KotlinLogging.logger {}
+private val logger = KotlinLogging.logger {}
 
 /**
  *

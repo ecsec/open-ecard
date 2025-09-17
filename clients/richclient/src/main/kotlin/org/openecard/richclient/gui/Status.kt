@@ -24,21 +24,24 @@ package org.openecard.richclient.gui
 
 import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import javafx.application.Platform
 import javafx.event.EventHandler
 import javafx.stage.Stage
 import javafx.stage.WindowEvent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.openecard.addon.AddonManager
 import org.openecard.common.AppVersion.name
-import org.openecard.common.event.EventObject
-import org.openecard.common.event.EventType
-import org.openecard.common.interfaces.Environment
-import org.openecard.common.interfaces.EventCallback
-import org.openecard.common.util.ByteUtils
 import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.manage.ManagementDialog
 import org.openecard.richclient.gui.update.UpdateWindow
+import org.openecard.richclient.sc.CardStateEvent
+import org.openecard.richclient.sc.CardWatcher
+import org.openecard.richclient.sc.CifDb
 import org.openecard.richclient.updater.VersionUpdateChecker
 import java.awt.BorderLayout
 import java.awt.Color
@@ -49,7 +52,6 @@ import java.awt.Point
 import java.awt.Window
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import java.util.Locale
 import java.util.concurrent.ConcurrentSkipListMap
 import javax.swing.BorderFactory
 import javax.swing.Box
@@ -75,13 +77,11 @@ private val LOG = KotlinLogging.logger { }
  */
 class Status(
 	private val appTray: AppTray,
-	private val env: Environment,
 	private val manager: AddonManager,
 	private val withControls: Boolean,
-) : EventCallback {
-	private val infoMap: MutableMap<String, JPanel?> = ConcurrentSkipListMap()
-	private val cardContext: MutableMap<String, ByteArray> = ConcurrentSkipListMap()
-	private val cardIcons = HashMap<String, ImageIcon>()
+	private val cifDb: CifDb,
+) {
+	private val infoMap: MutableMap<String, JPanel> = ConcurrentSkipListMap()
 	private var contentPane: JPanel? = null
 	private var infoView: JPanel? = null
 	private var noTerminal: JPanel? = null
@@ -132,7 +132,7 @@ class Status(
 		noTerminal!!.layout = FlowLayout(FlowLayout.LEFT)
 		noTerminal!!.background = Color.white
 		noTerminal!!.add(createInfoLabel())
-		infoMap[NO_TERMINAL_CONNECTED] = noTerminal
+		infoMap[NO_TERMINAL_CONNECTED] = noTerminal!!
 
 		infoView = JPanel()
 		infoView!!.layout = BoxLayout(infoView, BoxLayout.PAGE_AXIS)
@@ -213,7 +213,7 @@ class Status(
 	@Synchronized
 	private fun addInfo(
 		ifdName: String,
-		info: ConnectionHandleType.RecognitionInfo?,
+		cardType: String?,
 	) {
 		if (infoMap.containsKey(NO_TERMINAL_CONNECTED)) {
 			infoMap.remove(NO_TERMINAL_CONNECTED)
@@ -227,7 +227,7 @@ class Status(
 
 		val panel = JPanel()
 		panel.layout = FlowLayout(FlowLayout.LEFT)
-		panel.add(createInfoLabel(ifdName, info))
+		panel.add(createInfoLabel(ifdName, cardType))
 		infoMap[ifdName] = panel
 		infoView!!.add(panel)
 
@@ -239,12 +239,12 @@ class Status(
 	@Synchronized
 	private fun updateInfo(
 		ifdName: String,
-		info: ConnectionHandleType.RecognitionInfo?,
+		cardType: String?,
 	) {
 		val panel = infoMap[ifdName]
 		if (panel != null) {
 			panel.removeAll()
-			panel.add(createInfoLabel(ifdName, info))
+			panel.add(createInfoLabel(ifdName, cardType))
 			panel.repaint()
 
 			if (popup != null) {
@@ -261,7 +261,7 @@ class Status(
 			infoView!!.remove(panel)
 
 			if (infoMap.isEmpty()) {
-				infoMap[NO_TERMINAL_CONNECTED] = noTerminal
+				infoMap[NO_TERMINAL_CONNECTED] = noTerminal!!
 				infoView!!.add(noTerminal)
 			}
 
@@ -271,89 +271,28 @@ class Status(
 		}
 	}
 
-	@Synchronized
-	private fun getCardIcon(cardType: String?): ImageIcon? {
-		var cardType = cardType
-		if (cardType == null) {
-			cardType = "http://openecard.org/cif/no-card"
-		}
-
-		if (!cardIcons.containsKey(cardType)) {
-			var `is` =
-				env.recognition!!.getCardImage(cardType)
-					?: env.recognition!!.unknownCardImage
-			val icon = GuiUtils.getScaledCardImageIcon(`is`)
-			cardIcons[cardType] = icon
-		}
-
-		return cardIcons[cardType]
-	}
-
-	private fun getCardType(info: ConnectionHandleType.RecognitionInfo?): String {
-		if (info != null) {
-			val cardType = info.cardType
-
-			return if (cardType != null) {
-				resolveCardType(cardType)
-			} else {
-				I18N.strings.richclient_status_nocard.localized()
-			}
-		} else {
-			return I18N.strings.richclient_status_nocard.localized()
-		}
-	}
-
-	private fun resolveCardType(cardType: String): String {
-		if (cardType == "http://bsi.bund.de/cif/unknown") {
-			return I18N.strings.richclient_status_unknowncard.localized()
-		} else {
-			// read CardTypeName from CardInfo file
-			var cardTypeName = cardType
-			val cif = env.cifProvider!!.getCardInfo(cardType)
-
-			if (cif != null) {
-				val type = cif.cardType
-				if (type != null) {
-					var found = false
-					val languages = arrayOf(Locale.getDefault().language, "en")
-
-					// check native lang, then english
-					for (language in languages) {
-						if (found) { // stop when the inner loop terminated
-							break
-						}
-
-						val cardTypeNames = type.cardTypeName
-						for (ist in cardTypeNames) {
-							if (ist.lang.equals(language, ignoreCase = true)) {
-								cardTypeName = ist.value
-								found = true
-								break
-							}
-						}
-					}
-				}
-			}
-
-			return cardTypeName
-		}
+	private fun getCardIcon(cardType: String): ImageIcon {
+		val img = cifDb.getCardImage(cardType)
+		val icon = GuiUtils.getScaledCardImageIcon(img)
+		return icon
 	}
 
 	private fun createInfoLabel(
 		ifdName: String? = null,
-		info: ConnectionHandleType.RecognitionInfo? = null,
+		cardType: String? = null,
 	): JLabel {
 		val label = JLabel()
 
 		if (ifdName != null) {
-			val cardType = if (info != null) info.cardType else "http://openecard.org/cif/no-card"
+			val cardType = cardType ?: CifDb.NO_CARD
 			label.icon = getCardIcon(cardType)
-			label.text = "<html><b>" + getCardType(info) + "</b><br><i>" + ifdName + "</i></html>"
+			label.text = "<html><b>" + cifDb.getCardType(cardType) + "</b><br><i>" + ifdName + "</i></html>"
 		} else {
-			// no_terminal.png is based on klaasvangend_USB_plug.svg by klaasvangend
+			// no_terminal.svg is based on klaasvangend_USB_plug.svg by klaasvangend
 			// see: http://openclipart.org/detail/3705/usb-plug-by-klaasvangend
-			label.icon = getCardIcon("http://openecard.org/cif/no-terminal")
-			label.text = "<html><i>" + I18N.strings.richclient_status_noterminal.localized() + "</i></html>"
+			val cardType = CifDb.NO_TERMINAL
+			label.icon = getCardIcon(cardType)
+			label.text = "<html><i>" + cifDb.getCardType(cardType) + "</i></html>"
 		}
 
 		label.iconTextGap = 10
@@ -366,80 +305,49 @@ class Status(
 		return label
 	}
 
-	@Synchronized
-	override fun signalEvent(
-		eventType: EventType,
-		eventData: EventObject,
-	) {
-		LOG.debug { "Event: $eventType" }
+	lateinit var watcher: Job
 
-		val ch = eventData.handle
-		if (ch == null) {
-			LOG.error { "No handle provided in event $eventType." }
-			return
-		}
-
-		val ifdName = ch.ifdName
-		val ctx = ch.contextHandle
-		LOG.debug {
-			"ConnectionHandle: ifd=$ifdName, slot=${ByteUtils.toHexString(ch.slotHandle)}, ctx=${ByteUtils.toHexString(ctx)}"
-		}
-		val info = ch.recognitionInfo
-		if (info != null) {
-			LOG.debug { "RecognitionInfo: ${info.cardType}, ${ByteUtils.toHexString(info.cardIdentifier)}" }
-		} else {
-			LOG.debug { "RecognitionInfo: null" }
-		}
-
-		if (isResponsibleContext(ifdName, ctx)) {
-			when (eventType) {
-				EventType.TERMINAL_ADDED -> addInfo(ifdName, info)
-				EventType.TERMINAL_REMOVED -> {
-					removeInfo(ifdName)
-					removeResponsibleContext(ifdName)
-					updateInfo(ifdName, info)
+	fun startCardWatcher(cardWatcher: CardWatcher) {
+		val recognizeCard = cifDb.getCardRecognition()
+		val scope = CoroutineScope(Dispatchers.Default)
+		watcher =
+			scope.launch {
+				val events = cardWatcher.registerSink()
+				events.collect { evt ->
+					when (evt) {
+						is CardStateEvent.InitialCardState -> {
+							evt.cardState.terminals.forEach { addInfo(it, null) }
+							evt.cardState.terminalsWithCard.forEach { updateInfo(it, null) }
+							evt.cardState.recognizedCards.forEach { updateInfo(it.terminal, it.cardType) }
+						}
+						is CardStateEvent.TerminalAdded -> {
+							addInfo(evt.terminalName, null)
+						}
+						is CardStateEvent.TerminalRemoved -> {
+							removeInfo(evt.terminalName)
+							// updateInfo(evt.terminalName, null)
+						}
+						is CardStateEvent.CardInserted -> {
+							// addInfo(evt.terminalName, null)
+							updateInfo(evt.terminalName, null)
+						}
+						is CardStateEvent.CardRemoved -> {
+							updateInfo(evt.terminalName, null)
+						}
+						is CardStateEvent.CardRecognized -> {
+							// addInfo(evt.terminalName, evt.cardType)
+							updateInfo(evt.terminalName, evt.cardType)
+						}
+					}
 				}
-
-				EventType.CARD_REMOVED -> {
-					removeResponsibleContext(ifdName)
-					updateInfo(ifdName, info)
-				}
-
-				EventType.CARD_RECOGNIZED -> {
-					setResponsibleContext(ifdName, ctx)
-					addInfo(ifdName, info)
-					updateInfo(ifdName, info)
-				}
-
-				EventType.CARD_INSERTED -> {
-					addInfo(ifdName, info)
-					updateInfo(ifdName, info)
-				}
-
-				else -> {}
 			}
+	}
+
+	fun stopCardWatcher() =
+		// TODO: check if runBlocking is correct here
+		runBlocking {
+			watcher.cancelAndJoin()
 		}
-	}
-
-	private fun isResponsibleContext(
-		ifd: String,
-		ctx: ByteArray,
-	): Boolean {
-		val isResponsible = ByteUtils.compare(ctx, cardContext.getOrDefault(ifd, ctx))
-		LOG.debug { "Event sent has responsibility=$isResponsible for this card." }
-		return isResponsible
-	}
-
-	private fun setResponsibleContext(
-		ifd: String,
-		ctx: ByteArray,
-	) {
-		cardContext[ifd] = ByteUtils.clone(ctx)!!
-	}
-
-	private fun removeResponsibleContext(ifd: String) {
-		cardContext.remove(ifd)
-	}
 
 	fun showUpdateIcon(checker: VersionUpdateChecker) {
 		if (updateLabel != null) {

@@ -41,6 +41,12 @@ object GuiUtils {
 	private const val IMG_HEIGHT = 81
 	private const val IMG_WIDTH = 128
 
+	fun getScaledCardImageIcon(image: Image): ImageIcon {
+		val icon = ImageIcon(image)
+		icon.image = icon.image.getScaledInstance(IMG_WIDTH, IMG_HEIGHT, Image.SCALE_SMOOTH)
+		return icon
+	}
+
 	fun getScaledCardImageIcon(imageStream: InputStream): ImageIcon {
 		var icon = ImageIcon()
 		try {

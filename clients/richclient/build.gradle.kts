@@ -12,12 +12,13 @@ import java.util.zip.Deflater
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 
-description = "richclient"
+description = "Richclient"
 
 plugins {
 	id("openecard.app-conventions")
 	alias(libs.plugins.jfx)
 	alias(libs.plugins.jpackage)
+	id("dev.mokkery")
 }
 
 javafx {
@@ -54,6 +55,7 @@ dependencies {
 	implementation(project(":i18n"))
 
 	// basic runtime deps
+	implementation(project(":clients:richclient-res"))
 	implementation(project(":cifs"))
 	implementation(project(":wsdef:jaxb-marshaller"))
 
@@ -64,6 +66,11 @@ dependencies {
 	implementation(libs.jna.jpms)
 	implementation(libs.jna.jpms.platform)
 	implementation(libs.systray)
+
+	// Card Stack
+	implementation(project(":smartcard:pcsc-scio"))
+	implementation(project(":sal:smartcard-sal"))
+	implementation(project(":cif:bundled-cifs"))
 
 	testImplementation(libs.bundles.test.basics.kotlin)
 }

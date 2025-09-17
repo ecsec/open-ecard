@@ -29,13 +29,14 @@ import dorkbox.systemTray.SystemTray
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.addon.AddonManager
 import org.openecard.common.AppVersion.name
-import org.openecard.common.interfaces.Environment
 import org.openecard.common.util.SysUtils
 import org.openecard.i18n.I18N
 import org.openecard.richclient.RichClient
 import org.openecard.richclient.gui.graphics.OecIconType
 import org.openecard.richclient.gui.graphics.oecImage
 import org.openecard.richclient.gui.manage.ManagementDialog
+import org.openecard.richclient.sc.CardWatcher
+import org.openecard.richclient.sc.CifDb
 import java.awt.Color
 import java.awt.Container
 import java.awt.Dimension
@@ -114,15 +115,23 @@ class AppTray(
 	 * Finishes the setup process.
 	 * The loading icon is replaced with the eCard logo.
 	 *
-	 * @param env
 	 * @param manager
 	 */
 	fun endSetup(
-		env: Environment,
+		cifDb: CifDb,
 		manager: AddonManager,
+		cardWatcher: CardWatcher,
 	) {
-		val statusObj = Status(this, env, manager, tray == null)
+		val statusObj =
+			Status(
+				this,
+				manager,
+				tray == null,
+				cifDb,
+			)
+
 		status = statusObj
+		statusObj.startCardWatcher(cardWatcher)
 
 		tray?.let { tray ->
 			tray.setImage(tray.getTrayIconImage(ICON_LOGO))
@@ -189,6 +198,7 @@ class AppTray(
 	 * Removes the tray icon from the tray and terminates the application.
 	 */
 	fun shutdown() {
+		status?.stopCardWatcher()
 		tray?.shutdown()
 		tray = null
 		client.teardown()

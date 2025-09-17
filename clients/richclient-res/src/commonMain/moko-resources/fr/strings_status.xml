@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<string name="status_no_card">Pas de carte insérée.</string>
+	<string name="status_no_terminal">Aucun terminal connecté.</string>
+	<string name="status_unknown_card">Carte inconnue inséré.</string>
+
+<!--	<string name="status_npa">Personalausweis</string>-->
+<!--	<string name="status_egk">Elektronische Gesundheitskarte</string>-->
+<!--	<string name="status_hba">Heilberufsausweis</string>-->
+</resources>

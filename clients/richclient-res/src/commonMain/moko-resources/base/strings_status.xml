@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<string name="status_no_card">No card inserted</string>
+	<string name="status_no_terminal">No terminal connected</string>
+	<string name="status_unknown_card">Unknown Card inserted</string>
+
+	<string name="status_npa">German Electronic Identity Card</string>
+	<string name="status_egk">Electronic eHealth Card (Germany)</string>
+	<string name="status_hba">German HPC</string>
+</resources>

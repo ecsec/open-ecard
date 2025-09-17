@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:cc="http://web.resource.org/cc/" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:svg="http://www.w3.org/2000/svg" xmlns:ns1="http://sozi.baierouge.fr" id="svg2" sodipodi:docname="klaasvangend_USB_plug.svg" viewBox="0 0 380.74 211.1" sodipodi:version="0.32" version="1.0" inkscape:output_extension="org.inkscape.output.svg.inkscape" inkscape:version="0.45.1" sodipodi:docbase="/Users/johnolsen/Desktop">
+  <defs id="defs4">
+    <linearGradient id="linearGradient2299">
+      <stop id="stop2301" style="stop-color:#9e9e9e" offset="0"/>
+      <stop id="stop2303" style="stop-color:#323232" offset="1"/>
+    </linearGradient>
+    <linearGradient id="linearGradient2241">
+      <stop id="stop2243" style="stop-color:#3a3a3a" offset="0"/>
+      <stop id="stop2245" style="stop-color:#c5c5c5" offset="1"/>
+    </linearGradient>
+    <linearGradient id="linearGradient2206">
+      <stop id="stop2208" style="stop-color:#fcfcff" offset="0"/>
+      <stop id="stop2225" style="stop-color:#fafaff" offset=".45833"/>
+      <stop id="stop2210" style="stop-color:#c8c8cd" offset="1"/>
+    </linearGradient>
+    <radialGradient id="radialGradient2417" xlink:href="#linearGradient2299" gradientUnits="userSpaceOnUse" cy="116.22" cx="131.02" gradientTransform="matrix(-1.6113 -.13803 .10628 -.63871 420.61 237.26)" r="65.094" inkscape:collect="always"/>
+    <radialGradient id="radialGradient2420" xlink:href="#linearGradient2206" gradientUnits="userSpaceOnUse" cy="115.41" cx="47.511" gradientTransform="matrix(-4.6007 .10426 -.25927 -3.1188 357.87 515.51)" r="22.053" inkscape:collect="always"/>
+    <linearGradient id="linearGradient2423" y2="127.18" xlink:href="#linearGradient2299" gradientUnits="userSpaceOnUse" x2="205.43" gradientTransform="matrix(1 0 0 .87693 68.077 69.199)" y1="120.21" x1="207.21" inkscape:collect="always"/>
+    <linearGradient id="linearGradient2426" y2="127.18" xlink:href="#linearGradient2299" gradientUnits="userSpaceOnUse" x2="205.43" gradientTransform="matrix(1 0 0 .87693 79.934 69.199)" y1="120.21" x1="207.21" inkscape:collect="always"/>
+    <linearGradient id="linearGradient2429" y2="127.18" xlink:href="#linearGradient2299" gradientUnits="userSpaceOnUse" x2="205.43" gradientTransform="matrix(1 0 0 .87693 56.219 69.199)" y1="120.21" x1="207.21" inkscape:collect="always"/>
+    <linearGradient id="linearGradient2880" y2="115.48" gradientUnits="userSpaceOnUse" x2="38.717" gradientTransform="matrix(1 0 0 .41394 65.589 130.93)" y1="147.34" x1="35.393" inkscape:collect="always">
+      <stop id="stop2889" style="stop-color:#fcfcff" offset="0"/>
+      <stop id="stop2891" style="stop-color:#fafaff" offset=".45833"/>
+      <stop id="stop2893" style="stop-color:#c8c8cd" offset="1"/>
+    </linearGradient>
+    <linearGradient id="linearGradient2882" y2="138.87" xlink:href="#linearGradient2206" gradientUnits="userSpaceOnUse" x2="39.714" gradientTransform="matrix(1 0 0 .41394 65.589 130.93)" y1="125.05" x1="36.39" inkscape:collect="always"/>
+    <linearGradient id="linearGradient2895" y2="112.07" xlink:href="#linearGradient2241" gradientUnits="userSpaceOnUse" x2="30.599" y1="112.07" x1="19.203" inkscape:collect="always"/>
+    <linearGradient id="linearGradient2897" y2="131.04" xlink:href="#linearGradient2241" gradientUnits="userSpaceOnUse" x2="30.895" gradientTransform="translate(-.29643 6)" y1="131.04" x1="19.499" inkscape:collect="always"/>
+  </defs>
+  <sodipodi:namedview id="base" bordercolor="#666666" inkscape:pageshadow="2" inkscape:window-y="45" pagecolor="#ffffff" inkscape:window-height="865" inkscape:zoom="2.8865199" inkscape:window-x="259" borderopacity="1.0" inkscape:current-layer="layer1" inkscape:cx="190.36764" inkscape:cy="105.54958" inkscape:window-width="1167" inkscape:pageopacity="0.0" inkscape:document-units="px"/>
+  <g id="layer1" inkscape:label="Layer 1" inkscape:groupmode="layer" transform="translate(-54.751 -147.02)">
+    <path id="path2406" style="stroke:#2f2f2f;stroke-width:8.75;fill:none" d="m234.71 185.83c7.08 0.75 24.44 1.37 36.82 1.37 14.98 0 30.35 0.91 46.02 0.91 11.82 0 20.79 0.91 32.21 0.91 9.17 0 22.81 2.03 32.22 2.73 22.74 1.68 33.05 8.02 39.89 14.1 8.56 7.63 13.34 14.98 4.6 22.76-11.08 9.85-23.51 17.74-42.96 26.39-29.47 13.11-78.89 21.87-119.65 30.94-24.8 5.52-46.16 10.09-59.83 18.2-7.89 4.69-12.27 9.86-12.27 15.02 0 5.29 9.63 11.31 15.34 16.38 3.63 3.24 13.63 7.52 19.94 10.01 8.23 3.26 31.05 3.38 42.95 4.55 12.57 1.25 24.21 2.23 33.75 3.65"/>
+    <rect id="rect1318" style="fill:url(#linearGradient2429)" rx="3.8537" ry="3.8537" height="24.176" width="8.3002" y="174.62" x="257.5"/>
+    <rect id="rect2333" style="fill:url(#linearGradient2426)" rx="3.8537" ry="3.8537" height="24.176" width="8.3002" y="174.62" x="281.21"/>
+    <rect id="rect2337" style="fill:url(#linearGradient2423)" rx="3.8537" ry="3.8537" height="24.176" width="8.3002" y="174.62" x="269.36"/>
+    <rect id="rect1309" style="stroke:#000000;stroke-width:.13172;fill:url(#radialGradient2420)" ry="0" height="62.046" width="64.139" y="155.68" x="54.816"/>
+    <path id="rect1311" sodipodi:nodetypes="ccccccccccccc" style="fill:url(#radialGradient2417)" d="m124.03 147.02c-3.2 0-5.79 1.86-5.79 4.15v71.06c0 2.3 2.59 4.16 5.79 4.16h104.93c3.2 0 5.79-1.86 5.79-4.16v-3.56l24.11-12.48v-39.2l-24.11-12.23v-3.59c0-2.29-2.59-4.15-5.79-4.15h-104.93z"/>
+    <g id="g2255" transform="matrix(1 0 0 .76143 61.589 91.865)">
+      <rect id="rect2229" style="stroke:#000000;stroke-width:.11316;fill:url(#linearGradient2895)" height="11.271" width="11.271" y="106.43" x="19.265"/>
+      <rect id="rect2231" style="stroke:#000000;stroke-width:.11316;fill:url(#linearGradient2897)" height="11.271" width="11.271" y="131.4" x="19.265"/>
+    </g>
+    <rect id="rect2263" style="stroke:url(#linearGradient2882);stroke-width:.23296;fill:url(#linearGradient2880)" rx="3.2608" ry="3.2608" height="16.197" width="6.5216" y="178.18" x="98.718"/>
+  </g>
+  <metadata>
+    <rdf:RDF>
+      <cc:Work>
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+        <cc:license rdf:resource="http://creativecommons.org/licenses/publicdomain/"/>
+        <dc:publisher>
+          <cc:Agent rdf:about="http://openclipart.org/">
+            <dc:title>Openclipart</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:title>USB plug</dc:title>
+        <dc:date>2007-03-31T01:07:56</dc:date>
+        <dc:description>regular USB A plug</dc:description>
+        <dc:source>https://openclipart.org/detail/3705/usb-plug-by-klaasvangend</dc:source>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>klaasvangend</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>computer</rdf:li>
+            <rdf:li>computer technology</rdf:li>
+            <rdf:li>connector</rdf:li>
+            <rdf:li>plug</rdf:li>
+            <rdf:li>usb</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+      </cc:Work>
+      <cc:License rdf:about="http://creativecommons.org/licenses/publicdomain/">
+        <cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction"/>
+        <cc:permits rdf:resource="http://creativecommons.org/ns#Distribution"/>
+        <cc:permits rdf:resource="http://creativecommons.org/ns#DerivativeWorks"/>
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+</svg>

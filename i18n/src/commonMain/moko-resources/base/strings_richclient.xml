@@ -10,11 +10,6 @@
 	<string name="richclient_tray_message_loading">%s is loading...</string>
 	<string name="richclient_tray_message_shutdown">%s is shutting down...</string>
 
-	<!-- Status window-->
-	<string name="richclient_status_nocard">No card inserted.</string>
-	<string name="richclient_status_noterminal">No terminal connected.</string>
-	<string name="richclient_status_unknowncard">Unknown Card inserted.</string>
-
 	<!-- Client -->
 	<string name="richclient_client_startup_failed_headline">The %s cannot be started.</string>
 	<string name="richclient_client_startup_failed_nocontext">Failed to establish the context. Maybe your smart card service is not

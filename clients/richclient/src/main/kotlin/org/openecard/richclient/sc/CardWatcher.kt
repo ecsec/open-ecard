@@ -37,7 +37,7 @@ class CardWatcher(
 	private class ProcessState(
 		val terminals: Terminals,
 		val job: Job,
-		val activeJobs: MutableList<Job> = mutableListOf(),
+		val activeJobs: MutableMap<String, Job>,
 	)
 
 	private var curCardState: CardState.ImmutableCardState = CardState.ImmutableCardState.Empty
@@ -84,42 +84,56 @@ class CardWatcher(
 	}
 
 	fun start() {
-		val factoryLoad = factory.load()
-		factoryLoad.establishContext()
+		val terminals = factory.load()
+		terminals.establishContext()
 
 		logger.info { "Starting card watcher job" }
+		val activeJobs: MutableMap<String, Job> = mutableMapOf()
 		val job =
 			context.launch {
 				while (isActive) {
 					mutex.withLock {
-						val currentTerminals = factoryLoad.list()
-						val currentNames = currentTerminals.map { it.name }
+						try {
+							val currentTerminals = terminals.list()
+							val currentNames = currentTerminals.map { it.name }
 
-						val added = currentNames - curCardState.terminals
-						for (name in added) {
-							val terminal = currentTerminals.find { it.name == name }
-							if (terminal != null) {
-								curCardState = curCardState.addTerminal(name)
+							val added = currentNames - curCardState.terminals
+							for (name in added) {
+								val terminal = currentTerminals.find { it.name == name }
+								if (terminal != null) {
+									curCardState = curCardState.addTerminal(name)
 
-								// send events to all receivers
-								val evt = CardStateEvent.TerminalAdded(name)
-								receivers.values.forEach { it.send(evt) }
+									// send events to all receivers
+									val evt = CardStateEvent.TerminalAdded(name)
+									receivers.values.forEach { it.send(evt) }
 
-								// register worker
-								val monitorJob = monitorTerminal(terminal)
-								state?.activeJobs?.add(monitorJob)
-							} else {
-								logger.warn { "Terminal name='$terminal' removed while processing status update" }
+									// register worker
+									val monitorJob = monitorTerminal(terminal)
+									activeJobs[name] = monitorJob
+								} else {
+									logger.warn { "Terminal name='$terminal' removed while processing status update" }
+								}
 							}
-						}
 
-						val removed = curCardState.terminals - currentNames.toSet()
-						for (name in removed) {
-							curCardState = curCardState.removeTerminal(name)
+							val removed = curCardState.terminals - currentNames.toSet()
+							removeTerminals(removed, activeJobs)
+						} catch (e: Exception) {
+							logger.warn(e) { "Exception during terminal listing: ${e.message}" }
+							
+							try {
+								terminals.releaseContext()
+							} catch (releaseError: Exception) {
+								logger.warn { "Error releasing context: ${releaseError.message}" }
+							}
 
-							// send events to all receivers
-							val evt = CardStateEvent.TerminalRemoved(name)
-							receivers.values.forEach { it.send(evt) }
+							try {
+								terminals.establishContext()
+							} catch (establError: Exception) {
+								logger.warn { "Error re-establishing context: ${establError.message}" }
+							}
+
+							// remove all terminals
+							removeTerminals(curCardState.terminals, activeJobs)
 						}
 					}
 
@@ -127,7 +141,22 @@ class CardWatcher(
 					delay(pollingDelay)
 				}
 			}
-		state = ProcessState(factoryLoad, job)
+		state = ProcessState(terminals, job, activeJobs)
+	}
+
+	private suspend fun removeTerminals(
+		removed: Set<String>,
+		activeJobs: MutableMap<String, Job>,
+	) {
+		for (name in removed) {
+			// cancel watcher and remove terminal from current state
+			stopWatchJob(name, activeJobs)
+			curCardState = curCardState.removeTerminal(name)
+
+			// send events to all receivers
+			val evt = CardStateEvent.TerminalRemoved(name)
+			receivers.values.forEach { it.send(evt) }
+		}
 	}
 
 	private fun monitorTerminal(terminal: Terminal): Job =
@@ -177,6 +206,23 @@ class CardWatcher(
 			}
 		}
 
+	private suspend fun stopWatchJob(
+		terminal: String,
+		activeJobs: MutableMap<String, Job>,
+		joinTimeout: Duration = 5000.milliseconds,
+	) {
+		activeJobs.remove(terminal)?.let { job ->
+			job.cancel()
+			try {
+				withTimeout(joinTimeout) {
+					job.join()
+				}
+			} catch (e: TimeoutCancellationException) {
+				logger.warn { "Timeout while waiting for monitor job to finish" }
+			}
+		}
+	}
+
 	fun stop() {
 		runBlocking {
 			stopSuspending()
@@ -188,21 +234,13 @@ class CardWatcher(
 
 		val state = checkNotNull(this.state)
 		mutex.withLock {
-			state.activeJobs.forEach { job ->
-				job.cancel()
-				try {
-					withTimeout(5000) {
-						job.join()
-					}
-				} catch (e: TimeoutCancellationException) {
-					logger.warn { "Timeout while waiting for monitor job to finish" }
-				}
+			state.activeJobs.keys.toList().forEach { terminal ->
+				stopWatchJob(terminal, state.activeJobs)
 			}
-			state.activeJobs.clear()
 
 			state.job.cancel()
 			try {
-				withTimeout(5000) {
+				withTimeout(5000.milliseconds) {
 					state.job.join()
 				}
 			} catch (e: TimeoutCancellationException) {

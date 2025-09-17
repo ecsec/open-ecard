@@ -16,13 +16,4 @@ kotlin {
 			implementation(libs.kotlin.test)
 		}
 	}
-	listOf(
-		iosArm64(),
-		iosSimulatorArm64(),
-	).forEach {
-		it.binaries.framework {
-			baseName = "openecard_pcscIos"
-			isStatic = true
-		}
-	}
 }

@@ -123,6 +123,7 @@ awaitility = { group = "org.awaitility", name = "awaitility", version = "4.3.0" 
 wiremock = { module = "org.wiremock:wiremock", version.ref = "wiremock" }
 
 kotlin-crypto-core = { module = "dev.whyoleg.cryptography:cryptography-core", version.ref = "kotlin-crypto" }
+kotlin-crypto-random = { module = "dev.whyoleg.cryptography:cryptography-random", version.ref = "kotlin-crypto" }
 kotlin-crypto-asn1-core = { module = "dev.whyoleg.cryptography:cryptography-serialization-asn1", version.ref = "kotlin-crypto" }
 kotlin-crypto-asn1-modules = { module = "dev.whyoleg.cryptography:cryptography-serialization-asn1-modules", version.ref = "kotlin-crypto" }
 kotlin-crypto-jvm = { module = "dev.whyoleg.cryptography:cryptography-provider-jdk", version.ref = "kotlin-crypto" }

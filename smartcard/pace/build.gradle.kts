@@ -3,7 +3,7 @@ description = "PACE software implementation"
 plugins {
 	id("openecard.kmp-lib-conventions")
 	id("openecard.kmp-jvm-conventions")
-	// id("openecard.kmp-ios-conventions")
+	id("openecard.kmp-ios-conventions")
 	id("openecard.kmp-desktop-conventions")
 }
 
@@ -31,6 +31,11 @@ kotlin {
 		jvmTest.dependencies {
 			implementation(libs.bundles.test.jvm.kotlin)
 			implementation(project(":smartcard:pcsc-scio"))
+		}
+
+		nativeMain.dependencies {
+			implementation(libs.kotlin.crypto.random)
+			implementation(libs.kotlin.crypto.openssl)
 		}
 	}
 }

@@ -61,7 +61,6 @@ class PaceInfo(
 	 * @return True if generic mapping is used, otherwise false
 	 */
 	val isGm: Boolean by lazy {
-
 		protocol.value.startsWith(PaceObjectIdentifier.id_PACE_DH_GM) ||
 			protocol.value.startsWith(PaceObjectIdentifier.id_PACE_ECDH_GM)
 	}

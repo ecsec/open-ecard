@@ -10,12 +10,12 @@ import org.openecard.cif.dsl.builder.Builder
 class RecognitionTreeBuilder(
 	private val calls: MutableList<ApduCallDefinition> = mutableListOf(),
 ) : RecognitionTreeScope,
-	Builder<List<ApduCallDefinition>> {
+	Builder<RecognitionTree> {
 	override fun call(content: @CifMarker (ApduCardCallScope.() -> Unit)) {
 		val builder = ApduCardCallScopeBuilder()
 		content.invoke(builder)
 		calls.add(builder.build())
 	}
 
-	override fun build(): RecognitionTree = calls.toList()
+	override fun build() = calls.toList()
 }

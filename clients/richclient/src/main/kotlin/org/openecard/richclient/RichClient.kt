@@ -50,7 +50,6 @@ import org.openecard.common.OpenecardProperties
 import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.checkResult
 import org.openecard.common.event.EventDispatcherImpl
-import org.openecard.common.event.EventType
 import org.openecard.common.sal.CombinedCIFProvider
 import org.openecard.control.binding.http.HttpBinding
 import org.openecard.gui.message.DialogType
@@ -68,8 +67,11 @@ import org.openecard.recognition.CardRecognitionImpl
 import org.openecard.recognition.RepoCifProvider
 import org.openecard.richclient.gui.AppTray
 import org.openecard.richclient.gui.SettingsAndDefaultViewWrapper
+import org.openecard.richclient.sc.CardStateManager
+import org.openecard.richclient.sc.CifDb
 import org.openecard.richclient.updater.VersionUpdateChecker
 import org.openecard.sal.TinySAL
+import org.openecard.sal.sc.recognition.SettableCardRecognition
 import org.openecard.sc.iface.TerminalFactory
 import org.openecard.sc.pcsc.PcscTerminalFactory
 import org.openecard.transport.dispatcher.MessageDispatcher
@@ -167,7 +169,8 @@ class RichClient {
 			env.recognition = recognition
 
 			// Set up the IFD
-			terminalFactory = PcscTerminalFactory.instance
+			val terminalFactory = PcscTerminalFactory.instance
+			this.terminalFactory = terminalFactory
 			ifd = IFD()
 			ifd!!.addProtocol(ECardConstants.Protocol.PACE, PACEProtocolFactory())
 			ifd!!.setEnvironment(env)
@@ -190,6 +193,9 @@ class RichClient {
 // 		    sal.addSpecializedSAL(mwSal);
 // 		}
 // 	    }
+
+			val settableCardRecognition = SettableCardRecognition()
+			val cardStateManager = CardStateManager()
 
 			// Start up control interface
 			val guiWrapper = SettingsAndDefaultViewWrapper()
@@ -252,7 +258,7 @@ class RichClient {
 			}
 
 			val cifDb = CifDb.Companion.Bundled
-			tray!!.endSetup(terminalFactory!!, cifDb, manager!!)
+			tray!!.endSetup(terminalFactory, cifDb, manager!!, listOf(cardStateManager))
 
 			// Initialize the EventManager
 // 			eventDispatcher!!.add(

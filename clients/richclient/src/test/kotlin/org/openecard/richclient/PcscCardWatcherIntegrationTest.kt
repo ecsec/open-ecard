@@ -6,6 +6,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.openecard.cif.bundled.CompleteTree
+import org.openecard.richclient.sc.PcscCardWatcher
+import org.openecard.richclient.sc.PcscCardWatcherCallbacks
 import org.openecard.sal.sc.recognition.DirectCardRecognition
 import org.openecard.sc.pcsc.PcscTerminalFactory
 import kotlin.test.Ignore
@@ -38,7 +40,7 @@ class PcscCardWatcherIntegrationTest {
 
 					override fun onCardRecognized(
 						terminalName: String,
-						cardType: String?,
+						cardType: String,
 					) {
 						logger.warn { "Card recognized: $cardType on $terminalName" }
 					}

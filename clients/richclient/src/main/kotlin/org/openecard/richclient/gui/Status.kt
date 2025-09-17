@@ -33,11 +33,11 @@ import kotlinx.coroutines.Dispatchers
 import org.openecard.addon.AddonManager
 import org.openecard.common.AppVersion.name
 import org.openecard.i18n.I18N
-import org.openecard.richclient.CifDb
-import org.openecard.richclient.PcscCardWatcher
-import org.openecard.richclient.PcscCardWatcherCallbacks
 import org.openecard.richclient.gui.manage.ManagementDialog
 import org.openecard.richclient.gui.update.UpdateWindow
+import org.openecard.richclient.sc.CifDb
+import org.openecard.richclient.sc.PcscCardWatcher
+import org.openecard.richclient.sc.PcscCardWatcherCallbacks
 import org.openecard.richclient.updater.VersionUpdateChecker
 import org.openecard.sc.iface.TerminalFactory
 import java.awt.BorderLayout
@@ -305,11 +305,11 @@ class Status(
 
 	lateinit var watcher: PcscCardWatcher
 
-	fun startCardWatcher() {
+	fun startCardWatcher(callbacks: List<PcscCardWatcherCallbacks> = listOf()) {
 		val recognizeCard = cifDb.getCardRecognition()
 		val scope = CoroutineScope(Dispatchers.Default)
 
-		val callbacks =
+		val statusCb =
 			object : PcscCardWatcherCallbacks {
 				override fun onTerminalAdded(terminalName: String) {
 					addInfo(terminalName, null)
@@ -327,7 +327,7 @@ class Status(
 
 				override fun onCardRecognized(
 					terminalName: String,
-					cardType: String?,
+					cardType: String,
 				) {
 					addInfo(terminalName, cardType)
 					updateInfo(terminalName, cardType)
@@ -338,7 +338,10 @@ class Status(
 				}
 			}
 
-		watcher = PcscCardWatcher(callbacks, scope, recognizeCard, terminalFactory)
+		// combine all callbacks we need
+		val batchCbs = PcscCardWatcherCallbacks.BatchPcscCardWatcherCallbacks(callbacks + statusCb)
+
+		watcher = PcscCardWatcher(batchCbs, scope, recognizeCard, terminalFactory)
 		watcher.start()
 	}
 

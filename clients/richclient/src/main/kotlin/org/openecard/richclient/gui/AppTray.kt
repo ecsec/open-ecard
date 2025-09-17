@@ -31,11 +31,12 @@ import org.openecard.addon.AddonManager
 import org.openecard.common.AppVersion.name
 import org.openecard.common.util.SysUtils
 import org.openecard.i18n.I18N
-import org.openecard.richclient.CifDb
 import org.openecard.richclient.RichClient
 import org.openecard.richclient.gui.graphics.OecIconType
 import org.openecard.richclient.gui.graphics.oecImage
 import org.openecard.richclient.gui.manage.ManagementDialog
+import org.openecard.richclient.sc.CifDb
+import org.openecard.richclient.sc.PcscCardWatcherCallbacks
 import org.openecard.sc.iface.TerminalFactory
 import java.awt.Color
 import java.awt.Container
@@ -122,6 +123,7 @@ class AppTray(
 		terminalFactory: TerminalFactory,
 		cifDb: CifDb,
 		manager: AddonManager,
+		stateCallbacks: List<PcscCardWatcherCallbacks>,
 	) {
 		val statusObj =
 			Status(
@@ -133,7 +135,7 @@ class AppTray(
 			)
 
 		status = statusObj
-		statusObj.startCardWatcher()
+		statusObj.startCardWatcher(stateCallbacks)
 
 		tray?.let { tray ->
 			tray.setImage(tray.getTrayIconImage(ICON_LOGO))

@@ -1,4 +1,4 @@
-package org.openecard.richclient
+package org.openecard.richclient.sc
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
@@ -27,7 +27,7 @@ class PcscCardWatcher(
 
 	private var state: State? = null
 
-	private inner class State(
+	private class State(
 		val terminals: Terminals,
 		val job: Job,
 		val activeJobs: MutableList<Job> = mutableListOf(),
@@ -81,8 +81,9 @@ class PcscCardWatcher(
 
 					val channel = connection.card?.basicChannel
 					if (channel != null) {
-						val cardType = recognizeCard.recognizeCard(channel)
-						callbacks.onCardRecognized(terminal.name, cardType)
+						recognizeCard.recognizeCard(channel)?.let { cardType ->
+							callbacks.onCardRecognized(terminal.name, cardType)
+						}
 					}
 
 					terminal.waitForCardAbsent()

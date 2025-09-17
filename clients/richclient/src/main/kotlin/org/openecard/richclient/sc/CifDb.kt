@@ -1,4 +1,4 @@
-package org.openecard.richclient
+package org.openecard.richclient.sc
 
 import org.openecard.cif.bundled.CompleteTree
 import org.openecard.cif.bundled.EgkCif
@@ -9,6 +9,7 @@ import org.openecard.cif.bundled.NpaCif
 import org.openecard.cif.bundled.NpaDefinitions
 import org.openecard.cif.definition.CardInfoDefinition
 import org.openecard.cif.definition.recognition.removeUnsupported
+import org.openecard.richclient.MR
 import org.openecard.sal.sc.recognition.DirectCardRecognition
 import java.awt.image.BufferedImage
 

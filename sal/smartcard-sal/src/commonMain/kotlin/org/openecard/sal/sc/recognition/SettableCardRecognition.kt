@@ -3,22 +3,19 @@ package org.openecard.sal.sc.recognition
 import org.openecard.sc.iface.CardChannel
 
 class SettableCardRecognition : CardRecognition {
-	// TODO: use cardInfo
-	private val recognizedCards: MutableMap<String, Unit> = mutableMapOf()
+	private val recognizedCards: MutableMap<String, String> = mutableMapOf()
 
 	fun addCard(
 		terminal: String,
-		cif: Unit,
+		cardType: String,
 	) {
-		recognizedCards.put(terminal, cif)
+		recognizedCards[terminal] = cardType
 	}
 
 	fun removeCard(terminal: String) {
 		recognizedCards.remove(terminal)
 	}
 
-	override fun recognizeCard(channel: CardChannel): String? {
+	override fun recognizeCard(channel: CardChannel): String? =
 		recognizedCards[channel.card.terminalConnection.terminal.name]
-		TODO("Not yet implemented")
-	}
 }

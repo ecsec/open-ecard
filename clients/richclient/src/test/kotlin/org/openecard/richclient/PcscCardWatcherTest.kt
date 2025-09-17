@@ -13,6 +13,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
+import org.openecard.richclient.sc.PcscCardWatcher
+import org.openecard.richclient.sc.PcscCardWatcherCallbacks
 import org.openecard.sal.sc.recognition.CardRecognition
 import org.openecard.sc.iface.Card
 import org.openecard.sc.iface.Terminal

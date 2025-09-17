@@ -42,7 +42,7 @@ kotlinPoet = "2.2.0"
 junit = "5.13.+"
 wiremock = "3.13.+"
 mokkery = "2.9.0"
-kover = "0.9.1"
+kover = "0.9.2"
 
 
 apache-batik="1.19"

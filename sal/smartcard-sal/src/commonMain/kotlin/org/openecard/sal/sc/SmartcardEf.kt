@@ -1,14 +1,7 @@
 package org.openecard.sal.sc
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.cif.definition.acl.BoolTreeLeaf
-import org.openecard.cif.definition.acl.BoolTreeOr
-import org.openecard.cif.definition.dataset.DataSetDefinition
 import org.openecard.cif.definition.dataset.DatasetType
-import org.openecard.sal.iface.Dataset
-import org.openecard.sal.iface.MissingAuthentication
-import org.openecard.sal.iface.MissingAuthentications
-import org.openecard.sal.sc.acl.missingAuthentications
 import org.openecard.sc.apdu.ApduProcessingError
 import org.openecard.sc.apdu.command.FileControlInformation
 import org.openecard.sc.apdu.command.ReadBinary
@@ -20,7 +13,6 @@ import org.openecard.sc.iface.info.EfStructure
 import org.openecard.sc.iface.info.Fcp
 import org.openecard.sc.iface.info.FileInfo
 import org.openecard.utils.common.mergeToArray
-import org.openecard.utils.common.throwIf
 import org.openecard.utils.common.toUShort
 import org.openecard.utils.serialization.toPrintable
 
@@ -143,7 +135,8 @@ class SmartcardEf
 		@OptIn(ExperimentalUnsignedTypes::class)
 		private fun readTransparent(): UByteArray {
 			val extLen =
-				channel.card.capabilities
+				channel.card
+					.getCapabilities()
 					?.commandCoding
 					?.supportsExtendedLength ?: false
 			val shortEf = shortEf
@@ -209,7 +202,8 @@ class SmartcardEf
 		@OptIn(ExperimentalUnsignedTypes::class)
 		private fun readRecords(): UByteArray {
 			val extLen =
-				channel.card.capabilities
+				channel.card
+					.getCapabilities()
 					?.commandCoding
 					?.supportsExtendedLength ?: false
 			val shortEf = shortEf

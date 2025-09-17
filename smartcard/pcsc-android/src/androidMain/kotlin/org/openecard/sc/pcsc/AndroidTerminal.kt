@@ -15,6 +15,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import org.openecard.sc.iface.Cancelled
 import org.openecard.sc.iface.NoSmartcard
 import org.openecard.sc.iface.PreferredCardProtocol
 import org.openecard.sc.iface.ReaderUnsupported
@@ -197,7 +198,7 @@ class AndroidTerminal(
 	internal fun nfcTagDiscoveryOn() {
 		val activityIntent: Intent =
 			Intent(androidActivity, androidActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-		val flags = if (android.os.Build.VERSION.SDK_INT >= 31) PendingIntent.FLAG_MUTABLE else 0
+		val flags = if (Build.VERSION.SDK_INT >= 31) PendingIntent.FLAG_MUTABLE else 0
 		val pendingIntent: PendingIntent = PendingIntent.getActivity(androidActivity, 0, activityIntent, flags)
 
 		nfcAdapter?.enableForegroundDispatch(androidActivity, pendingIntent, null, null)

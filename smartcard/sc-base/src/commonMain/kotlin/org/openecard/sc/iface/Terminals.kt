@@ -22,6 +22,7 @@ interface Terminals {
 		NoService::class,
 		InvalidHandle::class,
 		CommError::class,
+		InternalSystemError::class,
 	)
 	fun releaseContext()
 

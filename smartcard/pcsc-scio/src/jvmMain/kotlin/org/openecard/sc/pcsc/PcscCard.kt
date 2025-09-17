@@ -14,12 +14,15 @@ class PcscCard(
 	override val terminalConnection: PcscTerminalConnection,
 	internal val scioCard: javax.smartcardio.Card,
 ) : Card {
-	override val atr: Atr = scioCard.atr.toAtr()
+	override fun atr(): Atr = scioCard.atr.toAtr()
+
 	override val protocol: CardProtocol by lazy {
 		scioCard.protocol.toCardProtocol(isContactless)
 	}
 
-	override var capabilities: CardCapabilities? = atr.historicalBytes?.cardCapabilities
+	override var setCapabilities: CardCapabilities? = null
+
+	override fun getCapabilities(): CardCapabilities? = atr().historicalBytes?.cardCapabilities ?: setCapabilities
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override val isContactless: Boolean by lazy {

@@ -2,16 +2,22 @@ package org.openecard.sc.iface
 
 interface Card {
 	val terminalConnection: TerminalConnection
-	val atr: Atr
+
 	val protocol: CardProtocol
 	val isContactless: Boolean
 	val basicChannel: CardChannel
+
+	var setCapabilities: CardCapabilities?
 
 	/**
 	 * Card Capabilities object.
 	 * Implementations can use the ones from the `ATR`, or it can be set explicitly after reading `EF.ATR`.
 	 */
-	var capabilities: CardCapabilities?
+	@Throws(CommError::class)
+	fun getCapabilities(): CardCapabilities?
+
+	@Throws(CommError::class)
+	fun atr(): Atr
 
 	@Throws(
 		InsufficientBuffer::class,

@@ -70,8 +70,8 @@ abstract class AbstractCardChannel : CardChannel {
 	}
 
 	protected fun doChaining(apdu: CommandApdu): Boolean {
-		val hasExtLen = card.capabilities?.commandCoding?.supportsExtendedLength ?: false
-		val hasChaining = card.capabilities?.commandCoding?.supportsCommandChaining ?: false
+		val hasExtLen = card.getCapabilities()?.commandCoding?.supportsExtendedLength ?: false
+		val hasChaining = card.getCapabilities()?.commandCoding?.supportsCommandChaining ?: false
 		return apdu.lc > 0xFFu && !hasExtLen && hasChaining
 	}
 

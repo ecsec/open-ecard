@@ -14,7 +14,7 @@ private val log = KotlinLogging.logger { }
 class SmartcardInfoRetriever(
 	val channel: CardChannel,
 ) {
-	val atr: Atr = channel.card.atr
+	val atr: Atr = channel.card.atr()
 	var efAtr: EfAtr? = null
 	var efDir: EfDir? = null
 

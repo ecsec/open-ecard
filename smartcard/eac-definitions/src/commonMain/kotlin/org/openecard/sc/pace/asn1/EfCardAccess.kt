@@ -132,12 +132,14 @@ class EfCardAccess
 				efCaShortFileId: UByte = EfCardAccess.efCardAccessShortFileId,
 			): EfCardAccess {
 				val extLen =
-					channel.card.capabilities
+					channel.card
+						.getCapabilities()
 						?.commandCoding
 						?.supportsExtendedLength ?: false
 				val useShortEf =
 					forceShortEf ||
-						channel.card.capabilities
+						channel.card
+							.getCapabilities()
 							?.selectionMethods
 							?.supportsShortEf ?: false
 				val efCaData =

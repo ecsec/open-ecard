@@ -32,9 +32,3 @@ multiplatformResources {
 	resourcesPackage.set("org.openecard.i18n") // required
 	resourcesClassName.set("I18N") // optional, default MR
 }
-
-// kover gets confused because no sources are in this project
-// TODO: reactivate this when https://github.com/Kotlin/kotlinx-kover/issues/747 is solved
-// kover {
-// 	disable()
-// }

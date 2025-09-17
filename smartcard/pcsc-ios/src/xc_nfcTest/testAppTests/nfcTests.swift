@@ -15,13 +15,18 @@ final class xCodeTestTests: XCTestCase {
 		let factory = IosTerminalFactory.companion.instance
 		assert(factory.name.elementsEqual("IosNFC"))
 
-		let terminals = factory.load()
-		XCTAssertEqual(try terminals.getTerminal(name: "")?.name, "IosNFCTerminal")
+		do {
+			let terminals = try factory.load()
+			XCTAssertEqual(try terminals.getTerminal(name: "")?.name, "IosNFCTerminal")
+
+		} catch (let error) {
+			XCTFail("Terminal could not be loaded \(error)")
+		}
 	}
 
-	func test_nfcSession_establishing() {
+	func test_nfcSession_establishing() throws {
 		let factory = IosTerminalFactory.companion.instance
-		let terminals = factory.load()
+		let terminals = try factory.load()
 		defer {
 			do {
 				try terminals.releaseContext()
@@ -37,9 +42,9 @@ final class xCodeTestTests: XCTestCase {
 		}
 	}
 
-	func test_waitForTag_throwsCancelOnUserCancel() async {
+	func test_waitForTag_throwsCancelOnUserCancel() async throws {
 		let factory = IosTerminalFactory.companion.instance
-		let terminals = factory.load()
+		let terminals = try factory.load()
 		defer {
 			do {
 				try terminals.releaseContext()
@@ -64,9 +69,9 @@ final class xCodeTestTests: XCTestCase {
 		}
 
 	}
-	func test_waitForTag_throwsTimeoutOnTimeout() async {
+	func test_waitForTag_throwsTimeoutOnTimeout() async throws {
 		let factory = IosTerminalFactory.companion.instance
-		let terminals = factory.load()
+		let terminals = try factory.load()
 		defer {
 			do {
 				try terminals.releaseContext()
@@ -93,9 +98,9 @@ final class xCodeTestTests: XCTestCase {
 
 	}
 
-	func test_tag_discover() async {
+	func test_tag_discover() async throws {
 		let factory = IosTerminalFactory.companion.instance
-		let terminals = factory.load()
+		let terminals = try factory.load()
 		defer {
 			do {
 				try terminals.releaseContext()
@@ -117,9 +122,9 @@ final class xCodeTestTests: XCTestCase {
 		}
 	}
 
-	func test_atr() async {
+	func test_atr() async throws {
 		let factory = IosTerminalFactory.companion.instance
-		let terminals = factory.load()
+		let terminals = try factory.load()
 		defer {
 			do {
 				try terminals.releaseContext()
@@ -141,9 +146,9 @@ final class xCodeTestTests: XCTestCase {
 			XCTFail("Failed with error: \(error)")
 		}
 	}
-	func test_send_convertingRawData() async {
+	func test_send_convertingRawData() async throws {
 		let factory = IosTerminalFactory.companion.instance
-		let terminals = factory.load()
+		let terminals = try factory.load()
 		defer {
 			do {
 				try terminals.releaseContext()
@@ -171,10 +176,10 @@ final class xCodeTestTests: XCTestCase {
 			XCTFail("Failed with error: \(error)")
 		}
 	}
-	func test_send_convertingNativeApdu() async {
+	func test_send_convertingNativeApdu() async throws {
 		let factory = IosTerminalFactory.companion.instance
 
-		let terminals = factory.load()
+		let terminals = try factory.load()
 		defer {
 			do {
 				try terminals.releaseContext()
@@ -219,10 +224,10 @@ final class xCodeTestTests: XCTestCase {
 		}
 	}
 
-	func test_tagLost_during_session() async {
+	func test_tagLost_during_session() async throws {
 		let factory = IosTerminalFactory.companion.instance
 
-		let terminals = factory.load()
+		let terminals = try factory.load()
 		defer {
 			do {
 				try terminals.releaseContext()

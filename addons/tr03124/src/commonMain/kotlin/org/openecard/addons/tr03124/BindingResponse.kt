@@ -28,5 +28,6 @@ sealed interface BindingResponse {
 		TC_TOKEN_RETRIEVAL_ERROR,
 		COMMUNICATION_ERROR,
 		OTHER_PROCESS_RUNNING,
+		INTERNAL_ERROR,
 	}
 }

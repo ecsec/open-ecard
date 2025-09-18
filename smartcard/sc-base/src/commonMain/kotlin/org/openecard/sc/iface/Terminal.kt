@@ -164,3 +164,69 @@ private inline fun waitForCard(
 		}
 	}
 }
+
+@Throws(
+	InsufficientBuffer::class,
+	InvalidHandle::class,
+	InvalidParameter::class,
+	InvalidValue::class,
+	NoMemory::class,
+	NoService::class,
+	ReaderUnavailable::class,
+	CommError::class,
+	InternalSystemError::class,
+	RemovedCard::class,
+	ResetCard::class,
+	NoSmartcard::class,
+	ProtoMismatch::class,
+	SharingViolation::class,
+	UnknownReader::class,
+	UnsupportedFeature::class,
+	UnpoweredCard::class,
+	UnresponsiveCard::class,
+)
+fun <T : Terminal, R> T.withTerminalOnlyConnect(
+	disposition: CardDisposition = CardDisposition.LEAVE,
+	block: (TerminalConnection) -> R,
+): R {
+	val con = connectTerminalOnly()
+	try {
+		return block.invoke(con)
+	} finally {
+		con.disconnect(disposition)
+	}
+}
+
+@Throws(
+	InsufficientBuffer::class,
+	InvalidHandle::class,
+	InvalidParameter::class,
+	InvalidValue::class,
+	NoMemory::class,
+	NoService::class,
+	ReaderUnavailable::class,
+	CommError::class,
+	InternalSystemError::class,
+	RemovedCard::class,
+	ResetCard::class,
+	NoSmartcard::class,
+	ProtoMismatch::class,
+	SharingViolation::class,
+	UnknownReader::class,
+	UnsupportedFeature::class,
+	UnpoweredCard::class,
+	UnresponsiveCard::class,
+)
+fun <T : Terminal, R> T.withCardConnect(
+	protocol: PreferredCardProtocol = PreferredCardProtocol.ANY,
+	shareMode: ShareMode = ShareMode.SHARED,
+	disposition: CardDisposition = CardDisposition.LEAVE,
+	block: (TerminalConnection) -> R,
+): R {
+	val con = connect(protocol, shareMode)
+	try {
+		return block.invoke(con)
+	} finally {
+		con.disconnect(disposition)
+	}
+}

@@ -26,10 +26,10 @@ import kotlin.time.Duration.Companion.milliseconds
 private val logger = KotlinLogging.logger { }
 
 class CardWatcher(
-	val context: CoroutineScope,
-	val recognition: CardRecognition,
-	val factory: TerminalFactory,
-	val pollingDelay: Duration = 1000.milliseconds,
+	private val context: CoroutineScope,
+	private val recognition: CardRecognition,
+	private val factory: TerminalFactory,
+	private val pollingDelay: Duration = 1000.milliseconds,
 ) {
 	private val mutex = Mutex()
 
@@ -42,6 +42,7 @@ class CardWatcher(
 	)
 
 	private var curCardState: CardState.ImmutableCardState = CardState.ImmutableCardState.Empty
+	val cardState: CardState get() = curCardState
 
 	private var receivers: Map<Flow<CardStateEvent>, Channel<CardStateEvent>> = mapOf()
 

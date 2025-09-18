@@ -68,9 +68,7 @@ class CardSelectionStep(
 		val radioBox = Radiobox("credentialSelectionBox")
 		radioBox.groupText = "Available Credentials"
 		for (cardName in avCardWithName.keys) {
-			val item = BoxItem()
-			item.name = avCardWithName[cardName]!!.getRecognitionInfo().getCardType()
-			item.text = cardName
+			val item = BoxItem(name = avCardWithName[cardName]!!.getRecognitionInfo().getCardType(), text = cardName)
 			radioBox.boxItems.add(item)
 		}
 

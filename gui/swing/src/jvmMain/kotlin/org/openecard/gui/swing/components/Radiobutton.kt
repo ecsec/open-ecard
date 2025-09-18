@@ -53,13 +53,10 @@ class Radiobutton(
 		buttons = ArrayList<JRadioButton>(radio.boxItems.size)
 		for (next in radio.boxItems) {
 			// copy box item
-			val copy = BoxItem()
+			val copy = BoxItem(name = next.name, text = next.text, isDisabled = next.isDisabled)
 			result.boxItems.add(copy)
-			copy.name = next.name
-			copy.text = next.text
-			copy.isDisabled = next.isDisabled
 			// create checkbox
-			val component = JRadioButton(next.text ?: "", next.isChecked)
+			val component = JRadioButton(next.text, next.isChecked)
 			bg.add(component)
 			if (next.isDisabled) {
 				component.setEnabled(false)

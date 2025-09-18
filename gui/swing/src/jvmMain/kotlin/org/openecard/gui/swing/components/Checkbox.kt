@@ -75,13 +75,10 @@ class Checkbox(
 		defaultCheckbox = checkbox.boxItems
 		for (next in checkbox.boxItems) {
 			// copy box item
-			val copy = BoxItem()
+			val copy = BoxItem(name = next.name, text = next.text, isDisabled = next.isDisabled)
 			result.boxItems.add(copy)
-			copy.name = next.name
-			copy.text = next.text
-			copy.isDisabled = next.isDisabled
 			// create checkbox
-			val component = CheckBoxItem(next.text ?: "", next.isChecked)
+			val component = CheckBoxItem(next.text, next.isChecked)
 			if (next.isDisabled) {
 				component.setEnabled(false)
 			}
@@ -116,9 +113,7 @@ class Checkbox(
 	}
 
 	override val component: Component
-		get() {
-			return panel
-		}
+		get() = panel
 
 	override fun validate(): Boolean = true
 

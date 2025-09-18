@@ -192,12 +192,12 @@ class CHATStep(
 		disabled: Boolean,
 		vararg textData: Any?,
 	): BoxItem =
-		BoxItem().apply {
-			name = value.localized()
-			isChecked = checked
-			isDisabled = disabled
-			this.text = value.format(textData).localized()
-		}
+		BoxItem(
+			name = value.localized(),
+			text = value.format(textData).localized(),
+			isChecked = checked,
+			isDisabled = disabled,
+		)
 
 	private fun makeBoxItem(
 		value: CHAT.SpecialFunction,

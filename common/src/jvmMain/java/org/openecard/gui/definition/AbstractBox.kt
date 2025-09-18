@@ -78,11 +78,7 @@ abstract class AbstractBox(
 		this.groupText = other.groupText
 		boxItems.clear()
 		for (next in other.boxItems) {
-			val copy = BoxItem()
-			copy.isChecked = next.isChecked
-			copy.isDisabled = next.isDisabled
-			copy.name = next.name
-			copy.text = next.text
+			val copy = BoxItem(name = next.name, text = next.text, isChecked = next.isChecked, isDisabled = next.isDisabled)
 			boxItems.add(copy)
 		}
 	}

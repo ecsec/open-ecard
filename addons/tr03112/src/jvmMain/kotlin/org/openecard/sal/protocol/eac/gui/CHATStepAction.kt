@@ -51,8 +51,8 @@ import org.openecard.sal.protocol.eac.anytype.PACEMarkerType
 private val logger = KotlinLogging.logger { }
 
 // private val LANG: I18n = I18n.getTranslation("pace")!!
-private val PIN: String? = I18N.strings.pace_pin.localized()
-private val PUK: String? = I18N.strings.pace_puk.localized()
+private val PIN: String = I18N.strings.pace_pin.localized()
+private val PUK: String = I18N.strings.pace_puk.localized()
 
 /**
  * StepAction for evaluation of CHAT value items on the EAC GUI.
@@ -150,7 +150,7 @@ class CHATStepAction(
 		if (cbRead != null) {
 			val selectedCHAT = eacData.selectedCHAT
 			for (item in cbRead.boxItems) {
-				val itemName = item.name!!
+				val itemName = item.name
 				if (dataGroupsNames.contains(itemName)) {
 					selectedCHAT.setReadAccess(itemName, item.isChecked)
 				} else if (specialFunctionsNames.contains(itemName)) {
@@ -165,7 +165,7 @@ class CHATStepAction(
 			val selectedCHAT = eacData.selectedCHAT
 			for (item in cbWrite.boxItems) {
 				if (dataGroupsNames.contains(item.name)) {
-					selectedCHAT.setWriteAccess(item.name!!, item.isChecked)
+					selectedCHAT.setWriteAccess(item.name, item.isChecked)
 				}
 			}
 		}

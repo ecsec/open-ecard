@@ -17,6 +17,7 @@ import org.openecard.cif.bundled.NpaDefinitions
 import org.openecard.cif.definition.acl.PaceAclQualifier
 import org.openecard.sal.iface.DeviceConnection
 import org.openecard.sal.iface.DeviceUnsupported
+import org.openecard.sal.iface.dids.PaceDid
 import org.openecard.sal.sc.SmartcardDeviceConnection
 import org.openecard.sal.sc.SmartcardSalSession
 import org.openecard.sal.sc.dids.SmartcardPaceDid
@@ -47,6 +48,7 @@ internal class UiStepImpl(
 	internal class UiStepCtx(
 		val session: SmartcardSalSession,
 		var card: SmartcardDeviceConnection?,
+		var pace: PaceDid?,
 		val token: TcToken,
 		val eserviceClient: EserviceClient,
 		val eidServer: EidServerInterface,
@@ -72,6 +74,10 @@ internal class UiStepImpl(
 			}
 
 		fun disconnectCard() {
+			runCatching {
+				pace?.closeChannel()
+				pace = null
+			}
 			card?.let {
 				runCatching { it.close(CardDisposition.LEAVE) }
 				card = null
@@ -109,6 +115,10 @@ internal class UiStepImpl(
 					it.name == getPinDidName()
 				},
 			) { "Required PACE DID is not available" }
+
+		// set PACE DID, so we can destroy the channel later
+		ctx.pace = pace
+
 		return pace
 	}
 
@@ -140,81 +150,86 @@ internal class UiStepImpl(
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override suspend fun processAuthentication(paceResponse: PaceEstablishChannelResponse): EidServerStep =
-		runEacCatching(ctx.eserviceClient) {
-			log.info { "Processing PACE response" }
-			val pace = getPaceDid()
-			check(pace.missingAuthAuthentications.isSolved)
+		runCatching {
+			runEacCatching(ctx.eserviceClient) {
+				log.info { "Processing PACE response" }
+				val pace = getPaceDid()
+				check(pace.missingAuthAuthentications.isSolved)
 
-			val efCa = paceResponse.efCardAccess.v.toEfCardAccess()
-			val ta = TerminalAuthenticationImpl(pace.application.device, efCa)
-			val ca = ChipAuthenticationImpl(pace.application.device, pace, efCa)
+				val efCa = paceResponse.efCardAccess.v.toEfCardAccess()
+				val ta = TerminalAuthenticationImpl(pace.application.device, efCa)
+				val ca = ChipAuthenticationImpl(pace.application.device, pace, efCa)
 
-			val challenge = ta.challenge
-			val chat =
-				checkNotNull(
-					pace
-						.toStateReference()
-						.stateQualifier
-						?.cast<PaceAclQualifier>()
-						?.chat,
-				) {
-					"PACE DID does not contain CHAT used for authentication"
+				val challenge = ta.challenge
+				val chat =
+					checkNotNull(
+						pace
+							.toStateReference()
+							.stateQualifier
+							?.cast<PaceAclQualifier>()
+							?.chat,
+					) {
+						"PACE DID does not contain CHAT used for authentication"
+					}
+				val idPicc =
+					checkNotNull(paceResponse.idIcc?.v) { "PACE did not yield a ID_PICC value, which is required for EAC" }
+				// remove type byte from the key
+				val idPiccRaw = idPicc.sliceArray(1 until idPicc.size)
+
+				val cars =
+					listOfNotNull(paceResponse.carCurr, paceResponse.carPrev).map {
+						it.v.toPublicKeyReference()
+					}
+				val chains =
+					cars
+						.asSequence()
+						.map { ctx.cvcs.toChain(it) }
+						.filterNotNull()
+				val chain =
+					chains
+						.firstOrNull()
+						?: throw IllegalArgumentException("Unknown trust chain referenced by CAR")
+
+				val eac1Out =
+					Eac1Output(
+						protocol = ctx.eac1InputReq.data.protocol,
+						certificateHolderAuthorizationTemplate = chat,
+						certificationAuthorityReference = cars.map { it.joinToString() },
+						efCardAccess = paceResponse.efCardAccess,
+						idPICC = idPiccRaw.toPrintable(),
+						challenge = challenge.toPrintable(),
+					)
+				val eac2In =
+					when (val msg = ctx.eidServer.sendDidAuthResponse(eac1Out)) {
+						is Eac2Input -> msg
+						else -> throw InvalidServerData(ctx.eserviceClient, "")
+					}
+
+				val aad =
+					ctx.eac1Input.authenticatedAuxiliaryData
+						?.v
+						?.toTlvBer()
+						?.tlv
+
+				val eacAuth: EacAuthentication = EacAuthenticationImpl(ta, ca, eac2In, chain, aad)
+
+				val outMsg = eacAuth.process()
+				ctx.eidServer.sendDidAuthResponse(outMsg)?.let {
+					val additionalMsg =
+						it.cast<EacAdditionalInput>()
+							?: throw InvalidServerData(ctx.eserviceClient, "Expecting an EacAdditionalInput message")
+					val caOutMsg = eacAuth.processAdditional(additionalMsg)
+					// send and fail if don't get a command message (e.g. Transmit)
+					if (ctx.eidServer.sendDidAuthResponse(caOutMsg) != null) {
+						throw InvalidServerData(ctx.eserviceClient, "Expecting a data command message")
+					}
 				}
-			val idPicc = checkNotNull(paceResponse.idIcc?.v) { "PACE did not yield a ID_PICC value, which is required for EAC" }
-			// remove type byte from the key
-			val idPiccRaw = idPicc.sliceArray(1 until idPicc.size)
 
-			val cars =
-				listOfNotNull(paceResponse.carCurr, paceResponse.carPrev).map {
-					it.v.toPublicKeyReference()
-				}
-			val chains =
-				cars
-					.asSequence()
-					.map { ctx.cvcs.toChain(it) }
-					.filterNotNull()
-			val chain =
-				chains
-					.firstOrNull()
-					?: throw IllegalArgumentException("Unknown trust chain referenced by CAR")
-
-			val eac1Out =
-				Eac1Output(
-					protocol = ctx.eac1InputReq.data.protocol,
-					certificateHolderAuthorizationTemplate = chat,
-					certificationAuthorityReference = cars.map { it.joinToString() },
-					efCardAccess = paceResponse.efCardAccess,
-					idPICC = idPiccRaw.toPrintable(),
-					challenge = challenge.toPrintable(),
-				)
-			val eac2In =
-				when (val msg = ctx.eidServer.sendDidAuthResponse(eac1Out)) {
-					is Eac2Input -> msg
-					else -> throw InvalidServerData(ctx.eserviceClient, "")
-				}
-
-			val aad =
-				ctx.eac1Input.authenticatedAuxiliaryData
-					?.v
-					?.toTlvBer()
-					?.tlv
-
-			val eacAuth: EacAuthentication = EacAuthenticationImpl(ta, ca, eac2In, chain, aad)
-
-			val outMsg = eacAuth.process()
-			ctx.eidServer.sendDidAuthResponse(outMsg)?.let {
-				val additionalMsg =
-					it.cast<EacAdditionalInput>()
-						?: throw InvalidServerData(ctx.eserviceClient, "Expecting an EacAdditionalInput message")
-				val caOutMsg = eacAuth.processAdditional(additionalMsg)
-				// send and fail if don't get a command message (e.g. Transmit)
-				if (ctx.eidServer.sendDidAuthResponse(caOutMsg) != null) {
-					throw InvalidServerData(ctx.eserviceClient, "Expecting a data command message")
-				}
+				EidServerStepImpl(this, ctx.eserviceClient, ctx.eidServer, pace.application.device)
 			}
-
-			EidServerStepImpl(ctx.eserviceClient, ctx.eidServer, pace.application.device)
-		}
+		}.onFailure {
+			disconnectCard()
+		}.getOrThrow()
 
 	companion object {
 		@OptIn(ExperimentalUnsignedTypes::class)
@@ -259,6 +274,7 @@ internal class UiStepImpl(
 			val ctx =
 				UiStepCtx(
 					session,
+					null,
 					null,
 					token,
 					eserviceClient,

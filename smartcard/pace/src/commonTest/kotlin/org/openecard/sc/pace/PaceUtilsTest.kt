@@ -1,9 +1,9 @@
 package org.openecard.sc.pace
 
-import org.junit.jupiter.api.assertThrows
 import org.openecard.sc.iface.SequenceCounterOverflow
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
+import kotlin.test.assertFailsWith
 
 class PaceUtilsTest {
 	@OptIn(ExperimentalUnsignedTypes::class)
@@ -16,7 +16,7 @@ class PaceUtilsTest {
 			UByteArray(8) + 127u + UByteArray(7) { 0xFFu },
 			Long.MAX_VALUE.toSequenceCounter(targetLength = len),
 		)
-		assertThrows<SequenceCounterOverflow> { (Long.MAX_VALUE + 1).toSequenceCounter(targetLength = len) }
+		assertFailsWith(SequenceCounterOverflow::class) { (Long.MAX_VALUE + 1).toSequenceCounter(targetLength = len) }
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
@@ -29,7 +29,7 @@ class PaceUtilsTest {
 			ubyteArrayOf(127u) + UByteArray(7) { 0xFFu },
 			Long.MAX_VALUE.toSequenceCounter(targetLength = len),
 		)
-		assertThrows<SequenceCounterOverflow> { (Long.MAX_VALUE + 1).toSequenceCounter(targetLength = len) }
+		assertFailsWith<SequenceCounterOverflow> { (Long.MAX_VALUE + 1).toSequenceCounter(targetLength = len) }
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
@@ -42,8 +42,8 @@ class PaceUtilsTest {
 			UByteArray(4) { 0xFFu },
 			0xFFFFFFFF.toSequenceCounter(targetLength = len),
 		)
-		assertThrows<SequenceCounterOverflow> { 0x01FFFFFFFF.toSequenceCounter(targetLength = len) }
-		assertThrows<SequenceCounterOverflow> { (Long.MAX_VALUE + 1).toSequenceCounter(targetLength = len) }
+		assertFailsWith<SequenceCounterOverflow> { 0x01FFFFFFFF.toSequenceCounter(targetLength = len) }
+		assertFailsWith<SequenceCounterOverflow> { (Long.MAX_VALUE + 1).toSequenceCounter(targetLength = len) }
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
@@ -56,14 +56,14 @@ class PaceUtilsTest {
 			ubyteArrayOf(0xFFu),
 			0xFFL.toSequenceCounter(targetLength = len),
 		)
-		assertThrows<SequenceCounterOverflow> { 0x01FFL.toSequenceCounter(targetLength = len) }
-		assertThrows<SequenceCounterOverflow> { (Long.MAX_VALUE + 1).toSequenceCounter(targetLength = len) }
+		assertFailsWith<SequenceCounterOverflow> { 0x01FFL.toSequenceCounter(targetLength = len) }
+		assertFailsWith<SequenceCounterOverflow> { (Long.MAX_VALUE + 1).toSequenceCounter(targetLength = len) }
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	@Test
 	fun `test SSC invalid byte`() {
-		assertThrows<IllegalArgumentException> { 1L.toSequenceCounter(targetLength = 0) }
-		assertThrows<IllegalArgumentException> { 1L.toSequenceCounter(targetLength = -1) }
+		assertFailsWith<IllegalArgumentException> { 1L.toSequenceCounter(targetLength = 0) }
+		assertFailsWith<IllegalArgumentException> { 1L.toSequenceCounter(targetLength = -1) }
 	}
 }

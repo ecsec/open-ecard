@@ -35,27 +35,19 @@ dependencies {
 	implementation(libs.apache.batik)
 	implementation(libs.kotlin.logging)
 	implementation(libs.logback.classic)
+
 	implementation(project(":crypto:tls"))
 
-	implementation(project(":ifd:ifd-core"))
-	implementation(project(":ifd:scio-backend:pcsc"))
-	implementation(project(":ifd:ifd-protocols:pace"))
-	implementation(project(":sal:tiny-sal"))
-	implementation(project(":management"))
 	implementation(project(":bindings:ktor"))
 	implementation(project(":gui:swing"))
 	implementation(project(":gui:graphics"))
 
 	// addons
-	implementation(project(":addons:pin-management"))
-	implementation(project(":addons:status"))
 	implementation(project(":addons:tr03124"))
 	implementation(project(":i18n"))
 
 	// basic runtime deps
 	implementation(project(":clients:richclient-res"))
-	implementation(project(":cifs"))
-	implementation(project(":wsdef:jaxb-marshaller"))
 
 	implementation(project(":releases"))
 	implementation(project(":build-info"))

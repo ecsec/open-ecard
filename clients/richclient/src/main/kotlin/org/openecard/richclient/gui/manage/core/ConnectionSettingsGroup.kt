@@ -22,10 +22,10 @@
 
 package org.openecard.richclient.gui.manage.core
 
-import org.openecard.addon.AddonPropertiesException
-import org.openecard.addon.manifest.ScalarListEntryType
 import org.openecard.crypto.tls.proxy.ProxySettings
 import org.openecard.i18n.I18N
+import org.openecard.richclient.AddonPropertiesException
+import org.openecard.richclient.gui.components.ScalarListEntryType
 import org.openecard.richclient.gui.components.ScalarListItem
 import java.awt.event.ItemEvent
 import java.awt.event.ItemListener
@@ -76,9 +76,9 @@ class ConnectionSettingsGroup : OpenecardPropertiesSettingsGroup(GROUP) {
 			)
 
 		// register event and trigger initial setup
-		val manager: ItemManager = ItemManager()
-		val selectedItem: Any? = selection.getSelectedItem()
-		val trigger: ItemEvent = ItemEvent(selection, ItemEvent.ITEM_FIRST, selectedItem, ItemEvent.SELECTED)
+		val manager = ItemManager()
+		val selectedItem = selection.selectedItem
+		val trigger = ItemEvent(selection, ItemEvent.ITEM_FIRST, selectedItem, ItemEvent.SELECTED)
 		manager.itemStateChanged(trigger)
 		selection.addItemListener(manager)
 	}

@@ -23,8 +23,7 @@
 package org.openecard.richclient.gui.manage
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.addon.AddonPropertiesException
-import org.openecard.i18n.I18N
+import org.openecard.richclient.AddonPropertiesException
 import org.openecard.richclient.gui.graphics.OecIconType
 import org.openecard.richclient.gui.graphics.oecImage
 import java.awt.AlphaComposite
@@ -43,7 +42,6 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JScrollPane
 import javax.swing.JSeparator
-import javax.swing.JTabbedPane
 import javax.swing.ScrollPaneConstants
 import javax.swing.SwingConstants
 import javax.swing.border.Border
@@ -62,54 +60,6 @@ private val logger = KotlinLogging.logger { }
 open class AddonPanel : JPanel {
 	private var logo: Image?
 	private var settingsPanel: SettingsPanel? = null
-
-	/**
-	 * Creates an AddonPanel with the given panels.
-	 * Each of the panel types may be left out, but at least one must be present in order for the dialog to make any
-	 * sense. The panels are arranged in a tab pane.
-	 *
-	 * @param actionPanel Optional action panel of the add-on.
-	 * @param settingsPanel Optional settings panel of the add-on.
-	 * @param aboutPanel Optional about page panel of the add-on.
-	 * @param name Name of the add-on as displayed in the head of the panel.
-	 * @param description Optional description of the add-on as displayed in the head of the panel.
-	 * @param logo Optional logo of the add-on as displayed on the [ManagementDialog].
-	 * If not present a default will be used.
-	 */
-	constructor(
-		actionPanel: ActionPanel?,
-		settingsPanel: SettingsPanel?,
-		aboutPanel: AboutPanel?,
-		name: String,
-		description: String?,
-		logo: Image?,
-	) {
-		setLayout(BorderLayout(0, 0))
-
-		this.logo = logo
-		val tabbedPane: JTabbedPane = JTabbedPane(JTabbedPane.TOP)
-		add(tabbedPane)
-		val dim: Dimension = Dimension(100, 100)
-
-		if (actionPanel != null) {
-			val actionScrollPane: JScrollPane = JScrollPane(actionPanel)
-			actionScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED)
-			actionScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED)
-			actionScrollPane.setMinimumSize(dim)
-			actionScrollPane.setPreferredSize(dim)
-			actionScrollPane.setBorder(EMPTY_BORDER)
-			tabbedPane.addTab(I18N.strings.addon_panel_tab_function.localized(), null, actionScrollPane, null)
-		}
-		if (settingsPanel != null) {
-			this.settingsPanel = settingsPanel
-			tabbedPane.addTab(I18N.strings.addon_panel_tab_settings.localized(), null, settingsPanel, null)
-		}
-		if (aboutPanel != null) {
-			tabbedPane.addTab(I18N.strings.addon_panel_tab_about.localized(), null, aboutPanel, null)
-		}
-
-		createHeader(name, description)
-	}
 
 	/**
 	 * Creates an AddonPanel with the given panel.
@@ -133,12 +83,12 @@ open class AddonPanel : JPanel {
 
 		val panel: JComponent
 		if (singlePanel !is AboutPanel && singlePanel !is SettingsPanel) {
-			val singleScrollPane: JScrollPane = JScrollPane(singlePanel)
+			val singleScrollPane = JScrollPane(singlePanel)
 			singleScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER)
 			singleScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED)
-			val dim: Dimension = Dimension(this.getWidth(), this.getHeight() - 75)
-			singleScrollPane.setMinimumSize(dim)
-			singleScrollPane.setPreferredSize(dim)
+			val dim = Dimension(this.getWidth(), this.getHeight() - 75)
+			singleScrollPane.minimumSize = dim
+			singleScrollPane.preferredSize = dim
 			singleScrollPane.setBorder(EMPTY_BORDER)
 			panel = singleScrollPane
 		} else {
@@ -191,7 +141,7 @@ open class AddonPanel : JPanel {
 		content.preferredSize = Dimension(50, 50)
 		panel.add(content)
 
-		val nameLabel: JLabel = JLabel(name)
+		val nameLabel = JLabel(name)
 		nameLabel.setAlignmentX(LEFT_ALIGNMENT)
 		nameLabel.setFont(nameLabel.getFont().deriveFont(Font.BOLD, 19f))
 		nameLabel.setForeground(Color.getHSBColor(0f, 0f, 0.25f))
@@ -199,7 +149,7 @@ open class AddonPanel : JPanel {
 
 		if (description != null && !description.isEmpty()) {
 			content.add(Box.createVerticalStrut(5))
-			val descLabel: JLabel = JLabel(description)
+			val descLabel = JLabel(description)
 			descLabel.setAlignmentX(LEFT_ALIGNMENT)
 			descLabel.setFont(descLabel.getFont().deriveFont(Font.PLAIN))
 			descLabel.setForeground(Color.getHSBColor(0f, 0f, 0.25f))
@@ -208,7 +158,7 @@ open class AddonPanel : JPanel {
 
 		panel.add(Box.createVerticalStrut(4))
 
-		val rule: JSeparator = JSeparator(SwingConstants.HORIZONTAL)
+		val rule = JSeparator(SwingConstants.HORIZONTAL)
 		rule.setBorder(EmptyBorder(10, 20, 10, 20))
 		rule.setAlignmentX(LEFT_ALIGNMENT)
 		panel.add(rule)

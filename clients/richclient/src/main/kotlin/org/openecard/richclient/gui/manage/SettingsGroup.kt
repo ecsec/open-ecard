@@ -23,16 +23,13 @@
 package org.openecard.richclient.gui.manage
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.addon.AddonPropertiesException
-import org.openecard.addon.manifest.ScalarEntryType
-import org.openecard.addon.manifest.ScalarListEntryType
 import org.openecard.i18n.I18N
+import org.openecard.richclient.AddonPropertiesException
 import org.openecard.richclient.gui.components.CheckboxListItem
 import org.openecard.richclient.gui.components.FileListEntryItem
-import org.openecard.richclient.gui.components.MathNumberEditor
 import org.openecard.richclient.gui.components.OpenFileBrowserListener
+import org.openecard.richclient.gui.components.ScalarListEntryType
 import org.openecard.richclient.gui.components.ScalarListItem
-import org.openecard.richclient.gui.components.SpinnerMathNumberModel
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Dimension
@@ -44,9 +41,6 @@ import java.awt.event.ItemEvent
 import java.awt.event.ItemListener
 import java.io.File
 import java.io.IOException
-import java.math.BigDecimal
-import java.math.BigInteger
-import java.text.DecimalFormat
 import javax.swing.BorderFactory
 import javax.swing.JButton
 import javax.swing.JCheckBox
@@ -54,12 +48,9 @@ import javax.swing.JComboBox
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JPasswordField
-import javax.swing.JSpinner
 import javax.swing.JTextField
 import javax.swing.border.Border
 import javax.swing.border.TitledBorder
-import javax.swing.event.ChangeEvent
-import javax.swing.event.ChangeListener
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
@@ -139,9 +130,9 @@ open class SettingsGroup(
 		element: Component,
 		enabled: Boolean,
 	) {
-		val label: JLabel? = fieldLabels.get(element)
-		label!!.setVisible(enabled)
-		element.setVisible(enabled)
+		val label: JLabel? = fieldLabels[element]
+		label!!.isVisible = enabled
+		element.isVisible = enabled
 	}
 
 	/**
@@ -201,7 +192,7 @@ open class SettingsGroup(
 				}
 		}
 
-		fieldLabels.put(input, label)
+		fieldLabels[input] = label
 		// add listener for value changes
 		input.document.addDocumentListener(
 			object : DocumentListener {
@@ -450,57 +441,57 @@ open class SettingsGroup(
 		container.add(component, constraints)
 	}
 
-	protected fun addScalarEntryTypNumber(
-		name: String,
-		description: String?,
-		property: String,
-		type: String,
-	): JSpinner? {
-		val label: JLabel = addLabel(name, description)
-		val value: String? = properties.getProperty(property)
-		val model: SpinnerMathNumberModel
-
-		if (type == ScalarEntryType.BIGDECIMAL.name) {
-			if (value == null || value == "") {
-				model = SpinnerMathNumberModel(BigDecimal("0.0"), null, null, BigDecimal("0.1"))
-			} else {
-				val convertedValue: BigDecimal = BigDecimal(value)
-				model = SpinnerMathNumberModel(convertedValue, null, null, BigDecimal("0.1"))
-			}
-		} else if (type == ScalarEntryType.BIGINTEGER.name) {
-			if (value == null || value == "") {
-				model = SpinnerMathNumberModel(BigInteger.ZERO, null, null, BigInteger.ONE)
-			} else {
-				val convertedValue: BigInteger = BigInteger(value)
-				model = SpinnerMathNumberModel(convertedValue, null, null, BigInteger.ONE)
-			}
-		} else {
-			LOG.error { "Type STRING and BOOLEAN are not allowed for the use of this function." }
-			return null
-		}
-
-		val spinner: JSpinner =
-			object : JSpinner(model) {
-				override fun getPreferredSize(): Dimension {
-					val dim: Dimension = super.getPreferredSize()
-					dim.width = 100
-					return dim
-				}
-			}
-		spinner.addChangeListener(
-			object : ChangeListener {
-				override fun stateChanged(e: ChangeEvent) {
-					properties.setProperty(property, spinner.getModel().getValue().toString())
-				}
-			},
-		)
-		spinner.setEnabled(true)
-		spinner.setEditor(MathNumberEditor(spinner, DecimalFormat.getInstance(spinner.getLocale()) as DecimalFormat?))
-		addComponent(spinner)
-		fieldLabels.put(spinner, label)
-		itemIdx++
-		return spinner
-	}
+// 	protected fun addScalarEntryTypNumber(
+// 		name: String,
+// 		description: String?,
+// 		property: String,
+// 		type: String,
+// 	): JSpinner? {
+// 		val label: JLabel = addLabel(name, description)
+// 		val value: String? = properties.getProperty(property)
+// 		val model: SpinnerMathNumberModel
+//
+// 		if (type == ScalarEntryType.BIGDECIMAL.name) {
+// 			if (value == null || value == "") {
+// 				model = SpinnerMathNumberModel(BigDecimal("0.0"), null, null, BigDecimal("0.1"))
+// 			} else {
+// 				val convertedValue: BigDecimal = BigDecimal(value)
+// 				model = SpinnerMathNumberModel(convertedValue, null, null, BigDecimal("0.1"))
+// 			}
+// 		} else if (type == ScalarEntryType.BIGINTEGER.name) {
+// 			if (value == null || value == "") {
+// 				model = SpinnerMathNumberModel(BigInteger.ZERO, null, null, BigInteger.ONE)
+// 			} else {
+// 				val convertedValue: BigInteger = BigInteger(value)
+// 				model = SpinnerMathNumberModel(convertedValue, null, null, BigInteger.ONE)
+// 			}
+// 		} else {
+// 			LOG.error { "Type STRING and BOOLEAN are not allowed for the use of this function." }
+// 			return null
+// 		}
+//
+// 		val spinner: JSpinner =
+// 			object : JSpinner(model) {
+// 				override fun getPreferredSize(): Dimension {
+// 					val dim: Dimension = super.getPreferredSize()
+// 					dim.width = 100
+// 					return dim
+// 				}
+// 			}
+// 		spinner.addChangeListener(
+// 			object : ChangeListener {
+// 				override fun stateChanged(e: ChangeEvent) {
+// 					properties.setProperty(property, spinner.getModel().getValue().toString())
+// 				}
+// 			},
+// 		)
+// 		spinner.setEnabled(true)
+// 		spinner.setEditor(MathNumberEditor(spinner, DecimalFormat.getInstance(spinner.getLocale()) as DecimalFormat?))
+// 		addComponent(spinner)
+// 		fieldLabels.put(spinner, label)
+// 		itemIdx++
+// 		return spinner
+// 	}
 
 	protected fun addFileEntry(
 		name: String,

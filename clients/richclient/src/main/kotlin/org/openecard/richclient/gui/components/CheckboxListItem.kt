@@ -22,7 +22,7 @@
 package org.openecard.richclient.gui.components
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.addon.AddonPropertiesException
+import org.openecard.richclient.AddonPropertiesException
 import org.openecard.richclient.gui.manage.Settings
 import java.awt.event.ItemEvent
 import java.awt.event.ItemListener

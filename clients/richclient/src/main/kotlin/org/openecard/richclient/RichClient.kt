@@ -30,10 +30,6 @@ import com.sun.jna.platform.win32.WinReg
 import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import iso.std.iso_iec._24727.tech.schema.EstablishContext
-import iso.std.iso_iec._24727.tech.schema.Initialize
-import iso.std.iso_iec._24727.tech.schema.ReleaseContext
-import iso.std.iso_iec._24727.tech.schema.Terminate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import org.apache.http.HttpException
@@ -43,18 +39,13 @@ import org.apache.http.message.BasicHttpEntityEnclosingRequest
 import org.apache.http.protocol.BasicHttpContext
 import org.apache.http.protocol.HttpContext
 import org.apache.http.protocol.HttpRequestExecutor
-import org.openecard.addon.AddonManager
 import org.openecard.addons.tr03124.ClientInformation
 import org.openecard.addons.tr03124.UserAgent
 import org.openecard.build.BuildInfo
 import org.openecard.common.AppVersion.name
 import org.openecard.common.ClientEnv
-import org.openecard.common.ECardConstants
 import org.openecard.common.OpenecardProperties
-import org.openecard.common.WSHelper
-import org.openecard.common.WSHelper.checkResult
 import org.openecard.common.event.EventDispatcherImpl
-import org.openecard.common.sal.CombinedCIFProvider
 import org.openecard.control.binding.ktor.HttpService
 import org.openecard.gui.message.DialogType
 import org.openecard.gui.swing.SwingDialogWrapper
@@ -64,11 +55,6 @@ import org.openecard.httpcore.HttpRequestHelper
 import org.openecard.httpcore.KHttpUtils
 import org.openecard.httpcore.StreamHttpClientConnection
 import org.openecard.i18n.I18N
-import org.openecard.ifd.protocol.pace.PACEProtocolFactory
-import org.openecard.ifd.scio.IFD
-import org.openecard.management.TinyManagement
-import org.openecard.recognition.CardRecognitionImpl
-import org.openecard.recognition.RepoCifProvider
 import org.openecard.richclient.gui.AppTray
 import org.openecard.richclient.gui.SettingsAndDefaultViewWrapper
 import org.openecard.richclient.sc.CardWatcher
@@ -78,11 +64,9 @@ import org.openecard.richclient.sc.EventCardRecognition
 import org.openecard.richclient.tr03124.RichclientTr03124Binding
 import org.openecard.richclient.tr03124.registerTr03124Binding
 import org.openecard.richclient.updater.VersionUpdateChecker
-import org.openecard.sal.TinySAL
 import org.openecard.sc.iface.TerminalFactory
 import org.openecard.sc.pcsc.PcscTerminalFactory
 import org.openecard.transport.dispatcher.MessageDispatcher
-import org.openecard.ws.SAL
 import java.io.IOException
 import java.net.BindException
 import java.net.Socket
@@ -115,20 +99,8 @@ class RichClient {
 	private var terminalFactory: TerminalFactory? = null
 	private var cardWatcher: CardWatcher? = null
 
-	// Interface Device Layer (IFD)
-	private var ifd: IFD? = null
-
-	// Service Access Layer (SAL)
-	private var sal: SAL? = null
-
-	// AddonManager
-	private var manager: AddonManager? = null
-
 	// EventDispatcherImpl
 	private var eventDispatcher: EventDispatcherImpl? = null
-
-	// Card recognition
-	private var recognition: CardRecognitionImpl? = null
 
 	// ContextHandle determines a specific IFD layer context
 	private var contextHandle: ByteArray? = null
@@ -164,18 +136,6 @@ class RichClient {
 
 			env.eventDispatcher = eventDispatcher
 
-			// Set up Management
-			val management = TinyManagement(env)
-			env.management = management
-
-			// Set up MiddlewareConfig
-// 	    MiddlewareConfigLoader mwConfigLoader = new MiddlewareConfigLoader();
-// 	    List<MiddlewareSALConfig> mwSALConfigs = mwConfigLoader.getMiddlewareSALConfigs();
-
-			// Set up CardRecognitionImpl
-			recognition = CardRecognitionImpl(env)
-			env.recognition = recognition
-
 			// Set up the IFD and card watcher
 			val terminalFactory = PcscTerminalFactory.instance
 			this.terminalFactory = terminalFactory
@@ -184,20 +144,6 @@ class RichClient {
 			val cardWatcher = CardWatcher(CoroutineScope(Dispatchers.Default), cifDb.getCardRecognition(), terminalFactory)
 			this.cardWatcher = cardWatcher
 			cardWatcher.start()
-
-			ifd = IFD()
-			ifd!!.addProtocol(ECardConstants.Protocol.PACE, PACEProtocolFactory())
-			ifd!!.setEnvironment(env)
-			env.ifd = ifd
-
-			val cifProv = CombinedCIFProvider()
-			env.cifProvider = cifProv
-			cifProv.addCifProvider(RepoCifProvider(recognition))
-
-			// Set up SAL
-			val mainSal = TinySAL(env)
-			sal = mainSal
-			env.sal = sal
 
 			// Set up Middleware SAL
 // 	    for (MiddlewareSALConfig mwSALConfig : mwSALConfigs) {
@@ -214,10 +160,6 @@ class RichClient {
 			// Start up control interface
 			val guiWrapper = SettingsAndDefaultViewWrapper()
 			try {
-				manager = AddonManager(env, guiWrapper, mainSal.salStateView)
-				guiWrapper.setAddonManager(manager)
-				mainSal.setAddonManager(manager)
-
 				// initialize http binding
 				var port = 24727
 				var dispatcherMode = false
@@ -287,32 +229,7 @@ class RichClient {
 				throw e
 			}
 
-			tray!!.endSetup(cifDb, manager!!, cardWatcher)
-
-			// Initialize the EventManager
-// 			eventDispatcher!!.add(
-// 				tray!!.status!!,
-// 				EventType.TERMINAL_ADDED,
-// 				EventType.TERMINAL_REMOVED,
-// 				EventType.CARD_INSERTED,
-// 				EventType.CARD_RECOGNIZED,
-// 				EventType.CARD_REMOVED,
-// 			)
-
-			// Perform an EstablishContext to get a ContextHandle
-			try {
-				val establishContext = EstablishContext()
-				val establishContextResponse = ifd!!.establishContext(establishContext)
-				checkResult(establishContextResponse)
-				contextHandle = establishContextResponse.contextHandle
-				mainSal.setIfdCtx(contextHandle)
-			} catch (ex: WSHelper.WSException) {
-				message = I18N.strings.richclient_client_startup_failed_nocontext.localized()
-				throw ex
-			}
-
-			// initialize SAL
-			checkResult(sal!!.initialize(Initialize()))
+			tray!!.endSetup(cifDb, cardWatcher)
 
 			// perform GC to bring down originally allocated memory
 			Timer("GC-Task").schedule(GCTask(), 5000)
@@ -384,30 +301,14 @@ class RichClient {
 				eventDispatcher!!.terminate()
 			}
 
-			// TODO: shutdown addon manager and related components?
-			if (manager != null) {
-				manager!!.shutdown()
-			}
-
 			// shutdown control modules
 			httpBinding?.let {
 				it.stop()
 				httpBinding = null
 			}
 
-			// shutdown SAL
-			if (sal != null) {
-				val terminate = Terminate()
-				sal!!.terminate(terminate)
-			}
-
 			// shutdown IFD
 			terminalFactory = null
-			if (ifd != null && contextHandle != null) {
-				val releaseContext = ReleaseContext()
-				releaseContext.contextHandle = contextHandle
-				ifd!!.releaseContext(releaseContext)
-			}
 		} catch (ex: Exception) {
 			LOG.error(ex) { "Failed to stop Richclient." }
 		}
@@ -432,7 +333,7 @@ class RichClient {
 					val port = if (regUrl.port == -1) regUrl.defaultPort else regUrl.port
 					val sock = Socket(regUrl.host, port)
 					val con = StreamHttpClientConnection(sock.getInputStream(), sock.getOutputStream())
-					var req = BasicHttpEntityEnclosingRequest("POST", regUrl.file)
+					val req = BasicHttpEntityEnclosingRequest("POST", regUrl.file)
 					// prepare request
 					HttpRequestHelper.setDefaultHeader(req, regUrl)
 					val reqContentType = ContentType.create("application/x-www-form-urlencoded", "UTF-8")

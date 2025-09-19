@@ -24,9 +24,9 @@ package org.openecard.richclient.gui.manage.core
 
 import ch.qos.logback.core.joran.spi.JoranException
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.addon.AddonPropertiesException
 import org.openecard.common.util.FileUtils.resolveResourceAsStream
 import org.openecard.i18n.I18N
+import org.openecard.richclient.AddonPropertiesException
 import org.openecard.richclient.LogbackConfig
 import org.openecard.richclient.gui.manage.SettingsFactory
 import org.openecard.richclient.gui.manage.SettingsGroup
@@ -37,7 +37,6 @@ import org.w3c.dom.DOMException
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.xml.sax.SAXException
-import sun.awt.FontConfiguration.loadProperties
 import java.awt.Desktop
 import java.io.File
 import java.io.FileInputStream

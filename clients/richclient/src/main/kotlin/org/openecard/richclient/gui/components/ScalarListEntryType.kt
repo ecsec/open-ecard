@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 HS Coburg.
+ * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,29 +18,16 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 
-package org.openecard.richclient.gui.manage.addon
-
-import org.openecard.richclient.gui.manage.SettingsGroup
-import org.openecard.richclient.gui.manage.SettingsPanel
+package org.openecard.richclient.gui.components
 
 /**
- * Settings panel that can be used as default.
- * This panel hosts the given settings groups.
  *
- * @author Dirk Petrautzki
+ * @author Hans-Martin Haase
  */
-class DefaultSettingsPanel(
-	vararg groups: SettingsGroup?,
-) : SettingsPanel() {
-	init {
-		for (group: SettingsGroup? in groups) {
-			addSettingsGroup(group!!)
-		}
-	}
-
-	companion object {
-		private const val serialVersionUID: Long = 1L
-	}
+enum class ScalarListEntryType {
+	STRING,
+	BIGINTEGER,
+	BIGDECIMAL,
 }

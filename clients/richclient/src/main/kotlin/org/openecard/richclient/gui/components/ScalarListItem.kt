@@ -21,7 +21,6 @@
  ***************************************************************************/
 package org.openecard.richclient.gui.components
 
-import org.openecard.addon.manifest.ScalarListEntryType
 import org.openecard.gui.swing.common.GUIDefaults
 import org.openecard.richclient.gui.manage.Settings
 import java.awt.Dimension
@@ -30,8 +29,6 @@ import java.awt.GridBagLayout
 import java.awt.Insets
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
-import java.awt.event.ItemEvent
-import java.awt.event.ItemListener
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.text.DecimalFormat
@@ -102,13 +99,12 @@ class ScalarListItem(
 	 * @param type The type of the ScalarListEntry which is managed by this ScalarListItem.
 	 */
 	init {
-		if (type == ScalarListEntryType.BIGDECIMAL) {
-			this.type = ScalarListEntryType.BIGDECIMAL
-		} else if (type == ScalarListEntryType.BIGINTEGER) {
-			this.type = ScalarListEntryType.BIGINTEGER
-		} else {
-			this.type = ScalarListEntryType.STRING
-		}
+		this.type =
+			when (type) {
+				ScalarListEntryType.BIGDECIMAL -> ScalarListEntryType.BIGDECIMAL
+				ScalarListEntryType.BIGINTEGER -> ScalarListEntryType.BIGINTEGER
+				else -> ScalarListEntryType.STRING
+			}
 
 		// basic variable and set layout
 		this.properties = properties

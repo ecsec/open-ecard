@@ -172,6 +172,8 @@ class CardWatcher(
 					connection = terminal.connect()
 
 					mutex.withLock {
+						// update card status
+						curCardState = curCardState.insertCard(terminal.name)
 						// send events to all receivers
 						val evt = CardStateEvent.CardInserted(terminal.name)
 						receivers.values.forEach { it.send(evt) }
@@ -181,6 +183,8 @@ class CardWatcher(
 					if (channel != null) {
 						recognition.recognizeCard(channel)?.let { cardType ->
 							mutex.withLock {
+								// update card status
+								curCardState = curCardState.recognizeCard(terminal.name, cardType)
 								// send events to all receivers
 								val evt = CardStateEvent.CardRecognized(terminal.name, cardType)
 								receivers.values.forEach { it.send(evt) }
@@ -190,6 +194,8 @@ class CardWatcher(
 
 					terminal.waitForCardAbsent()
 					mutex.withLock {
+						// update card status
+						curCardState = curCardState.removeCard(terminal.name)
 						// send events to all receivers
 						val evt = CardStateEvent.CardRemoved(terminal.name)
 						receivers.values.forEach { it.send(evt) }

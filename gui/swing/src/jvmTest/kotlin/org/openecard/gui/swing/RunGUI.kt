@@ -170,61 +170,82 @@ class RunGUI {
 // 	dataPrivacyDescriptionLink.setHref("http://www.dataprivacy.eu");
 // 	pinInputStep.inputInfoUnits.add(dataPrivacyDescriptionLink);
 		val dataToSendSelection = Checkbox("c1")
-		val vornameBoxItem = BoxItem()
-		vornameBoxItem.name = "vornameBoxItem"
-		vornameBoxItem.isChecked = true
-		vornameBoxItem.isDisabled = false
-		vornameBoxItem.text = "Vorname"
+		val vornameBoxItem =
+			BoxItem(
+				name = "vornameBoxItem",
+				isChecked = true,
+				isDisabled = false,
+				text = "Vorname",
+			)
 
-		val nameBoxItem = BoxItem()
-		nameBoxItem.name = "nameBoxItem"
-		nameBoxItem.isChecked = true
-		nameBoxItem.isDisabled = false
-		nameBoxItem.text = "Name"
-		val doctordegreeBoxItem = BoxItem()
-		doctordegreeBoxItem.name = "doctordegreeBoxItem"
-		doctordegreeBoxItem.isChecked = true
-		doctordegreeBoxItem.isDisabled = true
-		doctordegreeBoxItem.text = "Doktorgrad"
-		val addressBoxItem = BoxItem()
-		addressBoxItem.name = "addressBoxItem"
-		addressBoxItem.isChecked = true
-		addressBoxItem.isDisabled = false
-		addressBoxItem.text = "Anschrift"
-		val birthdayBoxItem = BoxItem()
-		birthdayBoxItem.name = "birthdayBoxItem"
-		birthdayBoxItem.isChecked = false
-		birthdayBoxItem.isDisabled = false
-		birthdayBoxItem.text = "Geburtstag"
-		val birthplaceBoxItem = BoxItem()
-		birthplaceBoxItem.name = "birthplaceBoxItem"
-		birthplaceBoxItem.isChecked = false
-		birthplaceBoxItem.isDisabled = false
-		birthplaceBoxItem.text = "Geburtsort"
+		val nameBoxItem =
+			BoxItem(
+				name = "nameBoxItem",
+				isChecked = true,
+				isDisabled = false,
+				text = "Name",
+			)
+		val doctordegreeBoxItem =
+			BoxItem(
+				name = "doctordegreeBoxItem",
+				isChecked = true,
+				isDisabled = true,
+				text = "Doktorgrad",
+			)
+		val addressBoxItem =
+			BoxItem(
+				name = "addressBoxItem",
+				isChecked = true,
+				isDisabled = false,
+				text = "Anschrift",
+			)
+		val birthdayBoxItem =
+			BoxItem(
+				name = "birthdayBoxItem",
+				isChecked = false,
+				isDisabled = false,
+				text = "Geburtstag",
+			)
+		val birthplaceBoxItem =
+			BoxItem(
+				name = "birthplaceBoxItem",
+				isChecked = false,
+				isDisabled = false,
+				text = "Geburtsort",
+			)
 		//        BoxItem pseudonymBoxItem = new BoxItem();
 //        pseudonymBoxItem.setName("pseudonymBoxItem");
 //        pseudonymBoxItem.setChecked(false);
 //        pseudonymBoxItem.setDisabled(true);
 //        pseudonymBoxItem.text = "Ordens-oder Künstlername";
-		val identiycardtypeBoxItem = BoxItem()
-		identiycardtypeBoxItem.name = "identiycardtypeBoxItem"
-		identiycardtypeBoxItem.isChecked = false
-		identiycardtypeBoxItem.isDisabled = true
-		identiycardtypeBoxItem.text = "Ausweistyp"
-		val certificationcountryBoxItem = BoxItem()
-		certificationcountryBoxItem.name = "certificationcountryBoxItem"
-		certificationcountryBoxItem.isChecked = false
-		certificationcountryBoxItem.isDisabled = true
-		certificationcountryBoxItem.text = "Ausstellendes Land"
-		val habitationBoxItem = BoxItem()
-		habitationBoxItem.name = "habitationBoxItem"
-		habitationBoxItem.isChecked = false
-		habitationBoxItem.isDisabled = true
-		habitationBoxItem.text = "Wohnort"
-		val ageverificationBoxItem = BoxItem()
-		ageverificationBoxItem.name = "ageverificationBoxItem"
-		ageverificationBoxItem.isChecked = false
-		ageverificationBoxItem.isDisabled = true
+		val identiycardtypeBoxItem =
+			BoxItem(
+				name = "identiycardtypeBoxItem",
+				isChecked = false,
+				isDisabled = true,
+				text = "Ausweistyp",
+			)
+		val certificationcountryBoxItem =
+			BoxItem(
+				name = "certificationcountryBoxItem",
+				isChecked = false,
+				isDisabled = true,
+				text = "Ausstellendes Land",
+			)
+		val habitationBoxItem =
+			BoxItem(
+				name = "habitationBoxItem",
+				isChecked = false,
+				isDisabled = true,
+				text = "Wohnort",
+			)
+		val ageverificationBoxItem =
+			BoxItem(
+				name = "ageverificationBoxItem",
+				isChecked = false,
+				isDisabled = true,
+				text = "",
+			)
 
 		//
 //        Text sendAgreement_Text = new Text ();
@@ -259,36 +280,44 @@ class RunGUI {
 		val dataTransactionStep = Step("Identitätsnachweis") // wird durchgeführt");
 		val requestedPINText = Text()
 		requestedPINText.text = "Eingegebene PIN"
-		val pinCorrekt = BoxItem()
-		pinCorrekt.name = "pinCorrect"
-		pinCorrekt.isChecked = true
-		pinCorrekt.text = "OK"
+		val pinCorrekt =
+			BoxItem(
+				name = "pinCorrect",
+				isChecked = true,
+				text = "OK",
+			)
 		dataTransactionStep.inputInfoUnits.add(requestedPINText)
 
 		val cerificateText = Text()
 		cerificateText.text = "Berechtigungszertifikat"
-		val certificateCorrekt = BoxItem()
-		certificateCorrekt.name = "certificateCorrekt"
-		certificateCorrekt.isChecked = true
-		certificateCorrekt.text = "OK"
+		val certificateCorrekt =
+			BoxItem(
+				name = "certificateCorrekt",
+				isChecked = true,
+				text = "OK",
+			)
 		//        statusMessages_CheckBox.boxItems.add(certificateCorrekt);
 		dataTransactionStep.inputInfoUnits.add(cerificateText)
 
 		val eCardText = Text()
 		eCardText.text = "Verwendete Karte"
-		val eCardCorrekt = BoxItem()
-		eCardCorrekt.name = "eCardCorrekt"
-		eCardCorrekt.isChecked = true
-		eCardCorrekt.text = "OK"
+		val eCardCorrekt =
+			BoxItem(
+				name = "eCardCorrekt",
+				isChecked = true,
+				text = "OK",
+			)
 		dataTransactionStep.inputInfoUnits.add(eCardText)
 
 		//        statusMessages_CheckBox.boxItems.add(eCardCorrekt);
 		val dataTransactionText = Text()
 		dataTransactionText.text = "Datenübermittlung wird geprüft"
-		val dataTransactionCorrekt = BoxItem()
-		dataTransactionCorrekt.name = "dataTransactionCorrekt"
-		dataTransactionCorrekt.isChecked = true
-		dataTransactionCorrekt.text = "OK"
+		val dataTransactionCorrekt =
+			BoxItem(
+				name = "dataTransactionCorrekt",
+				isChecked = true,
+				text = "OK",
+			)
 		//        statusMessages_CheckBox.boxItems.add(dataTransactionCorrekt);
 		dataTransactionStep.inputInfoUnits.add(dataTransactionText)
 
@@ -305,61 +334,83 @@ class RunGUI {
 			"Durch die Eingabe Ihrer PIN bestätigen Sie, dass folgende markierte Daten an den Anbieter übermittelt werden."
 		pinInputStep.inputInfoUnits.add(t)
 		val dataToSendSelection = Checkbox("c1")
-		val vornameBoxItem = BoxItem()
-		vornameBoxItem.name = "vornameBoxItem"
-		vornameBoxItem.isChecked = true
-		vornameBoxItem.isDisabled = true
-		vornameBoxItem.text = "Vorname"
-		val nameBoxItem = BoxItem()
-		nameBoxItem.name = "nameBoxItem"
-		nameBoxItem.isChecked = true
-		nameBoxItem.isDisabled = true
-		nameBoxItem.text = "Name"
-		val doctordegreeBoxItem = BoxItem()
-		doctordegreeBoxItem.name = "doctordegreeBoxItem"
-		doctordegreeBoxItem.isChecked = false
-		doctordegreeBoxItem.isDisabled = true
-		doctordegreeBoxItem.text = "Doktorgrad"
-		val addressBoxItem = BoxItem()
-		addressBoxItem.name = "addressBoxItem"
-		addressBoxItem.isChecked = true
-		addressBoxItem.isDisabled = true
-		addressBoxItem.text = "Anschrift"
-		val birthdayBoxItem = BoxItem()
-		birthdayBoxItem.name = "birthdayBoxItem"
-		birthdayBoxItem.isChecked = false
-		birthdayBoxItem.isDisabled = true
-		birthdayBoxItem.text = "Geburtstag"
-		val birthplaceBoxItem = BoxItem()
-		birthplaceBoxItem.name = "birthplaceBoxItem"
-		birthplaceBoxItem.isChecked = false
-		birthplaceBoxItem.isDisabled = true
-		birthplaceBoxItem.text = "Geburtsort"
-		val pseudonymBoxItem = BoxItem()
-		pseudonymBoxItem.name = "pseudonymBoxItem"
-		pseudonymBoxItem.isChecked = false
-		pseudonymBoxItem.isDisabled = true
-		pseudonymBoxItem.text = "Ordens-oder Künstlername"
-		val identiycardtypeBoxItem = BoxItem()
-		identiycardtypeBoxItem.name = "identiycardtypeBoxItem"
-		identiycardtypeBoxItem.isChecked = false
-		identiycardtypeBoxItem.isDisabled = true
-		identiycardtypeBoxItem.text = "Ausweistyp"
-		val certificationcountryBoxItem = BoxItem()
-		certificationcountryBoxItem.name = "certificationcountryBoxItem"
-		certificationcountryBoxItem.isChecked = false
-		certificationcountryBoxItem.isDisabled = true
-		certificationcountryBoxItem.text = "Ausstellendes Land"
-		val habitationBoxItem = BoxItem()
-		habitationBoxItem.name = "habitationBoxItem"
-		habitationBoxItem.isChecked = false
-		habitationBoxItem.isDisabled = true
-		habitationBoxItem.text = "Wohnort"
-		val ageverificationBoxItem = BoxItem()
-		ageverificationBoxItem.name = "ageverificationBoxItem"
-		ageverificationBoxItem.isChecked = false
-		ageverificationBoxItem.isDisabled = true
-		ageverificationBoxItem.text = "Altersverifikation"
+		val vornameBoxItem =
+			BoxItem(
+				name = "vornameBoxItem",
+				isChecked = true,
+				isDisabled = true,
+				text = "Vorname",
+			)
+		val nameBoxItem =
+			BoxItem(
+				name = "nameBoxItem",
+				isChecked = true,
+				isDisabled = true,
+				text = "Name",
+			)
+		val doctordegreeBoxItem =
+			BoxItem(
+				name = "doctordegreeBoxItem",
+				isChecked = false,
+				isDisabled = true,
+				text = "Doktorgrad",
+			)
+		val addressBoxItem =
+			BoxItem(
+				name = "addressBoxItem",
+				isChecked = true,
+				isDisabled = true,
+				text = "Anschrift",
+			)
+		val birthdayBoxItem =
+			BoxItem(
+				name = "birthdayBoxItem",
+				isChecked = false,
+				isDisabled = true,
+				text = "Geburtstag",
+			)
+		val birthplaceBoxItem =
+			BoxItem(
+				name = "birthplaceBoxItem",
+				isChecked = false,
+				isDisabled = true,
+				text = "Geburtsort",
+			)
+		val pseudonymBoxItem =
+			BoxItem(
+				name = "pseudonymBoxItem",
+				isChecked = false,
+				isDisabled = true,
+				text = "Ordens-oder Künstlername",
+			)
+		val identiycardtypeBoxItem =
+			BoxItem(
+				name = "identiycardtypeBoxItem",
+				isChecked = false,
+				isDisabled = true,
+				text = "Ausweistyp",
+			)
+		val certificationcountryBoxItem =
+			BoxItem(
+				name = "certificationcountryBoxItem",
+				isChecked = false,
+				isDisabled = true,
+				text = "Ausstellendes Land",
+			)
+		val habitationBoxItem =
+			BoxItem(
+				name = "habitationBoxItem",
+				isChecked = false,
+				isDisabled = true,
+				text = "Wohnort",
+			)
+		val ageverificationBoxItem =
+			BoxItem(
+				name = "ageverificationBoxItem",
+				isChecked = false,
+				isDisabled = true,
+				text = "Altersverifikation",
+			)
 
 		val sendAgreementText = Text()
 		sendAgreementText.text =

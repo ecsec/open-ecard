@@ -47,11 +47,9 @@ dependencies {
 	implementation(project(":gui:graphics"))
 
 	// addons
-	implementation(project(":addons:chipgateway"))
-	implementation(project(":addons:genericcryptography"))
 	implementation(project(":addons:pin-management"))
 	implementation(project(":addons:status"))
-	implementation(project(":addons:tr03112"))
+	implementation(project(":addons:tr03124"))
 	implementation(project(":i18n"))
 
 	// basic runtime deps
@@ -71,6 +69,7 @@ dependencies {
 	implementation(project(":smartcard:pcsc-scio"))
 	implementation(project(":sal:smartcard-sal"))
 	implementation(project(":cif:bundled-cifs"))
+	implementation(project(":smartcard:pace"))
 
 	testImplementation(libs.bundles.test.basics.kotlin)
 }

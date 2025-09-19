@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2019 ecsec GmbH.
+ * Copyright (C) 2012-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -44,6 +44,8 @@ import org.apache.http.protocol.BasicHttpContext
 import org.apache.http.protocol.HttpContext
 import org.apache.http.protocol.HttpRequestExecutor
 import org.openecard.addon.AddonManager
+import org.openecard.addons.tr03124.ClientInformation
+import org.openecard.addons.tr03124.UserAgent
 import org.openecard.build.BuildInfo
 import org.openecard.common.AppVersion.name
 import org.openecard.common.ClientEnv
@@ -73,6 +75,8 @@ import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.sc.CardWatcherCallback.Companion.registerWith
 import org.openecard.richclient.sc.CifDb
 import org.openecard.richclient.sc.EventCardRecognition
+import org.openecard.richclient.tr03124.RichclientTr03124Binding
+import org.openecard.richclient.tr03124.registerTr03124Binding
 import org.openecard.richclient.updater.VersionUpdateChecker
 import org.openecard.sal.TinySAL
 import org.openecard.sc.iface.TerminalFactory
@@ -204,9 +208,8 @@ class RichClient {
 // 		}
 // 	    }
 
-			val settableCardRecognition = EventCardRecognition()
-			settableCardRecognition.registerWith(cardWatcher)
-			// val cardStateManager = CardStateManager()
+			val eventCardRecognition = EventCardRecognition()
+			eventCardRecognition.registerWith(cardWatcher)
 
 			// Start up control interface
 			val guiWrapper = SettingsAndDefaultViewWrapper()
@@ -241,9 +244,25 @@ class RichClient {
 					}
 				}
 
+				// configure TR-03124 addon
+				val uaVersion =
+					BuildInfo.version.let { v ->
+						UserAgent.Version(v.major, v.minor, v.patch)
+					}
+				val clientInfo = ClientInformation(UserAgent("Open-eCard Richclient", uaVersion))
+				val tr03124Binding =
+					RichclientTr03124Binding(
+						clientInfo = clientInfo,
+						terminalFactory = terminalFactory,
+						cardRecognition = eventCardRecognition,
+						cardWatcher = cardWatcher,
+						gui = gui,
+					)
+
 				// start HTTP server
 				httpBinding =
 					HttpService.start(wait = false, port = port) {
+						registerTr03124Binding(tr03124Binding)
 					}
 
 				if (dispatcherMode) {

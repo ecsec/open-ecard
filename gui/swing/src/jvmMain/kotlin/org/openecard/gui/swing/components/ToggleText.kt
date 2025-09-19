@@ -131,9 +131,8 @@ class ToggleText(
 		button.setIcon(if (!collapsed) OPENED_INDICATOR else CLOSED_INDOCATOR)
 	}
 
-	private fun initText(content: Document): JComponent {
-		val mimeType = content.mimeType
-		return when (mimeType) {
+	private fun initText(content: Document): JComponent =
+		when (val mimeType = content.mimeType) {
 			"text/html" -> createHtmlPane(content.value)
 			"text/plain" -> createJTextArea(content.value.decodeToString())
 			"application/pdf" -> {
@@ -151,12 +150,11 @@ class ToggleText(
 				}
 				createJTextArea(
 					I18N.strings.swing_unsupported_mimetype
-						.format(mimeType as Any)
+						.format(mimeType ?: "null")
 						.localized(),
 				)
 			}
 		}
-	}
 
 	private fun initComponents() {
 		button.addActionListener(

@@ -24,7 +24,7 @@ sealed interface BindingResponse {
 	) : BindingResponse
 
 	enum class ContentCode {
-		INVALID_REQUEST_PARAMETERS,
+		NO_SUITABLE_ACTIVATION_PARAMETERS,
 		TC_TOKEN_RETRIEVAL_ERROR,
 		COMMUNICATION_ERROR,
 		OTHER_PROCESS_RUNNING,

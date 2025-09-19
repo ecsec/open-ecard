@@ -33,6 +33,7 @@
 	<string name="eac_restricted_identification">Restricted Identification</string>
 	<string name="eac_community_id_verification">Address verification</string>
 	<string name="eac_age_verification">Age verification (≥ %d)</string>
+	<string name="eac_pseudonymous_signature_authentication">Pseudonymous Signature verification</string>
 
 	<!-- CVC elements-->
 	<string name="eac_cvc_subject_name">Subject</string>
@@ -75,7 +76,6 @@
 	<string name="eac_step_processing_description">Please wait while the %s processes the eID authentication.</string>
 
 	<!-- PIN step stuff is located in PACE translation file -->
-
 	<string name="eac_forward_notice">Please note that by entering your %s, you acknowledge that the selected data will
 		be transmitted to the service provider.
 	</string>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015-2017 ecsec GmbH.
+ * Copyright (C) 2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,30 +18,14 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- */
-package org.openecard.gui.definition
+ ***************************************************************************/
+
+package org.openecard.richclient.tr03124.ui
 
 /**
- * Implementation of a simple document type.
- * The document is represented by a MimeType and a document value which represents the content of the document.
  *
- * @author Hans-Martin Haase
+ * @author Florian Otto
  */
-class Document(
-	/**
-	 * The MimeType of this document.
-	 */
-	var mimeType: String,
-	/**
-	 * The value of this document as byte array.
-	 * This array is cloned.
-	 */
-	value: ByteArray,
-) : Cloneable {
-	/**
-	 * The value of this document as byte array.
-	 */
-	var value: ByteArray = value.copyOf()
-
-	public override fun clone(): Document = Document(mimeType, value.copyOf())
-}
+class PinOrCanEmptyException(
+	msg: String,
+) : Exception(msg)

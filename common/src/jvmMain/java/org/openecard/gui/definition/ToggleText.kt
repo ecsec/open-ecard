@@ -97,12 +97,7 @@ class ToggleText :
 		 * @param text The text of this instance.
 		 */
 		set(text) {
-			if (document == null) {
-				document = Document()
-			}
-
-			document?.mimeType = "text/plain"
-			document?.value = text.toByteArray(Charset.forName("UTF-8"))
+			document = Document("text/plain", text.toByteArray(Charset.forName("UTF-8")))
 		}
 
 	override fun type(): InfoUnitElementType = InfoUnitElementType.TOGGLE_TEXT
@@ -115,17 +110,8 @@ class ToggleText :
 		val other = origin as ToggleText
 		// do copy
 		this.title = other.title
-		if (other.document != null) {
-			val doc = Document()
-			if (other.document?.mimeType != null) {
-				doc.mimeType = other.document?.mimeType
-			}
-
-			if (other.document?.value != null) {
-				val contentBytes = ByteArray(other.document?.value!!.size)
-				System.arraycopy(other.document?.value!!, 0, contentBytes, 0, other.document?.value!!.size)
-				doc.value = contentBytes
-			}
+		other.document?.let { otherDocument ->
+			val doc = otherDocument.clone()
 			this.document = doc
 		}
 		this.isCollapsed = other.isCollapsed

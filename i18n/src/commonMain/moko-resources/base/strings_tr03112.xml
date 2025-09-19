@@ -18,8 +18,9 @@
 	</string>
 
 	<!-- Specifically handled errors -->
+	<string name="tr03112_auth_process_running">Another authentication process is already running</string>
 	<string name="tr03112_activation_action_invalid_refresh_address">The determination of a valid "refreshURL" failed.</string>
-	<string name="tr03112_auth_server_exception">eService indicated an error.</string>
+	<string name="tr03112_auth_server_exception">eService indicated an error</string>
 	<string name="tr03112_authentication_failed">An error occurred during the authentication process.</string>
 	<string name="tr03112_certificate_error">A certificate error occurred.</string>
 	<string name="tr03112_certificate_description_check_error">There is a mismatch between the communication certificates and
@@ -68,6 +69,7 @@
 	</string>
 	<string name="tr03112_invalid_tctoken_url_exception_malformed_url">Malformed %s URL</string>
 	<string name="tr03112_invalid_tctoken_url_exception_no_https_url">%s is not a https URL.</string>
+	<string name="tr03112_communication_error">Unrecoverable communication error occurred</string>
 	<string name="tr03112_invalid_redirect_url_exception_no_url">Error redirect URL is not an URL.</string>
 	<string name="tr03112_invalid_redirect_url_exception_no_url_available">No redirect address available for an error
 		redirect.

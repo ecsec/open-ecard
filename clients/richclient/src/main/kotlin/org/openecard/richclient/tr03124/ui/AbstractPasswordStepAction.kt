@@ -34,6 +34,7 @@ import org.openecard.i18n.I18N
 import org.openecard.richclient.tr03124.EacProcessState
 import org.openecard.richclient.tr03124.TerminalSelection.waitForNpa
 import org.openecard.sal.iface.DeviceUnavailable
+import org.openecard.sal.iface.PasswordError
 import org.openecard.sal.iface.RemovedDevice
 import org.openecard.sal.iface.dids.PaceDid
 import org.openecard.sc.iface.feature.PaceError
@@ -102,6 +103,8 @@ abstract class AbstractPasswordStepAction(
 					)
 				}
 
+				is PasswordError -> StepActionResult(StepActionResultStatus.REPEAT)
+
 				else -> StepActionResult(StepActionResultStatus.CANCEL)
 			}
 
@@ -168,13 +171,12 @@ abstract class AbstractPasswordStepAction(
 						?.results
 						?.filterIsInstance<PasswordField>()
 						?.firstOrNull {
-							it.id ==
-								PINStep.CAN_FIELD
+							it.id == PINStep.CAN_FIELD
 						}?.value
 						?: throw PinOrCanEmptyException("No CAN value specified")
 
 				paceCan.establishChannel(
-					canValue.contentToString(),
+					canValue.concatToString(),
 					state.selectedChat.asBytes,
 					state.uiStep.guiData.certificateDescription.asBytes,
 				)

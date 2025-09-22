@@ -58,7 +58,7 @@ class PINStepAction(
 			try {
 				if (state.status?.cast<SecurityCommandFailure>()?.retries == 1) {
 					// we need to enter the can first
-					performPACEWithCAN(oldResults, state)?. let {
+					performPACEWithCAN(oldResults, state)?.let {
 						// if this yields a result, handle it in the gui executor
 						return@runBlocking it
 					}

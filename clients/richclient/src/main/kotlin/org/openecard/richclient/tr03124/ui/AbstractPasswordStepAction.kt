@@ -22,6 +22,7 @@
 
 package org.openecard.richclient.tr03124.ui
 
+import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.cif.bundled.NpaDefinitions
 import org.openecard.gui.definition.PasswordField
@@ -29,9 +30,13 @@ import org.openecard.gui.executor.ExecutionResults
 import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
+import org.openecard.i18n.I18N
 import org.openecard.richclient.tr03124.EacProcessState
 import org.openecard.richclient.tr03124.TerminalSelection.waitForNpa
+import org.openecard.sal.iface.DeviceUnavailable
+import org.openecard.sal.iface.RemovedDevice
 import org.openecard.sal.iface.dids.PaceDid
+import org.openecard.sc.iface.feature.PaceError
 
 private val logger = KotlinLogging.logger { }
 
@@ -45,12 +50,70 @@ abstract class AbstractPasswordStepAction(
 ) : StepAction(
 		step,
 	) {
+	private fun Throwable.handleCardExceptions(): StepActionResult {
+		val result =
+			when (this) {
+				is PaceError -> {
+					securityError?.let { secErr ->
+						state.status = secErr
+						step.updateStatus()
+						if (secErr.verificationFailed) {
+							StepActionResult(StepActionResultStatus.REPEAT)
+						} else {
+							// display error step with appropriate error message
+							val errStep =
+								if (secErr.authBlocked) {
+									val pin: String = I18N.strings.pace_pin.localized()
+									val puk: String = I18N.strings.pace_puk.localized()
+									ErrorStep(
+										I18N.strings.pace_step_error_title_blocked
+											.format(pin)
+											.localized(),
+										I18N.strings.pace_step_error_pin_blocked
+											.format(pin, pin, puk, pin)
+											.localized(),
+									)
+								} else if (secErr.authDeactivated) {
+									ErrorStep(
+										I18N.strings.pace_step_error_title_deactivated.localized(),
+										I18N.strings.pace_step_error_pin_deactivated.localized(),
+									)
+								} else {
+									ErrorStep(
+										I18N.strings.pinplugin_action_error_title.localized(),
+										I18N.strings.pinplugin_action_error_unknown.localized(),
+									)
+								}
+							StepActionResult(StepActionResultStatus.REPEAT, errStep)
+						}
+					} ?: StepActionResult(StepActionResultStatus.CANCEL)
+				}
+
+				is RemovedDevice,
+				is DeviceUnavailable,
+				-> {
+					state.paceDid = null
+					StepActionResult(
+						StepActionResultStatus.REPEAT,
+						ErrorStep(
+							I18N.strings.pinplugin_action_error_title.localized(),
+							I18N.strings.pinplugin_action_error_card_removed.localized(),
+						),
+					)
+				}
+
+				else -> StepActionResult(StepActionResultStatus.CANCEL)
+			}
+
+		return result
+	}
+
 	@OptIn(ExperimentalUnsignedTypes::class)
 	protected suspend fun performPACEWithPIN(
 		oldResults: Map<String, ExecutionResults>,
 		state: EacProcessState,
-	): StepActionResult {
-		try {
+	): StepActionResult =
+		runCatching {
 			val pace = state.waitForNpa()
 
 			val result =
@@ -65,8 +128,7 @@ abstract class AbstractPasswordStepAction(
 							?.results
 							?.filterIsInstance<PasswordField>()
 							?.firstOrNull {
-								it.id ==
-									PINStep.PIN_FIELD
+								it.id == PINStep.PIN_FIELD
 							}?.value
 							?: throw PinOrCanEmptyException("No PIN value specified")
 
@@ -79,18 +141,15 @@ abstract class AbstractPasswordStepAction(
 
 			state.paceResponse = result
 
-			return StepActionResult(StepActionResultStatus.NEXT)
-		} catch (ex: Exception) {
-			TODO("handle exceptions and failures")
-		}
-	}
+			StepActionResult(StepActionResultStatus.NEXT)
+		}.recover { it.handleCardExceptions() }.getOrThrow()
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	protected suspend fun performPACEWithCAN(
 		oldResults: Map<String, ExecutionResults>,
 		state: EacProcessState,
-	): StepActionResult? {
-		try {
+	): StepActionResult? =
+		runCatching {
 			val pacePin = state.waitForNpa()
 			val paceCan =
 				pacePin.application.dids
@@ -121,10 +180,6 @@ abstract class AbstractPasswordStepAction(
 				)
 			}
 			// no exception means pass
-			return null
-		} catch (ex: Exception) {
-			// TODO: handle exceptions and failures
-			return StepActionResult(StepActionResultStatus.REPEAT)
-		}
-	}
+			null
+		}.recover { it.handleCardExceptions() }.getOrThrow()
 }

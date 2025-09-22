@@ -23,11 +23,14 @@
 package org.openecard.richclient.tr03124
 
 import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.runInterruptible
 import org.openecard.addons.tr03124.BindingException
 import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.addons.tr03124.ClientInformation
@@ -59,7 +62,6 @@ class EacProcess(
 	val clientInfo: ClientInformation,
 	val cardWatcher: CardWatcher,
 	val gui: UserConsent,
-	val scope: CoroutineScope,
 ) {
 	@Throws(BindingException::class)
 	suspend fun start(tcTokenUrl: String): BindingResponse {
@@ -84,7 +86,7 @@ class EacProcess(
 		val state = EacProcessState(terminals, cardWatcher, uiStep)
 
 		val result =
-			CoroutineScope(newSingleThreadContext("EAC-GUI")).launch {
+			runInterruptible(Dispatchers.IO + CoroutineName("EAC-GUI")) {
 				state.trySelectPinPadTerminal()
 
 				val uc = UserConsentDescription(I18N.strings.eac_user_consent_title.localized())
@@ -96,7 +98,6 @@ class EacProcess(
 				cvcStep.action = cvcStepAction
 				uc.steps.add(cvcStep)
 
-				val selectedChat = state.selectedChat
 				val chatStep = CHATStep(state)
 				val chatAction = CHATStepAction(chatStep, state)
 				chatStep.action = chatAction
@@ -111,16 +112,11 @@ class EacProcess(
 
 				val nav = gui.obtainNavigator(uc)
 				val exec = ExecutionEngine(nav)
-				val uiResult = exec.process()
-
-				// TODO: provide a better bindingResponse based on exceptions in the process
-
-				if (state.bindingResponse == null) {
-					state.bindingResponse = state.uiStep.cancel()
-				}
+				exec.process()
 			}
 
-		result.join()
+		val bindRes = state.bindingResponse ?: state.uiStep.cancel()
+
 		return state.bindingResponse
 			?: BindingResponse.ReferencedContentResponse(
 				HttpStatusCode.InternalServerError.value,

@@ -29,6 +29,7 @@ import org.openecard.gui.definition.Text
 import org.openecard.i18n.I18N
 import org.openecard.richclient.tr03124.EacProcessState
 import org.openecard.sc.apdu.command.SecurityCommandFailure
+import org.openecard.sc.apdu.command.SecurityCommandSuccess
 import org.openecard.sc.iface.feature.PacePinId
 import org.openecard.utils.common.cast
 
@@ -77,8 +78,8 @@ class PINStep(
 		} else {
 			addTerminalElements(pinType)
 		}
-		updateCanData()
-		updateAttemptsDisplay()
+
+		updateStatus()
 	}
 
 	fun updateStatus() {
@@ -191,7 +192,7 @@ class PINStep(
 		}
 	}
 
-	fun ensureCanData() {
+	private fun ensureCanData() {
 		if (!state.nativePace) {
 			addCANEntry()
 		} else {
@@ -201,12 +202,14 @@ class PINStep(
 
 	private fun updateAttemptsDisplay() {
 		val retries: Int =
-			if (state.status == null) {
-				// assume we start fresh
-				3
-			} else {
-				// we have a number, or it is fatal -> 0
-				state.status?.cast<SecurityCommandFailure>()?.retries ?: 0
+			when (val status = state.status) {
+				// no status available or card status is good
+				null,
+				is SecurityCommandSuccess,
+				-> 3
+				is SecurityCommandFailure -> {
+					status.retries ?: 0
+				}
 			}
 
 		inputInfoUnits
@@ -275,7 +278,6 @@ class PINStep(
 
 		fun buildPinStep(state: EacProcessState): Step {
 			val status = state.status?.cast<SecurityCommandFailure>()
-			val nativePace = state.nativePace
 
 			if (status?.authBlocked == true) {
 				return ErrorStep(

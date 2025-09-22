@@ -24,7 +24,6 @@ package org.openecard.richclient.tr03124
 
 import org.openecard.cif.bundled.NpaCif
 import org.openecard.cif.bundled.NpaDefinitions
-import org.openecard.richclient.sc.WaitForCardType
 import org.openecard.richclient.sc.WaitForCardType.waitForCard
 import org.openecard.sal.iface.dids.PaceDid
 import org.openecard.sc.iface.feature.PaceFeature
@@ -39,19 +38,30 @@ object TerminalSelection {
 				state.terminalName = npaEntry.terminal
 				state.terminals.getTerminal(npaEntry.terminal)
 			}
-		val ts = npaTerminal?.let { listOf(it) } ?: state.terminals.list()
 
-		// check terminal(s) for native pace
-		ts.forEach { t ->
-			runCatching {
-				t.withTerminalOnlyConnect { con ->
-					if (con.getFeatures().any { it is PaceFeature }) {
-						// use this reader for the eac process
-						state.terminalName = con.terminal.name
-						state.nativePace = true
-					}
-				}
+		if (npaTerminal != null) {
+			// card is already inserted
+			this.uiStep.getPaceDid(npaTerminal.name).also { pace ->
+				this.nativePace = pace.capturePasswordInHardware()
+				this.terminalName = npaTerminal.name
+				this.paceDid = pace
+				this.status = pace.passwordStatus()
 			}
+		} else {
+			// check terminal(s) for native pace
+			state.terminals
+				.list()
+				.find { t ->
+					runCatching {
+						t.withTerminalOnlyConnect { con ->
+							con.getFeatures().any { it is PaceFeature }
+						}
+					}.getOrDefault(false)
+				}?.let { t ->
+					// use this reader for the eac process
+					state.terminalName = t.name
+					state.nativePace = true
+				}
 		}
 	}
 
@@ -86,6 +96,7 @@ object TerminalSelection {
 			this.nativePace = pace.capturePasswordInHardware()
 			this.terminalName = terminal
 			this.paceDid = pace
+			this.status = pace.passwordStatus()
 		}
 	}
 }

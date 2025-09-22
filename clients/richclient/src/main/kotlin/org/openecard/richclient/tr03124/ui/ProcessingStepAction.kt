@@ -56,8 +56,8 @@ class ProcessingStepAction(
 					state.paceResponse ?: run {
 						val errorStep =
 							ErrorStep(
-								I18N.strings.pace_step_error_title_deactivated.localized(),
-								I18N.strings.pace_step_error_pin_deactivated.localized(),
+								I18N.strings.tr03112_int_error.localized(),
+								I18N.strings.tr03112_error_internal.localized(),
 							)
 						return@runBlocking StepActionResult(StepActionResultStatus.REPEAT, errorStep)
 					}
@@ -69,12 +69,13 @@ class ProcessingStepAction(
 			} catch (ex: BindingException) {
 				state.bindingResponse = ex.toResponse()
 
-				val errorStep =
+				StepActionResult(
+					StepActionResultStatus.REPEAT,
 					ErrorStep(
-						I18N.strings.pace_step_error_title_deactivated.localized(),
-						I18N.strings.pace_step_error_pin_deactivated.localized(),
-					)
-				StepActionResult(StepActionResultStatus.REPEAT, errorStep)
+						I18N.strings.tr03112_err_header.localized(),
+						I18N.strings.tr03112_authentication_failed.localized(),
+					),
+				)
 			}
 		}
 

@@ -79,7 +79,7 @@ internal class UiStepImpl(
 				pace = null
 			}
 			card?.let {
-				runCatching { it.close(CardDisposition.LEAVE) }
+				runCatching { it.close(CardDisposition.RESET) }
 				card = null
 			}
 		}
@@ -135,7 +135,7 @@ internal class UiStepImpl(
 	@Throws(DeviceUnsupported::class)
 	private fun connectIfNeeded(): DeviceConnection =
 		ctx.card ?: run {
-			val card = ctx.session.connect(ctx.terminalName)
+			val card = ctx.session.connect(ctx.terminalName, true)
 			if (card.deviceType != NpaDefinitions.cardType) {
 				runCatching { card.close(CardDisposition.LEAVE) }
 				throw DeviceUnsupported("Connected card is of type ${card.deviceType}, which is unsupported")

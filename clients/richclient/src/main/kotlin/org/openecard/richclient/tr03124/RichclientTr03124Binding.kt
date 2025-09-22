@@ -28,6 +28,7 @@ import io.ktor.http.withCharset
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -50,13 +51,12 @@ import org.openecard.sc.pace.PaceFeatureSoftwareFactory
 import java.nio.charset.StandardCharsets
 
 class RichclientTr03124Binding(
-	private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
 	val clientInfo: ClientInformation,
 	val terminalFactory: TerminalFactory,
 	val cardRecognition: CardRecognition,
 	val cardWatcher: CardWatcher,
 	val gui: UserConsent,
-	val scope: CoroutineScope = CoroutineScope(Dispatchers.Default),
+	val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : Tr03124Binding {
 	private val paceFactory = PaceFeatureSoftwareFactory()
 
@@ -73,22 +73,19 @@ class RichclientTr03124Binding(
 					)
 				} else {
 					val job =
-						scope.async {
+						CoroutineScope(dispatcher).async(CoroutineName("EAC-Process")) {
 							try {
-								withContext(dispatcher) {
-									terminalFactory.load().withContextSuspend { ctx ->
-										val eacProcess =
-											EacProcess(
-												ctx,
-												cardRecognition,
-												paceFactory,
-												clientInfo,
-												cardWatcher,
-												gui,
-												scope,
-											)
-										eacProcess.start(tcTokenUrl)
-									}
+								terminalFactory.load().withContextSuspend { ctx ->
+									val eacProcess =
+										EacProcess(
+											ctx,
+											cardRecognition,
+											paceFactory,
+											clientInfo,
+											cardWatcher,
+											gui,
+										)
+									eacProcess.start(tcTokenUrl)
 								}
 							} catch (ex: BindingException) {
 								ex.toResponse()

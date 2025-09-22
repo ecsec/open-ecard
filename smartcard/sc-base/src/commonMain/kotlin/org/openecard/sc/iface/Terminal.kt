@@ -185,7 +185,7 @@ private inline fun waitForCard(
 	UnpoweredCard::class,
 	UnresponsiveCard::class,
 )
-fun <T : Terminal, R> T.withTerminalOnlyConnect(
+inline fun <T : Terminal, R> T.withTerminalOnlyConnect(
 	disposition: CardDisposition = CardDisposition.LEAVE,
 	block: (TerminalConnection) -> R,
 ): R {
@@ -217,7 +217,7 @@ fun <T : Terminal, R> T.withTerminalOnlyConnect(
 	UnpoweredCard::class,
 	UnresponsiveCard::class,
 )
-fun <T : Terminal, R> T.withCardConnect(
+inline fun <T : Terminal, R> T.withCardConnect(
 	protocol: PreferredCardProtocol = PreferredCardProtocol.ANY,
 	shareMode: ShareMode = ShareMode.SHARED,
 	disposition: CardDisposition = CardDisposition.LEAVE,

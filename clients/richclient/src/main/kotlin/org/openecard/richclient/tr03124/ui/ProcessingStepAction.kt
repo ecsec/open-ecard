@@ -34,14 +34,14 @@ import org.openecard.gui.executor.StepActionResultStatus
 import org.openecard.i18n.I18N
 import org.openecard.richclient.tr03124.EacProcessState
 
+private val logger = KotlinLogging.logger { }
+
 /**
  * Action waiting for the EAC process to finish.
  *
  * @author Tobias Wich
  * @author Hans-Martin Haase
  */
-private val logger = KotlinLogging.logger { }
-
 class ProcessingStepAction(
 	step: Step,
 	val state: EacProcessState,
@@ -78,35 +78,5 @@ class ProcessingStepAction(
 				)
 			}
 		}
-
-// 		val pAuthDone = ctx.getPromise(EACProtocol.AUTHENTICATION_DONE)
-// 		try {
-// 			pAuthDone.deref(120, TimeUnit.SECONDS)
-// 			return StepActionResult(StepActionResultStatus.NEXT)
-// 		} catch (ex: InterruptedException) {
-// 			logger.error(ex) { "ProcessingStepAction interrupted by the user or an other thread." }
-// 			ctx.put(
-// 				EACProtocol.PACE_EXCEPTION,
-// 				createException(
-// 					makeResultError(
-// 						ECardConstants.Minor.SAL.CANCELLATION_BY_USER,
-// 						"User canceled the EAC dialog.",
-// 					),
-// 				),
-// 			)
-// 			return StepActionResult(StepActionResultStatus.CANCEL)
-// 		} catch (ex: TimeoutException) {
-// 			logger.info(ex) { "Timeout while waiting for the authentication to finish." }
-// 			ctx.put(
-// 				EACProtocol.PACE_EXCEPTION,
-// 				createException(
-// 					makeResultError(
-// 						ECardConstants.Minor.Disp.TIMEOUT,
-// 						"Timeout during EAC process.",
-// 					),
-// 				),
-// 			)
-// 			return StepActionResult(StepActionResultStatus.CANCEL)
-// 		}
 	}
 }

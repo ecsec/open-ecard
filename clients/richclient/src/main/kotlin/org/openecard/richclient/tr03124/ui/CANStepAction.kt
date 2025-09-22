@@ -45,8 +45,8 @@ class CANStepAction(
 	override fun perform(
 		oldResults: Map<String, ExecutionResults>,
 		result: StepResult,
-	): StepActionResult {
-		return runBlocking {
+	): StepActionResult =
+		runBlocking {
 			try {
 				val resp = performPACEWithPIN(oldResults, state)
 				resp
@@ -57,65 +57,4 @@ class CANStepAction(
 				StepActionResult(StepActionResultStatus.REPEAT, newPinStep)
 			}
 		}
-
-// 			var conHandle = this.ctx.get(TR03112Keys.CONNECTION_HANDLE) as ConnectionHandleType?
-// 			val ph = PaceCardHelper(addonCtx, conHandle!!)
-// 			conHandle = ph.connectCardIfNeeded(setOf(ECardConstants.NPA_CARD_TYPE))
-// 			this.ctx.put(TR03112Keys.CONNECTION_HANDLE, conHandle)
-//
-// 			val establishChannelResponse = performPACEWithPIN(oldResults, conHandle)
-//
-// 			if (establishChannelResponse.getResult().getResultMajor() == ECardConstants.Major.ERROR) {
-// 				if (establishChannelResponse
-// 						.getResult()
-// 						.getResultMinor() == ECardConstants.Minor.IFD.AUTHENTICATION_FAILED
-// 				) {
-// 					// repeat the step
-// 					logger.info { "Wrong CAN entered, trying again." }
-// 					return StepActionResult(StepActionResultStatus.REPEAT)
-// 				} else {
-// 					checkResult<EstablishChannelResponse>(establishChannelResponse)
-// 				}
-// 			}
-//
-// 			eacData.paceResponse = establishChannelResponse
-// 			// PACE completed successfully, proceed with next step
-// 			ctx.put(EACProtocol.Companion.PACE_EXCEPTION, null)
-// 			return StepActionResult(StepActionResultStatus.NEXT)
-// 		} catch (ex: WSHelper.WSException) {
-// 			// This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
-// 			if (ex.resultMinor == ECardConstants.Minor.IFD.CANCELLATION_BY_USER) {
-// 				logger.error(ex) { "User canceled the authentication manually." }
-// 				return StepActionResult(StepActionResultStatus.CANCEL)
-// 			}
-//
-// 			// for people which think they have to remove the card in the process
-// 			if (ex.resultMinor == ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE) {
-// 				logger.error(ex) { "The SlotHandle was invalid so probably the user removed the card or an reset occurred." }
-// 				return StepActionResult(
-// 					StepActionResultStatus.REPEAT,
-// 					ErrorStep(
-// 						I18N.strings.pinplugin_action_error_title.localized(),
-// 						I18N.strings.pinplugin_action_error_card_removed.localized(),
-// 					),
-// 				)
-// 			}
-//
-// 			// repeat the step
-// 			logger.error { "An unknown error occurred while trying to verify the PIN." }
-// 			return StepActionResult(
-// 				StepActionResultStatus.REPEAT,
-// 				ErrorStep(
-// 					I18N.strings.pinplugin_action_error_title.localized(),
-// 					I18N.strings.pinplugin_action_error_unknown.localized(),
-// 				),
-// 			)
-// 		} catch (ex: InterruptedException) {
-// 			logger.warn(ex) { "CAN step action interrupted." }
-// 			return StepActionResult(StepActionResultStatus.CANCEL)
-// 		} catch (ex: PinOrCanEmptyException) {
-// 			logger.warn(ex) { "CAN was empty" }
-// 			return StepActionResult(StepActionResultStatus.REPEAT)
-// 		}
-	}
 }

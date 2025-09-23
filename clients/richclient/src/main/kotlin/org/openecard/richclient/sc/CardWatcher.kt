@@ -184,20 +184,23 @@ class CardWatcher(
 							}.onFailure {
 								logger.warn(it) { "Failed to open transaction for card recognition in terminal ${connection.terminal.name}" }
 							}.isSuccess
-						val channel = connection.card?.basicChannel
-						if (channel != null) {
-							recognition.recognizeCard(channel)?.let { cardType ->
-								mutex.withLock {
-									// update card status
-									curCardState = curCardState.recognizeCard(terminal.name, cardType)
-									// send events to all receivers
-									val evt = CardStateEvent.CardRecognized(terminal.name, cardType)
-									receivers.values.forEach { it.send(evt) }
+						try {
+							val channel = connection.card?.basicChannel
+							if (channel != null) {
+								recognition.recognizeCard(channel)?.let { cardType ->
+									mutex.withLock {
+										// update card status
+										curCardState = curCardState.recognizeCard(terminal.name, cardType)
+										// send events to all receivers
+										val evt = CardStateEvent.CardRecognized(terminal.name, cardType)
+										receivers.values.forEach { it.send(evt) }
+									}
 								}
 							}
-						}
-						if (hasTransaction) {
-							runCatching { connection.endTransaction() }
+						} finally {
+							if (hasTransaction) {
+								runCatching { connection.endTransaction() }
+							}
 						}
 					}
 
@@ -213,6 +216,16 @@ class CardWatcher(
 					logger.info { "Cancel received in card watcher job of terminal ${terminal.name}" }
 					throw ex
 				} catch (e: Exception) {
+					// correct state
+					mutex.withLock {
+						if (curCardState.terminalsWithCard.contains(terminal.name)) {
+							curCardState = curCardState.removeCard(terminal.name)
+							// send events to all receivers
+							val evt = CardStateEvent.CardRemoved(terminal.name)
+							receivers.values.forEach { it.send(evt) }
+						}
+					}
+
 					// handle cancellation of our job
 					logger.warn { "${terminal.name}: ${e.message}" }
 					// wait and try again, if the terminal is removed, someone will cancel us

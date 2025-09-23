@@ -115,12 +115,8 @@ class EacProcess(
 				exec.process()
 			}
 
+		// if we have no result, then we got cancelled
 		val bindRes = state.bindingResponse ?: state.uiStep.cancel()
-
-		return state.bindingResponse
-			?: BindingResponse.ReferencedContentResponse(
-				HttpStatusCode.InternalServerError.value,
-				BindingResponse.ContentCode.INTERNAL_ERROR,
-			)
+		return bindRes
 	}
 }

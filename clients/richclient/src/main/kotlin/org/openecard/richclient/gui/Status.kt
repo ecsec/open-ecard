@@ -42,6 +42,7 @@ import org.openecard.richclient.gui.update.UpdateWindow
 import org.openecard.richclient.sc.CardStateEvent
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.sc.CifDb
+import org.openecard.richclient.sc.CifDb.Companion.UNKNOWN_CARD
 import org.openecard.richclient.updater.VersionUpdateChecker
 import java.awt.BorderLayout
 import java.awt.Color
@@ -329,7 +330,7 @@ class Status(
 						}
 						is CardStateEvent.CardInserted -> {
 							// addInfo(evt.terminalName, null)
-							updateInfo(evt.terminalName, null)
+							updateInfo(evt.terminalName, UNKNOWN_CARD)
 						}
 						is CardStateEvent.CardRemoved -> {
 							updateInfo(evt.terminalName, null)

@@ -30,6 +30,7 @@ interface CifDb {
 	companion object {
 		const val NO_TERMINAL = "http://openecard.org/cif/no-terminal"
 		const val NO_CARD = "http://openecard.org/cif/no-card"
+		const val UNKNOWN_CARD = "http://openecard.org/cif/unknown-card"
 
 		object Bundled : CifDb {
 			override val supportedCifs =

@@ -64,9 +64,7 @@ class Text :
 	constructor(text: String) : this(text.toByteArray(Charset.forName("UTF-8")), "text/plain")
 
 	private constructor(value: ByteArray, mimeType: String) {
-		document = Document()
-		document?.mimeType = mimeType
-		document?.value = value
+		document = Document(mimeType, value)
 	}
 
 	/**
@@ -91,14 +89,11 @@ class Text :
 		 * with `text/`.
 		 */
 		get() {
-			if (document == null || document?.value == null || document?.value!!.isEmpty()) {
-				return ""
-			}
-
-			return if (document?.mimeType != null && document?.mimeType!!.startsWith("text/")) {
-				String(document?.value!!, Charset.forName("UTF-8"))
-			} else {
+			val document = document
+			return if (document == null || document.value.isEmpty() || !document.mimeType.startsWith("text/")) {
 				""
+			} else {
+				document.value.decodeToString()
 			}
 		}
 
@@ -108,12 +103,7 @@ class Text :
 		 * @param text The text to set for this instance.
 		 */
 		set(text) {
-			if (document == null) {
-				document = Document()
-			}
-
-			document?.mimeType = ("text/plain")
-			document?.value = text.toByteArray(Charset.forName("UTF-8"))
+			document = Document("text/plain", text.toByteArray(Charset.forName("UTF-8")))
 		}
 
 	override fun type(): InfoUnitElementType = InfoUnitElementType.TEXT
@@ -125,17 +115,8 @@ class Text :
 		}
 		val other = origin as Text
 		// do copy
-		if (other.document != null) {
-			val doc = Document()
-			if (other.document?.mimeType != null) {
-				doc.mimeType = other.document?.mimeType
-			}
-
-			if (other.document?.value != null) {
-				val contentBytes = ByteArray(other.document?.value!!.size)
-				System.arraycopy(other.document?.value!!, 0, contentBytes, 0, other.document?.value!!.size)
-				doc.value = contentBytes
-			}
+		other.document?.let { otherDocument ->
+			val doc = otherDocument.clone()
 			this.document = doc
 		}
 	}

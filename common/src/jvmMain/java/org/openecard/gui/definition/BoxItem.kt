@@ -34,29 +34,26 @@ package org.openecard.gui.definition
  *
  * @author Tobias Wich
  */
-class BoxItem {
+class BoxItem(
 	/**
 	 * Gets the name of the item.
 	 * The name is used to identify the item and thus should be unique in the surrounding selection box group.
 	 */
-	var name: String? = null
-
+	var name: String,
 	/**
 	 * Gets the display text of the item.
 	 * The text is displayed on the GUI to indicate the meaning of the option to the user.
 	 */
-	var text: String? = null
-
+	var text: String,
 	/**
 	 * Gets the selection value of the box item.
 	 * This value is used to preselect items and to set the value when the step displaying this item is finished.
 	 */
-	var isChecked: Boolean = false
-
+	var isChecked: Boolean = false,
 	/**
 	 * Gets whether the item is enabled, or disabled.
 	 * Disabled items can be used to show a preselected value to the user, but do not allow modification of the value.
 	 *
 	 */
-	var isDisabled: Boolean = false
-}
+	var isDisabled: Boolean = false,
+)

@@ -21,6 +21,12 @@ class RightsBitSet<T>(
 	}
 
 	fun toMap(): Map<T, Boolean> = entries.associateWith { bits[it.bitNumber] }
+
+	override fun toString(): String =
+		toMap()
+			.map {
+				"${it.key.name}=${it.value}"
+			}.joinToString(prefix = "RightsBits<", postfix = ">")
 }
 
 /**

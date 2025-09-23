@@ -1,5 +1,6 @@
 package org.openecard.sc.pace.cvc
 
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
@@ -62,5 +63,7 @@ data class CvcDate(
 			val now = this.toCvcDate()
 			return (start <= now) && (now <= endExclusive)
 		}
+
+		fun CvcDate.toLocalDate(): LocalDate = LocalDate(year, month, day)
 	}
 }

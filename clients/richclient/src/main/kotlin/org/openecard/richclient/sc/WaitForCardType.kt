@@ -4,14 +4,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapNotNull
 import org.openecard.utils.common.returnIf
 
-class WaitForCardType(
-	private val watcher: CardWatcher,
-) {
+object WaitForCardType {
 	/**
 	 * Waits for a card of the specified type to be inserted.
 	 * @return Terminals where the detected cards are inserted.
 	 */
-	suspend fun waitForCard(vararg cardTypes: String): List<String> {
+	suspend fun CardWatcher.waitForCard(vararg cardTypes: String): List<String> {
+		val watcher = this
 		val events = watcher.registerSink()
 		try {
 			val cards =

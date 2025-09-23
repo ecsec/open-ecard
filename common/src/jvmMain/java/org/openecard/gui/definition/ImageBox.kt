@@ -32,11 +32,10 @@ private val logger = KotlinLogging.logger { }
  *
  * @author Tobias Wich
  */
-class ImageBox :
-	IDTrait(),
+class ImageBox(
+	var document: Document,
+) : IDTrait(),
 	InputInfoUnit {
-	var document: Document? = null
-
 	var imageData: ByteArray
 		/**
 		 * Get the raw data of the image.
@@ -45,8 +44,8 @@ class ImageBox :
 		 * @return The raw image data.
 		 */
 		get() {
-			val imageData = document?.value
-			return imageData!!.copyOf(imageData.size)
+			val imageData = document.value
+			return imageData.copyOf(imageData.size)
 		}
 
 		/**
@@ -56,17 +55,17 @@ class ImageBox :
 		 * @param imageData The raw image data.
 		 */
 		set(imageData) {
-			document?.value = imageData.copyOf(imageData.size)
+			document.value = imageData.copyOf(imageData.size)
 		}
 
-	var mimeType: String?
+	var mimeType: String
 		/**
 		 * Gets the MIME type for the image represented by this instance.
 		 *
 		 * @see .setMimeType
 		 * @return String containing the MIME type.
 		 */
-		get() = document?.mimeType
+		get() = document.mimeType
 
 		/**
 		 * Sets the MIME type for the image represented by this instance.
@@ -78,7 +77,7 @@ class ImageBox :
 		 * @param mimeType MIME type describing the image type.
 		 */
 		set(mimeType) {
-			document?.mimeType = mimeType
+			document.mimeType = mimeType
 		}
 
 	override fun type(): InfoUnitElementType = InfoUnitElementType.IMAGE_BOX
@@ -89,13 +88,11 @@ class ImageBox :
 			return
 		}
 		val other = origin as ImageBox
-		// copy document
-		if (other.document != null) {
-			try {
-				this.document = other.document!!.clone()
-			} catch (ex: CloneNotSupportedException) {
-				throw AssertionError("Clone not implemented correctly in Document class.")
-			}
+		try {
+			// copy document
+			this.document = other.document.clone()
+		} catch (ex: CloneNotSupportedException) {
+			throw AssertionError("Clone not implemented correctly in Document class.")
 		}
 	}
 }

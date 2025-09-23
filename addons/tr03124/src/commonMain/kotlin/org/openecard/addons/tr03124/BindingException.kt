@@ -31,7 +31,7 @@ class NoTcToken(
 	cause: Throwable? = null,
 ) : BindingException(msg, cause) {
 	override suspend fun toResponse(): BindingResponse =
-		BindingResponse.ContentResponse(
+		BindingResponse.ReferencedContentResponse(
 			HttpStatusCode.NotFound.value,
 			BindingResponse.ContentCode.TC_TOKEN_RETRIEVAL_ERROR,
 		)

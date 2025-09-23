@@ -29,6 +29,7 @@ import org.openecard.utils.serialization.toPrintable
 private val log = KotlinLogging.logger { }
 
 internal class EidServerStepImpl(
+	private val uiStep: UiStep,
 	val eserviceClient: EserviceClient,
 	val eidServer: EidServerInterface,
 	val con: SmartcardDeviceConnection,
@@ -40,8 +41,8 @@ internal class EidServerStepImpl(
 			log.info { "EAC eID-Server Step cancelled" }
 			runEacCatching(eserviceClient) {
 				processingJob?.cancelAndJoin()
-
 				processingJob = null
+				uiStep.disconnectCard()
 				UserCanceled(eserviceClient).toResponse()
 			}
 		} catch (ex: BindingException) {
@@ -49,18 +50,23 @@ internal class EidServerStepImpl(
 		}
 
 	override suspend fun processEidServerLogic(): BindingResponse =
-		runEacCatching(eserviceClient) {
-			log.info { "Processing eID-Server logic" }
-			coroutineScope {
-				val res =
-					async {
-						processEidServerLogicInt()
-					}
-				processingJob = res
-				val resValue = res.await()
-				processingJob = null
-				resValue
+		try {
+			runEacCatching(eserviceClient) {
+				log.info { "Processing eID-Server logic" }
+				coroutineScope {
+					val res =
+						async {
+							processEidServerLogicInt()
+						}
+					processingJob = res
+					val resValue = res.await()
+					processingJob = null
+					resValue
+				}
 			}
+		} finally {
+			// disconnect card before returning
+			uiStep.disconnectCard()
 		}
 
 	private suspend fun CoroutineScope.processEidServerLogicInt(): BindingResponse {

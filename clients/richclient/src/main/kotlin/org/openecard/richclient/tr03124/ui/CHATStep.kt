@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2017 ecsec GmbH.
+ * Copyright (C) 2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,23 +18,32 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- */
-package org.openecard.sal.protocol.eac.gui
+ ***************************************************************************/
+
+package org.openecard.richclient.tr03124.ui
 
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.crypto.common.asn1.cvc.CHAT
-import org.openecard.crypto.common.asn1.cvc.stringResource
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.yearsUntil
+import org.openecard.addons.tr03124.eac.EacUiData
 import org.openecard.gui.definition.BoxItem
 import org.openecard.gui.definition.Checkbox
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.Text
 import org.openecard.gui.definition.ToggleText
 import org.openecard.i18n.I18N
-import org.openecard.sal.protocol.eac.EACData
-import java.util.Calendar
+import org.openecard.richclient.tr03124.EacProcessState
+import org.openecard.sc.pace.cvc.AuthenticationTerminalChat
+import org.openecard.sc.pace.cvc.ReadAccess
+import org.openecard.sc.pace.cvc.SpecialFunction
+import org.openecard.sc.pace.cvc.WriteAccess
 import java.util.Locale
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 private val logger = KotlinLogging.logger { }
 
@@ -47,7 +56,7 @@ private val logger = KotlinLogging.logger { }
  * @author Hans-Martin Haase
  */
 class CHATStep(
-	private val eacData: EACData,
+	private val state: EacProcessState,
 ) : Step(
 		STEP_ID,
 		I18N.strings.eac_step_chat_title.localized(),
@@ -58,6 +67,10 @@ class CHATStep(
 		addElements()
 	}
 
+	private val eacData get() = state.uiStep.guiData
+	private val selectedChat get() = state.selectedChat
+
+	@OptIn(ExperimentalUnsignedTypes::class)
 	private fun addElements() {
 		val description = Text()
 		val descriptionText =
@@ -73,13 +86,11 @@ class CHATStep(
 		val readAccessCheckBox = Checkbox(READ_CHAT_BOXES)
 		var displayReadAccessCheckBox = false
 		readAccessCheckBox.groupText = I18N.strings.eac_step_chat_read_access_description.localized()
-		val requiredReadAccess: Map<CHAT.DataGroup, Boolean> = eacData.requiredCHAT.getReadAccess()
-		val optionalReadAccess: Map<CHAT.DataGroup, Boolean> = eacData.optionalCHAT.getReadAccess()
+		val requiredReadAccess = eacData.requiredChat.readAccess.toMap()
+		val optionalReadAccess = eacData.optionalChat.readAccess.toMap()
 
-		val requiredSpecialFunctions: Map<CHAT.SpecialFunction, Boolean> =
-			eacData.requiredCHAT.getSpecialFunctions()
-		val optionalSpecialFunctions: Map<CHAT.SpecialFunction, Boolean?> =
-			eacData.optionalCHAT.getSpecialFunctions()
+		val requiredSpecialFunctions = eacData.requiredChat.specialFunctions.toMap()
+		val optionalSpecialFunctions = eacData.optionalChat.specialFunctions.toMap()
 
 		// iterate over all 22 eID application data groups
 		for (dataGroup in requiredReadAccess.keys) {
@@ -92,7 +103,7 @@ class CHATStep(
 					readAccessCheckBox.boxItems.add(makeBoxItem(dataGroup, checked = true, disabled = false))
 				}
 			} else {
-				eacData.selectedCHAT.setReadAccess(dataGroup, false)
+				selectedChat.readAccess[dataGroup] = false
 			}
 		}
 
@@ -100,22 +111,22 @@ class CHATStep(
 		for (specialFunction in requiredSpecialFunctions.keys) {
 			// determine if extra data is necessary
 			var textData = arrayOf<Any>()
-			if (CHAT.SpecialFunction.AGE_VERIFICATION == specialFunction) {
-				val c = eacData.aad.ageVerificationData
+			if (SpecialFunction.AGE_VERIFICATION == specialFunction) {
+				val c = eacData.aad?.ageVerification
 				if (c != null) {
 					val yearDiff: Int = getYearDifference(c)
 					textData = arrayOf(yearDiff)
 				} else {
 					logger.warn { "Removing age verification because of missing or invalid AAD." }
 					// disable this function as no working reference value is given
-					eacData.selectedCHAT.setSpecialFunctions(specialFunction, false)
+					selectedChat.specialFunctions[specialFunction] = false
 					continue
 				}
-			} else if (CHAT.SpecialFunction.COMMUNITY_ID_VERIFICATION == specialFunction) {
-				if (eacData.aad.communityIDVerificationData == null) {
+			} else if (SpecialFunction.COMMUNITY_ID_VERIFICATION == specialFunction) {
+				if (eacData.aad?.communityIdVerification == null) {
 					logger.warn { "Removing community ID verification because of missing AAD." }
 					// disable this function as no working reference value is given
-					eacData.selectedCHAT.setSpecialFunctions(specialFunction, false)
+					selectedChat.specialFunctions[specialFunction] = false
 					continue
 				}
 			}
@@ -143,7 +154,7 @@ class CHATStep(
 					)
 				}
 			} else {
-				eacData.selectedCHAT.setSpecialFunctions(specialFunction, false)
+				selectedChat.specialFunctions[specialFunction] = false
 			}
 		}
 
@@ -155,8 +166,8 @@ class CHATStep(
 		val writeAccessCheckBox = Checkbox(WRITE_CHAT_BOXES)
 		var displayWriteAccessCheckBox = false
 		writeAccessCheckBox.groupText = I18N.strings.eac_step_chat_write_access_description.localized()
-		val requiredWriteAccess: Map<CHAT.DataGroup, Boolean?> = eacData.requiredCHAT.getWriteAccess()
-		val optionalWriteAccess: Map<CHAT.DataGroup, Boolean?> = eacData.optionalCHAT.getWriteAccess()
+		val requiredWriteAccess = eacData.requiredChat.writeAccess.toMap()
+		val optionalWriteAccess = eacData.optionalChat.writeAccess.toMap()
 
 		// iterate over DG17-DG21 of the eID application data groups
 		for (dataGroup in requiredWriteAccess.keys) {
@@ -169,7 +180,7 @@ class CHATStep(
 					writeAccessCheckBox.boxItems.add(makeBoxItem(dataGroup, true, false))
 				}
 			} else {
-				eacData.selectedCHAT.setWriteAccess(dataGroup, false)
+				selectedChat.writeAccess[dataGroup] = false
 			}
 		}
 
@@ -187,31 +198,39 @@ class CHATStep(
 	}
 
 	private fun makeBoxItem(
+		name: String,
 		value: StringResource,
 		checked: Boolean,
 		disabled: Boolean,
 		vararg textData: Any?,
 	): BoxItem =
 		BoxItem(
-			name = value.localized(),
+			name = name,
 			text = value.format(textData).localized(),
 			isChecked = checked,
 			isDisabled = disabled,
 		)
 
 	private fun makeBoxItem(
-		value: CHAT.SpecialFunction,
+		value: SpecialFunction,
 		checked: Boolean,
 		disabled: Boolean,
 		vararg textData: Any?,
-	) = makeBoxItem(value.stringResource(), checked, disabled, textData)
+	) = makeBoxItem(value.name, value.stringResource(), checked, disabled, textData)
 
 	private fun makeBoxItem(
-		value: CHAT.DataGroup,
+		value: ReadAccess,
 		checked: Boolean,
 		disabled: Boolean,
 		vararg textData: Any?,
-	) = makeBoxItem(value.stringResource(), checked, disabled, textData)
+	) = makeBoxItem(value.name, value.stringResource(), checked, disabled, textData)
+
+	private fun makeBoxItem(
+		value: WriteAccess,
+		checked: Boolean,
+		disabled: Boolean,
+		vararg textData: Any?,
+	) = makeBoxItem(value.name, value.stringResource(), checked, disabled, textData)
 
 	companion object {
 		// step id
@@ -221,15 +240,10 @@ class CHATStep(
 		const val READ_CHAT_BOXES: String = "ReadCHATCheckBoxes"
 		const val WRITE_CHAT_BOXES: String = "WriteCHATCheckBoxes"
 
-		private fun getYearDifference(c: Calendar): Int =
-			Calendar
-				.getInstance()
-				.apply {
-					add(Calendar.DAY_OF_MONTH, -1 * c.get(Calendar.DAY_OF_MONTH))
-					add(Calendar.DAY_OF_MONTH, 1)
-					add(Calendar.MONTH, -1 * c.get(Calendar.MONTH))
-					add(Calendar.MONTH, 1)
-					add(Calendar.YEAR, -1 * c.get(Calendar.YEAR))
-				}.get(Calendar.YEAR)
+		@OptIn(ExperimentalTime::class)
+		private fun getYearDifference(c: LocalDate): Int {
+			val now = Clock.System.now()
+			return c.yearsUntil(now.toLocalDateTime(TimeZone.currentSystemDefault()).date)
+		}
 	}
 }

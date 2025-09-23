@@ -26,9 +26,9 @@
 	<string name="addon_list_core_general_legacy_invalid_schema_desc">Don't validate incoming messages against the eCard
 		XML schema.
 	</string>
-	<string name="addon_list_core_general_legacy_case_insensitive_path">Case insensitive URLs</string>
-	<string name="addon_list_core_general_legacy_case_insensitive_path_desc">Match URL paths case insensitive instead of
-		case sensitive as specified in RFC 3986.
+	<string name="addon_list_core_general_legacy_case_insensitive_path">Case-insensitive URLs</string>
+	<string name="addon_list_core_general_legacy_case_insensitive_path_desc">Match URL paths case-insensitive instead of
+		case-sensitive as specified in RFC 3986.
 	</string>
 
 	<!-- Connection settings-->

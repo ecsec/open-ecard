@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,17 +18,22 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- */
-package org.openecard.sal.protocol.eac.gui
+ ***************************************************************************/
 
+package org.openecard.richclient.tr03124.ui
+
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.format
+import kotlinx.datetime.format.FormatStringsInDatetimeFormats
+import kotlinx.datetime.format.byUnicodePattern
+import org.openecard.addons.tr03124.eac.EacUiData
 import org.openecard.gui.definition.Document
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.Text
 import org.openecard.gui.definition.ToggleText
 import org.openecard.i18n.I18N
-import org.openecard.sal.protocol.eac.EACData
-import java.text.DateFormat
-import java.text.SimpleDateFormat
+import org.openecard.sc.pace.cvc.CvcDate.Companion.toLocalDate
+import org.openecard.sc.pace.cvc.TermsOfUse
 
 /**
  * CVC GUI step for EAC.
@@ -38,7 +43,7 @@ import java.text.SimpleDateFormat
  * @author Hans-Martin Haase
  */
 class CVCStep(
-	private val eacData: EACData,
+	private val eacData: EacUiData,
 ) : Step(STEP_ID, I18N.strings.eac_step_cvc_title.localized()) {
 	init {
 		description = I18N.strings.eac_step_cvc_description.localized()
@@ -47,7 +52,7 @@ class CVCStep(
 		addElements()
 	}
 
-	@Suppress("SimpleDateFormat")
+	@OptIn(FormatStringsInDatetimeFormats::class)
 	private fun addElements() {
 		val description = Text()
 		description.text = I18N.strings.eac_step_cvc_description.localized()
@@ -57,50 +62,47 @@ class CVCStep(
 		val subjectName = ToggleText()
 		subjectName.id = "SubjectName"
 		subjectName.title = I18N.strings.eac_cvc_subject_name.localized()
-		subjectName.text = eacData.certificateDescription.subjectName!!
+		subjectName.text = eacData.certificateDescription.subjectName
 		inputInfoUnits.add(subjectName)
 
 		// SubjectURL
 		val subjectURL = ToggleText()
 		subjectURL.id = "SubjectURL"
 		subjectURL.title = I18N.strings.eac_cvc_subject_url.localized()
-		if (eacData.certificateDescription.subjectURL != null) {
-			subjectURL.text = eacData.certificateDescription.subjectURL!!
-		} else {
-			subjectURL.text = ""
-		}
+		subjectURL.text = eacData.certificateDescription.subjectUrl ?: ""
 		inputInfoUnits.add(subjectURL)
 
 		// TermsOfUsage
 		val termsOfUsage = ToggleText()
 		termsOfUsage.id = "TermsOfUsage"
 		termsOfUsage.title = I18N.strings.eac_cvc_termsofusage.localized()
-		val doc =
-			Document(
-				eacData.certificateDescription.getTermsOfUsageMimeType(),
-				eacData.certificateDescription.getTermsOfUsageBytes(),
-			)
-		termsOfUsage.document = doc
+		termsOfUsage.document =
+			when (val tou = eacData.certificateDescription.termsOfUse) {
+				is TermsOfUse.Html -> Document("text/html", tou.html.encodeToByteArray())
+				is TermsOfUse.Pdf -> Document("application/pdf", tou.pdf)
+				is TermsOfUse.PlainText -> Document("text/plain", tou.text.encodeToByteArray())
+			}
 		termsOfUsage.isCollapsed = true
 		inputInfoUnits.add(termsOfUsage)
 
 		// Validity
-		val dateFormat: DateFormat =
-			try {
-				SimpleDateFormat(
-					I18N.strings.eac_cvc_validity_format.localized(),
-				)
-			} catch (_: IllegalArgumentException) {
-				SimpleDateFormat()
-			}
+		val dateFormat = LocalDate.Format { this.byUnicodePattern(I18N.strings.eac_cvc_validity_format.localized()) }
 		val sb = StringBuilder(150)
 		sb.append(I18N.strings.eac_cvc_validity_from.localized())
 		sb.append(" ")
-		sb.append(dateFormat.format(eacData.certificate.getEffectiveDate().getTime()))
+		sb.append(
+			eacData.terminalCert.validFrom
+				.toLocalDate()
+				.format(dateFormat),
+		)
 		sb.append(" ")
 		sb.append(I18N.strings.eac_cvc_validity_to.localized())
 		sb.append(" ")
-		sb.append(dateFormat.format(eacData.certificate.getExpirationDate().getTime()))
+		sb.append(
+			eacData.terminalCert.validUntil
+				.toLocalDate()
+				.format(dateFormat),
+		)
 
 		val validity = ToggleText()
 		validity.id = "Validity"
@@ -113,7 +115,7 @@ class CVCStep(
 		val issuerName = ToggleText()
 		issuerName.id = "IssuerName"
 		issuerName.title = I18N.strings.eac_cvc_issuer_name.localized()
-		issuerName.text = eacData.certificateDescription.issuerName!!
+		issuerName.text = eacData.certificateDescription.issuerName
 		issuerName.isCollapsed = true
 		inputInfoUnits.add(issuerName)
 
@@ -122,11 +124,7 @@ class CVCStep(
 		issuerURL.id = "IssuerURL"
 		issuerURL.title = I18N.strings.eac_cvc_issuer_url.localized()
 		// issuer url is optional so perform a null check
-		if (eacData.certificateDescription.issuerURL != null) {
-			issuerURL.text = eacData.certificateDescription.issuerURL!!
-		} else {
-			issuerURL.text = ""
-		}
+		issuerURL.text = eacData.certificateDescription.issuerUrl ?: ""
 		issuerURL.isCollapsed = true
 		inputInfoUnits.add(issuerURL)
 	}

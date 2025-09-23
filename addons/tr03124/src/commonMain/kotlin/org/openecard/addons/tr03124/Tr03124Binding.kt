@@ -3,7 +3,7 @@ package org.openecard.addons.tr03124
 interface Tr03124Binding {
 	suspend fun activate(tcTokenUrl: String): BindingResponse
 
-	suspend fun status(): BindingResponse
+	suspend fun status(): EcardStatus
 
 	suspend fun showUi(module: Parameter.ShowUi.ShowUiModules)
 

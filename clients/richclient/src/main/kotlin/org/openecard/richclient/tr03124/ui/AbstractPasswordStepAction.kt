@@ -41,6 +41,9 @@ import org.openecard.sc.iface.feature.PaceError
 
 private val logger = KotlinLogging.logger { }
 
+private val pin: String = I18N.strings.pace_pin.localized()
+private val puk: String = I18N.strings.pace_puk.localized()
+
 /**
  *
  * @author Tobias Wich
@@ -51,21 +54,22 @@ abstract class AbstractPasswordStepAction(
 ) : StepAction(
 		step,
 	) {
-	private fun Throwable.handleCardExceptions(): StepActionResult {
+	private fun Throwable.handleCardExceptions(isSuspendRecovery: Boolean = false): StepActionResult {
 		val result =
 			when (this) {
 				is PaceError -> {
 					securityError?.let { secErr ->
-						state.status = secErr
-						step.updateStatus()
+						// only update when not in suspend resumption
+						if (!isSuspendRecovery) {
+							state.status = secErr
+							step.updateStatus()
+						}
 						if (secErr.verificationFailed) {
 							StepActionResult(StepActionResultStatus.REPEAT)
 						} else {
 							// display error step with appropriate error message
 							val errStep =
 								if (secErr.authBlocked) {
-									val pin: String = I18N.strings.pace_pin.localized()
-									val puk: String = I18N.strings.pace_puk.localized()
 									ErrorStep(
 										I18N.strings.pace_step_error_title_blocked
 											.format(pin)
@@ -183,5 +187,5 @@ abstract class AbstractPasswordStepAction(
 			}
 			// no exception means pass
 			null
-		}.recover { it.handleCardExceptions() }.getOrThrow()
+		}.recover { it.handleCardExceptions(true) }.getOrThrow()
 }

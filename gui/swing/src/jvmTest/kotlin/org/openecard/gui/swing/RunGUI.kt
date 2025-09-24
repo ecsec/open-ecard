@@ -77,7 +77,7 @@ class RunGUI {
 	}
 
 	private fun identityCheckStep(): Step {
-		val identityCheckServerConnectionStep = Step("Start") // ("Identitätsnachweis wird gestartet");
+		val identityCheckServerConnectionStep = Step(title = "Start") // ("Identitätsnachweis wird gestartet");
 		val serverConnectionText = Text()
 		serverConnectionText.text = "Verbindung zum Server wird aufgebaut"
 		identityCheckServerConnectionStep.inputInfoUnits.add(serverConnectionText)
@@ -92,7 +92,7 @@ class RunGUI {
 
 	@Throws(IOException::class)
 	private fun providerInfoStep(): Step {
-		val step = Step("Anbieter")
+		val step = Step(title = "Anbieter")
 
 		val decription = Text()
 		decription.text = "Zu dem Dienstanbieter und seiner Berechtigung liegen folgende Information vor."
@@ -159,7 +159,7 @@ class RunGUI {
 
 	@Throws(Exception::class)
 	private fun requestedDataStep(): Step {
-		val requestedDataStep1 = Step("Angefragte Daten")
+		val requestedDataStep1 = Step(title = "Angefragte Daten")
 		requestedDataStep1.action = RequestedDataAction(requestedDataStep1)
 		val requestedDataDescription = Text()
 		requestedDataDescription.text =
@@ -277,7 +277,7 @@ class RunGUI {
 	}
 
 	private fun checkDataStep(): Step {
-		val dataTransactionStep = Step("Identitätsnachweis") // wird durchgeführt");
+		val dataTransactionStep = Step(title = "Identitätsnachweis") // wird durchgeführt");
 		val requestedPINText = Text()
 		requestedPINText.text = "Eingegebene PIN"
 		val pinCorrekt =
@@ -327,7 +327,7 @@ class RunGUI {
 
 	@Throws(Exception::class)
 	private fun pinInputStep(requestedDataStep: Step): Step {
-		val pinInputStep = Step("PIN-Eingabe")
+		val pinInputStep = Step(title = "PIN-Eingabe")
 		pinInputStep.action = PinInputAction(pinInputStep, requestedDataStep)
 		val t = Text()
 		t.text =

@@ -37,7 +37,6 @@ import org.openecard.addon.sal.SALProtocolProxy
 import org.openecard.addon.sal.SalStateView
 import org.openecard.common.interfaces.Environment
 import org.openecard.common.util.FacadeInvocationHandler
-import org.openecard.gui.definition.ViewController
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Proxy
 
@@ -57,7 +56,6 @@ private val LOG = KotlinLogging.logger { }
 
 class AddonManager(
 	env: Environment,
-	view: ViewController,
 	registry: CombiningRegistry?,
 	salStateView: SalStateView,
 ) {
@@ -65,7 +63,6 @@ class AddonManager(
 	private val protectedRegistry: AddonRegistry
 	private val env: Environment
 	private val eventHandler: EventHandler
-	private val viewController: ViewController
 	private val salStateView: SalStateView
 
 	// TODO: rework cache to have borrow and return semantic
@@ -75,7 +72,6 @@ class AddonManager(
 	 * Creates a new AddonManager.
 	 *
 	 * @param env
-	 * @param view
 	 * @param registry
 	 * @param salStateView
 	 * @throws WSMarshallerException
@@ -90,7 +86,6 @@ class AddonManager(
 		this.env = env
 		this.eventHandler = EventHandler()
 		this.env.eventDispatcher!!.add(eventHandler)
-		this.viewController = view
 		this.salStateView = salStateView
 
 		Thread(
@@ -101,9 +96,8 @@ class AddonManager(
 		).start()
 	}
 
-	constructor(env: Environment, view: ViewController, salStateView: SalStateView) : this(
+	constructor(env: Environment, salStateView: SalStateView) : this(
 		env,
-		view,
 		null,
 		salStateView,
 	)
@@ -400,10 +394,9 @@ class AddonManager(
 	}
 
 	private fun createContext(addonSpec: AddonSpecification): Context {
-		val aCtx = Context(this, env, addonSpec, viewController, salStateView)
+		val aCtx = Context(this, env, addonSpec, salStateView)
 		aCtx.setCardRecognition(env.recognition)
 		aCtx.setEventHandle(eventHandler)
-		aCtx.userConsent = env.gui
 
 		return aCtx
 	}

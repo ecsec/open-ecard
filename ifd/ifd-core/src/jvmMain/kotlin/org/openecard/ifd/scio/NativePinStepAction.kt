@@ -19,15 +19,17 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+@file:Suppress("ktlint:standard:import-ordering")
+
 package org.openecard.ifd.scio
 
 import iso.std.iso_iec._24727.tech.schema.PinInputType
 import org.openecard.common.ifd.scio.SCIOException
-import org.openecard.gui.StepResult
-import org.openecard.gui.executor.ExecutionResults
-import org.openecard.gui.executor.StepAction
-import org.openecard.gui.executor.StepActionResult
-import org.openecard.gui.executor.StepActionResultStatus
+// import org.openecard.gui.StepResult
+// import org.openecard.gui.executor.ExecutionResults
+// import org.openecard.gui.executor.StepAction
+// import org.openecard.gui.executor.StepActionResult
+// import org.openecard.gui.executor.StepActionResultStatus
 import org.openecard.ifd.scio.reader.PCSCFeatures
 import org.openecard.ifd.scio.reader.PCSCPinVerify
 import org.openecard.ifd.scio.wrapper.SingleThreadChannel
@@ -44,25 +46,26 @@ class NativePinStepAction(
 	private val ch: SingleThreadChannel,
 	private val termInfo: TerminalInfo,
 	private val template: ByteArray,
-) : StepAction(stepName) {
+) {
+// ) : StepAction(stepName) {
 	var exception: IFDException? = null
 	var response: ByteArray? = null
 
-	override fun perform(
-		oldResults: Map<String, ExecutionResults>,
-		result: StepResult,
-	): StepActionResult {
-		try {
-			response = nativePinVerify()
-		} catch (ex: SCIOException) {
-			exception = IFDException(ex)
-		} catch (ex: IFDException) {
-			exception = ex
-		} catch (ex: InterruptedException) {
-			exception = IFDException(ex)
-		}
-		return StepActionResult(StepActionResultStatus.NEXT)
-	}
+// 	override fun perform(
+// 		oldResults: Map<String, ExecutionResults>,
+// 		result: StepResult,
+// 	): StepActionResult {
+// 		try {
+// 			response = nativePinVerify()
+// 		} catch (ex: SCIOException) {
+// 			exception = IFDException(ex)
+// 		} catch (ex: IFDException) {
+// 			exception = ex
+// 		} catch (ex: InterruptedException) {
+// 			exception = IFDException(ex)
+// 		}
+// 		return StepActionResult(StepActionResultStatus.NEXT)
+// 	}
 
 	@Throws(IFDException::class, SCIOException::class, InterruptedException::class)
 	private fun nativePinVerify(): ByteArray {

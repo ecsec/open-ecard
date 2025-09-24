@@ -82,8 +82,8 @@ class UnblockPINDialog(
 	 */
 	private fun createSuccessStep() =
 		Step(
-			"success",
-			I18N.strings.pinplugin_action_unblockpin_userconsent_successstep_title.localized(),
+			id = "success",
+			title = I18N.strings.pinplugin_action_unblockpin_userconsent_successstep_title.localized(),
 		).apply {
 			inputInfoUnits.add(
 				Text(
@@ -99,8 +99,8 @@ class UnblockPINDialog(
 	 */
 	private fun createErrorStep() =
 		Step(
-			"insert-card",
-			I18N.strings.pinplugin_action_unblockpin_userconsent_errorstep_title.localized(),
+			id = "insert-card",
+			title = I18N.strings.pinplugin_action_unblockpin_userconsent_errorstep_title.localized(),
 		).apply {
 			inputInfoUnits.add(
 				Text(
@@ -117,8 +117,8 @@ class UnblockPINDialog(
 	private fun createPUKStep(): Step {
 		val pukStep =
 			Step(
-				"insert-card",
-				I18N.strings.pinplugin_action_unblockpin_userconsent_pukstep_title.localized(),
+				id = "insert-card",
+				title = I18N.strings.pinplugin_action_unblockpin_userconsent_pukstep_title.localized(),
 			)
 		val i1 = Text()
 		pukStep.inputInfoUnits.add(i1)

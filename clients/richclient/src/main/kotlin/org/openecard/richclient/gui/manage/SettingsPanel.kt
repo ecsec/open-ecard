@@ -22,7 +22,7 @@
 
 package org.openecard.richclient.gui.manage
 
-import org.openecard.addon.AddonPropertiesException
+import org.openecard.richclient.AddonPropertiesException
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.Insets
@@ -97,7 +97,7 @@ abstract class SettingsPanel : JPanel() {
 	 *
 	 * @throws IOException Thrown in case the properties could not be written to the output device.
 	 * @throws SecurityException Thrown in case the permission to save the properties is missing.
-	 * @throws org.openecard.addon.AddonPropertiesException Thrown in case the AddonProperties object throws this
+	 * @throws AddonPropertiesException Thrown in case the AddonProperties object throws this
 	 * exception in the store method.
 	 */
 	@Throws(IOException::class, SecurityException::class, AddonPropertiesException::class)

@@ -23,7 +23,6 @@
 package org.openecard.richclient.tr03124.ui
 
 import dev.icerock.moko.resources.format
-import org.openecard.common.AppVersion.name
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.Text
 import org.openecard.i18n.I18N
@@ -33,10 +32,11 @@ import org.openecard.i18n.I18N
  *
  * @author Tobias Wich
  */
-class ProcessingStep :
-	Step(
-		STEP_ID,
-		I18N.strings.eac_step_processing_title.localized(),
+class ProcessingStep(
+	appName: String,
+) : Step(
+		id = STEP_ID,
+		title = I18N.strings.eac_step_processing_title.localized(),
 	) {
 	init {
 		description = I18N.strings.eac_step_processing_step_description.localized()
@@ -47,7 +47,7 @@ class ProcessingStep :
 		val desc = Text()
 		desc.text =
 			I18N.strings.eac_step_processing_description
-				.format(name)
+				.format(appName)
 				.localized()
 		inputInfoUnits.add(desc)
 	}

@@ -38,6 +38,7 @@ private val LOG = KotlinLogging.logger {}
  *
  * @author Tobias Wich
  */
+@Deprecated("Legacy OeC Code")
 open class OverridingProperties {
 	private val properties: Properties
 

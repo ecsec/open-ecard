@@ -42,7 +42,7 @@ import org.openecard.utils.common.cast
  */
 class PINStep(
 	private val state: EacProcessState,
-) : Step(STEP_ID, "Dummy-Title") {
+) : Step(id = STEP_ID, title = "Dummy-Title") {
 	private val hasAttemptsCounter: Boolean = state.uiStep.guiData.pinType != PacePinId.CAN
 
 	private val hasCanEntry = false
@@ -262,13 +262,12 @@ class PINStep(
 			}
 
 		fun createDummy(pinId: PacePinId): Step {
-			val s = Step(STEP_ID)
 			val pinType = pinId.toPinType()
-
-			s.title =
+			val title =
 				I18N.strings.pace_step_pace_title
 					.format(pinType)
 					.localized()
+			val s = Step(id = STEP_ID, title = title)
 			s.description =
 				I18N.strings.pace_step_pace_description
 					.format(pinType)

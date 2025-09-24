@@ -1429,10 +1429,11 @@ class IFD : IFD {
 			}
 
 			val channel = cm!!.getSlaveChannel(parameters.getSlotHandle())
-			val aTerm = AbstractTerminal(this, cm!!, channel, env!!.gui, ctxHandle, parameters.getDisplayIndex())
+			val aTerm = AbstractTerminal(this, cm!!, channel, ctxHandle, parameters.getDisplayIndex())
 			try {
-				response = aTerm.verifyUser(parameters)
-				return response
+// 				response = aTerm.verifyUser(parameters)
+// 				return response
+				throw IFDException("Removed functionality used, please migrate to new code")
 			} catch (ex: IFDException) {
 				response =
 					WSHelper.makeResponse(
@@ -1554,7 +1555,7 @@ class IFD : IFD {
 			// check out available software protocols
 			this.protocolFactories.get(protocol)?.let { factory ->
 				val protoImpl = factory.createInstance()
-				val response = protoImpl.establish(parameters, env!!.dispatcher!!, env!!.gui!!)
+				val response = protoImpl.establish(parameters, env!!.dispatcher!!)
 				// register protocol instance for secure messaging when protocol was processed successful
 				if (response.getResult().getResultMajor() == ECardConstants.Major.OK) {
 					channel.addSecureMessaging(protoImpl)

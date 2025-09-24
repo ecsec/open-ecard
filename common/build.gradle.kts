@@ -10,6 +10,7 @@ kotlin {
 			dependencies {
 				implementation(libs.kotlin.logging)
 				implementation(kotlin("reflect"))
+				api(project(":utils:common"))
 			}
 		}
 		val commonTest by getting {
@@ -26,6 +27,7 @@ kotlin {
 				api(libs.bc.oec.prov)
 				api(libs.bc.oec.tls)
 				api(libs.httpcore)
+				api(project(":gui:swing"))
 			}
 		}
 		val jvmTest by getting {

@@ -22,8 +22,8 @@
 
 package org.openecard.richclient.gui.manage.core
 
-import org.openecard.addon.AddonPropertiesException
 import org.openecard.common.OpenecardProperties
+import org.openecard.richclient.AddonPropertiesException
 import org.openecard.richclient.gui.manage.SettingsFactory
 import org.openecard.richclient.gui.manage.SettingsGroup
 import java.io.IOException

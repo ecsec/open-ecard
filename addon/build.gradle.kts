@@ -9,6 +9,7 @@ kotlin {
 		val commonMain by getting {
 			dependencies {
 				implementation(libs.kotlin.logging)
+				implementation(project(":utils:common"))
 			}
 		}
 		val commonTest by getting {
@@ -22,6 +23,7 @@ kotlin {
 				// 	api(libs.jaxb.ws.api)
 				// 	api(libs.slf4j.api)
 				api(project(":common"))
+				api(project(":gui:swing"))
 				// 	api(project(":wsdef:wsdef-client"))
 				// 	implementation(project(":i18n"))
 				// 	api(libs.bc.oec.prov)

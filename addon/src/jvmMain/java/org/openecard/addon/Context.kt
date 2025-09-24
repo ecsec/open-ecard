@@ -28,7 +28,6 @@ import org.openecard.common.interfaces.Dispatcher
 import org.openecard.common.interfaces.Environment
 import org.openecard.common.interfaces.EventDispatcher
 import org.openecard.gui.UserConsent
-import org.openecard.gui.definition.ViewController
 
 /**
  * This class implements a context object used for the exchange of information with addons.
@@ -46,12 +45,6 @@ class Context(
 	@JvmField val manager: AddonManager,
 	private val env: Environment,
 	spec: AddonSpecification,
-	/**
-	 * Get the ViewController object of this Context.
-	 *
-	 * @return The [ViewController] of this Context.
-	 */
-	@JvmField val viewController: ViewController,
 	@JvmField val salStateView: SalStateView,
 ) {
 	/**

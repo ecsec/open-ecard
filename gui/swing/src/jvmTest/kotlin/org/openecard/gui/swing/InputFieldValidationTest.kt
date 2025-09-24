@@ -51,7 +51,7 @@ class InputFieldValidationTest {
 		// create step
 		val ucd = UserConsentDescription("consent title")
 
-		val s = Step("step title")
+		val s = Step(title = "step title")
 		ucd.steps.add(s)
 		s.id = "step1"
 

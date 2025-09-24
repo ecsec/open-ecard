@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,19 +18,19 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- */
-package org.openecard.gui
+ ***************************************************************************/
+package org.openecard.richclient.proxy
 
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
-import org.openecard.gui.definition.Step
+import java.net.SocketException
 
 /**
- * Class for a step which has a connection handle.
+ * Exception indicating a failed attempt to open a HTTP proxy tunnel.
+ * The exception contains the result code and the textual description of the error.
  *
  * @author Tobias Wich
  */
-open class StepWithConnection(
-	id: String,
-	title: String?,
-	val connectionHandle: ConnectionHandleType,
-) : Step(id, title)
+class HttpConnectProxyException(
+	msg: String,
+	val code: Int,
+	val description: String?,
+) : SocketException(msg)

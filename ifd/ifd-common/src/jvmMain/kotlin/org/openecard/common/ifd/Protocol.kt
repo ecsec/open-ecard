@@ -25,7 +25,6 @@ package org.openecard.common.ifd
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse
 import org.openecard.common.interfaces.Dispatcher
-import org.openecard.gui.UserConsent
 
 // TODO: replace with addon IFD protocols
 
@@ -45,7 +44,6 @@ interface Protocol {
 	fun establish(
 		req: EstablishChannel,
 		dispatcher: Dispatcher,
-		gui: UserConsent,
 	): EstablishChannelResponse
 
 	/**

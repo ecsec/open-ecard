@@ -44,6 +44,7 @@ import java.util.jar.JarFile
  * @author Moritz Horsch
  * @author Tobias Wich
  */
+@Deprecated("Legacy OeC Code")
 object FileUtils {
 	@JvmStatic
 	@get:Throws(IOException::class, SecurityException::class)

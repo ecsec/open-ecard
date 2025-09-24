@@ -24,22 +24,12 @@ package org.openecard.richclient.gui.manage
 
 import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.addon.AddonException
-import org.openecard.addon.AddonManager
-import org.openecard.addon.AddonProperties
-import org.openecard.addon.AddonRegistry
-import org.openecard.addon.manifest.AddonSpecification
-import org.openecard.addon.manifest.AppExtensionSpecification
-import org.openecard.addon.manifest.AppPluginSpecification
-import org.openecard.addon.manifest.ProtocolPluginSpecification
-import org.openecard.common.AppVersion
+import org.openecard.build.BuildInfo
 import org.openecard.common.util.FileUtils.resolveResourceAsStream
 import org.openecard.common.util.FileUtils.toByteArray
 import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.graphics.OecIconType
 import org.openecard.richclient.gui.graphics.oecImage
-import org.openecard.richclient.gui.manage.addon.DefaultSettingsGroup
-import org.openecard.richclient.gui.manage.addon.DefaultSettingsPanel
 import org.openecard.richclient.gui.manage.core.AddonPanelBuilder.createConnectionSettingsAddon
 import org.openecard.richclient.gui.manage.core.AddonPanelBuilder.createGeneralSettingsAddon
 import org.openecard.richclient.gui.manage.core.AddonPanelBuilder.createLogSettingsAddon
@@ -76,15 +66,9 @@ private val LOG = KotlinLogging.logger {}
  *
  * @author Tobias Wich
  */
-class ManagementDialog(
-	manager: AddonManager,
-) : JFrame() {
-	private val manager: AddonManager
-	private val cpReg: AddonRegistry
-	private val fileReg: AddonRegistry
-
+class ManagementDialog : JFrame() {
 	private val selectionPanel: JPanel
-	private val contentPane: JPanel
+	private val contentPanel: JPanel
 	private lateinit var coreList: JList<String>
 	private lateinit var addonList: JList<String>
 	private val addonPanel: JPanel
@@ -97,30 +81,27 @@ class ManagementDialog(
 	 */
 	init {
 		LOG.debug { "Creating ManagementDialog." }
-		this.manager = manager
-		cpReg = manager.builtinRegistry
-		fileReg = manager.externalRegistry
 
 		val logo: Image = oecImage(OecIconType.COLORED, 147, 147)
 		iconImage = logo
 		setTitle(
 			I18N.strings.addon_title
-				.format(AppVersion.name)
+				.format(BuildInfo.appName)
 				.localized(),
 		)
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE)
 		minimumSize = Dimension(640, 420)
 		setSize(780, 480)
-		contentPane = JPanel()
-		contentPane.setBorder(EmptyBorder(5, 5, 5, 5))
-		contentPane.setLayout(BorderLayout(0, 0))
-		setContentPane(contentPane)
+		contentPanel = JPanel()
+		contentPanel.setBorder(EmptyBorder(5, 5, 5, 5))
+		contentPanel.setLayout(BorderLayout(0, 0))
+		contentPane = contentPanel
 
 		addonPanel = JPanel(BorderLayout(), true)
-		contentPane.add(addonPanel, BorderLayout.CENTER)
+		contentPanel.add(addonPanel, BorderLayout.CENTER)
 
 		val selectionWrapper = JPanel(BorderLayout())
-		contentPane.add(selectionWrapper, BorderLayout.WEST)
+		contentPanel.add(selectionWrapper, BorderLayout.WEST)
 		selectionPanel = JPanel()
 		selectionWrapper.add(selectionPanel, BorderLayout.NORTH)
 		selectionWrapper.add(Box.createHorizontalGlue(), BorderLayout.CENTER)
@@ -170,7 +151,7 @@ class ManagementDialog(
 		val label =
 			JLabel(
 				I18N.strings.addon_list_core
-					.format(AppVersion.name)
+					.format(BuildInfo.appName)
 					.localized(),
 			)
 		label.setFont(label.font.deriveFont(Font.BOLD))
@@ -216,9 +197,10 @@ class ManagementDialog(
 
 		// this assumes that all addons in the ClasspathRegistry are core addons
 		// an ActionPanel for every addon that has one or more AppExtensionActions will be added
-		for (desc: AddonSpecification in cpReg.listAddons()) {
-			createAddonPaneFromAddonSpec(desc, model, true)
-		}
+		// TODO: Replace with something more specific to start an action
+// 		for (desc: AddonSpecification in cpReg.listAddons()) {
+// 			createAddonPaneFromAddonSpec(desc, model, true)
+// 		}
 
 		selectionPanel.add(coreList, coreListConstraints)
 	}
@@ -253,9 +235,10 @@ class ManagementDialog(
 		// add addon panels
 
 		// this assumes that all addons in the FileRegistry are non core addons
-		for (desc: AddonSpecification in fileReg.listAddons()) {
-			createAddonPaneFromAddonSpec(desc, model, false)
-		}
+		// TODO: Replace with something more specific to start an action
+// 		for (desc: AddonSpecification in fileReg.listAddons()) {
+// 			createAddonPaneFromAddonSpec(desc, model, false)
+// 		}
 
 		selectionPanel.add(addonList, addonListConstraints)
 	}
@@ -292,147 +275,147 @@ class ManagementDialog(
 		}
 	}
 
-	private fun createAddonPaneFromAddonSpec(
-		desc: AddonSpecification,
-		model: AddonSelectionModel,
-		coreAddon: Boolean,
-	) {
-		val description: String = desc.getLocalizedDescription(LANGUAGE_CODE)
-		val name = desc.getLocalizedName(LANGUAGE_CODE)
-		var logo: Image?
-
-		if (coreAddon) {
-			logo = loadLogo(null, desc.getLogo())
-		} else {
-			try {
-				val loader: ClassLoader = manager.getRegistry().downloadAddon(desc)!!
-				logo = loadLogo(loader, "META-INF/" + desc.getLogo())
-			} catch (ex: AddonException) {
-				LOG.error { "Failed to load logo from Add-on bundle." }
-				logo = null
-			}
-		}
-
-		// setup about panel but just if we don't have a core addon
-		val about: String = desc.getAbout(LANGUAGE_CODE)
-		val licenseText: String = desc.getLicenseText(LANGUAGE_CODE)
-		var aboutPanel: AboutPanel? = null
-		if ((about != "" || licenseText != "") && !coreAddon) {
-			aboutPanel = AboutPanel(desc, false, manager, this)
-		}
-
-		// initial setup of settings panel if the addon has general settings in the non protocol/action specific
-		// declaration
-		var settingsPanel: DefaultSettingsPanel? = null
-		val settingsGroups: ArrayList<DefaultSettingsGroup> = ArrayList()
-		val addonProps = AddonProperties(desc)
-		val settings: Settings = SettingsFactory.getInstance(addonProps)
-		if (desc.configDescription != null && desc.configDescription!!.entries.isNotEmpty()) {
-			val group =
-				DefaultSettingsGroup(
-					I18N.strings.addon_settings_general.localized(),
-					settings,
-					desc.configDescription!!.entries,
-				)
-			settingsGroups.add(group)
-		}
-
-		// iteration over the configuration of actions and protocols
-		// AppExtensionActions
-		if (desc.applicationActions.isNotEmpty()) {
-			for (appExtSpec: AppExtensionSpecification in desc.applicationActions) {
-				if (appExtSpec.configDescription != null && appExtSpec.configDescription!!.entries.isNotEmpty()) {
-					val group =
-						DefaultSettingsGroup(
-							appExtSpec.getLocalizedName(LANGUAGE_CODE) +
-								" " + I18N.strings.addon_settings_settings.localized(),
-							settings,
-							appExtSpec.configDescription!!.entries,
-						)
-					settingsGroups.add(group)
-				}
-			}
-		}
-
-		// Binding actions
-		if (desc.bindingActions.isNotEmpty()) {
-			for (appPluginSpec: AppPluginSpecification in desc.bindingActions) {
-				if (appPluginSpec.configDescription != null && appPluginSpec.configDescription!!.entries.isNotEmpty()) {
-					val group =
-						DefaultSettingsGroup(
-							appPluginSpec.getLocalizedName(LANGUAGE_CODE) +
-								" " + I18N.strings.addon_settings_settings.localized(),
-							settings,
-							appPluginSpec.configDescription!!.entries,
-						)
-					settingsGroups.add(group)
-				}
-			}
-		}
-
-		// IFD Actions
-		if (desc.ifdActions.isNotEmpty()) {
-			for (protPluginSpec: ProtocolPluginSpecification in desc.ifdActions) {
-				if (protPluginSpec.configDescription != null && protPluginSpec.configDescription!!.entries.isNotEmpty()) {
-					val group =
-						DefaultSettingsGroup(
-							protPluginSpec.getLocalizedName(LANGUAGE_CODE) +
-								" " + I18N.strings.addon_settings_settings.localized(),
-							settings,
-							protPluginSpec.configDescription!!.entries,
-						)
-					settingsGroups.add(group)
-				}
-			}
-		}
-
-		// SAL Actions
-		if (desc.salActions.isNotEmpty()) {
-			for (protPluginSpec: ProtocolPluginSpecification in desc.salActions) {
-				if (protPluginSpec.configDescription != null && protPluginSpec.configDescription!!.entries.isNotEmpty()) {
-					val group =
-						DefaultSettingsGroup(
-							protPluginSpec.getLocalizedName(
-								LANGUAGE_CODE,
-							) + " " + I18N.strings.addon_settings_settings.localized(),
-							settings,
-							protPluginSpec.configDescription!!.entries,
-						)
-					settingsGroups.add(group)
-				}
-			}
-		}
-
-		if (settingsGroups.isNotEmpty()) {
-			settingsPanel = DefaultSettingsPanel(*settingsGroups.toTypedArray<DefaultSettingsGroup>())
-		}
-
-		// create the actions panel
-		var actionPanel: ActionPanel? = null
-		if (desc.applicationActions.isNotEmpty()) {
-			actionPanel = ActionPanel()
-			for (appExtSpec: AppExtensionSpecification in desc.applicationActions) {
-				val entry = ActionEntryPanel(desc, appExtSpec, manager)
-				actionPanel.addActionEntry(entry)
-			}
-		}
-
-		var nextPanel: AddonPanel? = null
-		// check whether to use a tabbed pane or not
-		if (actionPanel != null && settingsPanel == null && aboutPanel == null) {
-			nextPanel = AddonPanel(actionPanel, name, description, logo)
-		} else if (actionPanel == null && settingsPanel != null && aboutPanel == null) {
-			nextPanel = AddonPanel(settingsPanel, name, description, logo)
-		} else if (actionPanel == null && settingsPanel == null && aboutPanel != null) {
-			nextPanel = AddonPanel(aboutPanel, name, description, logo)
-		} else if (actionPanel != null || settingsPanel != null || aboutPanel != null) {
-			nextPanel = AddonPanel(actionPanel, settingsPanel, aboutPanel, name, description, logo)
-		}
-
-		if (nextPanel != null) {
-			model.addElement(name, nextPanel)
-		}
-	}
+// 	private fun createAddonPaneFromAddonSpec(
+// 		desc: AddonSpecification,
+// 		model: AddonSelectionModel,
+// 		coreAddon: Boolean,
+// 	) {
+// 		val description: String = desc.getLocalizedDescription(LANGUAGE_CODE)
+// 		val name = desc.getLocalizedName(LANGUAGE_CODE)
+// 		var logo: Image?
+//
+// 		if (coreAddon) {
+// 			logo = loadLogo(null, desc.getLogo())
+// 		} else {
+// 			try {
+// 				val loader: ClassLoader = manager.getRegistry().downloadAddon(desc)!!
+// 				logo = loadLogo(loader, "META-INF/" + desc.getLogo())
+// 			} catch (ex: AddonException) {
+// 				LOG.error { "Failed to load logo from Add-on bundle." }
+// 				logo = null
+// 			}
+// 		}
+//
+// 		// setup about panel but just if we don't have a core addon
+// 		val about: String = desc.getAbout(LANGUAGE_CODE)
+// 		val licenseText: String = desc.getLicenseText(LANGUAGE_CODE)
+// 		var aboutPanel: AboutPanel? = null
+// 		if ((about != "" || licenseText != "") && !coreAddon) {
+// 			aboutPanel = AboutPanel(desc, false, manager, this)
+// 		}
+//
+// 		// initial setup of settings panel if the addon has general settings in the non protocol/action specific
+// 		// declaration
+// 		var settingsPanel: DefaultSettingsPanel? = null
+// 		val settingsGroups: ArrayList<DefaultSettingsGroup> = ArrayList()
+// 		val addonProps = AddonProperties(desc)
+// 		val settings: Settings = SettingsFactory.getInstance(addonProps)
+// 		if (desc.configDescription != null && desc.configDescription!!.entries.isNotEmpty()) {
+// 			val group =
+// 				DefaultSettingsGroup(
+// 					I18N.strings.addon_settings_general.localized(),
+// 					settings,
+// 					desc.configDescription!!.entries,
+// 				)
+// 			settingsGroups.add(group)
+// 		}
+//
+// 		// iteration over the configuration of actions and protocols
+// 		// AppExtensionActions
+// 		if (desc.applicationActions.isNotEmpty()) {
+// 			for (appExtSpec: AppExtensionSpecification in desc.applicationActions) {
+// 				if (appExtSpec.configDescription != null && appExtSpec.configDescription!!.entries.isNotEmpty()) {
+// 					val group =
+// 						DefaultSettingsGroup(
+// 							appExtSpec.getLocalizedName(LANGUAGE_CODE) +
+// 								" " + I18N.strings.addon_settings_settings.localized(),
+// 							settings,
+// 							appExtSpec.configDescription!!.entries,
+// 						)
+// 					settingsGroups.add(group)
+// 				}
+// 			}
+// 		}
+//
+// 		// Binding actions
+// 		if (desc.bindingActions.isNotEmpty()) {
+// 			for (appPluginSpec: AppPluginSpecification in desc.bindingActions) {
+// 				if (appPluginSpec.configDescription != null && appPluginSpec.configDescription!!.entries.isNotEmpty()) {
+// 					val group =
+// 						DefaultSettingsGroup(
+// 							appPluginSpec.getLocalizedName(LANGUAGE_CODE) +
+// 								" " + I18N.strings.addon_settings_settings.localized(),
+// 							settings,
+// 							appPluginSpec.configDescription!!.entries,
+// 						)
+// 					settingsGroups.add(group)
+// 				}
+// 			}
+// 		}
+//
+// 		// IFD Actions
+// 		if (desc.ifdActions.isNotEmpty()) {
+// 			for (protPluginSpec: ProtocolPluginSpecification in desc.ifdActions) {
+// 				if (protPluginSpec.configDescription != null && protPluginSpec.configDescription!!.entries.isNotEmpty()) {
+// 					val group =
+// 						DefaultSettingsGroup(
+// 							protPluginSpec.getLocalizedName(LANGUAGE_CODE) +
+// 								" " + I18N.strings.addon_settings_settings.localized(),
+// 							settings,
+// 							protPluginSpec.configDescription!!.entries,
+// 						)
+// 					settingsGroups.add(group)
+// 				}
+// 			}
+// 		}
+//
+// 		// SAL Actions
+// 		if (desc.salActions.isNotEmpty()) {
+// 			for (protPluginSpec: ProtocolPluginSpecification in desc.salActions) {
+// 				if (protPluginSpec.configDescription != null && protPluginSpec.configDescription!!.entries.isNotEmpty()) {
+// 					val group =
+// 						DefaultSettingsGroup(
+// 							protPluginSpec.getLocalizedName(
+// 								LANGUAGE_CODE,
+// 							) + " " + I18N.strings.addon_settings_settings.localized(),
+// 							settings,
+// 							protPluginSpec.configDescription!!.entries,
+// 						)
+// 					settingsGroups.add(group)
+// 				}
+// 			}
+// 		}
+//
+// 		if (settingsGroups.isNotEmpty()) {
+// 			settingsPanel = DefaultSettingsPanel(*settingsGroups.toTypedArray<DefaultSettingsGroup>())
+// 		}
+//
+// 		// create the actions panel
+// 		var actionPanel: ActionPanel? = null
+// 		if (desc.applicationActions.isNotEmpty()) {
+// 			actionPanel = ActionPanel()
+// 			for (appExtSpec: AppExtensionSpecification in desc.applicationActions) {
+// 				val entry = ActionEntryPanel(desc, appExtSpec, manager)
+// 				actionPanel.addActionEntry(entry)
+// 			}
+// 		}
+//
+// 		var nextPanel: AddonPanel? = null
+// 		// check whether to use a tabbed pane or not
+// 		if (actionPanel != null && settingsPanel == null && aboutPanel == null) {
+// 			nextPanel = AddonPanel(actionPanel, name, description, logo)
+// 		} else if (actionPanel == null && settingsPanel != null && aboutPanel == null) {
+// 			nextPanel = AddonPanel(settingsPanel, name, description, logo)
+// 		} else if (actionPanel == null && settingsPanel == null && aboutPanel != null) {
+// 			nextPanel = AddonPanel(aboutPanel, name, description, logo)
+// 		} else if (actionPanel != null || settingsPanel != null || aboutPanel != null) {
+// 			nextPanel = AddonPanel(actionPanel, settingsPanel, aboutPanel, name, description, logo)
+// 		}
+//
+// 		if (nextPanel != null) {
+// 			model.addElement(name, nextPanel)
+// 		}
+// 	}
 
 	companion object {
 		private const val serialVersionUID: Long = 1L
@@ -443,15 +426,13 @@ class ManagementDialog(
 		/**
 		 * Creates a new instance of the dialog and displays it.
 		 * This method only permits a single instance, so this is the preferred way to open the dialog.
-		 *
-		 * @param manager
 		 */
 		@Synchronized
-		fun showDialog(manager: AddonManager) {
+		fun showDialog() {
 			val rd = runningDialog
 			if (rd == null) {
 				LOG.debug { "Creating ManagementDialog." }
-				val dialog = ManagementDialog(manager)
+				val dialog = ManagementDialog()
 				dialog.addWindowListener(
 					object : WindowListener {
 						override fun windowOpened(e: WindowEvent) {}

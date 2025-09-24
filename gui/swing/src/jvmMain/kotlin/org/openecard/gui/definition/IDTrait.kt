@@ -21,7 +21,8 @@
  */
 package org.openecard.gui.definition
 
-import org.openecard.common.util.ValueGenerators.genBase64Session
+import org.openecard.utils.common.generateSessionIdBase64
+import kotlin.random.Random
 
 /**
  * Class implementing the ID portion common to all `InfoUnit`s.
@@ -30,7 +31,8 @@ import org.openecard.common.util.ValueGenerators.genBase64Session
  * @author Tobias Wich
  */
 abstract class IDTrait(
-	override var id: String = genBase64Session(16),
+	random: Random = Random.Default,
+	override var id: String = random.generateSessionIdBase64(),
 ) : InfoUnit {
 	/**
 	 * Creates an IDTrait instance and initializes its ID to the given value.

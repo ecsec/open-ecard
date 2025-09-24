@@ -23,8 +23,6 @@
 package org.openecard.richclient.gui.manage
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.addon.AddonProperties
-import org.openecard.addon.AddonPropertiesException
 import org.openecard.common.OpenecardProperties
 import java.io.IOException
 import java.util.Properties
@@ -45,45 +43,6 @@ object SettingsFactory {
 	fun getInstance(): Settings = OpenecardPropertiesWrapper()
 
 	fun getInstance(props: Properties): Settings = NonSavingProperties(props)
-
-	/**
-	 * Get a Settings object from the given AddonProperties object.
-	 *
-	 * @param props The AddonProperties to wrap in the Settings object.
-	 * @return A Settings object which wraps the `props` object.
-	 */
-	fun getInstance(props: AddonProperties): Settings = AddonPropertiesWrapper(props)
-
-	/**
-	 * The class extends the Settings class wrapping an AddonProperties object.
-	 *
-	 * @author Hans-Martin Haase
-	 */
-	class AddonPropertiesWrapper(
-		private val props: AddonProperties,
-	) : Settings {
-		init {
-			try {
-				props.loadProperties()
-			} catch (ex: AddonPropertiesException) {
-				logger.error(ex) { "Failed to load AddonProperties." }
-			}
-		}
-
-		override fun setProperty(
-			key: String?,
-			value: String?,
-		) {
-			props.setProperty(key, value)
-		}
-
-		override fun getProperty(key: String?): String? = props.getProperty(key)
-
-		@Throws(AddonPropertiesException::class)
-		override fun store() {
-			props.saveProperties()
-		}
-	}
 
 	/**
 	 * The class extends the NonSavingProperties class and wraps OpenecardProperties.

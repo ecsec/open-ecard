@@ -23,7 +23,7 @@
 package org.openecard.richclient.gui.update
 
 import dev.icerock.moko.resources.format
-import org.openecard.common.AppVersion.name
+import org.openecard.build.BuildInfo
 import org.openecard.i18n.I18N
 import org.openecard.releases.UpdateAdvice
 import org.openecard.richclient.updater.VersionUpdateChecker
@@ -52,7 +52,7 @@ class UpdateMessageCreator {
 
 			if (updateStr != null) {
 				return I18N.strings.update_new_version_msg
-					.format(name, updateStr)
+					.format(BuildInfo.appName, updateStr)
 					.localized()
 			}
 		}

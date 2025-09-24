@@ -92,8 +92,8 @@ class ChangePINDialog(
 	 */
 	private fun createSuccessStep() =
 		Step(
-			"success",
-			I18N.strings.pinplugin_action_changepin_userconsent_successstep_title.localized(),
+			id = "success",
+			title = I18N.strings.pinplugin_action_changepin_userconsent_successstep_title.localized(),
 		).apply {
 			isReversible = false
 			inputInfoUnits.add(
@@ -110,8 +110,8 @@ class ChangePINDialog(
 	 */
 	private fun createErrorStep() =
 		Step(
-			"error",
-			I18N.strings.pinplugin_action_changepin_userconsent_errorstep_title.localized(),
+			id = "error",
+			title = I18N.strings.pinplugin_action_changepin_userconsent_errorstep_title.localized(),
 		).apply {
 			isReversible = false
 			inputInfoUnits.add(

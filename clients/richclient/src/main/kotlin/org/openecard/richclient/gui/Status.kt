@@ -34,8 +34,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.openecard.addon.AddonManager
-import org.openecard.common.AppVersion.name
+import org.openecard.build.BuildInfo
 import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.manage.ManagementDialog
 import org.openecard.richclient.gui.update.UpdateWindow
@@ -78,7 +77,6 @@ private val LOG = KotlinLogging.logger { }
  */
 class Status(
 	private val appTray: AppTray,
-	private val manager: AddonManager,
 	private val withControls: Boolean,
 	private val cifDb: CifDb,
 ) {
@@ -95,8 +93,6 @@ class Status(
 	 * Constructor of Status class.
 	 *
 	 * @param appTray tray icon
-	 * @param env The environment object.
-	 * @param manager
 	 */
 	init {
 		setupBaseUI()
@@ -143,7 +139,7 @@ class Status(
 
 		val label =
 			JLabel(
-				" ${I18N.strings.richclient_tray_title.format(name).localized()} ",
+				" ${I18N.strings.richclient_tray_title.format(BuildInfo.appName).localized()} ",
 			)
 		label.font = Font(Font.SANS_SERIF, Font.BOLD, 16)
 		label.horizontalAlignment = SwingConstants.CENTER
@@ -193,7 +189,7 @@ class Status(
 		btnSettings.addActionListener {
 			LOG.debug { "Settings button pressed." }
 			try {
-				ManagementDialog.Companion.showDialog(manager)
+				ManagementDialog.showDialog()
 			} catch (ex: Throwable) {
 				LOG.error(ex) { "Show Settings dialog threw an error." }
 				throw ex

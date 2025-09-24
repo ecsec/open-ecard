@@ -23,8 +23,6 @@
 package org.openecard.richclient.tr03124.ui
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.common.WSHelper
-import org.openecard.crypto.common.asn1.cvc.CHAT
 import org.openecard.gui.StepResult
 import org.openecard.gui.definition.Checkbox
 import org.openecard.gui.definition.Step
@@ -32,8 +30,6 @@ import org.openecard.gui.executor.ExecutionResults
 import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
-import org.openecard.i18n.I18N
-import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.tr03124.EacProcessState
 import org.openecard.sc.pace.cvc.ReadAccess
 import org.openecard.sc.pace.cvc.SpecialFunction
@@ -58,26 +54,12 @@ class CHATStepAction(
 		if (result.isOK()) {
 			processResult(oldResults)
 
-			try {
-				val nextStep = preparePinStep()
-
-				return StepActionResult(StepActionResultStatus.NEXT, nextStep)
-			} catch (ex: WSHelper.WSException) {
-				logger.error(ex) { "Failed to prepare PIN step." }
-				return StepActionResult(StepActionResultStatus.CANCEL)
-			} catch (ex: InterruptedException) {
-				logger.warn(ex) { "CHAT step action interrupted." }
-				return StepActionResult(StepActionResultStatus.CANCEL)
-			}
+			val nextStep = PINStep.buildPinStep(state)
+			return StepActionResult(StepActionResultStatus.NEXT, nextStep)
 		} else {
 			// cancel can not happen, so only back is left to be handled
 			return StepActionResult(StepActionResultStatus.BACK)
 		}
-	}
-
-	private fun preparePinStep(): Step {
-		val nextStep = PINStep.buildPinStep(state)
-		return nextStep
 	}
 
 	private fun processResult(results: Map<String, ExecutionResults>) {
@@ -85,7 +67,7 @@ class CHATStepAction(
 		val selectedCHAT = state.selectedChat
 
 		// process read access and special functions
-		executionResults.getResult(CHATStep.Companion.READ_CHAT_BOXES)?.cast<Checkbox>()?.let { cbRead ->
+		executionResults.getResult(CHATStep.READ_CHAT_BOXES)?.cast<Checkbox>()?.let { cbRead ->
 			for (item in cbRead.boxItems) {
 				val itemName = item.name
 				if (specialFunctionNames.contains(itemName)) {
@@ -113,7 +95,7 @@ class CHATStepAction(
 		 * @return list containing the names of all special functions.
 		 */
 		private val specialFunctionNames: Set<String> by lazy {
-			CHAT.SpecialFunction.entries
+			SpecialFunction.entries
 				.map { it.name }
 				.toSet()
 		}

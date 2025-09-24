@@ -22,7 +22,7 @@
 
 package org.openecard.richclient.gui.manage
 
-import org.openecard.addon.AddonPropertiesException
+import org.openecard.richclient.AddonPropertiesException
 import java.io.IOException
 
 /**

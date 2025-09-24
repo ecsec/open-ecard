@@ -598,8 +598,8 @@ class GenericPINAction(
 
 	private fun generateSuccessStep(successMessage: String) =
 		Step(
-			"success",
-			I18N.strings.pinplugin_action_success_title.localized(),
+			id = "success",
+			title = I18N.strings.pinplugin_action_success_title.localized(),
 		).apply {
 			isReversible = false
 			inputInfoUnits.add(
@@ -609,8 +609,8 @@ class GenericPINAction(
 
 	private fun generateErrorStep(errorMessage: String) =
 		Step(
-			ERROR_STEP_ID,
-			I18N.strings.pinplugin_action_error_title.localized(),
+			id = ERROR_STEP_ID,
+			title = I18N.strings.pinplugin_action_error_title.localized(),
 		).apply {
 			isReversible = false
 			inputInfoUnits.add(

@@ -44,7 +44,7 @@ import org.openecard.sc.pace.cvc.TermsOfUse
  */
 class CVCStep(
 	private val eacData: EacUiData,
-) : Step(STEP_ID, I18N.strings.eac_step_cvc_title.localized()) {
+) : Step(id = STEP_ID, title = I18N.strings.eac_step_cvc_title.localized()) {
 	init {
 		description = I18N.strings.eac_step_cvc_description.localized()
 

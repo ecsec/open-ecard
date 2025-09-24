@@ -21,10 +21,11 @@
  */
 package org.openecard.gui.definition
 
-import org.openecard.common.util.ValueGenerators.genBase64Session
 import org.openecard.gui.executor.BackgroundTask
 import org.openecard.gui.executor.DummyAction
 import org.openecard.gui.executor.StepAction
+import org.openecard.utils.common.generateSessionIdBase64
+import kotlin.random.Random
 
 /**
  * Description class for user consent steps.
@@ -33,17 +34,16 @@ import org.openecard.gui.executor.StepAction
  * @author Tobias Wich
  */
 open class Step(
-	id: String,
+	random: Random = Random.Default,
+	var id: String = random.generateSessionIdBase64(),
 	/**
 	 * Sets the title of this step.
 	 * The title may be used in a progress indicator and in a title element.
 	 *
 	 * @param title The title of this step.
 	 */
-	var title: String?,
+	var title: String,
 ) {
-	var id: String = id
-
 	/**
 	 * Gets the title of this step.
 	 * The title may be used in a progress indicator and in a title element.
@@ -151,14 +151,6 @@ open class Step(
 	 */
 	val inputInfoUnits: MutableList<InputInfoUnit> by lazy { mutableListOf() }
 
-	/**
-	 * Creates a step with the given title and a generated ID.
-	 *
-	 * @see .setTitle
-	 * @param title Title string of the step.
-	 */
-	constructor(title: String?) : this(genBase64Session(16), title)
-
 	val isMetaStep: Boolean
-		get() = inputInfoUnits!!.isEmpty()
+		get() = inputInfoUnits.isEmpty()
 }

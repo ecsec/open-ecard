@@ -22,21 +22,16 @@
 
 package org.openecard.richclient.gui.manage
 
-import org.openecard.addon.AddonManager
-import org.openecard.addon.manifest.AddonSpecification
 import org.openecard.i18n.I18N
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.GridLayout
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
 import java.awt.event.ItemEvent
 import java.awt.event.ItemListener
 import javax.swing.BorderFactory
 import javax.swing.ButtonGroup
-import javax.swing.JButton
 import javax.swing.JEditorPane
 import javax.swing.JLabel
 import javax.swing.JPanel
@@ -45,18 +40,14 @@ import javax.swing.JScrollPane
 import javax.swing.ScrollPaneConstants
 
 /**
- * Implements a about panel which contains basic information about the installed addon.
+ * Implements an about panel which contains basic information about the installed addon.
  *
  * @author Hans-Martin Haase
  */
 class AboutPanel(
-	addonSpecification: AddonSpecification,
 	coreAddon: Boolean,
-	manager: AddonManager,
 	dialog: ManagementDialog,
 ) : JPanel() {
-	private val addonSpec: AddonSpecification
-	private val manager: AddonManager
 	private val layout: GridBagLayout = GridBagLayout()
 	private val license: String
 	private val about: String
@@ -67,7 +58,7 @@ class AboutPanel(
 	 * Setup the header which contains basic information about license and the version.
 	 */
 	private fun setupHead() {
-		val basePane: JPanel = JPanel(GridBagLayout())
+		val basePane = JPanel(GridBagLayout())
 		basePane.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2))
 		basePane.setLayout(GridLayout(2, 1))
 		val versionLabel = JLabel(I18N.strings.about_version.localized() + ":")
@@ -89,7 +80,8 @@ class AboutPanel(
 		lc2.gridy = 0
 		lc2.weightx = 1.0
 		lc2.weighty = 1.0
-		basePane.add(JLabel(addonSpec.getVersion()))
+		// basePane.add(JLabel(addonSpec.getVersion()))
+		basePane.add(JLabel("TODO: Addon Version"))
 
 		val lc3 = GridBagConstraints()
 		lc3.anchor = GridBagConstraints.WEST
@@ -107,7 +99,8 @@ class AboutPanel(
 		lc4.gridy = 0
 		lc4.weightx = 1.0
 		lc4.weighty = 1.0
-		basePane.add(JLabel(addonSpec.license))
+		// basePane.add(JLabel(addonSpec.license))
+		basePane.add(JLabel("TODO: Addon License"))
 
 		val c = GridBagConstraints()
 		c.fill = GridBagConstraints.HORIZONTAL
@@ -200,45 +193,15 @@ class AboutPanel(
 	}
 
 	/**
-	 * Setup the footer which contains only the uninstall button but just for non core add-ons.
-	 */
-	private fun setupFooter(coreAddon: Boolean) {
-		if (!coreAddon) {
-			val panel: JPanel = JPanel(FlowLayout(FlowLayout.LEADING))
-			val uninstallButton: JButton = JButton(I18N.strings.addon_about_uninstall.localized())
-			uninstallButton.addActionListener {
-				manager.uninstallAddon(addonSpec)
-				// let's sleep a bit the file registry takes a bit to remove everything
-				try {
-					Thread.sleep(3000)
-				} catch (ex: InterruptedException) {
-					// ignore
-				}
-				dialog.updateGui()
-			}
-			panel.add(uninstallButton)
-
-			val c = GridBagConstraints()
-			c.fill = GridBagConstraints.HORIZONTAL
-			c.gridwidth = GridBagConstraints.REMAINDER
-			c.weightx = 1.0
-			c.weighty = 1.0
-			c.anchor = GridBagConstraints.SOUTH
-			layout.setConstraints(panel, c)
-			add(panel)
-		}
-	}
-
-	/**
 	 * ItemListener implementation which switches the text contained in the JEditorPane.
 	 */
 	private val action: ItemListener =
 		object : ItemListener {
 			override fun itemStateChanged(e: ItemEvent) {
 				if (e.getStateChange() == ItemEvent.DESELECTED) {
-					display!!.setText(license)
+					display!!.text = license
 				} else if (e.getStateChange() == ItemEvent.SELECTED) {
-					display!!.setText(about)
+					display!!.text = about
 				}
 				display!!.setCaretPosition(0)
 			}
@@ -254,15 +217,14 @@ class AboutPanel(
 	 */
 	init {
 		this.setLayout(layout)
-		this.manager = manager
 		this.dialog = dialog
 		this.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5))
-		addonSpec = addonSpecification
-		license = addonSpecification.getLicenseText(LANGUAGE_CODE)
-		about = addonSpecification.getAbout(LANGUAGE_CODE)
+// 		license = addonSpecification.getLicenseText(LANGUAGE_CODE)
+// 		about = addonSpecification.getAbout(LANGUAGE_CODE)
+		license = "TODO: License Text"
+		about = "TODO: About Text"
 		setupHead()
 		setupBody()
-		setupFooter(coreAddon)
 	}
 
 	companion object {

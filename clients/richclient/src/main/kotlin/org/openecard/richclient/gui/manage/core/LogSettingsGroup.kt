@@ -24,20 +24,19 @@ package org.openecard.richclient.gui.manage.core
 
 import ch.qos.logback.core.joran.spi.JoranException
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.addon.AddonPropertiesException
 import org.openecard.common.util.FileUtils.resolveResourceAsStream
 import org.openecard.i18n.I18N
+import org.openecard.richclient.AddonPropertiesException
 import org.openecard.richclient.LogbackConfig
 import org.openecard.richclient.gui.manage.SettingsFactory
 import org.openecard.richclient.gui.manage.SettingsGroup
-import org.openecard.ws.marshal.WSMarshaller
-import org.openecard.ws.marshal.WSMarshallerException
-import org.openecard.ws.marshal.WSMarshallerFactory.Companion.createInstance
+import org.openecard.utils.serialization.XmlUtils
+import org.openecard.utils.serialization.XmlUtils.Companion.doc2str
+import org.openecard.utils.serialization.XmlUtils.Companion.str2doc
 import org.w3c.dom.DOMException
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.xml.sax.SAXException
-import sun.awt.FontConfiguration.loadProperties
 import java.awt.Desktop
 import java.io.File
 import java.io.FileInputStream
@@ -65,11 +64,12 @@ private val LOG = KotlinLogging.logger { }
  *
  * @author Tobias Wich
  */
-class LogSettingsGroup :
-	SettingsGroup(
+class LogSettingsGroup(
+	private val xmlUtils: XmlUtils = XmlUtils(),
+) : SettingsGroup(
 		I18N.strings.addon_core_logging_group_name.localized(),
 		SettingsFactory.getInstance(
-			loadProperties(),
+			loadProperties(xmlUtils),
 		),
 	) {
 	init {
@@ -77,7 +77,10 @@ class LogSettingsGroup :
 			I18N.strings.addon_core_logging_root.localized(),
 			I18N.strings.addon_core_logging_root_desc.localized(),
 			ROOT_KEY,
-			*arrayOf("ERROR", "WARN", "INFO", "DEBUG"),
+			"ERROR",
+			"WARN",
+			"INFO",
+			"DEBUG",
 		)
 		addLogLevelBox(
 			I18N.strings.addon_core_logging_paos.localized(),
@@ -166,10 +169,7 @@ class LogSettingsGroup :
 		name: String,
 		desc: String,
 		key: String,
-	): JComboBox<*> {
-		val levels = arrayOf("", "WARN", "INFO", "DEBUG")
-		return addSelectionItem(name, desc, key, *levels)
-	}
+	): JComboBox<*> = addSelectionItem(name, desc, key, "", "WARN", "INFO", "DEBUG")
 
 	@Throws(IOException::class, SecurityException::class, AddonPropertiesException::class)
 	override fun saveProperties() {
@@ -194,10 +194,7 @@ class LogSettingsGroup :
 				}
 			}
 			// load file into a Document
-			val m: WSMarshaller = createInstance()
-			m.removeAllTypeClasses()
-			val fin: FileInputStream = FileInputStream(confFile)
-			val conf: Document = m.str2doc(fin)
+			val conf = xmlUtils.w3Builder().str2doc(confFile.inputStream())
 
 			// process root value
 			var value: String? = properties.getProperty(ROOT_KEY)
@@ -241,15 +238,13 @@ class LogSettingsGroup :
 			value = value ?: ""
 			setLoglevel(conf, CG_KEY, value)
 			FileWriter(confFile).use { w ->
-				val confStr: String = m.doc2str(conf)
+				val confStr: String = xmlUtils.transformer().doc2str(conf)
 				w.write(confStr)
 			}
 			// reload log config
 			LogbackConfig.load()
 		} catch (ex: JoranException) {
 			throw AddonPropertiesException(ex.message!!, ex)
-		} catch (ex: WSMarshallerException) {
-			throw IOException(ex.message, ex)
 		} catch (ex: SAXException) {
 			throw IOException(ex.message, ex)
 		} catch (ex: TransformerException) {
@@ -280,7 +275,7 @@ class LogSettingsGroup :
 			val url: String = event.url.toExternalForm()
 			try {
 				var browserOpened: Boolean = false
-				val uri: URI = URI(url)
+				val uri = URI(url)
 				if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
 					try {
 						Desktop.getDesktop().browse(uri)
@@ -291,7 +286,7 @@ class LogSettingsGroup :
 					}
 				}
 				if (!browserOpened) {
-					val pb: ProcessBuilder = ProcessBuilder("xdg-open", uri.toString())
+					val pb = ProcessBuilder("xdg-open", uri.toString())
 					try {
 						pb.start()
 					} catch (ex: IOException) {
@@ -321,7 +316,7 @@ class LogSettingsGroup :
 		private const val MDLW_EVENT_KEY: String = "org.openecard.mdlw.event"
 		private const val CG_KEY: String = "org.openecard.addons.cg"
 
-		private fun loadProperties(): Properties {
+		private fun loadProperties(xmlUtils: XmlUtils): Properties {
 			try {
 				val confFile: File = LogbackConfig.confFile
 				if (!confFile.exists()) {
@@ -329,10 +324,7 @@ class LogSettingsGroup :
 					return Properties()
 				} else {
 					// load file into a Document
-					val m: WSMarshaller = createInstance()
-					m.removeAllTypeClasses()
-					val fin = FileInputStream(confFile)
-					val conf: Document = m.str2doc(fin)
+					val conf: Document = xmlUtils.w3Builder().str2doc(confFile.inputStream())
 					// fill the properties
 					val p = Properties()
 					p.setProperty(ROOT_KEY, getRootlevel(conf))
@@ -354,8 +346,6 @@ class LogSettingsGroup :
 				// something else went wrong
 				return Properties()
 			} catch (ex: SAXException) {
-				return Properties()
-			} catch (ex: WSMarshallerException) {
 				return Properties()
 			} catch (ex: AddonPropertiesException) {
 				return Properties()
@@ -423,11 +413,10 @@ class LogSettingsGroup :
 			try {
 				val p: XPath = XPathFactory.newInstance().newXPath()
 				val exp: XPathExpression = p.compile("/configuration/root")
-				val e: Element? = exp.evaluate(conf, XPathConstants.NODE) as Element?
-				// no root is beyond our capability
-				if (e == null) {
-					throw AddonPropertiesException("Logging config is invalid, the root element is missing.")
-				}
+				val e =
+					exp.evaluate(conf, XPathConstants.NODE) as Element?
+						// no root is beyond our capability
+						?: throw AddonPropertiesException("Logging config is invalid, the root element is missing.")
 
 				return e.getAttribute("level")
 			} catch (ex: DOMException) {
@@ -445,11 +434,10 @@ class LogSettingsGroup :
 			try {
 				val p: XPath = XPathFactory.newInstance().newXPath()
 				val exp: XPathExpression = p.compile("/configuration/root")
-				val e: Element? = exp.evaluate(conf, XPathConstants.NODE) as Element?
-				// no root is beyond our capability
-				if (e == null) {
-					throw AddonPropertiesException("Logging config is invalid, the root element is missing.")
-				}
+				val e =
+					exp.evaluate(conf, XPathConstants.NODE) as Element?
+						// no root is beyond our capability
+						?: throw AddonPropertiesException("Logging config is invalid, the root element is missing.")
 
 				e.setAttribute("level", level)
 			} catch (ex: DOMException) {

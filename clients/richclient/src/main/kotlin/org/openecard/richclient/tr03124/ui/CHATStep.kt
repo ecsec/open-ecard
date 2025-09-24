@@ -58,8 +58,8 @@ private val logger = KotlinLogging.logger { }
 class CHATStep(
 	private val state: EacProcessState,
 ) : Step(
-		STEP_ID,
-		I18N.strings.eac_step_chat_title.localized(),
+		id = STEP_ID,
+		title = I18N.strings.eac_step_chat_title.localized(),
 	) {
 	init {
 		description = I18N.strings.eac_step_chat_step_description.localized()

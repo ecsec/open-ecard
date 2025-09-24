@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2019 ecsec GmbH.
+ * Copyright (C) 2012-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,10 +23,10 @@ package org.openecard.gui.swing.components
 
 import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
-import jakarta.activation.MimeType
-import jakarta.activation.MimeTypeParseException
+import io.ktor.http.BadContentTypeFormatException
+import io.ktor.http.ContentType
+import io.ktor.http.charset
 import org.apache.pdfbox.Loader
-import org.openecard.common.util.FileUtils.homeConfigDir
 import org.openecard.gui.definition.Document
 import org.openecard.gui.definition.OutputInfoUnit
 import org.openecard.gui.definition.ToggleText
@@ -64,6 +64,7 @@ import javax.swing.text.BadLocationException
 import javax.swing.text.ChangedCharSetException
 import javax.swing.text.html.HTMLDocument
 import javax.swing.text.html.HTMLEditorKit
+import kotlin.io.path.createTempDirectory
 import kotlin.math.ceil
 
 private val LOG = KotlinLogging.logger { }
@@ -150,7 +151,7 @@ class ToggleText(
 				}
 				createJTextArea(
 					I18N.strings.swing_unsupported_mimetype
-						.format(mimeType ?: "null")
+						.format(mimeType)
 						.localized(),
 				)
 			}
@@ -263,17 +264,13 @@ class ToggleText(
 		} catch (ex: ChangedCharSetException) {
 			try {
 				val spec = ex.getCharSetSpec()
-				val mt = MimeType(spec)
-				val charsetString = mt.getParameter("charset")
-				if (charsetString != null && !charsetString.isEmpty()) {
-					charset = Charset.forName(charsetString)
+				val mt = ContentType.parse(spec)
+				val charsetNew = mt.charset()
+				if (charsetNew != null) {
+					charset = charsetNew
 				}
-			} catch (ex2: MimeTypeParseException) {
+			} catch (ex2: BadContentTypeFormatException) {
 				LOG.warn(ex2) { "Failed to parse MIME Type specification." }
-			} catch (ex2: IllegalCharsetNameException) {
-				LOG.warn { "Unsupported charset specification inside HTML document." }
-			} catch (ex2: UnsupportedCharsetException) {
-				LOG.warn { "Unsupported charset specification inside HTML document." }
 			}
 		} catch (ex: BadLocationException) {
 			LOG.error(ex) { "Failed to parse HTML document." }
@@ -379,9 +376,8 @@ private fun createTmpPdf(content: ByteArray): String {
  */
 @Throws(IOException::class, SecurityException::class)
 private fun createTmpDir(): File {
-	val tmpDirPath = homeConfigDir.absolutePath + "/tmp"
-	val tmpDir = File(tmpDirPath)
-	tmpDir.mkdirs()
+	val tmpDirPath = createTempDirectory()
+	val tmpDir = tmpDirPath.toFile()
 	tmpDir.deleteOnExit()
 	return tmpDir
 }

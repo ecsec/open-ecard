@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,17 +19,15 @@
  * you and ecsec GmbH.
  *
  */
-package org.openecard.common
+
+package org.openecard.richclient.gui.components
 
 /**
- * Exception indicating that someone external forced the thread to terminate.
- * This is like an InterruptedException but implemented as a RuntimeException, so that it may be used without declaring
- * it everywhere.
  *
- * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
-class ThreadTerminateException : RuntimeException {
-	constructor(msg: String?) : super(msg)
-
-	constructor(msg: String?, cause: Throwable?) : super(msg, cause)
+enum class ScalarListEntryType {
+	STRING,
+	BIGINTEGER,
+	BIGDECIMAL,
 }

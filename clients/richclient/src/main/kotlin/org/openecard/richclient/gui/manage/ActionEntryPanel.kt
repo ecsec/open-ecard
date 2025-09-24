@@ -23,10 +23,6 @@
 package org.openecard.richclient.gui.manage
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.addon.AddonManager
-import org.openecard.addon.bind.AppExtensionAction
-import org.openecard.addon.manifest.AddonSpecification
-import org.openecard.addon.manifest.AppExtensionSpecification
 import java.awt.Component
 import java.awt.Dimension
 import java.awt.Font
@@ -45,13 +41,8 @@ private val LOG = KotlinLogging.logger { }
  *
  * @author Tobias Wich
  */
-class ActionEntryPanel(
-	addonSpec: AddonSpecification,
-	actionSpec: AppExtensionSpecification,
-	manager: AddonManager,
-) : JPanel() {
+class ActionEntryPanel : JPanel() {
 	protected val actionBtn: JButton
-	protected val manager: AddonManager
 
 	/**
 	 * Creates an entry without the actual action added.
@@ -63,8 +54,10 @@ class ActionEntryPanel(
 	init {
 		setLayout(BoxLayout(this, BoxLayout.X_AXIS))
 
-		val name: String = actionSpec.getLocalizedName(LANGUAGE_CODE)
-		val description: String = actionSpec.getLocalizedDescription(LANGUAGE_CODE)
+		// val name: String = actionSpec.getLocalizedName(LANGUAGE_CODE)
+		// val description: String = actionSpec.getLocalizedDescription(LANGUAGE_CODE)
+		val name = "TODO: Addon Action"
+		val description = "TODO: Addon Action description"
 
 		actionBtn = JButton(name)
 		add(actionBtn)
@@ -76,41 +69,40 @@ class ActionEntryPanel(
 		desc.setFont(desc.getFont().deriveFont(Font.PLAIN))
 		add(desc)
 
-		this.manager = manager
-		addAction(addonSpec, actionSpec)
+		// addAction(addonSpec, actionSpec)
 	}
 
-	/**
-	 * Adds an action to the entry.
-	 *
-	 * @param actionSpec Action to perform when the button is pressed.
-	 */
-	private fun addAction(
-		addonSpec: AddonSpecification,
-		actionSpec: AppExtensionSpecification,
-	) {
-		actionBtn.addActionListener {
-			object : SwingWorker<Unit, Void?>() {
-				override fun doInBackground() {
-					val action: AppExtensionAction = manager.getAppExtensionAction(addonSpec, actionSpec.id!!)!!
-					actionBtn.setEnabled(false)
-					try {
-						action.execute()
-					} catch (t: Throwable) {
-						// this catch is here just in case anything uncaught is thrown during execute
-						LOG.error(t) { "Execution ended with an error." }
-						throw t
-					} finally {
-						manager.returnAppExtensionAction(action)
-						actionBtn.setEnabled(true)
-					}
-				}
-			}.execute()
-		}
-	}
+// 	/**
+// 	 * Adds an action to the entry.
+// 	 *
+// 	 * @param actionSpec Action to perform when the button is pressed.
+// 	 */
+// 	private fun addAction(
+// 		addonSpec: AddonSpecification,
+// 		actionSpec: AppExtensionSpecification,
+// 	) {
+// 		actionBtn.addActionListener {
+// 			object : SwingWorker<Unit, Void?>() {
+// 				override fun doInBackground() {
+// 					val action: AppExtensionAction = manager.getAppExtensionAction(addonSpec, actionSpec.id!!)!!
+// 					actionBtn.setEnabled(false)
+// 					try {
+// 						action.execute()
+// 					} catch (t: Throwable) {
+// 						// this catch is here just in case anything uncaught is thrown during execute
+// 						LOG.error(t) { "Execution ended with an error." }
+// 						throw t
+// 					} finally {
+// 						manager.returnAppExtensionAction(action)
+// 						actionBtn.setEnabled(true)
+// 					}
+// 				}
+// 			}.execute()
+// 		}
+// 	}
 
 	companion object {
 		private const val serialVersionUID: Long = 1L
-		private val LANGUAGE_CODE: String = System.getProperty("user.language")
+		// private val LANGUAGE_CODE: String = System.getProperty("user.language")
 	}
 }

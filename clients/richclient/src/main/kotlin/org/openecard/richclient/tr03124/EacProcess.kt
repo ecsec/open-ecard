@@ -105,7 +105,7 @@ class EacProcess(
 
 				uc.steps.add(PINStep.createDummy(uiStep.guiData.pinType))
 
-				val procStep = ProcessingStep()
+				val procStep = ProcessingStep(clientInfo.userAgent.name)
 				val procStepAction = ProcessingStepAction(procStep, state)
 				procStep.action = procStepAction
 				uc.steps.add(procStep)

@@ -32,7 +32,6 @@ application {
 
 dependencies {
 
-	implementation(libs.apache.batik)
 	implementation(libs.kotlin.logging)
 	implementation(libs.logback.classic)
 
@@ -48,20 +47,21 @@ dependencies {
 
 	// basic runtime deps
 	implementation(project(":clients:richclient-res"))
+	implementation(libs.apache.batik)
+	implementation(libs.systray)
 
 	implementation(project(":releases"))
 	implementation(project(":build-info"))
-
-	implementation(libs.jose4j)
-	implementation(libs.jna.jpms)
-	implementation(libs.jna.jpms.platform)
-	implementation(libs.systray)
 
 	// Card Stack
 	implementation(project(":smartcard:pcsc-scio"))
 	implementation(project(":sal:smartcard-sal"))
 	implementation(project(":cif:bundled-cifs"))
 	implementation(project(":smartcard:pace"))
+
+	// http client
+	implementation(libs.ktor.client.core)
+	implementation(libs.ktor.client.okhttp)
 
 	testImplementation(libs.bundles.test.basics.kotlin)
 }

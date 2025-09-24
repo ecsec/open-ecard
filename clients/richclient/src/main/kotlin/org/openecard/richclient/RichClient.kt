@@ -30,15 +30,16 @@ import com.sun.jna.platform.win32.WinReg
 import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.request.forms.submitForm
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.parameters
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import org.apache.http.HttpException
-import org.apache.http.entity.ContentType
-import org.apache.http.entity.StringEntity
-import org.apache.http.message.BasicHttpEntityEnclosingRequest
-import org.apache.http.protocol.BasicHttpContext
-import org.apache.http.protocol.HttpContext
-import org.apache.http.protocol.HttpRequestExecutor
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.openecard.addons.tr03124.ClientInformation
 import org.openecard.addons.tr03124.UserAgent
 import org.openecard.build.BuildInfo
@@ -48,9 +49,6 @@ import org.openecard.gui.message.DialogType
 import org.openecard.gui.swing.SwingDialogWrapper
 import org.openecard.gui.swing.SwingUserConsent
 import org.openecard.gui.swing.common.GUIDefaults
-import org.openecard.httpcore.HttpRequestHelper
-import org.openecard.httpcore.KHttpUtils
-import org.openecard.httpcore.StreamHttpClientConnection
 import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.AppTray
 import org.openecard.richclient.gui.SettingsAndDefaultViewWrapper
@@ -65,14 +63,14 @@ import org.openecard.sc.iface.TerminalFactory
 import org.openecard.sc.pcsc.PcscTerminalFactory
 import java.io.IOException
 import java.net.BindException
-import java.net.Socket
 import java.net.URI
 import java.net.URL
-import java.nio.charset.UnsupportedCharsetException
 import java.util.Timer
 import java.util.TimerTask
 import java.util.concurrent.FutureTask
 import kotlin.system.exitProcess
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  *
@@ -104,8 +102,9 @@ class RichClient {
 		val gui = SwingUserConsent(SwingDialogWrapper())
 
 		try {
-			tray = AppTray(this)
-			tray!!.beginSetup()
+			val tray = AppTray(this)
+			this.tray = tray
+			tray.beginSetup()
 
 			// Set up the IFD and card watcher
 			val terminalFactory = PcscTerminalFactory.instance
@@ -185,7 +184,8 @@ class RichClient {
 					LOG.debug { "Trying to register HTTP binding port with dispatcher service." }
 					val realPort = httpBinding!!.port
 					val regUrl = URI("http://127.0.0.1:24727/dp/register").toURL()
-					val ft: FutureTask<*> = FutureTask(DispatcherRegistrator(regUrl, realPort, waitTime, timeout), 1)
+					val ft: FutureTask<*> =
+						FutureTask(DispatcherRegistrator(regUrl, realPort, waitTime.milliseconds, timeout.milliseconds), 1)
 					val registerThread = Thread(ft, "Register-Dispatcher-Service")
 					registerThread.isDaemon = true
 					registerThread.start()
@@ -200,7 +200,7 @@ class RichClient {
 				throw e
 			}
 
-			tray!!.endSetup(cifDb, cardWatcher)
+			tray.endSetup(cifDb, cardWatcher)
 
 			// perform GC to bring down originally allocated memory
 			Timer("GC-Task").schedule(GCTask(), 5000)
@@ -208,7 +208,7 @@ class RichClient {
 			val update = OpenecardProperties.getProperty("check-for-updates").toBoolean()
 			if (update) {
 				// check for updates
-				Timer("Update-Task").schedule(UpdateTask(tray!!), 1)
+				Timer("Update-Task").schedule(UpdateTask(tray), 1)
 			}
 		} catch (ex: Exception) {
 			LOG.error(ex) { "${ex.message}" }
@@ -286,64 +286,56 @@ class RichClient {
 	private class DispatcherRegistrator(
 		private val regUrl: URL,
 		private val bindingPort: Int,
-		private val waitTime: Long,
-		private val timeout: Long,
+		private val waitTime: Duration,
+		private val timeout: Duration,
 	) : Runnable {
-		override fun run() {
-			// TODO: replace with ktor
-			val startTime = System.currentTimeMillis()
-			val exec = HttpRequestExecutor()
-			val httpCtx: HttpContext = BasicHttpContext()
-
-			do {
-				try {
-					val port = if (regUrl.port == -1) regUrl.defaultPort else regUrl.port
-					val sock = Socket(regUrl.host, port)
-					val con = StreamHttpClientConnection(sock.getInputStream(), sock.getOutputStream())
-					val req = BasicHttpEntityEnclosingRequest("POST", regUrl.file)
-					// prepare request
-					HttpRequestHelper.setDefaultHeader(req, regUrl)
-					val reqContentType = ContentType.create("application/x-www-form-urlencoded", "UTF-8")
-					val bodyStr = "Port=$bindingPort"
-					val bodyEnt = StringEntity(bodyStr, reqContentType)
-					req.entity = bodyEnt
-					req.setHeader(bodyEnt.contentType)
-					req.setHeader("Content-Length", bodyEnt.contentLength.toString())
-
-					// send request
-					KHttpUtils.dumpHttpRequest(LOG, req)
-					val response = exec.execute(req, con, httpCtx)
-					KHttpUtils.dumpHttpResponse(LOG, response)
-
-					val statusCode = response.statusLine.statusCode
-					if (statusCode == 204) {
-						return
-					} else {
-						val msg = "Execution of dispatcher registration is not successful (code=$statusCode), trying again ..."
-						LOG.info { msg }
+		override fun run() =
+			runBlocking {
+				val startTime = System.currentTimeMillis()
+				val client =
+					HttpClient(OkHttp) {
 					}
-				} catch (ex: HttpException) {
-					LOG.error(ex) { "Failed to send dispatcher registration reguest." }
-				} catch (ex: IOException) {
-					LOG.error(ex) { "Failed to send dispatcher registration reguest." }
-				} catch (ex: UnsupportedCharsetException) {
-					LOG.error(ex) { "Failed to send dispatcher registration reguest." }
-				}
 
-				// terminate in case there is no time left
-				val now = System.currentTimeMillis()
-				if (now - startTime > timeout) {
-					throw RuntimeException("Failed to register with dispatcher service in a timely manner.")
-				}
-				// wait a bit and try again
-				try {
-					Thread.sleep(waitTime)
-				} catch (ex: InterruptedException) {
-					LOG.info { "Dispatcher registration interrupted." }
-					return
-				}
-			} while (true)
-		}
+				do {
+					try {
+						val resp =
+							client.submitForm(
+								regUrl.toExternalForm(),
+								formParameters =
+									parameters {
+										append("Port", bindingPort.toString())
+									},
+								encodeInQuery = false,
+							) {
+							}
+
+						if (resp.status == HttpStatusCode.NoContent) {
+							return@runBlocking
+						} else {
+							val msg = "Execution of dispatcher registration is not successful (code=${resp.status}), trying again ..."
+							LOG.info { msg }
+						}
+					} catch (ex: CancellationException) {
+						LOG.error(ex) { "Dispatcher registration interrupted" }
+						return@runBlocking
+					} catch (ex: Exception) {
+						LOG.error(ex) { "Failed to send dispatcher registration reguest" }
+					}
+
+					// terminate in case there is no time left
+					val now = System.currentTimeMillis()
+					if ((now - startTime).milliseconds > timeout) {
+						throw RuntimeException("Failed to register with dispatcher service in a timely manner.")
+					}
+					// wait a bit and try again
+					try {
+						delay(waitTime)
+					} catch (ex: CancellationException) {
+						LOG.info { "Dispatcher registration interrupted." }
+						return@runBlocking
+					}
+				} while (true)
+			}
 	}
 
 	companion object {

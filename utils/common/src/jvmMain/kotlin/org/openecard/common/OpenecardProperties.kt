@@ -47,6 +47,7 @@ private val logger = KotlinLogging.logger { }
  *
  * @author Tobias Wich
  */
+@Deprecated("Legacy OeC Code")
 object OpenecardProperties {
 	private var properties: OverridingProperties? = null
 

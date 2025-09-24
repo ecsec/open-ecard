@@ -28,30 +28,12 @@ import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilities
 import iso.std.iso_iec._24727.tech.schema.IFDCapabilitiesType
 import iso.std.iso_iec._24727.tech.schema.KeyPadCapabilityType
 import iso.std.iso_iec._24727.tech.schema.OutputInfoType
-import iso.std.iso_iec._24727.tech.schema.Transmit
-import iso.std.iso_iec._24727.tech.schema.TransmitResponse
-import iso.std.iso_iec._24727.tech.schema.VerifyUser
-import iso.std.iso_iec._24727.tech.schema.VerifyUserResponse
 import oasis.names.tc.dss._1_0.core.schema.Result
 import org.openecard.common.ECardConstants
-import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.makeResultError
 import org.openecard.common.WSHelper.makeResultOK
 import org.openecard.common.WSHelper.makeResultUnknownError
 import org.openecard.common.apdu.common.CardCommandStatus
-import org.openecard.common.apdu.common.CardResponseAPDU
-import org.openecard.common.ifd.scio.SCIOException
-import org.openecard.common.util.PINUtils
-import org.openecard.common.util.UtilException
-import org.openecard.gui.ResultStatus
-import org.openecard.gui.UserConsent
-import org.openecard.gui.definition.PasswordField
-import org.openecard.gui.definition.Step
-import org.openecard.gui.definition.Text
-import org.openecard.gui.definition.UserConsentDescription
-import org.openecard.gui.executor.ExecutionEngine
-import org.openecard.gui.executor.StepAction
-import org.openecard.i18n.I18N
 import org.openecard.ifd.scio.wrapper.ChannelManager
 import org.openecard.ifd.scio.wrapper.SingleThreadChannel
 import org.openecard.ifd.scio.wrapper.TerminalInfo
@@ -67,7 +49,6 @@ internal class AbstractTerminal(
 	private val ifd: IFD,
 	private val cm: ChannelManager,
 	private val channel: SingleThreadChannel,
-	private val gui: UserConsent?,
 	private val ctxHandle: ByteArray?,
 	private val displayIdx: BigInteger?,
 ) {
@@ -132,196 +113,196 @@ internal class AbstractTerminal(
 		}
 	}
 
-	@Throws(SCIOException::class, IFDException::class, InterruptedException::class)
-	fun verifyUser(verify: VerifyUser): VerifyUserResponse {
-		val handle = verify.getSlotHandle()
-		// get capabilities
-		getCapabilities()
-
-		// check if is possible to perform PinCompare protocol
-		val protoList = this.capabilities!!.getSlotCapability()[0].getProtocol()
-		if (!protoList.contains(ECardConstants.Protocol.PIN_COMPARE)) {
-			throw IFDException("PinCompare protocol is not supported by this IFD.")
-		}
-
-		// get values from requested command
-		val inputUnit = verify.getInputUnit()
-		val allMsgs: AltVUMessagesType = getMessagesOrDefaults(verify.getAltVUMessages())
-		var firstTimeout = verify.getTimeoutUntilFirstKey()
-		firstTimeout = firstTimeout ?: BigInteger.valueOf(60000)
-		var otherTimeout = verify.getTimeoutAfterFirstKey()
-		otherTimeout = otherTimeout ?: BigInteger.valueOf(15000)
-		val template = verify.getTemplate()
-
-		var response: VerifyUserResponse?
-		var result: Result
-		// check which type of authentication to perform
-		if (inputUnit.getBiometricInput() != null) {
-			// TODO: implement
-			val msg = "Biometric authentication not supported by IFD."
-			val ex = IFDException(ECardConstants.Minor.IFD.IO.UNKNOWN_INPUT_UNIT, msg)
-			LOG.warn(ex) { ex.message }
-			throw ex
-		} else if (inputUnit.getPinInput() != null) {
-			val pinInput = inputUnit.getPinInput()
-
-			// we have a sophisticated card reader
-			if (terminalInfo.supportsPinCompare()) {
-				// create custom pinAction to submit pin to terminal
-				val pinAction = NativePinStepAction("enter-pin", pinInput, channel, terminalInfo, template)
-				// display message instructing user what to do
-				val uc = pinUserConsent(pinAction)
-				val ucr = gui!!.obtainNavigator(uc)
-				val exec = ExecutionEngine(ucr)
-				// run gui
-				val status = exec.process()
-				if (status == ResultStatus.CANCEL) {
-					val msg = "PIN entry cancelled by user."
-					LOG.warn { msg }
-					result = makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg)
-					response =
-						WSHelper.makeResponse(
-							VerifyUserResponse::class.java,
-							result,
-						)
-				} else if (pinAction.exception != null) {
-					LOG.warn(pinAction.exception) { pinAction.exception!!.message }
-					result =
-						makeResultError(
-							ECardConstants.Minor.IFD.AUTHENTICATION_FAILED,
-							pinAction.exception!!.message,
-						)
-					response =
-						WSHelper.makeResponse(
-							VerifyUserResponse::class.java,
-							result,
-						)
-				} else {
-					// input by user
-					val verifyResponse = pinAction.response
-					// evaluate result
-					result = checkNativePinVerify(verifyResponse!!)
-					response =
-						WSHelper.makeResponse(
-							VerifyUserResponse::class.java,
-							result,
-						)
-					response.setResponse(verifyResponse)
-				}
-
-				return response
-			} else if (this.isVirtual) { // software method
-				// get pin, encode and send
-				val minLength = pinInput.getPasswordAttributes().getMinLength().toInt()
-				val maxLength = pinInput.getPasswordAttributes().getMaxLength().toInt()
-				val uc = pinUserConsent(minLength, maxLength)
-				val ucr = gui!!.obtainNavigator(uc)
-				val exec = ExecutionEngine(ucr)
-				val status = exec.process()
-				if (status == ResultStatus.CANCEL) {
-					val msg = "PIN entry cancelled by user."
-					LOG.warn { msg }
-					result = makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg)
-					response =
-						WSHelper.makeResponse(
-							VerifyUserResponse::class.java,
-							result,
-						)
-					return response
-				}
-
-				val rawPIN: CharArray = getPinFromUserConsent(exec)
-				val attributes = pinInput.getPasswordAttributes()
-				var verifyTransmit: Transmit?
-
-				try {
-					verifyTransmit = PINUtils.buildVerifyTransmit(rawPIN, attributes, template, handle)
-				} catch (e: UtilException) {
-					val msg = "Failed to create the verifyTransmit message."
-					LOG.error(e) { msg }
-					result = makeResultError(ECardConstants.Minor.IFD.UNKNOWN_ERROR, msg)
-					response =
-						WSHelper.makeResponse(
-							VerifyUserResponse::class.java,
-							result,
-						)
-					return response
-				} finally {
-					rawPIN.fill(' ')
-				}
-
-				// send to reader
-				var transResp: TransmitResponse
-				try {
-					transResp = ifd.transmit(verifyTransmit)
-				} finally {
-					// blank PIN APDU
-					for (apdu in verifyTransmit.getInputAPDUInfo()) {
-						val rawApdu = apdu.getInputAPDU()
-						rawApdu?.fill(0.toByte())
-					}
-				}
-
-				// produce messages
-				if (transResp.getResult().getResultMajor() == ECardConstants.Major.ERROR) {
-					if (transResp.getOutputAPDU().isEmpty()) {
-						result =
-							makeResultError(
-								ECardConstants.Minor.IFD.AUTHENTICATION_FAILED,
-								transResp.getResult().getResultMessage().getValue(),
-							)
-						response =
-							WSHelper.makeResponse(
-								VerifyUserResponse::class.java,
-								result,
-							)
-						return response
-					} else {
-						response =
-							WSHelper.makeResponse(
-								VerifyUserResponse::class.java,
-								transResp.getResult()!!,
-							)
-						response.setResponse(transResp.getOutputAPDU()[0])
-
-						// repeat if the response apdu signals that there are tries left
-						// TODO: move this code to the PIN Compare protocol
-						if (response.getResponse() != null) {
-							val resApdu = CardResponseAPDU(response.getResponse())
-							val statusBytes = resApdu.statusBytes
-							val isMainStatus = statusBytes[0] == 0x63.toByte()
-							val isMinorStatus =
-								(statusBytes[1].toInt() and 0xF0.toByte().toInt()) == 0xC0.toByte().toInt()
-							val triesLeft = statusBytes[1].toInt() and 0x0F
-							if (isMainStatus && isMinorStatus && triesLeft > 0) {
-								LOG.info { "PIN not entered successful. There are ${statusBytes[1].toInt() and 0x0F} tries left." }
-								return verifyUser(verify)
-							}
-						}
-
-						return response
-					}
-				} else {
-					response =
-						WSHelper.makeResponse(
-							VerifyUserResponse::class.java,
-							transResp.getResult()!!,
-						)
-					response.setResponse(transResp.getOutputAPDU()[0])
-					return response
-				}
-			} else {
-				val ex = IFDException("No input unit available to perform PinCompare protocol.")
-				LOG.warn(ex) { ex.message }
-				throw ex
-			}
-		} else {
-			val msg = "Unsupported authentication input method requested."
-			val ex = IFDException(ECardConstants.Minor.IFD.IO.UNKNOWN_INPUT_UNIT, msg)
-			LOG.warn(ex) { ex.message }
-			throw ex
-		}
-	}
+// 	@Throws(SCIOException::class, IFDException::class, InterruptedException::class)
+// 	fun verifyUser(verify: VerifyUser): VerifyUserResponse {
+// 		val handle = verify.getSlotHandle()
+// 		// get capabilities
+// 		getCapabilities()
+//
+// 		// check if is possible to perform PinCompare protocol
+// 		val protoList = this.capabilities!!.getSlotCapability()[0].getProtocol()
+// 		if (!protoList.contains(ECardConstants.Protocol.PIN_COMPARE)) {
+// 			throw IFDException("PinCompare protocol is not supported by this IFD.")
+// 		}
+//
+// 		// get values from requested command
+// 		val inputUnit = verify.getInputUnit()
+// 		val allMsgs: AltVUMessagesType = getMessagesOrDefaults(verify.getAltVUMessages())
+// 		var firstTimeout = verify.getTimeoutUntilFirstKey()
+// 		firstTimeout = firstTimeout ?: BigInteger.valueOf(60000)
+// 		var otherTimeout = verify.getTimeoutAfterFirstKey()
+// 		otherTimeout = otherTimeout ?: BigInteger.valueOf(15000)
+// 		val template = verify.getTemplate()
+//
+// 		var response: VerifyUserResponse?
+// 		var result: Result
+// 		// check which type of authentication to perform
+// 		if (inputUnit.getBiometricInput() != null) {
+// 			// TODO: implement
+// 			val msg = "Biometric authentication not supported by IFD."
+// 			val ex = IFDException(ECardConstants.Minor.IFD.IO.UNKNOWN_INPUT_UNIT, msg)
+// 			LOG.warn(ex) { ex.message }
+// 			throw ex
+// 		} else if (inputUnit.getPinInput() != null) {
+// 			val pinInput = inputUnit.getPinInput()
+//
+// 			// we have a sophisticated card reader
+// 			if (terminalInfo.supportsPinCompare()) {
+// 				// create custom pinAction to submit pin to terminal
+// 				val pinAction = NativePinStepAction("enter-pin", pinInput, channel, terminalInfo, template)
+// 				// display message instructing user what to do
+// 				val uc = pinUserConsent(pinAction)
+// 				val ucr = gui!!.obtainNavigator(uc)
+// 				val exec = ExecutionEngine(ucr)
+// 				// run gui
+// 				val status = exec.process()
+// 				if (status == ResultStatus.CANCEL) {
+// 					val msg = "PIN entry cancelled by user."
+// 					LOG.warn { msg }
+// 					result = makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg)
+// 					response =
+// 						WSHelper.makeResponse(
+// 							VerifyUserResponse::class.java,
+// 							result,
+// 						)
+// 				} else if (pinAction.exception != null) {
+// 					LOG.warn(pinAction.exception) { pinAction.exception!!.message }
+// 					result =
+// 						makeResultError(
+// 							ECardConstants.Minor.IFD.AUTHENTICATION_FAILED,
+// 							pinAction.exception!!.message,
+// 						)
+// 					response =
+// 						WSHelper.makeResponse(
+// 							VerifyUserResponse::class.java,
+// 							result,
+// 						)
+// 				} else {
+// 					// input by user
+// 					val verifyResponse = pinAction.response
+// 					// evaluate result
+// 					result = checkNativePinVerify(verifyResponse!!)
+// 					response =
+// 						WSHelper.makeResponse(
+// 							VerifyUserResponse::class.java,
+// 							result,
+// 						)
+// 					response.setResponse(verifyResponse)
+// 				}
+//
+// 				return response
+// 			} else if (this.isVirtual) { // software method
+// 				// get pin, encode and send
+// 				val minLength = pinInput.getPasswordAttributes().getMinLength().toInt()
+// 				val maxLength = pinInput.getPasswordAttributes().getMaxLength().toInt()
+// 				val uc = pinUserConsent(minLength, maxLength)
+// 				val ucr = gui!!.obtainNavigator(uc)
+// 				val exec = ExecutionEngine(ucr)
+// 				val status = exec.process()
+// 				if (status == ResultStatus.CANCEL) {
+// 					val msg = "PIN entry cancelled by user."
+// 					LOG.warn { msg }
+// 					result = makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg)
+// 					response =
+// 						WSHelper.makeResponse(
+// 							VerifyUserResponse::class.java,
+// 							result,
+// 						)
+// 					return response
+// 				}
+//
+// 				val rawPIN: CharArray = getPinFromUserConsent(exec)
+// 				val attributes = pinInput.getPasswordAttributes()
+// 				var verifyTransmit: Transmit?
+//
+// 				try {
+// 					verifyTransmit = PINUtils.buildVerifyTransmit(rawPIN, attributes, template, handle)
+// 				} catch (e: UtilException) {
+// 					val msg = "Failed to create the verifyTransmit message."
+// 					LOG.error(e) { msg }
+// 					result = makeResultError(ECardConstants.Minor.IFD.UNKNOWN_ERROR, msg)
+// 					response =
+// 						WSHelper.makeResponse(
+// 							VerifyUserResponse::class.java,
+// 							result,
+// 						)
+// 					return response
+// 				} finally {
+// 					rawPIN.fill(' ')
+// 				}
+//
+// 				// send to reader
+// 				var transResp: TransmitResponse
+// 				try {
+// 					transResp = ifd.transmit(verifyTransmit)
+// 				} finally {
+// 					// blank PIN APDU
+// 					for (apdu in verifyTransmit.getInputAPDUInfo()) {
+// 						val rawApdu = apdu.getInputAPDU()
+// 						rawApdu?.fill(0.toByte())
+// 					}
+// 				}
+//
+// 				// produce messages
+// 				if (transResp.getResult().getResultMajor() == ECardConstants.Major.ERROR) {
+// 					if (transResp.getOutputAPDU().isEmpty()) {
+// 						result =
+// 							makeResultError(
+// 								ECardConstants.Minor.IFD.AUTHENTICATION_FAILED,
+// 								transResp.getResult().getResultMessage().getValue(),
+// 							)
+// 						response =
+// 							WSHelper.makeResponse(
+// 								VerifyUserResponse::class.java,
+// 								result,
+// 							)
+// 						return response
+// 					} else {
+// 						response =
+// 							WSHelper.makeResponse(
+// 								VerifyUserResponse::class.java,
+// 								transResp.getResult()!!,
+// 							)
+// 						response.setResponse(transResp.getOutputAPDU()[0])
+//
+// 						// repeat if the response apdu signals that there are tries left
+// 						// TODO: move this code to the PIN Compare protocol
+// 						if (response.getResponse() != null) {
+// 							val resApdu = CardResponseAPDU(response.getResponse())
+// 							val statusBytes = resApdu.statusBytes
+// 							val isMainStatus = statusBytes[0] == 0x63.toByte()
+// 							val isMinorStatus =
+// 								(statusBytes[1].toInt() and 0xF0.toByte().toInt()) == 0xC0.toByte().toInt()
+// 							val triesLeft = statusBytes[1].toInt() and 0x0F
+// 							if (isMainStatus && isMinorStatus && triesLeft > 0) {
+// 								LOG.info { "PIN not entered successful. There are ${statusBytes[1].toInt() and 0x0F} tries left." }
+// 								return verifyUser(verify)
+// 							}
+// 						}
+//
+// 						return response
+// 					}
+// 				} else {
+// 					response =
+// 						WSHelper.makeResponse(
+// 							VerifyUserResponse::class.java,
+// 							transResp.getResult()!!,
+// 						)
+// 					response.setResponse(transResp.getOutputAPDU()[0])
+// 					return response
+// 				}
+// 			} else {
+// 				val ex = IFDException("No input unit available to perform PinCompare protocol.")
+// 				LOG.warn(ex) { ex.message }
+// 				throw ex
+// 			}
+// 		} else {
+// 			val msg = "Unsupported authentication input method requested."
+// 			val ex = IFDException(ECardConstants.Minor.IFD.IO.UNKNOWN_INPUT_UNIT, msg)
+// 			LOG.warn(ex) { ex.message }
+// 			throw ex
+// 		}
+// 	}
 
 	private fun beep() {
 		if (canBeep()) {
@@ -433,7 +414,7 @@ internal class AbstractTerminal(
 		}
 
 	private val isVirtual: Boolean
-		get() = gui != null
+		get() = true // gui != null
 
 	@Throws(IFDException::class)
 	private fun getCapabilities() {
@@ -451,61 +432,61 @@ internal class AbstractTerminal(
 		this.capabilities = cap.getIFDCapabilities()
 	}
 
-	private fun pinUserConsent(
-		minLength: Int,
-		maxLength: Int,
-	): UserConsentDescription {
-		// title always "action.changepin.userconsent.pinstep.title
-		val uc =
-			UserConsentDescription(
-				I18N.strings.pinplugin_action_changepin_userconsent_pinstep_title.localized(),
-				"pin_entry_dialog",
-			)
-		// create step
-		val s =
-			Step(
-				"enter-pin",
-				I18N.strings.pinplugin_action_changepin_userconsent_pinstep_title.localized(),
-			)
-		uc.steps.add(s)
-		// add text instructing user
-		// add text instructing user
-		val i1 = Text()
-		s.inputInfoUnits.add(i1)
-		i1.text = (
-			I18N.strings.pinplugin_action_pinentry_userconsent_pinstep_enter_pin.localized()
-		)
-
-		val i2 = PasswordField("pin")
-		s.inputInfoUnits.add(i2)
-		i2.description = "PIN"
-		i2.minLength = minLength
-		i2.maxLength = maxLength
-
-		return uc
-	}
-
-	private fun pinUserConsent(action: StepAction): UserConsentDescription {
-		val uc =
-			UserConsentDescription(
-				I18N.strings.pinplugin_action_changepin_userconsent_pinstep_title.localized(),
-				"pin_entry_dialog",
-			)
-		// create step
-		val s =
-			Step(
-				"enter-pin",
-				I18N.strings.pinplugin_action_changepin_userconsent_pinstep_title.localized(),
-			)
-		s.action = action
-		uc.steps.add(s)
-		s.isInstantReturn = true
-		// add text instructing user
-		val i1 = Text()
-		s.inputInfoUnits.add(i1)
-		i1.text = I18N.strings.pinplugin_action_pinentry_userconsent_pinstep_enter_pin_term.localized()
-		return uc
-	}
+// 	private fun pinUserConsent(
+// 		minLength: Int,
+// 		maxLength: Int,
+// 	): UserConsentDescription {
+// 		// title always "action.changepin.userconsent.pinstep.title
+// 		val uc =
+// 			UserConsentDescription(
+// 				I18N.strings.pinplugin_action_changepin_userconsent_pinstep_title.localized(),
+// 				"pin_entry_dialog",
+// 			)
+// 		// create step
+// 		val s =
+// 			Step(
+// 				"enter-pin",
+// 				I18N.strings.pinplugin_action_changepin_userconsent_pinstep_title.localized(),
+// 			)
+// 		uc.steps.add(s)
+// 		// add text instructing user
+// 		// add text instructing user
+// 		val i1 = Text()
+// 		s.inputInfoUnits.add(i1)
+// 		i1.text = (
+// 			I18N.strings.pinplugin_action_pinentry_userconsent_pinstep_enter_pin.localized()
+// 		)
+//
+// 		val i2 = PasswordField("pin")
+// 		s.inputInfoUnits.add(i2)
+// 		i2.description = "PIN"
+// 		i2.minLength = minLength
+// 		i2.maxLength = maxLength
+//
+// 		return uc
+// 	}
+//
+// 	private fun pinUserConsent(action: StepAction): UserConsentDescription {
+// 		val uc =
+// 			UserConsentDescription(
+// 				I18N.strings.pinplugin_action_changepin_userconsent_pinstep_title.localized(),
+// 				"pin_entry_dialog",
+// 			)
+// 		// create step
+// 		val s =
+// 			Step(
+// 				"enter-pin",
+// 				I18N.strings.pinplugin_action_changepin_userconsent_pinstep_title.localized(),
+// 			)
+// 		s.action = action
+// 		uc.steps.add(s)
+// 		s.isInstantReturn = true
+// 		// add text instructing user
+// 		val i1 = Text()
+// 		s.inputInfoUnits.add(i1)
+// 		i1.text = I18N.strings.pinplugin_action_pinentry_userconsent_pinstep_enter_pin_term.localized()
+// 		return uc
+// 	}
 }
 
 private fun getMessagesOrDefaults(messages: AltVUMessagesType?): AltVUMessagesType {
@@ -568,7 +549,7 @@ private fun checkNativePinVerify(response: ByteArray): Result {
 	return makeResultUnknownError(CardCommandStatus.getMessage(response))
 }
 
-private fun getPinFromUserConsent(response: ExecutionEngine): CharArray {
-	val p = response.results["enter-pin"]!!.getResult("pin") as PasswordField
-	return p.value
-}
+// private fun getPinFromUserConsent(response: ExecutionEngine): CharArray {
+// 	val p = response.results["enter-pin"]!!.getResult("pin") as PasswordField
+// 	return p.value
+// }

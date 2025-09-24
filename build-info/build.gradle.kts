@@ -30,6 +30,8 @@ kotlin {
 }
 
 fun generateVersionInfo() {
+	val appName = System.getenv("OEC_APP_NAME") ?: "Open eCard App"
+
 	// construct a BuildInfo file with all the data we need
 	val buildInfoFile =
 		FileSpec
@@ -41,13 +43,19 @@ fun generateVersionInfo() {
 					.addProperty(
 						PropertySpec
 							.builder(
+								"appName",
+								ClassName("kotlin", "String"),
+							).initializer("%S", appName)
+							.build(),
+					).addProperty(
+						PropertySpec
+							.builder(
 								"version",
 								ClassName("io.github.z4kn4fein.semver", "Version"),
 							).initializer("%S.toVersion()", project.version)
 							.build(),
 					).build(),
 			).build()
-	// TODO: add more data if needed
 
 	val outDir = generatedKotlinSourcesDir.get().asFile
 	buildInfoFile.writeTo(outDir)

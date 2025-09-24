@@ -42,10 +42,7 @@ import org.apache.http.protocol.HttpRequestExecutor
 import org.openecard.addons.tr03124.ClientInformation
 import org.openecard.addons.tr03124.UserAgent
 import org.openecard.build.BuildInfo
-import org.openecard.common.AppVersion.name
-import org.openecard.common.ClientEnv
 import org.openecard.common.OpenecardProperties
-import org.openecard.common.event.EventDispatcherImpl
 import org.openecard.control.binding.ktor.HttpService
 import org.openecard.gui.message.DialogType
 import org.openecard.gui.swing.SwingDialogWrapper
@@ -66,7 +63,6 @@ import org.openecard.richclient.tr03124.registerTr03124Binding
 import org.openecard.richclient.updater.VersionUpdateChecker
 import org.openecard.sc.iface.TerminalFactory
 import org.openecard.sc.pcsc.PcscTerminalFactory
-import org.openecard.transport.dispatcher.MessageDispatcher
 import java.io.IOException
 import java.net.BindException
 import java.net.Socket
@@ -93,24 +89,15 @@ class RichClient {
 	// Control interface
 	private var httpBinding: HttpService? = null
 
-	// Client environment
-	private var env = ClientEnv()
-
 	private var terminalFactory: TerminalFactory? = null
 	private var cardWatcher: CardWatcher? = null
-
-	// EventDispatcherImpl
-	private var eventDispatcher: EventDispatcherImpl? = null
-
-	// ContextHandle determines a specific IFD layer context
-	private var contextHandle: ByteArray? = null
 
 	fun setup() {
 		GUIDefaults.initialize()
 
 		val title =
 			I18N.strings.richclient_client_startup_failed_headline
-				.format(name)
+				.format(BuildInfo.appName)
 				.localized()
 		var message: String? = null
 		// Set up GUI
@@ -119,22 +106,6 @@ class RichClient {
 		try {
 			tray = AppTray(this)
 			tray!!.beginSetup()
-
-			// Set up client environment
-			env = ClientEnv()
-
-			env.gui = gui
-
-			// Set up the Dispatcher
-			val dispatcher = MessageDispatcher(env)
-			env.dispatcher = dispatcher
-
-			// Set up EventDispatcherImpl
-			eventDispatcher = EventDispatcherImpl()
-			// start event dispatcher
-			eventDispatcher!!.start()
-
-			env.eventDispatcher = eventDispatcher
 
 			// Set up the IFD and card watcher
 			val terminalFactory = PcscTerminalFactory.instance
@@ -224,7 +195,7 @@ class RichClient {
 			} catch (e: BindException) {
 				message =
 					I18N.strings.richclient_client_startup_failed_portinuse
-						.format(name)
+						.format(BuildInfo.appName)
 						.localized()
 				throw e
 			}
@@ -249,7 +220,7 @@ class RichClient {
 
 			// Show dialog to the user and shut down the client
 			val msg = String.format("%s%n%n%s", title, message)
-			gui.obtainMessageDialog().showMessageDialog(msg, name, DialogType.ERROR_MESSAGE)
+			gui.obtainMessageDialog().showMessageDialog(msg, BuildInfo.appName, DialogType.ERROR_MESSAGE)
 			teardown()
 		} catch (ex: Throwable) {
 			LOG.error(ex) { "Unexpected error occurred. Exiting client." }
@@ -296,10 +267,6 @@ class RichClient {
 	fun teardown() {
 		try {
 			cardWatcher?.stop()
-
-			if (eventDispatcher != null) {
-				eventDispatcher!!.terminate()
-			}
 
 			// shutdown control modules
 			httpBinding?.let {
@@ -410,7 +377,7 @@ class RichClient {
 
 		@JvmStatic
 		fun main(args: Array<String>) {
-			LOG.info { "Starting $name ${BuildInfo.version} ..." }
+			LOG.info { "Starting ${BuildInfo.appName} ${BuildInfo.version} ..." }
 
 			LOG.debug {
 				"Running on ${System.getProperty("os.name")} ${System.getProperty("os.version")} ${System.getProperty("os.arch")}."

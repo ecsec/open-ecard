@@ -9,6 +9,7 @@ kotlin {
 		val commonMain by getting {
 			dependencies {
 				implementation(libs.kotlin.logging)
+				implementation(project(":utils:common"))
 			}
 		}
 		val commonTest by getting {
@@ -18,8 +19,6 @@ kotlin {
 		}
 		val jvmMain by getting {
 			dependencies {
-				api(project(":common"))
-				api(libs.slf4j.api)
 				api(libs.apache.batik)
 			}
 		}

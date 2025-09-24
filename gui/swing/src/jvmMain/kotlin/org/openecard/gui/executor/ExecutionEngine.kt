@@ -23,7 +23,6 @@ package org.openecard.gui.executor
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.ThreadTerminateException
-import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked
 import org.openecard.gui.ResultStatus
 import org.openecard.gui.UserConsentNavigator
 import org.openecard.gui.definition.InputInfoUnit
@@ -146,15 +145,6 @@ class ExecutionEngine(
 						navigator.close()
 						throw ThreadTerminateException("GUI has been interrupted.")
 					} catch (ex: ExecutionException) {
-						// there are some special kinds we need to handle here
-						if (ex.cause is InvocationTargetExceptionUnchecked) {
-							val iex = ex.cause as InvocationTargetExceptionUnchecked?
-							if (iex!!.cause is ThreadTerminateException) {
-								logger.info(ex) { "StepAction was interrupted." }
-								throw ThreadTerminateException("GUI has been interrupted.")
-							}
-						}
-						// all other types
 						logger.error(ex.cause) { "StepAction failed with error." }
 						return ResultStatus.CANCEL
 					}

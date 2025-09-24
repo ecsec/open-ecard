@@ -9,6 +9,7 @@ plugins {
 kotlin {
 	sourceSets {
 		commonMain.dependencies {
+			implementation(libs.kotlin.logging)
 		}
 
 		commonTest.dependencies {

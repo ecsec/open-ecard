@@ -65,6 +65,7 @@ object SysUtils {
 	val isSuSEOrDerivate: Boolean
 		get() = File("/etc/SuSE-release").exists()
 
+	@Deprecated("Legacy OeC Code")
 	@JvmStatic
 	val isMobileDevice: Boolean
 		get() = isAndroid || isIOS
@@ -73,19 +74,23 @@ object SysUtils {
 	private val PLAIN_VAR_ENV: Pattern = Pattern.compile("(\\\\)?(\\$([A-Za-z0-9_]+))")
 	private val CURLY_VAR_SYS: Pattern = Pattern.compile("(\\\\)?(\\$\\{([A-Za-z0-9_\\.]+)\\})")
 
+	@Deprecated("Legacy OeC Code")
 	@JvmStatic
 	var isAndroid: Boolean = false
 		private set
 
+	@Deprecated("Legacy OeC Code")
 	@JvmStatic
 	var isIOS: Boolean = false
 		private set
 
+	@Deprecated("Legacy OeC Code")
 	@JvmStatic
 	fun setIsIOS() {
 		isIOS = true
 	}
 
+	@Deprecated("Legacy OeC Code")
 	@JvmStatic
 	fun setIsAndroid() {
 		isAndroid = true

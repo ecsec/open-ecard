@@ -27,14 +27,12 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 
 import java.util.*;
 
+import kotlin.random.Random;
 import org.openecard.addon.sal.SalStateView;
 import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.util.Promise;
-import org.openecard.common.util.SysUtils;
-import org.openecard.crypto.common.sal.CancelOnCardRemovedFilter;
-import org.openecard.crypto.common.sal.CardRemovalFilter;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
@@ -106,12 +104,6 @@ public class InsertCardDialog {
 	    callbacks.add(insertCardAction);
 	    evDispatcher.add(insertCardAction, EventType.CARD_RECOGNIZED);
 
-	    if (SysUtils.isIOS()) {
-		CancelOnCardRemovedFilter cancelCallback = new CancelOnCardRemovedFilter(promise);
-		callbacks.add(cancelCallback);
-		evDispatcher.add(cancelCallback, new CardRemovalFilter());
-	    }
-
 	    try {
 		UserConsentNavigator ucr = gui.obtainNavigator(createInsertCardUserConsent(insertCardAction));
 		ExecutionEngine exec = new ExecutionEngine(ucr);
@@ -168,7 +160,7 @@ public class InsertCardDialog {
 		"insert_card_dialog");
 
 	// create step
-	Step s = new Step(STEP_ID, I18N.strings.INSTANCE.getTctoken_step_title().localized(Locale.getDefault()) );
+	Step s = new Step(Random.Default, STEP_ID, I18N.strings.INSTANCE.getTctoken_step_title().localized(Locale.getDefault()) );
 
 	s.setInstantReturn(true);
 	s.setAction(insertCardAction);

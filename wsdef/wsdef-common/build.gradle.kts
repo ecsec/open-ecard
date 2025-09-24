@@ -9,6 +9,7 @@ kotlin {
 		val commonMain by getting {
 			dependencies {
 				implementation(libs.kotlin.logging)
+				implementation(project(":utils:common"))
 			}
 		}
 		val commonTest by getting {

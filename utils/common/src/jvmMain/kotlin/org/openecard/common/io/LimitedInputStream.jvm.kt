@@ -31,6 +31,7 @@ import java.io.InputStream
  *
  * @author Moritz Horsch
  */
+@Deprecated("Legacy OeC Code")
 class LimitedInputStream
 	/**
 	 * Creates a new limited input stream.

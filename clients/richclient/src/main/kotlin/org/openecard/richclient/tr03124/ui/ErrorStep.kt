@@ -36,12 +36,10 @@ import org.openecard.gui.executor.StepActionResultStatus
  * @author Hans-Martin Haase
  */
 class ErrorStep(
-	title: String?,
+	title: String,
 	errorText: String,
-) : Step(title) {
+) : Step(id = STEP_ID, title = title) {
 	init {
-		id = STEP_ID
-
 		isReversible = false
 		val pinBlockedNote = Text(errorText)
 		inputInfoUnits.add(pinBlockedNote)

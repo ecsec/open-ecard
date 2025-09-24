@@ -23,7 +23,6 @@
 package org.openecard.richclient.gui.update
 
 import dev.icerock.moko.resources.format
-import dorkbox.util.SwingUtil
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.event.ActionEvent
@@ -44,9 +43,7 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
 import javafx.util.Callback
-import jdk.swing.interop.SwingInterOpUtils
-import oecImage
-import org.openecard.common.AppVersion.name
+import org.openecard.build.BuildInfo
 import org.openecard.common.OpenecardProperties
 import org.openecard.gui.swing.common.GUIDefaults
 import org.openecard.gui.swing.common.SwingUtils
@@ -55,7 +52,6 @@ import org.openecard.releases.UpdateAdvice
 import org.openecard.richclient.updater.VersionUpdateChecker
 import java.net.URI
 import java.util.function.Consumer
-import javax.swing.SwingUtilities
 
 /**
  *
@@ -86,7 +82,7 @@ class UpdateWindow(
 		stage.icons.add(Image(GUIDefaults.getOecImageStream(45, 45)))
 		stage.title =
 			I18N.strings.update_tooltip_msg
-				.format(name)
+				.format(BuildInfo.appName)
 				.localized()
 		stage.setScene(scene)
 		stage.isResizable = false
@@ -194,7 +190,7 @@ class UpdateWindow(
 					} else {
 						Label(
 							I18N.strings.update_new_version_msg
-								.format(name, currentVersion)
+								.format(BuildInfo.appName, currentVersion)
 								.localized(),
 						)
 					}

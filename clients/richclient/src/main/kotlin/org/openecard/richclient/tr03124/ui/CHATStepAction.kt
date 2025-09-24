@@ -23,7 +23,6 @@
 package org.openecard.richclient.tr03124.ui
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.common.WSHelper
 import org.openecard.gui.StepResult
 import org.openecard.gui.definition.Checkbox
 import org.openecard.gui.definition.Step
@@ -32,7 +31,6 @@ import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
 import org.openecard.richclient.tr03124.EacProcessState
-import org.openecard.sc.pace.cvc.Chat
 import org.openecard.sc.pace.cvc.ReadAccess
 import org.openecard.sc.pace.cvc.SpecialFunction
 import org.openecard.sc.pace.cvc.WriteAccess
@@ -56,26 +54,12 @@ class CHATStepAction(
 		if (result.isOK()) {
 			processResult(oldResults)
 
-			try {
-				val nextStep = preparePinStep()
-
-				return StepActionResult(StepActionResultStatus.NEXT, nextStep)
-			} catch (ex: WSHelper.WSException) {
-				logger.error(ex) { "Failed to prepare PIN step." }
-				return StepActionResult(StepActionResultStatus.CANCEL)
-			} catch (ex: InterruptedException) {
-				logger.warn(ex) { "CHAT step action interrupted." }
-				return StepActionResult(StepActionResultStatus.CANCEL)
-			}
+			val nextStep = PINStep.buildPinStep(state)
+			return StepActionResult(StepActionResultStatus.NEXT, nextStep)
 		} else {
 			// cancel can not happen, so only back is left to be handled
 			return StepActionResult(StepActionResultStatus.BACK)
 		}
-	}
-
-	private fun preparePinStep(): Step {
-		val nextStep = PINStep.buildPinStep(state)
-		return nextStep
 	}
 
 	private fun processResult(results: Map<String, ExecutionResults>) {

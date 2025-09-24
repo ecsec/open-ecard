@@ -39,9 +39,9 @@ import org.openecard.plugins.pinplugin.RecognizedState
  */
 class GenericPINStep(
 	id: String,
-	title: String?,
+	title: String,
 	private val cardCapturer: CardCapturer,
-) : Step(id, title) {
+) : Step(id = id, title = title) {
 	// indicators set by the action
 	private var wrongPINFormat = false
 	private var failedPINVerify = false

@@ -25,7 +25,6 @@ import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.build.BuildInfo
-import org.openecard.common.AppVersion
 import org.openecard.gui.swing.common.SwingUtils
 import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.graphics.OecIconType
@@ -84,7 +83,7 @@ class AboutDialog private constructor() : JFrame() {
 				isEditable = false
 				text =
 					I18N.strings.about_heading
-						.format(AppVersion.name)
+						.format(BuildInfo.appName)
 						.localized()
 				setBounds(12, 12, 692, 30)
 			}
@@ -143,7 +142,7 @@ class AboutDialog private constructor() : JFrame() {
 		iconImage = logo
 		title =
 			I18N.strings.about_title
-				.format(AppVersion.name)
+				.format(BuildInfo.appName)
 				.localized()
 		defaultCloseOperation = DISPOSE_ON_CLOSE
 		isResizable = false

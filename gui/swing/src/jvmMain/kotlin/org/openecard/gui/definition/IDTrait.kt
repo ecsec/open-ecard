@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,17 +19,24 @@
  * you and ecsec GmbH.
  *
  */
-package org.openecard.common
+package org.openecard.gui.definition
+
+import org.openecard.utils.common.generateSessionIdBase64
+import kotlin.random.Random
 
 /**
- * Exception indicating that someone external forced the thread to terminate.
- * This is like an InterruptedException but implemented as a RuntimeException, so that it may be used without declaring
- * it everywhere.
+ * Class implementing the ID portion common to all `InfoUnit`s.
+ * This class creates IDs if none are given and provides an implementation of the ID getter and setter.
  *
  * @author Tobias Wich
  */
-class ThreadTerminateException : RuntimeException {
-	constructor(msg: String?) : super(msg)
-
-	constructor(msg: String?, cause: Throwable?) : super(msg, cause)
+abstract class IDTrait(
+	random: Random = Random.Default,
+	override var id: String = random.generateSessionIdBase64(),
+) : InfoUnit {
+	/**
+	 * Creates an IDTrait instance and initializes its ID to the given value.
+	 *
+	 * @param id The ID with which this instance will be initialized.
+	 */
 }

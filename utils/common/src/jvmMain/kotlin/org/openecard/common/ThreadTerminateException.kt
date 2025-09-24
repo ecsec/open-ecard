@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,18 +19,18 @@
  * you and ecsec GmbH.
  *
  */
-package org.openecard.gui
-
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
-import org.openecard.gui.definition.Step
+package org.openecard.common
 
 /**
- * Class for a step which has a connection handle.
+ * Exception indicating that someone external forced the thread to terminate.
+ * This is like an InterruptedException but implemented as a RuntimeException, so that it may be used without declaring
+ * it everywhere.
  *
  * @author Tobias Wich
  */
-open class StepWithConnection(
-	id: String,
-	title: String?,
-	val connectionHandle: ConnectionHandleType,
-) : Step(id, title)
+@Deprecated("Legacy OeC Code")
+class ThreadTerminateException : RuntimeException {
+	constructor(msg: String?) : super(msg)
+
+	constructor(msg: String?, cause: Throwable?) : super(msg, cause)
+}

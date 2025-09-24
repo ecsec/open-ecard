@@ -34,7 +34,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.openecard.common.AppVersion.name
+import org.openecard.build.BuildInfo
 import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.manage.ManagementDialog
 import org.openecard.richclient.gui.update.UpdateWindow
@@ -139,7 +139,7 @@ class Status(
 
 		val label =
 			JLabel(
-				" ${I18N.strings.richclient_tray_title.format(name).localized()} ",
+				" ${I18N.strings.richclient_tray_title.format(BuildInfo.appName).localized()} ",
 			)
 		label.font = Font(Font.SANS_SERIF, Font.BOLD, 16)
 		label.horizontalAlignment = SwingConstants.CENTER

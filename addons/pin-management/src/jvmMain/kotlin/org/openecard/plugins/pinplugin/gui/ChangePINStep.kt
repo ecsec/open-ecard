@@ -42,12 +42,12 @@ import org.openecard.i18n.I18N
  */
 class ChangePINStep(
 	id: String,
-	title: String?,
+	title: String,
 	capturePin: Boolean,
 	retryCounter: Int,
 	enteredWrong: Boolean,
 	verifyFailed: Boolean,
-) : Step(id, title) {
+) : Step(id = id, title = title) {
 	init {
 		isReversible = false
 

@@ -24,7 +24,7 @@ package org.openecard.richclient.gui.manage
 
 import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.common.AppVersion
+import org.openecard.build.BuildInfo
 import org.openecard.common.util.FileUtils.resolveResourceAsStream
 import org.openecard.common.util.FileUtils.toByteArray
 import org.openecard.i18n.I18N
@@ -86,7 +86,7 @@ class ManagementDialog : JFrame() {
 		iconImage = logo
 		setTitle(
 			I18N.strings.addon_title
-				.format(AppVersion.name)
+				.format(BuildInfo.appName)
 				.localized(),
 		)
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE)
@@ -151,7 +151,7 @@ class ManagementDialog : JFrame() {
 		val label =
 			JLabel(
 				I18N.strings.addon_list_core
-					.format(AppVersion.name)
+					.format(BuildInfo.appName)
 					.localized(),
 			)
 		label.setFont(label.font.deriveFont(Font.BOLD))

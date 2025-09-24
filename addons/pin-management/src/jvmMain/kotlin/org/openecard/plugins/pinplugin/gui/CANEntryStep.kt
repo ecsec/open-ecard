@@ -42,12 +42,12 @@ import org.openecard.plugins.pinplugin.RecognizedState
  */
 class CANEntryStep(
 	id: String,
-	title: String?,
+	title: String,
 	capturePin: Boolean,
 	state: RecognizedState,
 	enteredWrong: Boolean,
 	verifyFailed: Boolean,
-) : Step(id, title) {
+) : Step(id = id, title = title) {
 	val i1 =
 		Text(
 			I18N.strings.pinplugin_action_changepin_userconsent_canstep_notice.localized(),

@@ -42,7 +42,7 @@ class BackgroundTaskTest {
 		val uc: UserConsent = SwingUserConsent(SwingDialogWrapper())
 
 		val ucd = UserConsentDescription("Test background wait")
-		val s = Step("Wait Step")
+		val s = Step(title = "Wait Step")
 		s.inputInfoUnits.add(Text("Please wait for the background task to complete ..."))
 		s.backgroundTask =
 			object : BackgroundTask {
@@ -51,7 +51,7 @@ class BackgroundTaskTest {
 					// first wait
 					Thread.sleep(1000)
 					// then repeat ;-)
-					val replacement = Step("Replacement Step")
+					val replacement = Step(title = "Replacement Step")
 					replacement.inputInfoUnits.add(Text("Super cool it works."))
 					replacement.isInstantReturn = true
 					return StepActionResult(StepActionResultStatus.REPEAT, replacement)

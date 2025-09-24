@@ -22,6 +22,7 @@
 package org.openecard.gui.definition
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlin.random.Random
 
 private val logger = KotlinLogging.logger { }
 
@@ -40,7 +41,8 @@ private val logger = KotlinLogging.logger { }
  */
 abstract class AbstractBox(
 	id: String,
-) : IDTrait(id),
+	random: Random = Random.Default,
+) : IDTrait(random, id),
 	InputInfoUnit,
 	OutputInfoUnit {
 	/**

@@ -27,7 +27,7 @@ import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.Separator
 import dorkbox.systemTray.SystemTray
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.common.AppVersion.name
+import org.openecard.build.BuildInfo
 import org.openecard.common.util.SysUtils
 import org.openecard.i18n.I18N
 import org.openecard.richclient.RichClient
@@ -87,17 +87,17 @@ class AppTray(
 			SystemTray
 				.get(
 					I18N.strings.richclient_tray_title
-						.format(name)
+						.format(BuildInfo.appName)
 						.localized(),
 				)?.let { tray ->
 					tray.setImage(tray.getTrayIconImage(ICON_LOADER))
 					tray.status =
 						I18N.strings.richclient_tray_message_loading
-							.format(name)
+							.format(BuildInfo.appName)
 							.localized()
 					tray.setTooltip(
 						I18N.strings.richclient_tray_title
-							.format(name)
+							.format(BuildInfo.appName)
 							.localized(),
 					)
 
@@ -205,7 +205,7 @@ class AppTray(
 	private fun setupFrame(standalone: Boolean): InfoFrame =
 		InfoFrame(
 			I18N.strings.richclient_tray_title
-				.format(name)
+				.format(BuildInfo.appName)
 				.localized(),
 		).also { frame ->
 			frame.iconImage = oecImage(OecIconType.COLORED, 256, 256)

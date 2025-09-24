@@ -35,8 +35,6 @@ dependencies {
 	implementation(libs.kotlin.logging)
 	implementation(libs.logback.classic)
 
-	implementation(project(":crypto:tls"))
-
 	implementation(project(":bindings:ktor"))
 	implementation(project(":gui:swing"))
 	implementation(project(":gui:graphics"))
@@ -62,6 +60,8 @@ dependencies {
 	// http client
 	implementation(libs.ktor.client.core)
 	implementation(libs.ktor.client.okhttp)
+	// proxy
+	implementation(libs.proxyvole)
 
 	testImplementation(libs.bundles.test.basics.kotlin)
 }

@@ -25,6 +25,7 @@ package org.openecard.richclient.tr03124
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.withCharset
+import io.ktor.server.request.acceptItems
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import kotlinx.coroutines.CoroutineDispatcher
@@ -36,10 +37,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.job
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import org.openecard.addons.tr03124.BindingException
 import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.addons.tr03124.ClientInformation
+import org.openecard.addons.tr03124.EcardStatus
 import org.openecard.addons.tr03124.Tr03124Binding
 import org.openecard.addons.tr03124.Tr03124Binding.Parameter.ShowUi.ShowUiModules.Companion.toUiModule
 import org.openecard.gui.UserConsent
@@ -48,7 +50,6 @@ import org.openecard.sal.sc.recognition.CardRecognition
 import org.openecard.sc.iface.TerminalFactory
 import org.openecard.sc.iface.withContextSuspend
 import org.openecard.sc.pace.PaceFeatureSoftwareFactory
-import java.nio.charset.StandardCharsets
 
 class RichclientTr03124Binding(
 	val clientInfo: ClientInformation,
@@ -99,16 +100,19 @@ class RichclientTr03124Binding(
 		return jobFuture.await()
 	}
 
-	override suspend fun status(): BindingResponse {
-		// TODO: Not yet implemented
-		return BindingResponse.ContentResponse(
-			status = HttpStatusCode.NotFound.value,
-			ContentType.Text.Plain
-				.withCharset(StandardCharsets.UTF_8)
-				.toString(),
-			"Status method not implemented".encodeToByteArray(),
+	override suspend fun status(): EcardStatus =
+		EcardStatus(
+			app =
+				EcardStatus.ProductEntry(
+					name = clientInfo.userAgent.name,
+					vendor = "ecsec GmbH",
+					version = clientInfo.userAgent.version.toString(),
+				),
+			specs =
+				listOf(
+					EcardStatus.ProductEntry(name = "TR-03124-1", vendor = "Federal Office for Information Security", version = "1.4"),
+				),
 		)
-	}
 
 	override suspend fun showUi(module: Tr03124Binding.Parameter.ShowUi.ShowUiModules) {
 		// TODO: Not yet implemented
@@ -125,7 +129,22 @@ fun Routing.registerTr03124Binding(trBinding: Tr03124Binding) {
 			if (tokenUrl != null) {
 				trBinding.activate(tokenUrl)
 			} else if (isStatusRequest) {
-				trBinding.status()
+				val status = trBinding.status()
+				call.request
+					.acceptItems()
+					.asSequence()
+					.mapNotNull {
+						if (ContentType.Application.Json.match(it.value)) {
+							status.asJson()
+						} else if (ContentType.Text.Plain.match(it.value)) {
+							status.asAusweisAppPlainText()
+						} else {
+							null
+						}
+					}.firstOrNull() ?: BindingResponse.ReferencedContentResponse(
+					status = HttpStatusCode.NotAcceptable.value,
+					BindingResponse.ContentCode.NO_ACCEPTABLE_FORMAT,
+				)
 			} else if (gui != null) {
 				trBinding.showUi(gui.toUiModule())
 				BindingResponse.NoContent()
@@ -138,4 +157,36 @@ fun Routing.registerTr03124Binding(trBinding: Tr03124Binding) {
 
 		response.toKtorResponse(call)
 	}
+}
+
+fun EcardStatus.asAusweisAppPlainText(): BindingResponse {
+	val entries =
+		buildList {
+			app.name.let { add("Implementation-Title: $it") }
+			app.vendor?.let { add("Implementation-Title: $it") }
+			app.version.let { add("Implementation-Version: $it") }
+			specs.firstOrNull()?.let { spec ->
+				spec.name.let { add("Specification-Title: $it") }
+				spec.vendor?.let { add("Specification-Title: $it") }
+				spec.version.let { add("Specification-Version: $it") }
+			}
+		}
+	return BindingResponse.ContentResponse(
+		status = HttpStatusCode.OK.value,
+		ContentType.Text.Plain
+			.withCharset(Charsets.UTF_8)
+			.toString(),
+		entries.joinToString(separator = "\n").encodeToByteArray(),
+	)
+}
+
+fun EcardStatus.asJson(): BindingResponse {
+	val text = Json.encodeToString(this)
+	return BindingResponse.ContentResponse(
+		status = HttpStatusCode.OK.value,
+		ContentType.Application.Json
+			.withCharset(Charsets.UTF_8)
+			.toString(),
+		text.encodeToByteArray(),
+	)
 }

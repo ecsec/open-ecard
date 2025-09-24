@@ -76,6 +76,12 @@ internal suspend fun BindingResponse.toKtorResponse(call: RoutingCall) {
 						status = httpStatus,
 					)
 				}
+				BindingResponse.ContentCode.NO_ACCEPTABLE_FORMAT -> {
+					call.respondText(
+						text = I18N.strings.http_406.localized(),
+						status = httpStatus,
+					)
+				}
 				BindingResponse.ContentCode.INTERNAL_ERROR -> {
 					call.respondText(
 						text = I18N.strings.tr03112_error_internal.localized(),

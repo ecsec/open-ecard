@@ -348,15 +348,12 @@ object CompleteTree {
 			call {
 				command = hex("00A4040400")
 				response {
-// 					body(0x62u) {
-// 						matchData(0x84u) {
-// 							matchBytes { value = hex("D27600014601") }
-// 						}
-// 					}
-					body {
-						offset = 0x10u
-						length = 0x06u
-						value = hex("D27600014601")
+					body(0x62u) {
+						matchData(0x84u) {
+							matchBytes {
+								value = hex("D27600014601")
+							}
+						}
 					}
 					recognizedCardType(HbaDefinitions.cardType)
 				}

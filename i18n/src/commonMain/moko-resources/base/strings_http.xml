@@ -8,6 +8,7 @@
 	<string name="http_403">You don't have permission to access the requested directory.</string>
 	<string name="http_404">The requested URL was not found on this server.</string>
 	<string name="http_405">The method is not allowed for the requested URL.</string>
+	<string name="http_406">The server could not produce a response matching the list of acceptable values defined in the request.</string>
 	<string name="http_415">The server does not support the media type transmitted in the request.</string>
 	<string name="http_500">The server encountered an internal error and was unable to complete your request.</string>
 </resources>

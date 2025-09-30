@@ -22,17 +22,18 @@
 package org.openecard.gui.swing
 
 import oecImage
+import org.junit.jupiter.api.Disabled
 import org.openecard.gui.UserConsent
 import org.openecard.gui.message.DialogType
 import org.openecard.gui.message.MessageDialogResult
 import org.openecard.gui.message.OptionType
 import org.openecard.gui.message.ReturnType
-import org.testng.Assert
-import org.testng.annotations.BeforeTest
-import org.testng.annotations.Test
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import javax.imageio.ImageIO
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Test class for manual execution of the Swing based MessageDialog.
@@ -63,13 +64,15 @@ class RunMessageBox {
 			return imageInByte
 		}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	fun showMessage() {
 		val messageBox = uc.obtainMessageDialog()
 		messageBox.showMessageDialog(MSG, TITLE)
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	fun showMessage2() {
 		val messageBox = uc.obtainMessageDialog()
 		messageBox.showMessageDialog(
@@ -79,7 +82,8 @@ class RunMessageBox {
 		)
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	@Throws(IOException::class)
 	fun showMessage3() {
 		val messageBox = uc.obtainMessageDialog()
@@ -91,26 +95,29 @@ class RunMessageBox {
 		)
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	fun showConfirmDialog() {
 		val messageBox = uc.obtainMessageDialog()
 		var result = messageBox.showConfirmDialog("Press yes!", TITLE)
-		Assert.assertEquals(result.returnValue, ReturnType.OK)
+		assertEquals(result.returnValue, ReturnType.OK)
 		result = messageBox.showConfirmDialog("Press no!", TITLE)
-		Assert.assertEquals(result.returnValue, ReturnType.NO)
+		assertEquals(result.returnValue, ReturnType.NO)
 		result = messageBox.showConfirmDialog("Press cancel!", TITLE)
-		Assert.assertEquals(result.returnValue, ReturnType.CANCEL)
+		assertEquals(result.returnValue, ReturnType.CANCEL)
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	fun showConfirmDialog2() {
 		val messageBox = uc.obtainMessageDialog()
 		val result =
 			messageBox.showConfirmDialog("Press ok!", TITLE, OptionType.OK_CANCEL_OPTION)
-		Assert.assertEquals(result.returnValue, ReturnType.OK)
+		assertEquals(result.returnValue, ReturnType.OK)
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	fun showConfirmDialog3() {
 		val messageBox = uc.obtainMessageDialog()
 		val result =
@@ -120,10 +127,11 @@ class RunMessageBox {
 				OptionType.OK_CANCEL_OPTION,
 				DialogType.ERROR_MESSAGE,
 			)
-		Assert.assertEquals(result.returnValue, ReturnType.OK)
+		assertEquals(result.returnValue, ReturnType.OK)
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	@Throws(IOException::class)
 	fun showConfirmDialog4() {
 		val messageBox = uc.obtainMessageDialog()
@@ -135,34 +143,38 @@ class RunMessageBox {
 				DialogType.ERROR_MESSAGE,
 				iconData,
 			)
-		Assert.assertEquals(result.returnValue, ReturnType.OK)
+		assertEquals(result.returnValue, ReturnType.OK)
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	fun showInputDialog() {
 		val messageBox = uc.obtainMessageDialog()
 		val result = messageBox.showInputDialog("Enter the text \"test\"!", TITLE)
-		Assert.assertEquals(result.returnValue, ReturnType.OK)
-		Assert.assertEquals(result.userInput, "test")
+		assertEquals(result.returnValue, ReturnType.OK)
+		assertEquals(result.userInput, "test")
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	fun showInputDialog2() {
 		val messageBox = uc.obtainMessageDialog()
 		val result = messageBox.showInputDialog("Press ok!", "initialValue")
-		Assert.assertEquals(result.returnValue, ReturnType.OK)
-		Assert.assertEquals(result.userInput, "initialValue")
+		assertEquals(result.returnValue, ReturnType.OK)
+		assertEquals(result.userInput, "initialValue")
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	fun showInputDialog3() {
 		val messageBox = uc.obtainMessageDialog()
 		val result =
 			messageBox.showInputDialog("Press ok!", TITLE, DialogType.ERROR_MESSAGE, "")
-		Assert.assertEquals(result.returnValue, ReturnType.OK)
+		assertEquals(result.returnValue, ReturnType.OK)
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	@Throws(IOException::class)
 	fun showInputDialog4() {
 		val messageBox = uc.obtainMessageDialog()
@@ -175,11 +187,12 @@ class RunMessageBox {
 				2,
 				*options,
 			)
-		Assert.assertEquals(result.returnValue, ReturnType.OK)
-		Assert.assertEquals(result.userInput, "three")
+		assertEquals(result.returnValue, ReturnType.OK)
+		assertEquals(result.userInput, "three")
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	@Throws(IOException::class)
 	fun showOptionDialog() {
 		val messageBox = uc.obtainMessageDialog()
@@ -192,8 +205,8 @@ class RunMessageBox {
 				iconData,
 				*options,
 			)
-		Assert.assertEquals(result.returnValue, ReturnType.OK)
-		Assert.assertEquals(result.userInput, "one")
+		assertEquals(result.returnValue, ReturnType.OK)
+		assertEquals(result.userInput, "one")
 	}
 }
 

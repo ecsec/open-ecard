@@ -21,6 +21,7 @@
  ***************************************************************************/
 package org.openecard.gui.swing
 
+import org.junit.jupiter.api.Disabled
 import org.openecard.gui.UserConsentNavigator
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.Text
@@ -28,7 +29,7 @@ import org.openecard.gui.definition.TextField
 import org.openecard.gui.definition.UserConsentDescription
 import org.openecard.gui.executor.ExecutionEngine
 import org.openecard.gui.executor.StepAction
-import org.testng.annotations.Test
+import kotlin.test.Test
 
 /**
  * Test class for manual test of the input field validation.
@@ -36,7 +37,8 @@ import org.testng.annotations.Test
  * @author Dirk Petrautzki
  */
 class InputFieldValidationTest {
-	@Test(enabled = false)
+	@Disabled
+	@Test
 	fun test() {
 		// create wait action
 		val action = WaitAction("step1", WAIT_TIME)

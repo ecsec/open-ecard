@@ -11,8 +11,8 @@ package org.openecard.gui.swing
 
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.io.NonSeekableRandomAccessReadInputStream
+import org.junit.jupiter.api.Disabled
 import org.openecard.gui.swing.components.PdfComponent
-import org.testng.annotations.Test
 import java.awt.BorderLayout
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
@@ -20,13 +20,15 @@ import java.io.IOException
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
 import javax.swing.JFrame
+import kotlin.test.Test
 
 /**
  *
  * @author Tobias Wich
  */
 class TestPdfFrame {
-	@Test(enabled = false)
+	@Disabled
+	@Test
 	@Throws(IOException::class, InterruptedException::class, ExecutionException::class)
 	fun startFrame() {
 		val f = JFrame()

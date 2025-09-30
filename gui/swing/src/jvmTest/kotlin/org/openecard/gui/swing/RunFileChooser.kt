@@ -21,14 +21,15 @@
  ***************************************************************************/
 package org.openecard.gui.swing
 
+import org.junit.jupiter.api.Disabled
 import org.openecard.gui.UserConsent
 import org.openecard.gui.file.CombiningOrFilter
 import org.openecard.gui.file.FileDialogResult
 import org.openecard.gui.file.FileEndingFilter
-import org.testng.Assert
-import org.testng.annotations.BeforeTest
-import org.testng.annotations.Test
 import java.io.File
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertTrue
 
 /**
  * Test class for manual execution of the Swing based FileDialog.
@@ -43,21 +44,24 @@ class RunFileChooser {
 		uc = SwingUserConsent(SwingDialogWrapper())
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	fun openFile() {
 		val dialog = uc.obtainFileDialog()
 		val result = dialog.showOpen()
 		checkResult(result)
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	fun saveFile() {
 		val dialog = uc.obtainFileDialog()
 		val result = dialog.showSave()
 		checkResult(result)
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	fun setCurrentDir() {
 		val dialog = uc.obtainFileDialog()
 		val currentDir = File("/tmp")
@@ -66,7 +70,8 @@ class RunFileChooser {
 		checkResult(result)
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	fun setSelectedFile() {
 		val dialog = uc.obtainFileDialog()
 		val selectedFile = File("/etc/issue")
@@ -75,7 +80,8 @@ class RunFileChooser {
 		checkResult(result)
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	fun setSelectedFiles() {
 		val dialog = uc.obtainFileDialog()
 		// dialog.setMultiSelectionEnabled(true);
@@ -86,7 +92,8 @@ class RunFileChooser {
 		checkResult(result)
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	fun clearSelectedFiles() {
 		val dialog = uc.obtainFileDialog()
 		val selectedFile1 = File("/etc/issue")
@@ -97,7 +104,8 @@ class RunFileChooser {
 		checkResult(result)
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	fun setFileFilter() {
 		val dialog = uc.obtainFileDialog()
 		dialog.addFileFilter(FileEndingFilter("xml"))
@@ -105,7 +113,8 @@ class RunFileChooser {
 		checkResult(result)
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	fun setCombiningFileFilter() {
 		val dialog = uc.obtainFileDialog()
 		val filter = CombiningOrFilter(FileEndingFilter("xml"), FileEndingFilter("png"))
@@ -114,7 +123,8 @@ class RunFileChooser {
 		checkResult(result)
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	fun clearFileFilter() {
 		val dialog = uc.obtainFileDialog()
 		dialog.addFileFilter(FileEndingFilter("xml"))
@@ -123,7 +133,8 @@ class RunFileChooser {
 		checkResult(result)
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	fun showHiddenFiles() {
 		val dialog = uc.obtainFileDialog()
 		dialog.setShowHiddenFiles(true)
@@ -131,7 +142,8 @@ class RunFileChooser {
 		checkResult(result)
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	fun folderSelectable() {
 		val dialog = uc.obtainFileDialog()
 		dialog.setFolderSelectable(true)
@@ -139,7 +151,8 @@ class RunFileChooser {
 		checkResult(result)
 	}
 
-	@Test(enabled = !true)
+	@Disabled
+	@Test
 	fun selectMultipleFiles() {
 		val dialog = uc.obtainFileDialog()
 		dialog.setMultiSelectionEnabled(true)
@@ -149,9 +162,9 @@ class RunFileChooser {
 
 	private fun checkResult(result: FileDialogResult) {
 		if (result.isOK) {
-			Assert.assertTrue(!result.selectedFiles.isEmpty())
+			assertTrue(!result.selectedFiles.isEmpty())
 		} else {
-			Assert.assertTrue(result.selectedFiles.isEmpty())
+			assertTrue(result.selectedFiles.isEmpty())
 		}
 	}
 }

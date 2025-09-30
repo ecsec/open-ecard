@@ -79,7 +79,7 @@
 	<string name="addon_core_logging_addon_desc">Les opérations liées à l’Add-on Manager.</string>
 	<string name="addon_core_logging_salstate">Etat SAL</string>
 	<string name="addon_core_logging_salstate_desc">Les événements qui affectent le comportement de l'état SAL.</string>
-	<string name="addon_core_logging_middleware">PKCS\#11 Middleware</string>
+	<string name="addon_core_logging_middleware">PKCS#11 Middleware</string>
 	<string name="addon_core_logging_middleware_desc">Opérations liés au Middleware.</string>
 	<string name="addon_core_logging_middleware-event">Middleware Event Manager</string>
 	<string name="addon_core_logging_middleware-event_desc">Les événements de bas niveau avec des cartes.</string>
@@ -87,8 +87,8 @@
 	<string name="addon_core_logging_chipgateway_desc">Opérations de protocole liés au ChipGateway.</string>
 
 	<!-- Middleware settings-->
-	<string name="addon_list_core_middleware">PKCS\#11</string>
-	<string name="addon_core_middleware_group_name">Choix du middleware PKCS\#11</string>
+	<string name="addon_list_core_middleware">PKCS#11</string>
+	<string name="addon_core_middleware_group_name">Choix du middleware PKCS#11</string>
 	<string name="addon_core_middleware_item_label">%s</string>
 	<string name="addon_core_middleware_item_desc">Activer / Désactiver ce middleware.</string>
 	<string name="addon_core_middleware_item_desc_forced">Ce middleware est requis et ne peut pas être désactivé.

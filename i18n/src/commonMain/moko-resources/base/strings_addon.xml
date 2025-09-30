@@ -78,7 +78,7 @@
 	<string name="addon_core_logging_addon_desc">Add-on Manager related operations.</string>
 	<string name="addon_core_logging_salstate">SAL state</string>
 	<string name="addon_core_logging_salstate_desc">Events which affect the behaviour of the SAL's state.</string>
-	<string name="addon_core_logging_middleware">PKCS\#11 Middleware</string>
+	<string name="addon_core_logging_middleware">PKCS#11 Middleware</string>
 	<string name="addon_core_logging_middleware_desc">Middleware related operations.</string>
 	<string name="addon_core_logging_middleware-event">Middleware Event Manager</string>
 	<string name="addon_core_logging_middleware-event_desc">Low level events with cards.</string>
@@ -86,8 +86,8 @@
 	<string name="addon_core_logging_chipgateway_desc">ChipGateway protocol related operations.</string>
 
 	<!-- Middleware settings-->
-	<string name="addon_list_core_middleware">PKCS\#11</string>
-	<string name="addon_core_middleware_group_name">PKCS\#11 Middleware Selection</string>
+	<string name="addon_list_core_middleware">PKCS#11</string>
+	<string name="addon_core_middleware_group_name">PKCS#11 Middleware Selection</string>
 	<string name="addon_core_middleware_item_label">%s</string>
 	<string name="addon_core_middleware_item_desc">Enable/ Disable this middleware.</string>
 	<string name="addon_core_middleware_item_desc_forced">This middleware is required and cannot be disabled.</string>

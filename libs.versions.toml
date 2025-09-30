@@ -9,13 +9,20 @@ kx-serde-xml = "0.91.2"
 kt-logging = "7.0.+"
 kx-datetime = "0.7.1"
 
-ktor = "3.2.+"
-kotlin-crypto = "0.5.0"
-kotlin-bignum = "0.3.10"
-bouncycastle = "1.81"
-
+# Plugins
+gradle-versions = "0.52.0"
+gradle-jfx = "0.1.0"
+android-sdkloader = "3.1.0"
 moko = "0.25.0"
 
+# common
+ktor = "3.2.+"
+semver = "3.0.0"
+jwtkt = "1.2.1"
+kotlin-crypto = "0.5.0"
+kotlin-bignum = "0.3.10"
+
+# Android
 agp = "8.12.+"
 androidx-activityCompose = "1.9.+"
 androidx-appcompat = "1.6.+"
@@ -26,23 +33,29 @@ androidx-espresso-core = "3.5.+"
 androidx-material = "1.11.+"
 androidx-test-junit = "1.3.0"
 androidx-test-runner = "1.7.0"
+android-slf4j = "2.0.+"
 
+# JVM dependencies
+bouncycastle = "1.81"
+jnasmartcardio = "25.03.11"
+apache-batik="1.19"
+proxy-vole = "1.1.6"
+pdfbox = "3.0.5"
 jfx = "22.0.2"
 systray = "4.5"
+logback = "1.5.+"
 
-semver = "3.0.0"
-jwtkt = "1.2.1"
-
+# build scripts
+jose4j = "0.9.6"
 jgit = "7.1.0.202411261347-r"
 kotlinPoet = "2.2.0"
 
+# Testing
 junit = "5.13.+"
 wiremock = "3.13.+"
 mokkery = "2.9.0"
 kover = "0.9.2"
 
-
-apache-batik="1.19"
 
 [libraries]
 apache-batik = {module = "org.apache.xmlgraphics:batik-all", version.ref="apache-batik"}
@@ -98,8 +111,8 @@ ktor-serde-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.
 ktor-serde-xml = { module = "io.ktor:ktor-serialization-kotlinx-xml", version.ref = "ktor" }
 
 # logging
-logback-classic = { group = "ch.qos.logback", name = "logback-classic", version = "1.5.+" }
-slf4j-android = { group = "uk.uuid.slf4j", name = "slf4j-android", version = "2.0.+" }
+logback-classic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
+slf4j-android = { group = "uk.uuid.slf4j", name = "slf4j-android", version.ref = "android-slf4j" }
 
 # utilities
 kotlinPoet = { group = "com.squareup", name = "kotlinpoet-jvm", version.ref = "kotlinPoet" }
@@ -126,13 +139,13 @@ bc-prov-debug = { module = "org.bouncycastle:bcprov-debug-jdk18on", version.ref 
 bc-pkix-debug = { module = "org.bouncycastle:bcpkix-debug-jdk18on", version.ref = "bouncycastle" }
 bc-tls-debug = { module = "org.bouncycastle:bctls-debug-jdk18on", version.ref = "bouncycastle" }
 
-proxyvole = { group = "org.bidib.com.github.markusbernhardt", name = "proxy-vole", version = "1.1.6" }
+proxyvole = { group = "org.bidib.com.github.markusbernhardt", name = "proxy-vole", version.ref = "proxy-vole" }
 
-pdfbox = { group = "org.apache.pdfbox", name = "pdfbox", version = "3.0.5" }
+pdfbox = { group = "org.apache.pdfbox", name = "pdfbox", version.ref = "pdfbox" }
 
-scio = { group = "com.github.martinpaljak", name = "apdu4j-jnasmartcardio", version = "25.03.11" }
+scio = { group = "com.github.martinpaljak", name = "apdu4j-jnasmartcardio", version.ref = "jnasmartcardio" }
 
-jose4j = { group = "org.bitbucket.b_c", name = "jose4j", version = "0.9.6" }
+jose4j = { group = "org.bitbucket.b_c", name = "jose4j", version.ref = "jose4j" }
 jwtkt-core = { module = "com.appstractive:jwt-kt", version.ref = "jwtkt" }
 jwtkt-ecdsa = { module = "com.appstractive:jwt-ecdsa-kt", version.ref = "jwtkt" }
 jwtkt-jwks = { module = "com.appstractive:jwt-jwks-kt", version.ref = "jwtkt" }
@@ -156,7 +169,7 @@ test-android-kotlin = [
 
 [plugins]
 androidKmpLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
-androidSdkLoader = { id = "com.quittle.setup-android-sdk", version = "3.1.0" }
+androidSdkLoader = { id = "com.quittle.setup-android-sdk", version.ref = "android-sdkloader" }
 
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-plugin" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -173,8 +186,8 @@ moko = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko"
 mokkery = { id = "dev.mokkery", version.ref = "mokkery"}
 
 # adds job for generating reports about dependency versions
-versions = { id = "com.github.ben-manes.versions", version = "0.52.0" }
+versions = { id = "com.github.ben-manes.versions", version.ref = "gradle-versions" }
 
-jfx = { id =  "org.openjfx.javafxplugin", version = "0.1.0" }
+jfx = { id =  "org.openjfx.javafxplugin", version.ref = "gradle-jfx" }
 
 jpackage = { id = "org.panteleyev.jpackageplugin", version = "1.6.0" }

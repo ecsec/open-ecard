@@ -8,7 +8,6 @@ kx-serde = "1.9.+"
 kx-serde-xml = "0.91.2"
 kt-logging = "7.0.+"
 kx-datetime = "0.7.1"
-compose = "1.8.2"
 
 ktor = "3.2.+"
 kotlin-crypto = "0.5.0"
@@ -30,8 +29,6 @@ androidx-test-runner = "1.7.0"
 
 jfx = "22.0.2"
 systray = "4.5"
-cxf = "4.1.0"
-jna = "5.17.0"
 
 semver = "3.0.0"
 jwtkt = "1.2.1"
@@ -76,7 +73,6 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 
 moko-resources = { module = "dev.icerock.moko:resources", version.ref = "moko" }
-moko-compose = { module = "dev.icerock.moko:resources-compose", version.ref = "moko" }
 moko-resourcesTest = { module = "dev.icerock.moko:resources-test", version.ref = "moko" }
 
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
@@ -102,8 +98,6 @@ ktor-serde-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.
 ktor-serde-xml = { module = "io.ktor:ktor-serialization-kotlinx-xml", version.ref = "ktor" }
 
 # logging
-slf4j-api = { group = "org.slf4j", name = "slf4j-api", version = "2.0.17" }
-slf4j-jdk14 = { group = "org.slf4j", name = "slf4j-jdk14", version = "2.0.17" }
 logback-classic = { group = "ch.qos.logback", name = "logback-classic", version = "1.5.+" }
 slf4j-android = { group = "uk.uuid.slf4j", name = "slf4j-android", version = "2.0.+" }
 
@@ -114,16 +108,6 @@ kotlinPoet = { group = "com.squareup", name = "kotlinpoet-jvm", version.ref = "k
 junit-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit" }
 awaitility = { group = "org.awaitility", name = "awaitility", version = "4.3.0" }
 wiremock = { module = "org.wiremock:wiremock", version.ref = "wiremock" }
-
-# jaxb
-# stick to version 3 of jaxb, so the module system doesn't fuck up android and ios
-# the problem is that org.glassfish.jaxb.runtime.v2.MUtils accesses Module from java reflections, which is not supported
-jaxb-api = { group = "jakarta.xml.bind", name = "jakarta.xml.bind-api", version = "3.0.1" }
-#jaxb-impl = { group = "com.sun.xml.bind", name = "jaxb-impl", version = "3.0.2" }
-# use modified artifact (excludes awt classes and has some other hacks)
-jaxb-impl = { group = "org.glassfish.jaxb", name = "jaxb-runtime", version = "3.0.2-mobile" }
-
-jackson-jaxb = { group = "com.fasterxml.jackson.module", name = "jackson-module-jakarta-xmlbind-annotations", version = "2.16.+" }
 
 kotlin-crypto-core = { module = "dev.whyoleg.cryptography:cryptography-core", version.ref = "kotlin-crypto" }
 kotlin-crypto-asn1-core = { module = "dev.whyoleg.cryptography:cryptography-serialization-asn1", version.ref = "kotlin-crypto" }
@@ -141,11 +125,7 @@ bc-tls = { module = "org.bouncycastle:bctls-jdk18on", version.ref = "bouncycastl
 bc-prov-debug = { module = "org.bouncycastle:bcprov-debug-jdk18on", version.ref = "bouncycastle" }
 bc-pkix-debug = { module = "org.bouncycastle:bcpkix-debug-jdk18on", version.ref = "bouncycastle" }
 bc-tls-debug = { module = "org.bouncycastle:bctls-debug-jdk18on", version.ref = "bouncycastle" }
-bc-oec-prov = { group = "org.openecard", name = "bcprov-jdk15on", version = "1.62" }
-bc-oec-pkix = { group = "org.openecard", name = "bcpkix-jdk15on", version = "1.62" }
-bc-oec-tls = { group = "org.openecard", name = "bctls-jdk15on", version = "1.62" }
 
-httpcore = { group = "org.apache.httpcomponents", name = "httpcore", version = "4.4.16" }
 # https://github.com/akuhtz/proxy-vole
 proxyvole = { group = "org.bidib.com.github.markusbernhardt", name = "proxy-vole", version = "1.1.6" }
 #			nashorn", "org.javadelight", "delight-nashorn-sandbox").version("0.2.5")
@@ -158,9 +138,6 @@ jose4j = { group = "org.bitbucket.b_c", name = "jose4j", version = "0.9.6" }
 jwtkt-core = { module = "com.appstractive:jwt-kt", version.ref = "jwtkt" }
 jwtkt-ecdsa = { module = "com.appstractive:jwt-ecdsa-kt", version.ref = "jwtkt" }
 jwtkt-jwks = { module = "com.appstractive:jwt-jwks-kt", version.ref = "jwtkt" }
-
-jna-jpms = { group = "net.java.dev.jna", name = "jna-jpms", version.ref = "jna" }
-jna-jpms-platform = { group = "net.java.dev.jna", name = "jna-platform-jpms", version.ref = "jna" }
 
 systray = { group = "com.dorkbox", name = "SystemTray", version.ref = "systray" }
 
@@ -180,9 +157,7 @@ test-android-kotlin = [
 ]
 
 [plugins]
-androidLibrary = { id = "com.android.library", version.ref = "agp" }
 androidKmpLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
-androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidSdkLoader = { id = "com.quittle.setup-android-sdk", version = "3.1.0" }
 
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-plugin" }
@@ -195,17 +170,12 @@ kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", versio
 
 kotlinKover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 
-jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose" }
-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-
 moko = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko" }
 
 mokkery = { id = "dev.mokkery", version.ref = "mokkery"}
 
 # adds job for generating reports about dependency versions
 versions = { id = "com.github.ben-manes.versions", version = "0.52.0" }
-
-cxf = { id = "io.mateo.cxf-codegen", version = "2.4.1" }
 
 jfx = { id =  "org.openjfx.javafxplugin", version = "0.1.0" }
 

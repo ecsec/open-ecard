@@ -23,6 +23,7 @@
 package org.openecard.richclient
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.junit.jupiter.api.Disabled
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
@@ -66,7 +67,8 @@ class RichClientTest {
 	/**
 	 * Test the Response of the RichClient to a TCTokenRequest.
 	 */
-	@Test(enabled = false)
+	@Disabled
+	@Test
 	fun testTCToken() {
 		try {
 			val urlConnection = tcTokenURL.openConnection() as HttpURLConnection
@@ -80,7 +82,8 @@ class RichClientTest {
 	/**
 	 * Test the Response of the RichClient to a StatusRequest.
 	 */
-	@Test(enabled = false)
+	@Disabled
+	@Test
 	fun testStatus() {
 		try {
 			val urlConnection = statusURL.openConnection() as HttpURLConnection
@@ -94,7 +97,8 @@ class RichClientTest {
 	/**
 	 * Test the Response of the RichClient to a WaitForChangeReuquest.
 	 */
-	@Test(enabled = false)
+	@Disabled
+	@Test
 	fun testWaitForChange() {
 		try {
 			val urlConnection = waitForChangeURL.openConnection() as HttpURLConnection

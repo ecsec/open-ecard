@@ -33,7 +33,6 @@ import org.openecard.richclient.gui.graphics.oecImage
 import org.openecard.richclient.gui.manage.core.AddonPanelBuilder.createConnectionSettingsAddon
 import org.openecard.richclient.gui.manage.core.AddonPanelBuilder.createGeneralSettingsAddon
 import org.openecard.richclient.gui.manage.core.AddonPanelBuilder.createLogSettingsAddon
-import org.openecard.richclient.gui.manage.core.AddonPanelBuilder.createMiddlewareSelectionAddon
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.Font
@@ -190,10 +189,10 @@ class ManagementDialog : JFrame() {
 			I18N.strings.addon_list_core_logging.localized(),
 			createLogSettingsAddon(),
 		)
-		model.addElement(
-			I18N.strings.addon_list_core_middleware.localized(),
-			createMiddlewareSelectionAddon(),
-		)
+// 		model.addElement(
+// 			I18N.strings.addon_list_core_middleware.localized(),
+// 			createMiddlewareSelectionAddon(),
+// 		)
 
 		// this assumes that all addons in the ClasspathRegistry are core addons
 		// an ActionPanel for every addon that has one or more AppExtensionActions will be added

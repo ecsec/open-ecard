@@ -19,17 +19,6 @@
     <string name="addon_list_core_general_notification_omit_show_remove_card_desc">Zeige keinen Karte entfernen Dialog
         nach Beendigung der Authentisierung an.
     </string>
-    <string name="addon_list_core_general_legacy_group_name">Legacy Verhalten</string>
-    <string name="addon_list_core_general_legacy_tls1">TLS 1.0</string>
-    <string name="addon_list_core_general_legacy_tls1_desc">Die Verwendung von TLS Version 1.0 zulassen.</string>
-    <string name="addon_list_core_general_legacy_invalid_schema">Keine Schema-Validierung</string>
-    <string name="addon_list_core_general_legacy_invalid_schema_desc">Führe keine Schema-Validierung der eingehenden
-        Nachrichten gegen die eCard XML Schemata durch.
-    </string>
-    <string name="addon_list_core_general_legacy_case_insensitive_path">Ignoriere Großbuchstaben in URLs</string>
-    <string name="addon_list_core_general_legacy_case_insensitive_path_desc">Ignoriere Großschreibung beim Vergleich von
-        URL Pfaden entgegen den Regeln aus RFC 3986.
-    </string>
 
     <!-- Connection settings-->
     <string name="addon_list_core_connection">Verbindungseinstellungen</string>

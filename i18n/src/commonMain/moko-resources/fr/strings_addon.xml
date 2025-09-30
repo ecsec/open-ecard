@@ -17,17 +17,6 @@
 	<string name="addon.list.core.general.notification.omit_show_remove_card.desc">Do not show a remove card dialog
 		after finishing the authentication with the card.
 	</string>
-	<string name="addon.list.core.general.legacy.group_name">Legacy Behaviour</string>
-	<string name="addon.list.core.general.legacy.tls1">TLS 1.0</string>
-	<string name="addon.list.core.general.legacy.tls1.desc">Allow the use of TLS version 1.0.</string>
-	<string name="addon_list_core_general_legacy_invalid_schema">Pas de validation de schéma</string>
-	<string name="addon_list_core_general_legacy_invalid_schema_desc">Ne validez pas les messages entrants par rapport
-		au schéma XML d'eCard.
-	</string>
-	<string name="#addon_list_core_general_legacy_case_insensitive_path">Case insensitive URLs</string>
-	<string name="#addon_list_core_general_legacy_case_insensitive_path_desc">Match URL paths case insensitive instead
-		of case sensitive as specified in RFC 3986.
-	</string>
 
 	<!-- Connection settings-->
 	<string name="addon_list_core_connection">Paramètres de connexion</string>

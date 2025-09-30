@@ -126,9 +126,7 @@ bc-prov-debug = { module = "org.bouncycastle:bcprov-debug-jdk18on", version.ref 
 bc-pkix-debug = { module = "org.bouncycastle:bcpkix-debug-jdk18on", version.ref = "bouncycastle" }
 bc-tls-debug = { module = "org.bouncycastle:bctls-debug-jdk18on", version.ref = "bouncycastle" }
 
-# https://github.com/akuhtz/proxy-vole
 proxyvole = { group = "org.bidib.com.github.markusbernhardt", name = "proxy-vole", version = "1.1.6" }
-#			nashorn", "org.javadelight", "delight-nashorn-sandbox").version("0.2.5")
 
 pdfbox = { group = "org.apache.pdfbox", name = "pdfbox", version = "3.0.5" }
 

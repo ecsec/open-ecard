@@ -8,7 +8,7 @@ kotlin {
 		namespace = "org.openecard"
 
 		minSdk = 21
-		compileSdk = 34
+		compileSdk = 36
 
 		withHostTestBuilder { }
 		withDeviceTestBuilder { }.configure {

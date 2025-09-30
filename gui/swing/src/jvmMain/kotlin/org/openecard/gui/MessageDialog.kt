@@ -37,12 +37,12 @@ interface MessageDialog {
 	/**
 	 * Brings up an information-message dialog.
 	 *
-	 * @param message The message displayed in the box.
+	 * @param msg The message displayed in the box.
 	 * @param title The title string of the dialog.
 	 * @return MessageDialogResult with no return value.
 	 */
 	fun showMessageDialog(
-		message: String,
+		msg: String,
 		title: String?,
 	): MessageDialogResult
 
@@ -50,30 +50,30 @@ interface MessageDialog {
 	 * Brings up a dialog that displays a message using the given title and a default icon determined by the messageType
 	 * parameter.
 	 *
-	 * @param message The message displayed in the dialog.
+	 * @param msg The message displayed in the dialog.
 	 * @param title The title string of the dialog.
-	 * @param messageType The type of message to be displayed.
+	 * @param msgType The type of message to be displayed.
 	 * @return MessageDialogResult with no return value.
 	 */
 	fun showMessageDialog(
-		message: String,
+		msg: String,
 		title: String?,
-		messageType: DialogType,
+		msgType: DialogType,
 	): MessageDialogResult
 
 	/**
 	 * Brings up a dialog displaying a message, specifying all parameters.
 	 *
-	 * @param message The message displayed in the dialog.
+	 * @param msg The message displayed in the dialog.
 	 * @param title The title string of the dialog.
-	 * @param messageType The type of message to be displayed.
+	 * @param msgType The type of message to be displayed.
 	 * @param iconData An icon to display in the dialog that helps the user identify the kind of message in the box.
 	 * @return MessageDialogResult with no return value.
 	 */
 	fun showMessageDialog(
-		message: String,
+		msg: String,
 		title: String?,
-		messageType: DialogType,
+		msgType: DialogType,
 		iconData: ByteArray?,
 	): MessageDialogResult
 
@@ -81,25 +81,25 @@ interface MessageDialog {
 	 * Brings up a dialog with the options Yes, No and Cancel; with the internationalized version of the title 'Select
 	 * an Option'.
 	 *
-	 * @param message The message displayed in the dialog.
+	 * @param msg The message displayed in the dialog.
 	 * @param title The title string of the dialog.
 	 * @return MessageDialogResult with a result value set conforming to the option selected by the user.
 	 */
 	fun showConfirmDialog(
-		message: String,
+		msg: String,
 		title: String?,
 	): MessageDialogResult
 
 	/**
 	 * Brings up a dialog with the given title where the number of choices is determined by the optionType parameter.
 	 *
-	 * @param message The message displayed in the dialog.
+	 * @param msg The message displayed in the dialog.
 	 * @param title The title string of the dialog.
 	 * @param optionType The option type of the dialog.
 	 * @return MessageDialogResult with a result value set conforming to the option selected by the user.
 	 */
 	fun showConfirmDialog(
-		message: String,
+		msg: String,
 		title: String?,
 		optionType: OptionType,
 	): MessageDialogResult
@@ -108,17 +108,17 @@ interface MessageDialog {
 	 * Brings up a dialog using the given title and a default icon determined by the messageType parameter where the
 	 * number of choices is determined by the optionType parameter.
 	 *
-	 * @param message The message displayed in the dialog.
+	 * @param msg The message displayed in the dialog.
 	 * @param title The title string of the dialog.
 	 * @param optionType The option type of the dialog.
-	 * @param messageType The type of message to be displayed.
+	 * @param msgType The type of message to be displayed.
 	 * @return MessageDialogResult with a result value set conforming to the option selected by the user.
 	 */
 	fun showConfirmDialog(
-		message: String,
+		msg: String,
 		title: String?,
 		optionType: OptionType,
-		messageType: DialogType,
+		msgType: DialogType,
 	): MessageDialogResult
 
 	/**
@@ -127,30 +127,30 @@ interface MessageDialog {
 	 * The messageType parameter is primarily used to supply a default icon from the
 	 * implementation.
 	 *
-	 * @param message The message displayed in the dialog.
+	 * @param msg The message displayed in the dialog.
 	 * @param title The title string of the dialog.
 	 * @param optionType The option type of the dialog.
-	 * @param messageType The type of message to be displayed.
+	 * @param msgType The type of message to be displayed.
 	 * @param iconData An icon to display in the dialog that helps the user identify the kind of message in the box.
 	 * @return MessageDialogResult with a result value set conforming to the option selected by the user.
 	 */
 	fun showConfirmDialog(
-		message: String,
+		msg: String,
 		title: String?,
 		optionType: OptionType,
-		messageType: DialogType,
+		msgType: DialogType,
 		iconData: ByteArray?,
 	): MessageDialogResult
 
 	/**
 	 * Shows a question-message dialog requesting input from the user.
 	 *
-	 * @param message The message displayed in the dialog.
+	 * @param msg The message displayed in the dialog.
 	 * @param title The title string of the dialog.
 	 * @return a MessageDialogResult with the user's input.
 	 */
 	fun showInputDialog(
-		message: String,
+		msg: String,
 		title: String?,
 	): MessageDialogResult
 
@@ -158,13 +158,13 @@ interface MessageDialog {
 	 * Shows a question-message dialog requesting input from the user, with the input value initialized to
 	 * initialSelectionValue.
 	 *
-	 * @param message The message displayed in the dialog.
+	 * @param msg The message displayed in the dialog.
 	 * @param title The title string of the dialog.
 	 * @param initialValue The value to initialize the input field.
 	 * @return a MessageDialogResult with the user's input.
 	 */
 	fun showInputDialog(
-		message: String,
+		msg: String,
 		title: String?,
 		initialValue: String?,
 	): MessageDialogResult
@@ -173,16 +173,16 @@ interface MessageDialog {
 	 * Shows a dialog requesting input from the user with the dialog having the title title and message type
 	 * messageType.
 	 *
-	 * @param message The message displayed in the dialog.
+	 * @param msg The message displayed in the dialog.
 	 * @param title The title string of the dialog.
-	 * @param messageType The type of message to be displayed.
+	 * @param msgType The type of message to be displayed.
 	 * @param initialValue The value to initialize the input field.
 	 * @return MessageDialogResult with the user's input.
 	 */
 	fun showInputDialog(
-		message: String,
+		msg: String,
 		title: String?,
-		messageType: DialogType,
+		msgType: DialogType,
 		initialValue: String?,
 	): MessageDialogResult
 
@@ -193,18 +193,18 @@ interface MessageDialog {
 	 * the user with. It is up to the UI to decide how best to represent the selectionValues, but usually a ComboBox or
 	 * List will be used.
 	 *
-	 * @param message The message displayed in the dialog.
+	 * @param msg The message displayed in the dialog.
 	 * @param title The title string of the dialog.
-	 * @param messageType The type of message to be displayed.
+	 * @param msgType The type of message to be displayed.
 	 * @param iconData An icon to display in the dialog that helps the user identify the kind of message in the box.
 	 * @param initialSelectionIndex Zero based index of the initially selected value.
 	 * @param selectionValues Nonempty list of Strings that gives the possible selections.
 	 * @return MessageDialogResult with the user's input.
 	 */
 	fun showInputDialog(
-		message: String,
+		msg: String,
 		title: String?,
-		messageType: DialogType,
+		msgType: DialogType,
 		iconData: ByteArray?,
 		initialSelectionIndex: Int,
 		vararg selectionValues: String,
@@ -217,19 +217,19 @@ interface MessageDialog {
 	 * supplied by the implementation.
 	 * The messageType parameter is primarily used to supply a default icon from the implementation.
 	 *
-	 * @param message The message displayed in the dialog.
+	 * @param msg The message displayed in the dialog.
 	 * @param title The title string of the dialog
 	 * @param optionType The option type of the dialog.
-	 * @param messageType The type of message to be displayed.
+	 * @param msgType The type of message to be displayed.
 	 * @param iconData An icon to display in the dialog that helps the user identify the kind of message int the box.
 	 * @param options Nonempty list of Strings that gives the possible options.
 	 * @return MessageDialogResult with a result value set conforming to the option selected by the user.
 	 */
 	fun showOptionDialog(
-		message: String,
+		msg: String,
 		title: String?,
 		optionType: OptionType,
-		messageType: DialogType,
+		msgType: DialogType,
 		iconData: ByteArray?,
 		vararg options: String,
 	): MessageDialogResult

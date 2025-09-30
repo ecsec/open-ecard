@@ -42,9 +42,9 @@ class FileEndingFilter(
 	 * @param withDot Whether to prepend a . to the file ending or not. The dot is only added if non is present yet.
 	 */
 
-	override fun accept(f: File): Boolean {
-		if (!f.isDirectory) {
-			val name = f.name
+	override fun accept(file: File): Boolean {
+		if (!file.isDirectory) {
+			val name = file.name
 			return name.endsWith(fileEnding)
 		} else {
 			return true

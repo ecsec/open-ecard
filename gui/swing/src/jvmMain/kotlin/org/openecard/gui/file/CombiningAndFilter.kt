@@ -67,9 +67,9 @@ class CombiningAndFilter(
 		description = sb.toString()
 	}
 
-	override fun accept(f: File): Boolean {
+	override fun accept(file: File): Boolean {
 		for (next in filters) {
-			if (!next.accept(f)) {
+			if (!next.accept(file)) {
 				return false
 			}
 		}

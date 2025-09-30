@@ -51,16 +51,16 @@ import javax.swing.JPanel
 class SwingUserConsent(
 	private val baseDialogWrapper: SwingDialogWrapper,
 ) : UserConsent {
-	override fun obtainNavigator(parameters: UserConsentDescription): UserConsentNavigator {
+	override fun obtainNavigator(uc: UserConsentDescription): UserConsentNavigator {
 		val dialogWrapper = baseDialogWrapper.derive()
-		dialogWrapper.setTitle(parameters.title)
+		dialogWrapper.setTitle(uc.title)
 
 		val rootPanel = dialogWrapper.getContentPane
 		rootPanel.removeAll()
 
-		val isPinEntryDialog = parameters.dialogType == "pin_entry_dialog"
-		val isPinChangeDialog = parameters.dialogType == "pin_change_dialog"
-		val isUpdateDialog = parameters.dialogType == "update_dialog"
+		val isPinEntryDialog = uc.dialogType == "pin_entry_dialog"
+		val isPinChangeDialog = uc.dialogType == "pin_change_dialog"
+		val isUpdateDialog = uc.dialogType == "update_dialog"
 
 		// set different size when special dialog type is requested
 		if (isPinEntryDialog) {
@@ -71,8 +71,8 @@ class SwingUserConsent(
 			dialogWrapper.setSize(480, 330)
 		}
 
-		val dialogType = parameters.dialogType
-		val steps = parameters.steps
+		val dialogType = uc.dialogType
+		val steps = uc.steps
 
 		// Set up panels
 		val stepPanel = JPanel(BorderLayout())

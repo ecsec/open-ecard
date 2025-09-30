@@ -205,14 +205,15 @@ class ManagementDialog : JFrame() {
 	}
 
 	private fun createAddonList() {
-		val label = JLabel(I18N.strings.addon_list_addon.localized())
-		label.setFont(label.font.deriveFont(Font.BOLD))
-		val labelConstraints = GridBagConstraints()
-		labelConstraints.insets = Insets(5, 0, 5, 10)
-		labelConstraints.anchor = GridBagConstraints.NORTH
-		labelConstraints.gridx = 0
-		labelConstraints.gridy = 3
-		selectionPanel.add(label, labelConstraints)
+		// TODO: Add label when adding add-ons again
+// 		val label = JLabel(I18N.strings.addon_list_addon.localized())
+// 		label.setFont(label.font.deriveFont(Font.BOLD))
+// 		val labelConstraints = GridBagConstraints()
+// 		labelConstraints.insets = Insets(5, 0, 5, 10)
+// 		labelConstraints.anchor = GridBagConstraints.NORTH
+// 		labelConstraints.gridx = 0
+// 		labelConstraints.gridy = 3
+// 		 selectionPanel.add(label, labelConstraints)
 
 		// TODO: remove this code
 		// label.setVisible(false);

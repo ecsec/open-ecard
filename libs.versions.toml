@@ -10,13 +10,13 @@ kt-logging = "7.0.+"
 kx-datetime = "0.7.1"
 
 # Plugins
-gradle-versions = "0.52.0"
+gradle-versions = "0.53.0"
 gradle-jfx = "0.1.0"
 android-sdkloader = "3.1.0"
 moko = "0.25.0"
 
 # common
-ktor = "3.2.+"
+ktor = "3.3.+"
 semver = "3.0.0"
 jwtkt = "1.2.1"
 kotlin-crypto = "0.5.0"
@@ -24,7 +24,7 @@ kotlin-bignum = "0.3.10"
 
 # Android
 agp = "8.12.+"
-androidx-activityCompose = "1.9.+"
+androidx-activityCompose = "1.10.+"
 androidx-appcompat = "1.6.+"
 androidx-constraintlayout = "2.1.+"
 androidx-core-ktx = "1.13.+"
@@ -36,7 +36,7 @@ androidx-test-runner = "1.7.0"
 android-slf4j = "2.0.+"
 
 # JVM dependencies
-bouncycastle = "1.81"
+bouncycastle = "1.82"
 jnasmartcardio = "25.03.11"
 apache-batik="1.19"
 proxy-vole = "1.1.6"
@@ -53,7 +53,7 @@ kotlinPoet = "2.2.0"
 # Testing
 junit = "5.13.+"
 wiremock = "3.13.+"
-mokkery = "2.9.0"
+mokkery = "2.10.0"
 kover = "0.9.2"
 
 

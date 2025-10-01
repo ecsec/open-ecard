@@ -323,7 +323,12 @@ tasks.register<MacSignLibrariesTask>("prepareMacBundle") {
 		enabled = false
 	}
 
-	jarFiles.setDir(layout.buildDirectory.dir("jars")).include("jna-*.jar")
+	jarFiles
+		.setDir(layout.buildDirectory.dir("jars"))
+		.include(
+			"jna-*.jar",
+			"jansi-*.jar",
+		)
 	jarFilesSignedOutputDir =
 		Path.of(
 			layout.buildDirectory
@@ -335,6 +340,7 @@ tasks.register<MacSignLibrariesTask>("prepareMacBundle") {
 	filesToSign =
 		listOf(
 			"com/sun/jna/darwin-.*/libjnidispatch.jnilib",
+			"org/fusesource/jansi/internal/native/Mac/.*/libjansi.jnilib",
 		)
 	compressionLevel = Deflater.BEST_COMPRESSION
 }

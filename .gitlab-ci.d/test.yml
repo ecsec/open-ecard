@@ -1,6 +1,6 @@
 test:
   stage: test
-  image: docker.io/cimg/android:2025.04
+  image: docker.io/cimg/android:2025.09
   tags:
     - "podman"
   cache:

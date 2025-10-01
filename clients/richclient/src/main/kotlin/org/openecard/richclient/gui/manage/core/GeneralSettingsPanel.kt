@@ -29,7 +29,6 @@ import org.openecard.richclient.gui.manage.SettingsPanel
  * This panel hosts the following groups:
  *
  *  * Notification
- *  * Legacy
  *
  *
  * @author Tobias Wich
@@ -37,7 +36,6 @@ import org.openecard.richclient.gui.manage.SettingsPanel
 class GeneralSettingsPanel : SettingsPanel() {
 	init {
 		addSettingsGroup(GeneralSettingsNotificationGroup())
-		addSettingsGroup(GeneralSettingsLegacyGroup())
 	}
 
 	companion object {

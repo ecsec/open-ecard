@@ -19,17 +19,6 @@
 	<string name="addon_list_core_general_notification_omit_show_remove_card_desc">Do not show a remove card dialog
 		after finishing the authentication with the card.
 	</string>
-	<string name="addon_list_core_general_legacy_group_name">Legacy Behaviour</string>
-	<string name="addon_list_core_general_legacy_tls1">TLS 1.0</string>
-	<string name="addon_list_core_general_legacy_tls1_desc">Allow the use of TLS version 1.0.</string>
-	<string name="addon_list_core_general_legacy_invalid_schema">No Schema Validation</string>
-	<string name="addon_list_core_general_legacy_invalid_schema_desc">Don't validate incoming messages against the eCard
-		XML schema.
-	</string>
-	<string name="addon_list_core_general_legacy_case_insensitive_path">Case-insensitive URLs</string>
-	<string name="addon_list_core_general_legacy_case_insensitive_path_desc">Match URL paths case-insensitive instead of
-		case-sensitive as specified in RFC 3986.
-	</string>
 
 	<!-- Connection settings-->
 	<string name="addon_list_core_connection">Connection Settings</string>
@@ -78,7 +67,7 @@
 	<string name="addon_core_logging_addon_desc">Add-on Manager related operations.</string>
 	<string name="addon_core_logging_salstate">SAL state</string>
 	<string name="addon_core_logging_salstate_desc">Events which affect the behaviour of the SAL's state.</string>
-	<string name="addon_core_logging_middleware">PKCS\#11 Middleware</string>
+	<string name="addon_core_logging_middleware">PKCS#11 Middleware</string>
 	<string name="addon_core_logging_middleware_desc">Middleware related operations.</string>
 	<string name="addon_core_logging_middleware-event">Middleware Event Manager</string>
 	<string name="addon_core_logging_middleware-event_desc">Low level events with cards.</string>
@@ -86,8 +75,8 @@
 	<string name="addon_core_logging_chipgateway_desc">ChipGateway protocol related operations.</string>
 
 	<!-- Middleware settings-->
-	<string name="addon_list_core_middleware">PKCS\#11</string>
-	<string name="addon_core_middleware_group_name">PKCS\#11 Middleware Selection</string>
+	<string name="addon_list_core_middleware">PKCS#11</string>
+	<string name="addon_core_middleware_group_name">PKCS#11 Middleware Selection</string>
 	<string name="addon_core_middleware_item_label">%s</string>
 	<string name="addon_core_middleware_item_desc">Enable/ Disable this middleware.</string>
 	<string name="addon_core_middleware_item_desc_forced">This middleware is required and cannot be disabled.</string>

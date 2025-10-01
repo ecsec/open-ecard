@@ -37,9 +37,11 @@ import org.openecard.addons.tr03124.ClientInformation
 import org.openecard.addons.tr03124.EidActivation
 import org.openecard.addons.tr03124.eac.UiStep
 import org.openecard.cif.bundled.NpaCif
+import org.openecard.common.OpenecardProperties
 import org.openecard.gui.UserConsent
 import org.openecard.gui.definition.UserConsentDescription
 import org.openecard.gui.executor.ExecutionEngine
+import org.openecard.gui.message.DialogType
 import org.openecard.i18n.I18N
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.tr03124.TerminalSelection.trySelectPinPadTerminal
@@ -79,6 +81,11 @@ class EacProcess(
 		return processUi(uiStep)
 	}
 
+	private val isShowRemoveCard: Boolean by lazy {
+		val str = OpenecardProperties.getProperty("notification.omit_show_remove_card")
+		!str.toBoolean()
+	}
+
 	@OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
 	@Throws(BindingException::class)
 	private suspend fun processUi(uiStep: UiStep): BindingResponse {
@@ -113,10 +120,29 @@ class EacProcess(
 				val nav = gui.obtainNavigator(uc)
 				val exec = ExecutionEngine(nav)
 				exec.process()
+
+				// show the finish message just if the card still seems to be present
+				if (isShowRemoveCard && state.isCardInserted()) {
+					showFinishMessage()
+				}
 			}
 
 		// if we have no result, then we got cancelled
 		val bindRes = state.bindingResponse ?: state.uiStep.cancel()
 		return bindRes
+	}
+
+	private fun EacProcessState.isCardInserted(): Boolean =
+		this.cardWatcher.cardState.terminalsWithCard
+			.contains(this.terminalName ?: "invalid-terminal-name")
+
+	private fun showFinishMessage() {
+		val title = I18N.strings.tr03112_finish.localized()
+		val msg = I18N.strings.tr03112_remove_card_msg.localized()
+
+		Thread(
+			{ gui.obtainMessageDialog().showMessageDialog(msg, title, DialogType.INFORMATION_MESSAGE) },
+			"Background_MsgBox",
+		).start()
 	}
 }

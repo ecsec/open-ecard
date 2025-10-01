@@ -4,9 +4,9 @@ val propsFile = buildFile.parentFile.parentFile.resolve("gradle.properties")
 val props = loadProperties(propsFile.absolutePath)
 
 val javaToolchain: String by props
-java {
-	toolchain {
-		languageVersion.set(JavaLanguageVersion.of(javaToolchain))
+kotlin {
+	jvmToolchain {
+		languageVersion = JavaLanguageVersion.of(javaToolchain)
 	}
 }
 

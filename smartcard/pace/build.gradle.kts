@@ -4,6 +4,7 @@ plugins {
 	id("openecard.kmp-lib-conventions")
 	id("openecard.kmp-jvm-conventions")
 	// id("openecard.kmp-ios-conventions")
+	id("openecard.kmp-desktop-conventions")
 }
 
 kotlin {
@@ -13,7 +14,7 @@ kotlin {
 			api(project(":utils:common"))
 			api(project(":smartcard:sc-base"))
 			api(project(":smartcard:eac-definitions"))
-// 			implementation(libs.kotlin.crypto.core)
+			implementation(libs.kotlin.crypto.core)
 			implementation(libs.kotlin.crypto.asn1.core)
 			implementation(libs.kotlin.crypto.asn1.modules)
 		}

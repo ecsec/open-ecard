@@ -23,8 +23,10 @@
 package org.openecard.richclient
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.junit.jupiter.api.Disabled
 import java.io.IOException
 import java.net.HttpURLConnection
+import java.net.URI
 import java.net.URL
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -48,15 +50,12 @@ class RichClientTest {
 	 */
 	@BeforeTest
 	fun setUp() {
+		val baseUri = "http://127.0.0.1:24727"
+		val tokenPath = "http%3A%2F%2Fopenecard-demo.vserver-001.urospace.de%2FtcToken"
 		tcTokenURL =
-			URL(
-				"http",
-				"127.0.0.1",
-				24727,
-				"/eID-Client?tcTokenURL=http%3A%2F%2Fopenecard-demo.vserver-001.urospace.de%2FtcToken%3Fcard-type%3Dhttp%3A%2F%2Fbsi.bund.de%2Fcif%2Fnpa.xml",
-			)
-		statusURL = URL("http", "127.0.0.1", 24727, "/getStatus")
-		waitForChangeURL = URL("http", "127.0.0.1", 24727, "/waitForChange")
+			URI.create("$baseUri/eID-Client?tcTokenURL=$tokenPath").toURL()
+		statusURL = URI.create("$baseUri/getStatus").toURL()
+		waitForChangeURL = URI.create("$baseUri/waitForChange").toURL()
 		val client = RichClient()
 		client.setup()
 		// Wait some seconds until the client comes up
@@ -66,7 +65,8 @@ class RichClientTest {
 	/**
 	 * Test the Response of the RichClient to a TCTokenRequest.
 	 */
-	@Test(enabled = false)
+	@Disabled
+	@Test
 	fun testTCToken() {
 		try {
 			val urlConnection = tcTokenURL.openConnection() as HttpURLConnection
@@ -80,7 +80,8 @@ class RichClientTest {
 	/**
 	 * Test the Response of the RichClient to a StatusRequest.
 	 */
-	@Test(enabled = false)
+	@Disabled
+	@Test
 	fun testStatus() {
 		try {
 			val urlConnection = statusURL.openConnection() as HttpURLConnection
@@ -94,7 +95,8 @@ class RichClientTest {
 	/**
 	 * Test the Response of the RichClient to a WaitForChangeReuquest.
 	 */
-	@Test(enabled = false)
+	@Disabled
+	@Test
 	fun testWaitForChange() {
 		try {
 			val urlConnection = waitForChangeURL.openConnection() as HttpURLConnection

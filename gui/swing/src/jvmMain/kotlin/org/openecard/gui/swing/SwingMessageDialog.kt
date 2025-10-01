@@ -55,7 +55,7 @@ class SwingMessageDialog : MessageDialog {
 		msgType: DialogType,
 		iconData: ByteArray?,
 	): MessageDialogResult {
-		var msg = formatMessage(msg)
+		val msg = formatMessage(msg)
 		val icon = if (iconData != null) ImageIcon(iconData) else null
 		val jop = JOptionPane(msg, convertDialogType(msgType), JOptionPane.DEFAULT_OPTION, icon)
 		val dialog = jop.createDialog(title)
@@ -94,8 +94,7 @@ class SwingMessageDialog : MessageDialog {
 		msgType: DialogType,
 		iconData: ByteArray?,
 	): MessageDialogResult {
-		var msg = msg
-		msg = formatMessage(msg)
+		val msg = formatMessage(msg)
 		val icon = if (iconData != null) ImageIcon(iconData) else null
 		val jop =
 			JOptionPane(
@@ -137,7 +136,7 @@ class SwingMessageDialog : MessageDialog {
 		msgType: DialogType,
 		initialValue: String?,
 	): MessageDialogResult {
-		var msg = formatMessage(msg)
+		val msg = formatMessage(msg)
 		val jop = JOptionPane(msg, convertDialogType(msgType), JOptionPane.OK_CANCEL_OPTION)
 		val dialog = jop.createDialog(title)
 		dialog.setIconImage(FRAME_ICON)
@@ -162,13 +161,13 @@ class SwingMessageDialog : MessageDialog {
 		title: String?,
 		msgType: DialogType,
 		iconData: ByteArray?,
-		initialSelectedIndex: Int,
-		vararg options: String,
+		initialSelectionIndex: Int,
+		vararg selectionValues: String,
 	): MessageDialogResult {
 		var msg = msg
-		var initialSelectedIndex = initialSelectedIndex
+		var initialSelectedIndex = initialSelectionIndex
 		msg = formatMessage(msg)
-		val optionsList = options.toList()
+		val optionsList = selectionValues.toList()
 		require(!optionsList.isEmpty()) { "List of options must be given." }
 		if (initialSelectedIndex > optionsList.size) {
 			initialSelectedIndex = 0
@@ -184,7 +183,7 @@ class SwingMessageDialog : MessageDialog {
 			)
 		val dialog = jop.createDialog(title)
 		dialog.setIconImage(FRAME_ICON)
-		jop.setSelectionValues(options)
+		jop.setSelectionValues(selectionValues)
 		jop.setInitialSelectionValue(initialValue)
 		jop.setWantsInput(true)
 		if (SwingDialogWrapper.Companion.needsFullscreen()) {

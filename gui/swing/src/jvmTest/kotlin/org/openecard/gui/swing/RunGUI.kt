@@ -22,6 +22,7 @@
 package org.openecard.gui.swing
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.junit.jupiter.api.Disabled
 import org.openecard.gui.ResultStatus
 import org.openecard.gui.StepResult
 import org.openecard.gui.definition.BoxItem
@@ -40,10 +41,10 @@ import org.openecard.gui.executor.StepActionResultStatus
 import org.openecard.gui.results
 import org.openecard.gui.status
 import org.openecard.gui.swing.common.GUIDefaults.initialize
-import org.testng.annotations.BeforeTest
-import org.testng.annotations.Test
 import java.io.IOException
 import java.util.regex.Pattern
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 private val LOG = KotlinLogging.logger { }
 
@@ -444,7 +445,8 @@ class RunGUI {
 	 * Uncomment the
 	 * `@Ignore` line to run a demo gui so you can debug it.
 	 */
-	@Test(enabled = false)
+	@Disabled
+	@Test
 	fun runUC() {
 		try {
 			val dialog = SwingDialogWrapper()

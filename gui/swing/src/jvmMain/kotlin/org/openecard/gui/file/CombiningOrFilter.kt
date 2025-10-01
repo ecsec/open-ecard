@@ -21,7 +21,6 @@
  */
 package org.openecard.gui.file
 
-import org.openecard.gui.file.AcceptAllFilesFilter
 import java.io.File
 import java.util.Arrays
 
@@ -69,9 +68,9 @@ class CombiningOrFilter(
 		description = sb.toString()
 	}
 
-	override fun accept(f: File): Boolean {
+	override fun accept(file: File): Boolean {
 		for (next in filters) {
-			if (next.accept(f)) {
+			if (next.accept(file)) {
 				return true
 			}
 		}

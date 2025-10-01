@@ -30,7 +30,7 @@ import java.io.File
  * @author Tobias Wich
  */
 class AcceptAllFilesFilter : FileFilter {
-	override fun accept(f: File): Boolean = true
+	override fun accept(file: File): Boolean = true
 
 	override val description: String
 		get() = "*"

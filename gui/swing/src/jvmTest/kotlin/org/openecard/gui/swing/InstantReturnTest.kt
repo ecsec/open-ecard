@@ -21,14 +21,15 @@
  ***************************************************************************/
 package org.openecard.gui.swing
 
+import org.junit.jupiter.api.Disabled
 import org.openecard.gui.UserConsentNavigator
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.Text
 import org.openecard.gui.definition.UserConsentDescription
 import org.openecard.gui.executor.ExecutionEngine
 import org.openecard.gui.executor.StepAction
-import org.testng.Assert
-import org.testng.annotations.Test
+import kotlin.test.Test
+import kotlin.test.assertTrue
 
 // TODO: make Selenium test which really proves, that the GUI works correctly
 
@@ -43,7 +44,8 @@ class InstantReturnTest {
 	 * Test if the GUI closes itself after executing an action with instantreturn set.
 	 * There is no way to determine whether the GUI is displayed at all. This check must be part of a Selenium test.
 	 */
-	@Test(enabled = false)
+	@Disabled
+	@Test
 	fun testInstantReturn() {
 		// create wait action
 		val action = WaitAction("step1", DIFF_TIME)
@@ -59,7 +61,7 @@ class InstantReturnTest {
 		val act = stopTime - startTime
 		val diff: Long = act - DIFF_TIME
 		val msg = "Display time of dialog differs ${diff}ms from reference value (${VARIANCE}ms allowed)."
-		Assert.assertTrue(diff <= VARIANCE, msg)
+		assertTrue(msg) { diff <= VARIANCE }
 	}
 
 	private fun createNavigator(waitAction: StepAction): UserConsentNavigator {

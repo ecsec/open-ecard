@@ -5,6 +5,7 @@
     - .gradle/daemon/
     - .gradle/native/
     - .gradle/jdks/
+    - .gradle/konan/
 
 .cache-gradle-builds:
   paths:

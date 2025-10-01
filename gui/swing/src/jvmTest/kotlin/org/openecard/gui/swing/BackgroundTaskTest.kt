@@ -21,6 +21,7 @@
  ***************************************************************************/
 package org.openecard.gui.swing
 
+import org.junit.jupiter.api.Disabled
 import org.openecard.gui.UserConsent
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.Text
@@ -29,7 +30,7 @@ import org.openecard.gui.executor.BackgroundTask
 import org.openecard.gui.executor.ExecutionEngine
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
-import org.testng.annotations.Test
+import kotlin.test.Test
 
 /**
  *
@@ -37,7 +38,8 @@ import org.testng.annotations.Test
  */
 class BackgroundTaskTest {
 	// TODO: skip test only in ci
-	@Test(enabled = false)
+	@Disabled
+	@Test
 	fun testWait() {
 		val uc: UserConsent = SwingUserConsent(SwingDialogWrapper())
 

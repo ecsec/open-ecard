@@ -1,7 +1,8 @@
 description = "releases"
 
 plugins {
-	id("openecard.lib-multiplatform-conventions")
+	id("openecard.kmp-lib-conventions")
+	id("openecard.kmp-jvm-conventions")
 	id("openecard.moko-conventions")
 }
 

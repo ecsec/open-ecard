@@ -15,6 +15,6 @@ val testHeapSize: String by project
 tasks {
 	test {
 		maxHeapSize = testHeapSize
-		useTestNG()
+		useJUnitPlatform { }
 	}
 }

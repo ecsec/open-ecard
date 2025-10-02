@@ -19,15 +19,14 @@ private val logger = KotlinLogging.logger { }
 class IosNfcCard(
 	override val terminalConnection: IosTerminalConnection,
 ) : Card {
-	val tag
-		get() = terminalConnection.tag
+	internal val tag
+		get() = terminalConnection.tag ?: throw RemovedCard()
 
 	override fun atr(): Atr {
-		logger.debug { "Historical bytes from card: ${tag?.historicalBytes}" }
-		return tag?.historicalBytes?.toUByteArray()?.let {
-			terminalConnection.terminal.currentSession?.setAlertMessage(IosNfcAlertMessages.cardConnectedMessage)
-			Atr.fromHistoricalBytes(it)
-		} ?: throw CommError("Unsupported card or no valid historical bytes could be read.")
+		logger.debug { "Historical bytes from card: ${tag.historicalBytes}" }
+		val hist = tag.historicalBytes?.toUByteArray() ?: ubyteArrayOf()
+		terminalConnection.terminal.currentSession?.setAlertMessage(IosNfcAlertMessages.cardConnectedMessage)
+		return Atr.fromHistoricalBytes(hist)
 	}
 
 	override val protocol = CardProtocol.TCL
@@ -53,7 +52,7 @@ class IosCardChannel internal constructor(
 		val iosApdu = apdu.toIosApdu()
 
 		val res = CompletableDeferred<ResponseApdu>()
-		card.tag?.sendCommandAPDU(
+		card.tag.sendCommandAPDU(
 			iosApdu,
 		) { data, sw1, sw2, error ->
 			logger.debug {

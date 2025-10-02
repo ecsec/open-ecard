@@ -38,6 +38,7 @@ import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.CValuesRef
 import kotlinx.cinterop.ExperimentalForeignApi
 import org.openecard.sc.pace.asn1.StandardizedDomainParameters
+import org.openecard.utils.common.nextBitField
 import toBigNum
 import toUByteArray
 import kotlin.UByteArray
@@ -246,7 +247,7 @@ internal class OSslEcPrivateKey(
 			curve: OSslEcCurve,
 			rand: Random,
 		) = OSslEcPrivateKey(
-			rand.nextBytes((EC_GROUP_get_degree(curve.group) + 7) / 8).toUByteArray(),
+			rand.nextBitField(EC_GROUP_get_degree(curve.group)),
 			curve,
 		).also {
 			logger.debug { "Private key was generated" }

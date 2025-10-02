@@ -13,10 +13,10 @@ interface Card {
 	 * Card Capabilities object.
 	 * Implementations can use the ones from the `ATR`, or it can be set explicitly after reading `EF.ATR`.
 	 */
-	@Throws(CommError::class)
+	@Throws(CommError::class, RemovedCard::class)
 	fun getCapabilities(): CardCapabilities?
 
-	@Throws(CommError::class)
+	@Throws(CommError::class, RemovedCard::class)
 	fun atr(): Atr
 
 	@Throws(

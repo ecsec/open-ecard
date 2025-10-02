@@ -3,6 +3,7 @@ package org.openecard.sc.pace.cvc
 import org.openecard.sc.tlv.Tag
 import org.openecard.sc.tlv.Tlv
 import org.openecard.sc.tlv.TlvPrimitive
+import org.openecard.utils.common.Iso88591.decodeIso88591
 import org.openecard.utils.serialization.toPrintable
 
 data class PublicKeyReference(
@@ -41,9 +42,9 @@ data class PublicKeyReference(
 			return when (this) {
 				is TlvPrimitive -> {
 					val data = value.toByteArray()
-					val country = data.decodeToString(0, 2)
-					val holder = data.decodeToString(2, data.size - 5)
-					val sequence = data.decodeToString(data.size - 5)
+					val country = data.sliceArray(0 until 2).decodeIso88591()
+					val holder = data.sliceArray(2 until data.size - 5).decodeIso88591()
+					val sequence = data.sliceArray(data.size - 5 until data.size).decodeIso88591()
 					PublicKeyReference(country, holder, sequence)
 				}
 				else -> throw IllegalArgumentException("PublicKeyReference TLV is not primitive")
@@ -53,9 +54,9 @@ data class PublicKeyReference(
 		@OptIn(ExperimentalUnsignedTypes::class)
 		fun UByteArray.toPublicKeyReference(): PublicKeyReference {
 			val data = this.toByteArray()
-			val country = data.decodeToString(0, 2)
-			val holder = data.decodeToString(2, data.size - 5)
-			val sequence = data.decodeToString(data.size - 5)
+			val country = data.sliceArray(0 until 2).decodeIso88591()
+			val holder = data.sliceArray(2 until data.size - 5).decodeIso88591()
+			val sequence = data.sliceArray(data.size - 5 until data.size).decodeIso88591()
 			return PublicKeyReference(country, holder, sequence)
 		}
 	}

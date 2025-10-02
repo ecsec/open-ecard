@@ -5,6 +5,4 @@ import org.openecard.sc.pace.asn1.EfCardAccess
 actual fun cryptoSuite(
 	paceInfos: EfCardAccess.PaceInfos,
 	password: String,
-): PaceCryptoSuite {
-	TODO("Not yet implemented")
-}
+): PaceCryptoSuite = OSslPaceCryptoSuite(paceInfos, password)

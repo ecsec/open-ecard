@@ -31,16 +31,26 @@ fun commandApduFromNFCISO7816APDU(
 
 fun CommandApdu.toIosApdu(): NFCISO7816APDU =
 	NFCISO7816APDU(
-		data = data.v.toNSData(),
+		data = if (data.v.isEmpty()) NSData() else data.v.toNSData(),
 		instructionClass = classByte.byte,
 		instructionCode = ins,
 		p2Parameter = p2,
 		p1Parameter = p1,
 		expectedResponseLength =
 			when (val v = le?.toLong()) {
+				0L ->
+					if (this.forceExtendedLength) {
+						65536L
+					} else {
+						256L
+					}
 				null,
-				0L,
-				-> -1L
+				->
+					if (this.forceExtendedLength) {
+						65536L
+					} else {
+						-1L
+					}
 				else -> v
 			},
 	)

@@ -54,6 +54,8 @@ class AndroidCardChannel internal constructor(
 
 	// only relevant for logic channels
 	override fun close() {
-		TODO("Not yet implemented")
+		if (isLogicalChannel) {
+			TODO("Not yet implemented")
+		}
 	}
 }

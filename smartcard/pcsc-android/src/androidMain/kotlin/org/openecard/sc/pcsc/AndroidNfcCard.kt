@@ -18,11 +18,11 @@ class AndroidNfcCard(
 	override val terminalConnection: AndroidTerminalConnection,
 ) : Card {
 	val tag
-		get() = terminalConnection.tag
+		get() = terminalConnection.tag ?: throw RemovedCard()
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override fun atr(): Atr {
-		val histBytesTmp = tag?.historicalBytes ?: tag?.hiLayerResponse
+		val histBytesTmp = tag.historicalBytes ?: tag.hiLayerResponse
 		return histBytesTmp?.let {
 			Atr.fromHistoricalBytes(histBytesTmp.toUByteArray())
 		} ?: throw CommError("Unsupported card or no valid historical bytes could be read.")
@@ -48,12 +48,8 @@ class AndroidCardChannel internal constructor(
 ) : AbstractCardChannel() {
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override fun transmitRaw(apdu: CommandApdu) =
-		when (val tag = card.tag) {
-			null -> throw RemovedCard()
-			else ->
-				mapScioError {
-					tag.transceive(apdu.toBytes.toByteArray()).toResponseApdu()
-				}
+		mapScioError {
+			card.tag.transceive(apdu.toBytes.toByteArray()).toResponseApdu()
 		}
 
 	// only relevant for logic channels

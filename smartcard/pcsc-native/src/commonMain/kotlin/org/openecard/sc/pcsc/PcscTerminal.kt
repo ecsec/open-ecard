@@ -1,13 +1,20 @@
 package org.openecard.sc.pcsc
 
 import au.id.micolous.kotlin.pcsc.Context
+import au.id.micolous.kotlin.pcsc.ReaderState
+import au.id.micolous.kotlin.pcsc.State
 import au.id.micolous.kotlin.pcsc.connect
 import au.id.micolous.kotlin.pcsc.getStatus
+import au.id.micolous.kotlin.pcsc.getStatusChangeSuspend
+import io.github.oshai.kotlinlogging.KotlinLogging
+import org.openecard.sc.iface.InternalSystemError
 import org.openecard.sc.iface.PreferredCardProtocol
 import org.openecard.sc.iface.ShareMode
 import org.openecard.sc.iface.Terminal
 import org.openecard.sc.iface.TerminalConnection
 import org.openecard.sc.iface.TerminalStateType
+
+private val log = KotlinLogging.logger { }
 
 class PcscTerminal(
 	override val name: String,
@@ -42,11 +49,23 @@ class PcscTerminal(
 			return PcscTerminalConnection(card, this)
 		}
 
-	override suspend fun waitForCardPresent() {
-		TODO("Not yet implemented")
-	}
+	override suspend fun waitForCardPresent() =
+		mapScioError {
+			val oldState = ReaderState(reader = name, currentState = State(empty = true))
+			log.debug { "Wait for card present in terminal $name" }
+			val state = context.getStatusChangeSuspend(Int.MAX_VALUE, listOf(oldState)).first()
+			if (state.eventState.empty) {
+				throw InternalSystemError("Card is not present after status call.")
+			}
+		}
 
-	override suspend fun waitForCardAbsent() {
-		TODO("Not yet implemented")
-	}
+	override suspend fun waitForCardAbsent() =
+		mapScioError {
+			val oldState = ReaderState(reader = name, currentState = State(present = true))
+			log.debug { "Wait for card absent in terminal $name" }
+			val state = context.getStatusChangeSuspend(Int.MAX_VALUE, listOf(oldState)).first()
+			if (state.eventState.present) {
+				throw InternalSystemError("Card is not absent after status call.")
+			}
+		}
 }

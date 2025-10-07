@@ -1,6 +1,7 @@
 package org.openecard.sc.pcsc
 
 import au.id.micolous.kotlin.pcsc.Context
+import au.id.micolous.kotlin.pcsc.getAllReaderStatus
 import org.openecard.sc.iface.InvalidHandle
 import org.openecard.sc.iface.TerminalFactory
 import org.openecard.sc.iface.Terminals
@@ -33,6 +34,8 @@ class PcscTerminals(
 	override fun list(): List<PcscTerminal> =
 		mapScioError {
 			contextAsserted.let { ctx ->
+				// update reader status, then return list
+				ctx.getAllReaderStatus()
 				ctx.listReaders().map { name ->
 					PcscTerminal(name, this, ctx)
 				}
@@ -42,6 +45,8 @@ class PcscTerminals(
 	override fun getTerminal(name: String): PcscTerminal? =
 		mapScioError {
 			contextAsserted.let { ctx ->
+				// update reader status, then return the requested reader
+				ctx.getAllReaderStatus()
 				ctx
 					.listReaders()
 					.find { it == name }

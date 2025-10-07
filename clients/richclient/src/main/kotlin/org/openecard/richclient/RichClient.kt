@@ -257,8 +257,6 @@ class RichClient {
 	private class GCTask : TimerTask() {
 		override fun run() {
 			System.gc()
-			System.runFinalization()
-			System.gc()
 			// repeat every 5 minutes
 			Timer().schedule(GCTask(), (5 * 60 * 1000).toLong())
 		}

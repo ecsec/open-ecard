@@ -1,6 +1,5 @@
 package org.openecard.sc.pcsc
 
-import au.id.micolous.kotlin.pcsc.PCSCError
 import org.openecard.sc.apdu.CommandApdu
 import org.openecard.sc.apdu.isNormalProcessed
 import org.openecard.sc.iface.Atr
@@ -14,7 +13,11 @@ class PcscCard(
 	override val terminalConnection: PcscTerminalConnection,
 ) : Card {
 	override val protocol: CardProtocol by lazy {
-		card.protocol.toSc()
+		if (isContactless) {
+			CardProtocol.TCL
+		} else {
+			card.protocol.toSc()
+		}
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)

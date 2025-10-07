@@ -6,6 +6,7 @@ import dev.mokkery.answering.sequentiallyReturns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
+import dev.mokkery.matcher.eq
 import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verifyNoMoreCalls
@@ -55,14 +56,17 @@ class CardWatcherTest {
 			val terminals =
 				mock<Terminals> {
 					every { list() } returns listOf(terminal)
+					every { getTerminal(eq("mockTerminal")) } returns terminal
 					every { establishContext() } returns Unit
 					every { releaseContext() } returns Unit
 				}
+			every { terminal.terminals } returns terminals
 
 			val factory =
 				mock<TerminalFactory> {
 					every { load() } returns terminals
 				}
+			every { terminals.factory } returns factory
 
 			val callbacks =
 				mock<CardWatcherCallback> {
@@ -101,14 +105,21 @@ class CardWatcherTest {
 			val terminals =
 				mock<Terminals> {
 					every { list() } returns listOf(terminal1, terminal2, terminal3)
+					every { getTerminal(eq("terminal1")) } returns terminal1
+					every { getTerminal(eq("terminal2")) } returns terminal2
+					every { getTerminal(eq("terminal3")) } returns terminal3
 					every { establishContext() } returns Unit
 					every { releaseContext() } returns Unit
 				}
+			every { terminal1.terminals } returns terminals
+			every { terminal2.terminals } returns terminals
+			every { terminal3.terminals } returns terminals
 
 			val factory =
 				mock<TerminalFactory> {
 					every { load() } returns terminals
 				}
+			every { terminals.factory } returns factory
 
 			val callbacks =
 				mock<CardWatcherCallback> {
@@ -153,14 +164,19 @@ class CardWatcherTest {
 			val terminals =
 				mock<Terminals> {
 					every { list() } sequentiallyReturns sequence
+					every { getTerminal(eq("terminal1")) } returns terminal1
+					every { getTerminal(eq("terminal2")) } returns terminal2
 					every { establishContext() } returns Unit
 					every { releaseContext() } returns Unit
 				}
+			every { terminal1.terminals } returns terminals
+			every { terminal2.terminals } returns terminals
 
 			val factory =
 				mock<TerminalFactory> {
 					every { load() } returns terminals
 				}
+			every { terminals.factory } returns factory
 
 			val callbacks =
 				mock<CardWatcherCallback> {
@@ -199,14 +215,19 @@ class CardWatcherTest {
 							listOf(terminal1),
 							listOf(terminal1),
 						)
+					every { getTerminal(eq("terminal1")) } returns terminal1
+					every { getTerminal(eq("terminal2")) } returns terminal2
 					every { establishContext() } returns Unit
 					every { releaseContext() } returns Unit
 				}
+			every { terminal1.terminals } returns terminals
+			every { terminal2.terminals } returns terminals
 
 			val factory =
 				mock<TerminalFactory> {
 					every { load() } returns terminals
 				}
+			every { terminals.factory } returns factory
 
 			val callbacks =
 				mock<CardWatcherCallback> {
@@ -248,14 +269,17 @@ class CardWatcherTest {
 			val terminals =
 				mock<Terminals> {
 					every { list() } returns listOf(terminal)
+					every { getTerminal(eq("mockTerminal")) } returns terminal
 					every { establishContext() } returns Unit
 					every { releaseContext() } returns Unit
 				}
+			every { terminal.terminals } returns terminals
 
 			val factory =
 				mock<TerminalFactory> {
 					every { load() } returns terminals
 				}
+			every { terminals.factory } returns factory
 
 			val callbacks =
 				mock<CardWatcherCallback> {

@@ -22,6 +22,8 @@ import org.openecard.sc.iface.TerminalConnection
 import org.openecard.sc.iface.TerminalFactory
 import org.openecard.sc.iface.Terminals
 import org.openecard.sc.iface.withCardConnect
+import org.openecard.sc.iface.withContext
+import org.openecard.sc.iface.withContextSuspend
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -165,71 +167,75 @@ class CardWatcher(
 
 	private fun monitorTerminal(terminal: Terminal): Job =
 		context.launch {
-			while (isActive) {
-				try {
-					terminal.waitForCardPresent()
+			// obtain fresh context because context is not thread safe
+			terminal.terminals.factory.load().withContextSuspend { terminals ->
+				val terminal = terminals.getTerminal(terminal.name)
+				while (isActive && terminal != null) {
+					try {
+						terminal.waitForCardPresent()
 
-					terminal.withCardConnect { connection ->
-						mutex.withLock {
-							// update card status
-							curCardState = curCardState.insertCard(terminal.name)
-							// send events to all receivers
-							val evt = CardStateEvent.CardInserted(terminal.name)
-							receivers.values.forEach { it.send(evt) }
-						}
+						terminal.withCardConnect { connection ->
+							mutex.withLock {
+								// update card status
+								curCardState = curCardState.insertCard(terminal.name)
+								// send events to all receivers
+								val evt = CardStateEvent.CardInserted(terminal.name)
+								receivers.values.forEach { it.send(evt) }
+							}
 
-						val hasTransaction =
-							runCatching {
-								connection.beginTransaction()
-							}.onFailure {
-								logger.warn(it) { "Failed to open transaction for card recognition in terminal ${connection.terminal.name}" }
-							}.isSuccess
-						try {
-							val channel = connection.card?.basicChannel
-							if (channel != null) {
-								recognition.recognizeCard(channel)?.let { cardType ->
-									mutex.withLock {
-										// update card status
-										curCardState = curCardState.recognizeCard(terminal.name, cardType)
-										// send events to all receivers
-										val evt = CardStateEvent.CardRecognized(terminal.name, cardType)
-										receivers.values.forEach { it.send(evt) }
+							val hasTransaction =
+								runCatching {
+									connection.beginTransaction()
+								}.onFailure {
+									logger.warn(it) { "Failed to open transaction for card recognition in terminal ${connection.terminal.name}" }
+								}.isSuccess
+							try {
+								val channel = connection.card?.basicChannel
+								if (channel != null) {
+									recognition.recognizeCard(channel)?.let { cardType ->
+										mutex.withLock {
+											// update card status
+											curCardState = curCardState.recognizeCard(terminal.name, cardType)
+											// send events to all receivers
+											val evt = CardStateEvent.CardRecognized(terminal.name, cardType)
+											receivers.values.forEach { it.send(evt) }
+										}
 									}
 								}
-							}
-						} finally {
-							if (hasTransaction) {
-								runCatching { connection.endTransaction() }
+							} finally {
+								if (hasTransaction) {
+									runCatching { connection.endTransaction() }
+								}
 							}
 						}
-					}
 
-					terminal.waitForCardAbsent()
-					mutex.withLock {
-						// update card status
-						curCardState = curCardState.removeCard(terminal.name)
-						// send events to all receivers
-						val evt = CardStateEvent.CardRemoved(terminal.name)
-						receivers.values.forEach { it.send(evt) }
-					}
-				} catch (ex: CancellationException) {
-					logger.info { "Cancel received in card watcher job of terminal ${terminal.name}" }
-					throw ex
-				} catch (e: Exception) {
-					// correct state
-					mutex.withLock {
-						if (curCardState.terminalsWithCard.contains(terminal.name)) {
+						terminal.waitForCardAbsent()
+						mutex.withLock {
+							// update card status
 							curCardState = curCardState.removeCard(terminal.name)
 							// send events to all receivers
 							val evt = CardStateEvent.CardRemoved(terminal.name)
 							receivers.values.forEach { it.send(evt) }
 						}
-					}
+					} catch (ex: CancellationException) {
+						logger.info { "Cancel received in card watcher job of terminal ${terminal.name}" }
+						throw ex
+					} catch (e: Exception) {
+						// correct state
+						mutex.withLock {
+							if (curCardState.terminalsWithCard.contains(terminal.name)) {
+								curCardState = curCardState.removeCard(terminal.name)
+								// send events to all receivers
+								val evt = CardStateEvent.CardRemoved(terminal.name)
+								receivers.values.forEach { it.send(evt) }
+							}
+						}
 
-					// handle cancellation of our job
-					logger.warn { "${terminal.name}: ${e.message}" }
-					// wait and try again, if the terminal is removed, someone will cancel us
-					delay(1000.milliseconds)
+						// handle cancellation of our job
+						logger.warn { "${terminal.name}: ${e.message}" }
+						// wait and try again, if the terminal is removed, someone will cancel us
+						delay(1000.milliseconds)
+					}
 				}
 			}
 		}

@@ -1,9 +1,14 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
 	id("openecard.kmp-conventions")
 }
 
+val javaTarget: String by project
+
 kotlin {
 	jvm {
+		compilerOptions.jvmTarget = JvmTarget.fromTarget(javaTarget)
 		compilations {
 			val test by getting {
 // 				tasks.named<Test>("jvmTest") {
@@ -27,4 +32,10 @@ kotlin {
 			}
 		}
 	}
+}
+
+java {
+	val jVersion = JavaVersion.toVersion(javaTarget)
+	sourceCompatibility = jVersion
+	targetCompatibility = jVersion
 }

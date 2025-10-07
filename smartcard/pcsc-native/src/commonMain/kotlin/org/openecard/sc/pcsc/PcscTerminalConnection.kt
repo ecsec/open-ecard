@@ -41,9 +41,20 @@ class PcscTerminalConnection(
 		_card = getCardInstance()
 	}
 
-	override fun getFeatures(): Set<Feature> {
-		TODO("Not yet implemented")
+	fun controlCommand(
+		code: Int,
+		command: ByteArray,
+	): ByteArray =
+		mapScioError {
+			hwCard.control(code.toLong(), command, 8192)!!
+		}
+
+	private val featureSet by lazy {
+		val info = FeatureInfo(this)
+		info.featureMap.toFeatures(this)
 	}
+
+	override fun getFeatures(): Set<Feature> = featureSet
 
 	override fun beginTransaction() =
 		mapScioError {

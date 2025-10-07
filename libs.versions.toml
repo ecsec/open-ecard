@@ -24,10 +24,10 @@ kotlin-bignum = "0.3.10"
 
 # Android
 agp = "8.12.+"
-androidx-activityCompose = "1.10.+"
+androidx-activityCompose = "1.11.+"
 androidx-appcompat = "1.6.+"
 androidx-constraintlayout = "2.1.+"
-androidx-core-ktx = "1.13.+"
+androidx-core-ktx = "1.15.+"
 androidx-test-ktx = "1.7.+"
 androidx-espresso-core = "3.5.+"
 androidx-material = "1.11.+"

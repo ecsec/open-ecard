@@ -16,7 +16,6 @@ include("utils:common")
 include("utils:serialization")
 
 include("smartcard:sc-base")
-include("smartcard:pcsc-scio")
 include("smartcard:pcsc-native")
 include("smartcard:pcsc-android")
 include("smartcard:pcsc-ios")

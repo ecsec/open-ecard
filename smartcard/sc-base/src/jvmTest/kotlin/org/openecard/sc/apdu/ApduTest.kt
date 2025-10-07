@@ -164,7 +164,7 @@ class ApduTest {
 		"0xFF",
 	)
 	fun `read and write command apdu -CLA-INS-P1-P2-LC-DATA-`(args: ArgumentsAccessor) {
-		val lcInput = args.getInteger(0).toInt()
+		val lcInput = args.getInteger(0)!!
 
 		UByteArray(lcInput) { 0.toUByte() }.let { data ->
 			val dataStr = data.toHexString()
@@ -185,7 +185,7 @@ class ApduTest {
 		"0xFFFF",
 	)
 	fun `read and write command apdu -CLA-INS-P1-P2-EXTLC-DATA-`(args: ArgumentsAccessor) {
-		val lcInput = args.getInteger(0).toInt()
+		val lcInput = args.getInteger(0)!!
 
 		UByteArray(lcInput) { 0.toUByte() }.let { data ->
 			val dataStr = data.toHexString()
@@ -204,7 +204,7 @@ class ApduTest {
 		"0xFF",
 	)
 	fun `read and write command apdu -CLA-INS-P1-P2-LE-`(args: ArgumentsAccessor) {
-		val leInput = args.getInteger(0).toUByte().toHexString()
+		val leInput = args.getInteger(0)!!.toUByte().toHexString()
 
 		"00010203$leInput".hexToUByteArray().let { apduData ->
 			val rewrite = apduData.toCommandApdu().toBytes
@@ -221,7 +221,7 @@ class ApduTest {
 		"0xFFFF",
 	)
 	fun `read and write command apdu -CLA-INS-P1-P2-EXTLE-`(args: ArgumentsAccessor) {
-		val leInput = args.getInteger(0).toUShort().toHexString()
+		val leInput = args.getInteger(0)!!.toUShort().toHexString()
 
 		"0001020300$leInput".hexToUByteArray().let { apduData ->
 			val rewrite = apduData.toCommandApdu().toBytes
@@ -238,8 +238,8 @@ class ApduTest {
 		"0xFF, 0xFF",
 	)
 	fun `read and write command apdu -CLA-INS-P1-P2-LC-DATA-LE-`(args: ArgumentsAccessor) {
-		val lcInput = args.getInteger(0).toUByte()
-		val leInput = args.getInteger(1).toUByte()
+		val lcInput = args.getInteger(0)!!.toUByte()
+		val leInput = args.getInteger(1)!!.toUByte()
 
 		UByteArray(lcInput.toInt()) { 0.toUByte() }.let { data ->
 			val dataStr = data.toHexString()
@@ -267,8 +267,8 @@ class ApduTest {
 		"0xFFFF, 0xFFFF",
 	)
 	fun `read and write command apdu -CLA-INS-P1-P2-EXTLC-DATA-EXTLE-`(args: ArgumentsAccessor) {
-		val lcInput = args.getInteger(0).toUByte()
-		val leInput = args.getInteger(1).toUByte()
+		val lcInput = args.getInteger(0)!!.toUByte()
+		val leInput = args.getInteger(1)!!.toUByte()
 
 		UByteArray(lcInput.toInt()) { 0.toUByte() }.let { data ->
 			val dataStr = data.toHexString()

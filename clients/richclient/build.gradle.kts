@@ -52,7 +52,7 @@ dependencies {
 	implementation(project(":build-info"))
 
 	// Card Stack
-	implementation(project(":smartcard:pcsc-scio"))
+	implementation(project(":smartcard:pcsc-native"))
 	implementation(project(":sal:smartcard-sal"))
 	implementation(project(":cif:bundled-cifs"))
 	implementation(project(":smartcard:pace"))

@@ -17,6 +17,7 @@ include("utils:serialization")
 
 include("smartcard:sc-base")
 include("smartcard:pcsc-scio")
+include("smartcard:pcsc-native")
 include("smartcard:pcsc-android")
 include("smartcard:pcsc-ios")
 include("smartcard:eac-definitions")
@@ -47,6 +48,10 @@ dependencyResolutionManagement {
 
 	repositories {
 		// mavenLocal()
+		maven {
+			name = "Central Portal Snapshots"
+			url = uri("https://central.sonatype.com/repository/maven-snapshots/")
+		}
 		google()
 		mavenCentral()
 

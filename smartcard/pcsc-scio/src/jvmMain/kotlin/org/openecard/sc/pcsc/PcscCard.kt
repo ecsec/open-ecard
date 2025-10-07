@@ -22,8 +22,6 @@ class PcscCard(
 
 	override var setCapabilities: CardCapabilities? = null
 
-	override fun getCapabilities(): CardCapabilities? = atr().historicalBytes?.cardCapabilities ?: setCapabilities
-
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override val isContactless: Boolean by lazy {
 		try {

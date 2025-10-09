@@ -164,6 +164,7 @@ class CardWatcherTest {
 			val terminals =
 				mock<Terminals> {
 					every { list() } sequentiallyReturns sequence
+					everySuspend { waitForTerminalChange(eq(listOf())) } returns Unit
 					every { getTerminal(eq("terminal1")) } returns terminal1
 					every { getTerminal(eq("terminal2")) } returns terminal2
 					every { establishContext() } returns Unit
@@ -215,6 +216,7 @@ class CardWatcherTest {
 							listOf(terminal1),
 							listOf(terminal1),
 						)
+					everySuspend { waitForTerminalChange(eq(listOf("terminal1", "terminal2"))) } returns Unit
 					every { getTerminal(eq("terminal1")) } returns terminal1
 					every { getTerminal(eq("terminal2")) } returns terminal2
 					every { establishContext() } returns Unit

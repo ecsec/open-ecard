@@ -16,16 +16,14 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import org.openecard.sal.sc.recognition.CardRecognition
-import org.openecard.sc.iface.ShareMode
 import org.openecard.sc.iface.Terminal
-import org.openecard.sc.iface.TerminalConnection
 import org.openecard.sc.iface.TerminalFactory
 import org.openecard.sc.iface.Terminals
 import org.openecard.sc.iface.withCardConnect
-import org.openecard.sc.iface.withContext
 import org.openecard.sc.iface.withContextSuspend
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 private val logger = KotlinLogging.logger { }
 
@@ -98,53 +96,65 @@ class CardWatcher(
 		val job =
 			context.launch {
 				while (isActive) {
-					mutex.withLock {
-						try {
-							val currentTerminals = terminals.list()
-							val currentNames = currentTerminals.map { it.name }
+					val tmpState =
+						mutex.withLock {
+							try {
+								val currentTerminals = terminals.list()
+								val currentNames = currentTerminals.map { it.name }
 
-							val added = currentNames - curCardState.terminals
-							for (name in added) {
-								val terminal = currentTerminals.find { it.name == name }
-								if (terminal != null) {
-									curCardState = curCardState.addTerminal(name)
+								val added = currentNames - curCardState.terminals
+								for (name in added) {
+									val terminal = currentTerminals.find { it.name == name }
+									if (terminal != null) {
+										curCardState = curCardState.addTerminal(name)
 
-									// send events to all receivers
-									val evt = CardStateEvent.TerminalAdded(name)
-									receivers.values.forEach { it.send(evt) }
+										// send events to all receivers
+										val evt = CardStateEvent.TerminalAdded(name)
+										receivers.values.forEach { it.send(evt) }
 
-									// register worker
-									val monitorJob = monitorTerminal(terminal)
-									activeJobs[name] = monitorJob
-								} else {
-									logger.warn { "Terminal name='$terminal' removed while processing status update" }
+										// register worker
+										val monitorJob = monitorTerminal(terminal)
+										activeJobs[name] = monitorJob
+									} else {
+										logger.warn { "Terminal name='$terminal' removed while processing status update" }
+									}
 								}
-							}
 
-							val removed = curCardState.terminals - currentNames.toSet()
-							removeTerminals(removed, activeJobs)
-						} catch (e: Exception) {
-							logger.warn(e) { "Exception during terminal listing: ${e.message}" }
+								val removed = curCardState.terminals - currentNames.toSet()
+								removeTerminals(removed, activeJobs)
+							} catch (e: Exception) {
+								logger.warn(e) { "Exception during terminal listing: ${e.message}" }
 							
-							try {
-								terminals.releaseContext()
-							} catch (releaseError: Exception) {
-								logger.warn { "Error releasing context: ${releaseError.message}" }
+								try {
+									terminals.releaseContext()
+								} catch (releaseError: Exception) {
+									logger.warn { "Error releasing context: ${releaseError.message}" }
+								}
+
+								try {
+									terminals.establishContext()
+								} catch (establError: Exception) {
+									logger.warn { "Error re-establishing context: ${establError.message}" }
+								}
+
+								// remove all terminals
+								removeTerminals(curCardState.terminals, activeJobs)
 							}
 
-							try {
-								terminals.establishContext()
-							} catch (establError: Exception) {
-								logger.warn { "Error re-establishing context: ${establError.message}" }
-							}
-
-							// remove all terminals
-							removeTerminals(curCardState.terminals, activeJobs)
+							curCardState.terminals.toList()
 						}
-					}
 
-					// polling as there is no api for checking terminal events in the current implementation
-					delay(pollingDelay)
+					// wait for a terminal event
+					runCatching {
+						terminals.waitForTerminalChange(tmpState)
+					}.onFailure { ex ->
+						if (ex is CancellationException) {
+							// continue cancellation
+							throw ex
+						}
+						logger.warn(ex) { "Error while waiting for terminal change, waiting 5 seconds before trying again" }
+						delay(5.seconds)
+					}
 				}
 			}
 		state = ProcessState(terminals, job, activeJobs)

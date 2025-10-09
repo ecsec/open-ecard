@@ -111,7 +111,7 @@ class RichClient {
 			this.terminalFactory = terminalFactory
 
 			val cifDb = CifDb.Companion.Bundled
-			val cardWatcher = CardWatcher(CoroutineScope(Dispatchers.Default), cifDb.getCardRecognition(), terminalFactory)
+			val cardWatcher = CardWatcher(CoroutineScope(Dispatchers.IO), cifDb.getCardRecognition(), terminalFactory)
 			this.cardWatcher = cardWatcher
 			cardWatcher.start()
 

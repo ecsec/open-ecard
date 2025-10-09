@@ -1,12 +1,14 @@
 package org.openecard.sc.pcsc
 
 import au.id.micolous.kotlin.pcsc.Context
-import au.id.micolous.kotlin.pcsc.PCSCError
+import au.id.micolous.kotlin.pcsc.ReaderState
 import au.id.micolous.kotlin.pcsc.getAllReaderStatus
 import au.id.micolous.kotlin.pcsc.getStatus
+import au.id.micolous.kotlin.pcsc.getStatusChangeSuspend
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.sc.iface.InvalidHandle
 import org.openecard.sc.iface.ReaderUnavailable
+import org.openecard.sc.iface.Terminal
 import org.openecard.sc.iface.TerminalFactory
 import org.openecard.sc.iface.Terminals
 import org.openecard.sc.iface.UnknownReader
@@ -68,6 +70,44 @@ class PcscTerminals(
 		} catch (ex: ReaderUnavailable) {
 			null
 		}
+
+	override suspend fun waitForTerminalChange(currentState: List<String>) {
+		mapScioError {
+			contextAsserted.let { ctx ->
+				var curState =
+					if (currentState.isEmpty()) {
+						listOf(ReaderState(reader = "\\\\?PnP?\\Notification"))
+					} else {
+						val curStateReq =
+							currentState.map { name ->
+								ReaderState(reader = name)
+							} + ReaderState(reader = "\\\\?PnP?\\Notification")
+						log.debug { "calling PCSC [$this] Context.getStatusChange(...)" }
+						ctx
+							.getStatusChange(0, curStateReq)
+							.map { state -> state.copy(currentState = state.eventState) }
+					}
+
+				// check if we already have a change to the expected state
+				if (curState.any { it.eventState.unknown }) {
+					log.debug { "Initial terminal status is not correct. Returning to notify change." }
+					return
+				}
+				// wait for a change to the determined state
+				while (true) {
+					log.debug { "Wait for terminal change" }
+					val newState = ctx.getStatusChangeSuspend(Int.MAX_VALUE, curState)
+					// check if we already have a change to the new state
+					if (newState.last().eventState.changed) {
+						log.debug { "Terminal list has changed" }
+						return
+					} else {
+						curState = newState.map { state -> state.copy(currentState = state.eventState) }
+					}
+				}
+			}
+		}
+	}
 
 	override fun toString(): String = "PcscTerminals(context=$context)"
 }

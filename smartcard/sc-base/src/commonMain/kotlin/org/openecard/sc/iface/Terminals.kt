@@ -56,7 +56,22 @@ interface Terminals {
 	)
 	fun getTerminal(name: String): Terminal?
 
-// 	fun terminalWatcher(): TerminalWatcher
+	/**
+	 * Wait until a terminal is added or removed.
+	 * The determination is made based on the provided list of terminals representing the current state.
+	 */
+	@Throws(
+		CancellationException::class,
+		// pcsc errors
+		NoService::class,
+		InvalidParameter::class,
+		InvalidValue::class,
+		InvalidHandle::class,
+		ReaderUnavailable::class,
+		UnknownReader::class,
+		Timeout::class,
+	)
+	suspend fun waitForTerminalChange(currentState: List<String>)
 }
 
 @Throws(
@@ -95,4 +110,23 @@ suspend fun <T : Terminals, R> T.withContextSuspend(block: suspend (T) -> R): R 
 	} finally {
 		releaseContext()
 	}
+}
+
+/**
+ * Wait until a terminal is added or removed.
+ * The determination is made based on the provided list of terminals representing the current state.
+ */
+@Throws(
+	CancellationException::class,
+	// pcsc errors
+	NoService::class,
+	InvalidParameter::class,
+	InvalidValue::class,
+	InvalidHandle::class,
+	ReaderUnavailable::class,
+	UnknownReader::class,
+	Timeout::class,
+)
+suspend fun <T : Terminals, R> T.waitForTerminalChange(currentState: List<Terminal>) {
+	waitForTerminalChange(currentState.map { it.name })
 }

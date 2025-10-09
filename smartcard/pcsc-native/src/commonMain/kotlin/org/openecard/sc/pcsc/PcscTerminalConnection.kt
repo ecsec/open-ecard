@@ -1,5 +1,6 @@
 package org.openecard.sc.pcsc
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.sc.iface.Card
 import org.openecard.sc.iface.CardDisposition
 import org.openecard.sc.iface.PreferredCardProtocol
@@ -7,12 +8,15 @@ import org.openecard.sc.iface.ShareMode
 import org.openecard.sc.iface.TerminalConnection
 import org.openecard.sc.iface.feature.Feature
 
+private val log = KotlinLogging.logger { }
+
 class PcscTerminalConnection(
 	private val hwCard: au.id.micolous.kotlin.pcsc.Card,
 	override val terminal: PcscTerminal,
 ) : TerminalConnection {
 	override val isCardConnected: Boolean
 		get() {
+			log.debug { "calling PCSC [$this] Card.status()" }
 			return mapScioError { hwCard.status().present }
 		}
 
@@ -20,6 +24,7 @@ class PcscTerminalConnection(
 
 	private fun getCardInstance(): PcscCard? =
 		mapScioError {
+			log.debug { "calling PCSC [$this] Card.status()" }
 			if (hwCard.status().present) PcscCard(hwCard, this) else null
 		}
 
@@ -29,6 +34,7 @@ class PcscTerminalConnection(
 
 	override fun disconnect(disposition: CardDisposition) =
 		mapScioError {
+			log.debug { "calling PCSC [$this] Card.disconnect($disposition)" }
 			hwCard.disconnect(disposition.toPcscDisconnect())
 		}
 
@@ -37,6 +43,7 @@ class PcscTerminalConnection(
 		shareMode: ShareMode,
 		disposition: CardDisposition,
 	) = mapScioError {
+		log.debug { "calling PCSC [$this] Card.reconnect($shareMode, $protocol, $disposition)" }
 		hwCard.reconnect(shareMode.toPcsc(), setOf(protocol.toPcsc()), disposition.toPcscConnect())
 		_card = getCardInstance()
 	}
@@ -46,7 +53,9 @@ class PcscTerminalConnection(
 		command: ByteArray,
 	): ByteArray =
 		mapScioError {
-			hwCard.control(code.toLong(), command, 8192)!!
+			val recBufSize = 8192
+			log.debug { "calling PCSC [$this] Card.control($code, command=..., $recBufSize)" }
+			hwCard.control(code.toLong(), command, recBufSize)!!
 		}
 
 	private val featureSet by lazy {
@@ -58,11 +67,15 @@ class PcscTerminalConnection(
 
 	override fun beginTransaction() =
 		mapScioError {
+			log.debug { "calling PCSC [$this] Card.beginTransaction()" }
 			hwCard.beginTransaction()
 		}
 
 	override fun endTransaction() =
 		mapScioError {
+			log.debug { "calling PCSC [$this] Card.endTransaction()" }
 			hwCard.endTransaction()
 		}
+
+	override fun toString(): String = "PcscTerminalConnection(terminal=$terminal, card=$hwCard)"
 }

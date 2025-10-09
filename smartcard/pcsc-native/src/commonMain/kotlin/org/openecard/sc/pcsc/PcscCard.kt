@@ -1,5 +1,6 @@
 package org.openecard.sc.pcsc
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.sc.apdu.CommandApdu
 import org.openecard.sc.apdu.isNormalProcessed
 import org.openecard.sc.iface.Atr
@@ -7,6 +8,8 @@ import org.openecard.sc.iface.Card
 import org.openecard.sc.iface.CardCapabilities
 import org.openecard.sc.iface.CardProtocol
 import org.openecard.sc.iface.toAtr
+
+private val log = KotlinLogging.logger { }
 
 class PcscCard(
 	private val card: au.id.micolous.kotlin.pcsc.Card,
@@ -21,8 +24,8 @@ class PcscCard(
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
-	// @get:Throws(PCSCError::class)
 	private val atrValue by lazy {
+		log.debug { "calling PCSC [$this] Card.status()" }
 		card
 			.status()
 			.atr
@@ -52,4 +55,6 @@ class PcscCard(
 	override fun openLogicalChannel(): PcscCardChannel {
 		TODO("Not yet implemented")
 	}
+
+	override fun toString(): String = "PcscCard($terminalConnection)"
 }

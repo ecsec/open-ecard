@@ -51,21 +51,31 @@ class PcscTerminal(
 
 	override suspend fun waitForCardPresent() =
 		mapScioError {
-			val oldState = ReaderState(reader = name, currentState = State(empty = true))
-			log.debug { "Wait for card present in terminal $name" }
-			val state = context.getStatusChangeSuspend(Int.MAX_VALUE, listOf(oldState)).first()
-			if (state.eventState.empty) {
-				throw InternalSystemError("Card is not present after status call.")
+			var statusChanged = false
+			while (!statusChanged) {
+				val oldState = ReaderState(reader = name, currentState = State(empty = true))
+				log.debug { "Wait for card present in terminal $name" }
+				val state = context.getStatusChangeSuspend(Int.MAX_VALUE, listOf(oldState)).first()
+				if (state.eventState.empty) {
+					log.debug { "Card is not present after status call: ${state.eventState}" }
+				} else {
+					statusChanged = true
+				}
 			}
 		}
 
 	override suspend fun waitForCardAbsent() =
 		mapScioError {
-			val oldState = ReaderState(reader = name, currentState = State(present = true))
-			log.debug { "Wait for card absent in terminal $name" }
-			val state = context.getStatusChangeSuspend(Int.MAX_VALUE, listOf(oldState)).first()
-			if (state.eventState.present) {
-				throw InternalSystemError("Card is not absent after status call.")
+			var statusChanged = false
+			while (!statusChanged) {
+				val oldState = ReaderState(reader = name, currentState = State(present = true))
+				log.debug { "Wait for card absent in terminal $name" }
+				val state = context.getStatusChangeSuspend(Int.MAX_VALUE, listOf(oldState)).first()
+				if (state.eventState.present) {
+					log.debug { "Card is not absent after status call: ${state.eventState}" }
+				} else {
+					statusChanged = true
+				}
 			}
 		}
 }

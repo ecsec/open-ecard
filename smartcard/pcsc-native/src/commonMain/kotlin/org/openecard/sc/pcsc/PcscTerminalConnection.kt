@@ -16,7 +16,7 @@ class PcscTerminalConnection(
 ) : TerminalConnection {
 	override val isCardConnected: Boolean
 		get() {
-			log.debug { "calling PCSC [$this] Card.status()" }
+			log.trace { "calling PCSC [$this] Card.status()" }
 			return mapScioError { hwCard.status().present }
 		}
 
@@ -24,7 +24,7 @@ class PcscTerminalConnection(
 
 	private fun getCardInstance(): PcscCard? =
 		mapScioError {
-			log.debug { "calling PCSC [$this] Card.status()" }
+			log.trace { "calling PCSC [$this] Card.status()" }
 			if (hwCard.status().present) PcscCard(hwCard, this) else null
 		}
 
@@ -34,7 +34,7 @@ class PcscTerminalConnection(
 
 	override fun disconnect(disposition: CardDisposition) =
 		mapScioError {
-			log.debug { "calling PCSC [$this] Card.disconnect($disposition)" }
+			log.trace { "calling PCSC [$this] Card.disconnect($disposition)" }
 			hwCard.disconnect(disposition.toPcscDisconnect())
 		}
 
@@ -43,7 +43,7 @@ class PcscTerminalConnection(
 		shareMode: ShareMode,
 		disposition: CardDisposition,
 	) = mapScioError {
-		log.debug { "calling PCSC [$this] Card.reconnect($shareMode, $protocol, $disposition)" }
+		log.trace { "calling PCSC [$this] Card.reconnect($shareMode, $protocol, $disposition)" }
 		hwCard.reconnect(shareMode.toPcsc(), setOf(protocol.toPcsc()), disposition.toPcscConnect())
 		_card = getCardInstance()
 	}
@@ -54,7 +54,7 @@ class PcscTerminalConnection(
 	): ByteArray =
 		mapScioError {
 			val recBufSize = 8192
-			log.debug { "calling PCSC [$this] Card.control($code, command=..., $recBufSize)" }
+			log.trace { "calling PCSC [$this] Card.control($code, command=..., $recBufSize)" }
 			hwCard.control(code.toLong(), command, recBufSize)!!
 		}
 
@@ -67,13 +67,13 @@ class PcscTerminalConnection(
 
 	override fun beginTransaction() =
 		mapScioError {
-			log.debug { "calling PCSC [$this] Card.beginTransaction()" }
+			log.trace { "calling PCSC [$this] Card.beginTransaction()" }
 			hwCard.beginTransaction()
 		}
 
 	override fun endTransaction() =
 		mapScioError {
-			log.debug { "calling PCSC [$this] Card.endTransaction()" }
+			log.trace { "calling PCSC [$this] Card.endTransaction()" }
 			hwCard.endTransaction()
 		}
 

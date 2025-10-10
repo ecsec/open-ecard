@@ -31,13 +31,13 @@ class PcscTerminals(
 
 	override fun establishContext() =
 		mapScioError {
-			log.debug { "calling PCSC [$this] Context.establish()" }
+			log.trace { "calling PCSC [$this] Context.establish()" }
 			context = Context.establish()
 		}
 
 	override fun releaseContext() =
 		mapScioError {
-			log.debug { "calling PCSC [$this] Context.release()" }
+			log.trace { "calling PCSC [$this] Context.release()" }
 			contextAsserted.release()
 			context = null
 		}
@@ -46,9 +46,9 @@ class PcscTerminals(
 		mapScioError {
 			contextAsserted.let { ctx ->
 				// update reader status, then return list
-				log.debug { "calling PCSC [$this] Context.getAllReaderStatus()" }
+				log.trace { "calling PCSC [$this] Context.getAllReaderStatus()" }
 				ctx.getAllReaderStatus()
-				log.debug { "calling PCSC [$this] Context.listReaders()" }
+				log.trace { "calling PCSC [$this] Context.listReaders()" }
 				ctx.listReaders().map { name ->
 					PcscTerminal(name, this, ctx)
 				}
@@ -60,7 +60,7 @@ class PcscTerminals(
 			mapScioError {
 				contextAsserted.let { ctx ->
 					// update reader status, then return the requested reader
-					log.debug { "calling PCSC [$this] Context.getStatus($name)" }
+					log.trace { "calling PCSC [$this] Context.getStatus($name)" }
 					val state = ctx.getStatus(name)
 					PcscTerminal(name, this, ctx)
 				}
@@ -82,7 +82,7 @@ class PcscTerminals(
 							currentState.map { name ->
 								ReaderState(reader = name)
 							} + ReaderState(reader = "\\\\?PnP?\\Notification")
-						log.debug { "calling PCSC [$this] Context.getStatusChange(...)" }
+						log.trace { "calling PCSC [$this] Context.getStatusChange(...)" }
 						ctx
 							.getStatusChange(0, curStateReq)
 							.map { state -> state.copy(currentState = state.eventState) }

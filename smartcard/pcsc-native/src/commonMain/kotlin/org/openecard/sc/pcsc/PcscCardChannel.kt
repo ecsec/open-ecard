@@ -20,7 +20,7 @@ class PcscCardChannel(
 	override fun transmitRaw(apdu: CommandApdu): ResponseApdu =
 		mapScioError {
 			val maxBufSize = au.id.micolous.kotlin.pcsc.Card.MAX_BUFFER_SIZE_EXTENDED
-			log.debug { "calling PCSC [$this] Card.transmit(apdu=...)" }
+			log.trace { "calling PCSC [$this] Card.transmit(apdu=...)" }
 			val respData = hwCard.transmit(apdu.toBytes.toByteArray(), maxBufSize)
 			return respData.toResponseApdu()
 		}

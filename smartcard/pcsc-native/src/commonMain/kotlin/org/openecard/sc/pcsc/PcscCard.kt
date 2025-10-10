@@ -25,7 +25,7 @@ class PcscCard(
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	private val atrValue by lazy {
-		log.debug { "calling PCSC [$this] Card.status()" }
+		log.trace { "calling PCSC [$this] Card.status()" }
 		card
 			.status()
 			.atr

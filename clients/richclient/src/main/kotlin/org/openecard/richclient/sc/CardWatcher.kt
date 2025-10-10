@@ -16,6 +16,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import org.openecard.sal.sc.recognition.CardRecognition
+import org.openecard.sc.iface.ReaderUnsupported
 import org.openecard.sc.iface.Terminal
 import org.openecard.sc.iface.TerminalFactory
 import org.openecard.sc.iface.Terminals
@@ -151,9 +152,13 @@ class CardWatcher(
 						if (ex is CancellationException) {
 							// continue cancellation
 							throw ex
+						} else if (ex is ReaderUnsupported) {
+							// reader events not supported on this system, just try again shortly
+							delay(1.seconds)
+						} else {
+							logger.info(ex) { "Error while waiting for terminal change, waiting 5 seconds before trying again" }
+							delay(5.seconds)
 						}
-						logger.warn(ex) { "Error while waiting for terminal change, waiting 5 seconds before trying again" }
-						delay(5.seconds)
 					}
 				}
 			}

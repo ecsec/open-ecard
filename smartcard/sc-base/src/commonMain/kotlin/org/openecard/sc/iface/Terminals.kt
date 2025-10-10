@@ -59,6 +59,8 @@ interface Terminals {
 	/**
 	 * Wait until a terminal is added or removed.
 	 * The determination is made based on the provided list of terminals representing the current state.
+	 *
+	 * @throws ReaderUnsupported when the system does not support reader events.
 	 */
 	@Throws(
 		CancellationException::class,
@@ -69,6 +71,7 @@ interface Terminals {
 		InvalidHandle::class,
 		ReaderUnavailable::class,
 		UnknownReader::class,
+		ReaderUnsupported::class,
 		Timeout::class,
 	)
 	suspend fun waitForTerminalChange(currentState: List<String>)

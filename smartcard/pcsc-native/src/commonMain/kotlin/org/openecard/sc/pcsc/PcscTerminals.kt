@@ -6,12 +6,15 @@ import au.id.micolous.kotlin.pcsc.getAllReaderStatus
 import au.id.micolous.kotlin.pcsc.getStatus
 import au.id.micolous.kotlin.pcsc.getStatusChangeSuspend
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.delay
 import org.openecard.sc.iface.InvalidHandle
 import org.openecard.sc.iface.ReaderUnavailable
+import org.openecard.sc.iface.ReaderUnsupported
 import org.openecard.sc.iface.Terminal
 import org.openecard.sc.iface.TerminalFactory
 import org.openecard.sc.iface.Terminals
 import org.openecard.sc.iface.UnknownReader
+import kotlin.time.Duration.Companion.seconds
 
 private val log = KotlinLogging.logger { }
 
@@ -72,21 +75,27 @@ class PcscTerminals(
 		}
 
 	override suspend fun waitForTerminalChange(currentState: List<String>) {
+		val eventReaderName = "\\\\?PnP?\\Notification"
 		mapScioError {
 			contextAsserted.let { ctx ->
 				var curState =
 					if (currentState.isEmpty()) {
-						listOf(ReaderState(reader = "\\\\?PnP?\\Notification"))
+						listOf(ReaderState(reader = eventReaderName))
 					} else {
 						val curStateReq =
 							currentState.map { name ->
 								ReaderState(reader = name)
-							} + ReaderState(reader = "\\\\?PnP?\\Notification")
+							} + ReaderState(reader = eventReaderName)
 						log.trace { "calling PCSC [$this] Context.getStatusChange(...)" }
 						ctx
 							.getStatusChange(0, curStateReq)
 							.map { state -> state.copy(currentState = state.eventState) }
 					}
+
+				// on osx, the PnP reader does not exist and yields unknown for that status
+				if (curState.last().eventState.unknown) {
+					throw ReaderUnsupported("Special event reader ($eventReaderName) is not supported")
+				}
 
 				// check if we already have a change to the expected state
 				if (curState.any { it.eventState.unknown }) {

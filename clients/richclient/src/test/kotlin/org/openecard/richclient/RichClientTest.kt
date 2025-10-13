@@ -23,12 +23,12 @@
 package org.openecard.richclient
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.junit.jupiter.api.Disabled
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URI
 import java.net.URL
 import kotlin.test.BeforeTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.test.fail
@@ -65,7 +65,7 @@ class RichClientTest {
 	/**
 	 * Test the Response of the RichClient to a TCTokenRequest.
 	 */
-	@Disabled
+	@Ignore
 	@Test
 	fun testTCToken() {
 		try {
@@ -80,7 +80,7 @@ class RichClientTest {
 	/**
 	 * Test the Response of the RichClient to a StatusRequest.
 	 */
-	@Disabled
+	@Ignore
 	@Test
 	fun testStatus() {
 		try {
@@ -95,7 +95,7 @@ class RichClientTest {
 	/**
 	 * Test the Response of the RichClient to a WaitForChangeReuquest.
 	 */
-	@Disabled
+	@Ignore
 	@Test
 	fun testWaitForChange() {
 		try {

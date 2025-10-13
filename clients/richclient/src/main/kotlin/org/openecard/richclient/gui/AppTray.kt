@@ -45,8 +45,6 @@ import java.awt.Container
 import java.awt.Dimension
 import java.awt.Frame
 import java.awt.Image
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.util.concurrent.ExecutionException
@@ -56,7 +54,6 @@ import java.util.concurrent.TimeoutException
 import javax.swing.ImageIcon
 import javax.swing.JFrame
 import javax.swing.JLabel
-import kotlin.system.exitProcess
 
 private val LOG = KotlinLogging.logger { }
 
@@ -119,8 +116,6 @@ class AppTray(
 	/**
 	 * Finishes the setup process.
 	 * The loading icon is replaced with the eCard logo.
-	 *
-	 * @param manager
 	 */
 	fun endSetup(
 		cifDb: CifDb,
@@ -142,23 +137,20 @@ class AppTray(
 			tray.menu.add(
 				MenuItem(
 					I18N.strings.richclient_tray_card_status.localized(),
-					object : ActionListener {
-						override fun actionPerformed(e: ActionEvent) {
-							if (!infoPopupActive) {
-								val frame = setupFrame(false)
-								frame.setStatusPane(statusObj)
-								frame.addWindowListener(
-									object : WindowAdapter() {
-										override fun windowClosed(e: WindowEvent) {
-											infoPopupActive = false
-										}
-									},
-								)
-								infoPopupActive = true
-							}
-						}
-					},
-				),
+				) {
+					if (!infoPopupActive) {
+						val frame = setupFrame(false)
+						frame.setStatusPane(statusObj)
+						frame.addWindowListener(
+							object : WindowAdapter() {
+								override fun windowClosed(e: WindowEvent) {
+									infoPopupActive = false
+								}
+							},
+						)
+						infoPopupActive = true
+					}
+				},
 			)
 			tray.menu.add(
 				MenuItem(
@@ -185,33 +177,18 @@ class AppTray(
 			tray.menu.add(
 				MenuItem(
 					I18N.strings.richclient_tray_about.localized(),
-					object : ActionListener {
-						override fun actionPerformed(e: ActionEvent) {
-							AboutDialog.showDialog()
-						}
-					},
-				),
+				) { AboutDialog.showDialog() },
 			)
 			tray.menu.add(
 				MenuItem(
 					I18N.strings.richclient_tray_config.localized(),
-					object : ActionListener {
-						override fun actionPerformed(e: ActionEvent) {
-							ManagementDialog.showDialog()
-						}
-					},
-				),
+				) { ManagementDialog.showDialog() },
 			)
 			tray.menu.add(Separator())
 			tray.menu.add(
 				MenuItem(
 					I18N.strings.richclient_tray_exit.localized(),
-					object : ActionListener {
-						override fun actionPerformed(e: ActionEvent) {
-							client.teardown()
-						}
-					},
-				),
+				) { client.teardown() },
 			)
 		}
 

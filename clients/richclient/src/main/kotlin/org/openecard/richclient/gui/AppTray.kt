@@ -74,7 +74,7 @@ private const val ICON_LOGO: String = "logo"
  * @author Tobias Wich
  */
 class AppTray(
-	private val client: RichClient,
+	val client: RichClient,
 ) {
 	private var tray: SystemTray? = null
 	var status: Status? = null
@@ -208,7 +208,7 @@ class AppTray(
 					I18N.strings.richclient_tray_exit.localized(),
 					object : ActionListener {
 						override fun actionPerformed(e: ActionEvent) {
-							shutdown()
+							client.teardown()
 						}
 					},
 				),
@@ -221,14 +221,15 @@ class AppTray(
 	/**
 	 * Removes the tray icon from the tray and terminates the application.
 	 */
-	fun shutdown() {
-// 		pinManager.closeManagementDialog()
-// 		println("dialog closed from shutdown function.")
+	fun shutdownUi() {
+		// TODO: remove tray menu elements and show status
+		pinManager?.closeManagementDialog()
 		status?.stopCardWatcher()
+	}
+
+	fun removeTray() {
 		tray?.shutdown()
 		tray = null
-		client.teardown()
-		exitProcess(0)
 	}
 
 	private fun setupFrame(standalone: Boolean): InfoFrame =

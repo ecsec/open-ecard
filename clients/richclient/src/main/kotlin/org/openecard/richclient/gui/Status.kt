@@ -161,7 +161,7 @@ class Status(
 		btnExit.addActionListener {
 			LOG.debug { "Shutdown button pressed." }
 			try {
-				appTray.shutdown()
+				appTray.client.teardown()
 			} catch (ex: Throwable) {
 				LOG.error(ex) { "Exiting client threw an error." }
 				throw ex

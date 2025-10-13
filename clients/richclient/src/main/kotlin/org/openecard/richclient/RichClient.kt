@@ -36,6 +36,7 @@ import io.ktor.client.request.forms.submitForm
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.parameters
 import javafx.application.Application
+import javafx.stage.Stage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -53,7 +54,6 @@ import org.openecard.gui.swing.common.GUIDefaults
 import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.AppTray
 import org.openecard.richclient.gui.SettingsAndDefaultViewWrapper
-import org.openecard.richclient.javafx.FXInitializer
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.sc.CardWatcherCallback.Companion.registerWith
 import org.openecard.richclient.sc.CifDb
@@ -82,7 +82,7 @@ import kotlin.time.Duration.Companion.milliseconds
  * @author René Lottes
  * @author Tobias Wich
  */
-class RichClient {
+class RichClient : Application() {
 	// Tray icon
 	private var tray: AppTray? = null
 
@@ -91,6 +91,16 @@ class RichClient {
 
 	private var terminalFactory: TerminalFactory? = null
 	private var cardWatcher: CardWatcher? = null
+
+	override fun start(primaryStage: Stage) {
+		javafx.application.Platform.setImplicitExit(false)
+
+		primaryStage.isIconified = true
+		primaryStage.hide()
+
+		// start richclient init
+		setup()
+	}
 
 	fun setup() {
 		GUIDefaults.initialize()
@@ -223,10 +233,11 @@ class RichClient {
 			// Show dialog to the user and shut down the client
 			val msg = String.format("%s%n%n%s", title, message)
 			gui.obtainMessageDialog().showMessageDialog(msg, BuildInfo.appName, DialogType.ERROR_MESSAGE)
-			teardown()
+			// stop processes and terminate with the exception
+			stop()
 		} catch (ex: Throwable) {
 			LOG.error(ex) { "Unexpected error occurred. Exiting client." }
-			exitProcess(1)
+			throw ex
 		}
 	}
 
@@ -264,8 +275,13 @@ class RichClient {
 		}
 	}
 
-	fun teardown() {
+	/**
+	 * JavaFX shutdown handler, don't call explicitly, use the [teardown] function instead.
+	 */
+	override fun stop() {
 		try {
+			tray?.shutdownUi()
+
 			cardWatcher?.stop()
 
 			// shutdown control modules
@@ -276,11 +292,23 @@ class RichClient {
 
 			// shutdown IFD
 			terminalFactory = null
+
+			tray?.removeTray()
+			tray = null
+
+			// TODO: make sure to kill all threads on shutdown, so we don't need to force kill the java process
+			exitProcess(0)
 		} catch (ex: Exception) {
 			LOG.error(ex) { "Failed to stop Richclient." }
+			exitProcess(1)
 		}
+	}
 
-		exitProcess(0)
+	/**
+	 * Stops the JavaFX application and executes cleanup functionality.
+	 */
+	fun teardown() {
+		javafx.application.Platform.exit()
 	}
 
 	private class DispatcherRegistrator(
@@ -375,7 +403,7 @@ class RichClient {
 				"Running on ${System.getProperty("os.name")} ${System.getProperty("os.version")} ${System.getProperty("os.arch")}."
 			}
 
-			Application.launch(FXInitializer::class.java)
+			launch(RichClient::class.java)
 		}
 
 		private fun regKeyExists(

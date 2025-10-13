@@ -22,8 +22,9 @@ class CardSelectionModel(
 		onUpdate: () -> Unit,
 		onError: (String) -> Unit,
 	) {
-		val callback =
-			object : CardWatcherCallback {
+		// TODO: remove callback from watcher, when selection UI is finished
+		val listUpdateJob =
+			object : CardWatcherCallback.CardWatcherCallbackDefault() {
 				override fun onInitialState(cardState: CardState) {
 					val recognized =
 						cardState.recognizedCards
@@ -70,13 +71,7 @@ class CardSelectionModel(
 						}
 					}
 				}
-
-				override fun onTerminalAdded(terminalName: String) {}
-
-				override fun onCardInserted(terminalName: String) {}
-			}
-
-		callback.registerWith(cardWatcher, CoroutineScope(Dispatchers.IO))
+			}.registerWith(cardWatcher)
 	}
 
 	fun selectTerminal(terminal: TerminalInfo) {

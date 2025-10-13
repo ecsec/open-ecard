@@ -11,7 +11,7 @@ class PinManager(
 	private val uiFactory = PinUiFactory(stage, cardWatcher)
 
 	fun openManagerDialog() {
-		val controller = uiFactory.openSelectionUi()
+		val controller = uiFactory.createSelectionUi()
 		controller.start()
 	}
 

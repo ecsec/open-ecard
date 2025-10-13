@@ -15,7 +15,6 @@ class CardSelectionController(
 	private val view: CardSelectionViewController,
 	private val uiFactory: PinUiFactory,
 	private val root: StackPane,
-	private val cardWatcher: CardWatcher,
 ) {
 	fun start() {
 		model.registerWatcher(
@@ -31,19 +30,17 @@ class CardSelectionController(
 		view.setup(model.terminals) { selected ->
 			model.selectTerminal(selected)
 
-			CoroutineScope(Dispatchers.IO).launch {
-				uiFactory.openPinUiForType(
-					cardType = selected.cardType,
-					terminal = selected,
-					onError = { error ->
-						view.showErrorDialog("Error: ${error.message}") {
-							model.selectedTerminal = null
-							root.children.setAll(view.cardListLayout)
-						}
-					},
-					model = model,
-				)
-			}
+			uiFactory.openPinUiForType(
+				cardType = selected.cardType,
+				terminal = selected,
+				onError = { error ->
+					view.showErrorDialog("Error: ${error.message}") {
+						model.selectedTerminal = null
+						root.children.setAll(view.cardListLayout)
+					}
+				},
+				model = model,
+			)
 		}
 
 		Platform.runLater {

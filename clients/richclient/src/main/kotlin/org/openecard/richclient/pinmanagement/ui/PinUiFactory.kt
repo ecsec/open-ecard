@@ -4,8 +4,6 @@ import javafx.application.Platform
 import javafx.fxml.FXMLLoader
 import javafx.scene.layout.StackPane
 import javafx.stage.Stage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import org.openecard.cif.bundled.NpaDefinitions
 import org.openecard.richclient.MR.images.oec_logo
 import org.openecard.richclient.gui.GuiUtils.toFXImage
@@ -15,7 +13,6 @@ import org.openecard.richclient.pinmanagement.controllers.CardSelectionViewContr
 import org.openecard.richclient.pinmanagement.controllers.NpaPacePinController
 import org.openecard.richclient.pinmanagement.controllers.PlaceholderPinController
 import org.openecard.richclient.pinmanagement.model.CardSelectionModel
-import org.openecard.richclient.sc.CardState
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.sc.CardWatcherCallback
 import org.openecard.richclient.sc.CardWatcherCallback.Companion.registerWith
@@ -27,7 +24,7 @@ class PinUiFactory(
 	val supportedCardTypes: Set<String> = setOf(NpaDefinitions.cardType)
 	val dialogStage: Stage get() = stage
 
-	fun openSelectionUi(): CardSelectionController {
+	fun createSelectionUi(): CardSelectionController {
 		val model = CardSelectionModel(supportedCardTypes, cardWatcher)
 		val loader = FXMLLoader(javaClass.getResource("/fxml/CardSelectionView.fxml"))
 		val root = loader.load<StackPane>()
@@ -35,7 +32,7 @@ class PinUiFactory(
 
 		stage.icons.add(oec_logo.image.toFXImage())
 
-		return CardSelectionController(model, viewController, this, root, cardWatcher)
+		return CardSelectionController(model, viewController, this, root)
 	}
 
 	fun openPinUiForType(
@@ -52,45 +49,22 @@ class PinUiFactory(
 					else -> PlaceholderPinController(terminal, view)
 				}
 
-			val callback =
-				object : CardWatcherCallback {
-					override fun onInitialState(cardState: CardState) {}
-
-					override fun onCardRecognized(
-						terminalName: String,
-						cardType: String,
-					) {
-					}
-
-					override fun onCardInserted(terminalName: String) {}
-
-					override fun onTerminalAdded(terminalName: String) {}
-
+			// watch card for removal event
+			// TODO: remove callback from watcher, when selection UI is finished (e.g. cancel job)
+			val terminalWatchJob =
+				object : CardWatcherCallback.CardWatcherCallbackDefault() {
 					override fun onCardRemoved(terminalName: String) {
 						if (terminal.terminalName == terminalName) {
 							Platform.runLater {
 								view.showMessage("The selected card or card terminal has been removed.") {
-									val controller = openSelectionUi()
+									val controller = createSelectionUi()
 									model.selectedTerminal = null
 									controller.start()
 								}
 							}
 						}
 					}
-
-					override fun onTerminalRemoved(terminalName: String) {
-						if (terminal.terminalName == terminalName) {
-							Platform.runLater {
-								view.showMessage("The selected card or card terminal has been removed.") {
-									val controller = openSelectionUi()
-									model.selectedTerminal = null
-									controller.start()
-								}
-							}
-						}
-					}
-				}
-			callback.registerWith(cardWatcher, CoroutineScope(Dispatchers.IO))
+				}.registerWith(cardWatcher)
 
 			Platform.runLater {
 				controller.show()

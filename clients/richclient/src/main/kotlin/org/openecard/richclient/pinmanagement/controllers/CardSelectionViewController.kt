@@ -18,8 +18,8 @@ import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import javafx.stage.Modality
 import javafx.stage.Stage
+import org.openecard.richclient.gui.GuiUtils.toFXImage
 import org.openecard.richclient.pinmanagement.TerminalInfo
-import org.openecard.richclient.pinmanagement.util.toFXImage
 import org.openecard.richclient.sc.CifDb.Companion.Bundled.getCardImage
 import org.openecard.richclient.sc.CifDb.Companion.Bundled.getCardType
 import java.util.Timer

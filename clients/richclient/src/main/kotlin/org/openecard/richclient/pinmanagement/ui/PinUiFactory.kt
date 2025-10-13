@@ -8,14 +8,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import org.openecard.cif.bundled.NpaDefinitions
 import org.openecard.richclient.MR.images.oec_logo
+import org.openecard.richclient.gui.GuiUtils.toFXImage
 import org.openecard.richclient.pinmanagement.TerminalInfo
 import org.openecard.richclient.pinmanagement.controllers.CardSelectionController
 import org.openecard.richclient.pinmanagement.controllers.CardSelectionViewController
 import org.openecard.richclient.pinmanagement.controllers.NpaPacePinController
 import org.openecard.richclient.pinmanagement.controllers.PlaceholderPinController
 import org.openecard.richclient.pinmanagement.model.CardSelectionModel
-import org.openecard.richclient.pinmanagement.ui.NpaPacePinView
-import org.openecard.richclient.pinmanagement.util.toFXImage
 import org.openecard.richclient.sc.CardState
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.sc.CardWatcherCallback

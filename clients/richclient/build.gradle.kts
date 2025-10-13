@@ -22,7 +22,7 @@ plugins {
 
 javafx {
 	version = libs.versions.jfx.get()
-	modules = listOf("javafx.controls", "javafx.fxml")
+	modules = listOf("javafx.swing", "javafx.controls", "javafx.fxml")
 }
 
 application {

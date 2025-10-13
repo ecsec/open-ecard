@@ -18,4 +18,8 @@ class PinManager(
 	fun closeManagementDialog() {
 		uiFactory.closeStage()
 	}
+
+	fun toFront() {
+		uiFactory.dialogStage.toFront()
+	}
 }

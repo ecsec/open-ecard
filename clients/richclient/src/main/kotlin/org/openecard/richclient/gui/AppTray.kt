@@ -28,6 +28,7 @@ import dorkbox.systemTray.Separator
 import dorkbox.systemTray.SystemTray
 import io.github.oshai.kotlinlogging.KotlinLogging
 import javafx.application.Platform
+import javafx.event.EventHandler
 import javafx.stage.Stage
 import org.openecard.build.BuildInfo
 import org.openecard.common.util.SysUtils
@@ -80,6 +81,8 @@ class AppTray(
 		private set
 	private var frame: InfoFrame? = null
 	private var infoPopupActive = false
+
+	private var pinManager: PinManager? = null
 
 	/**
 	 * Starts the setup process.
@@ -159,17 +162,24 @@ class AppTray(
 			)
 			tray.menu.add(
 				MenuItem(
-					"PIN Management",
-					object : ActionListener {
-						override fun actionPerformed(e: ActionEvent) {
-							Platform.runLater {
+					I18N.strings.pinplugin_name.localized(),
+				) {
+					Platform.runLater {
+						when (val pm = pinManager) {
+							null -> {
 								val stage = Stage()
-								val pinManager = PinManager(stage, cardWatcher)
-								pinManager.openManagerDialog()
+								pinManager =
+									PinManager(stage, cardWatcher).also { pm ->
+										stage.onCloseRequest = EventHandler { pinManager = null }
+										pm.openManagerDialog()
+									}
+							}
+							else -> {
+								pm.toFront()
 							}
 						}
-					},
-				),
+					}
+				},
 			)
 			tray.menu.add(Separator())
 			tray.menu.add(

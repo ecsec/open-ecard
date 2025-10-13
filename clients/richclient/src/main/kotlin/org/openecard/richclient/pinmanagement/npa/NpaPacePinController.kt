@@ -1,4 +1,4 @@
-package org.openecard.richclient.pinmanagement.controllers
+package org.openecard.richclient.pinmanagement.npa
 
 import javafx.application.Platform
 import kotlinx.coroutines.CoroutineScope
@@ -8,11 +8,8 @@ import org.openecard.cif.bundled.CompleteTree
 import org.openecard.cif.bundled.NpaCif
 import org.openecard.cif.bundled.NpaDefinitions
 import org.openecard.cif.definition.recognition.removeUnsupported
+import org.openecard.richclient.pinmanagement.PinManagementUI
 import org.openecard.richclient.pinmanagement.TerminalInfo
-import org.openecard.richclient.pinmanagement.model.NpaPacePinModel
-import org.openecard.richclient.pinmanagement.model.PinStatus
-import org.openecard.richclient.pinmanagement.ui.NpaPacePinView
-import org.openecard.richclient.pinmanagement.ui.PinManagementUI
 import org.openecard.sal.sc.SmartcardApplication
 import org.openecard.sal.sc.SmartcardSal
 import org.openecard.sal.sc.recognition.DirectCardRecognition
@@ -28,7 +25,7 @@ class NpaPacePinController(
 ) : PinManagementUI {
 	override fun show() {
 		CoroutineScope(Dispatchers.IO).launch {
-			val terminals = PcscTerminalFactory.instance.load()
+			val terminals = PcscTerminalFactory.Companion.instance.load()
 			try {
 				terminals.withContext { ctx ->
 					val model = NpaPacePinModel(connectToMf(ctx))
@@ -57,7 +54,7 @@ class NpaPacePinController(
 		new: String,
 	) {
 		CoroutineScope(Dispatchers.IO).launch {
-			val terminals = PcscTerminalFactory.instance.load()
+			val terminals = PcscTerminalFactory.Companion.instance.load()
 			try {
 				terminals.withContext { ctx ->
 					val model = NpaPacePinModel(connectToMf(ctx))
@@ -103,7 +100,7 @@ class NpaPacePinController(
 		pin: String,
 	) {
 		CoroutineScope(Dispatchers.IO).launch {
-			val terminals = PcscTerminalFactory.instance.load()
+			val terminals = PcscTerminalFactory.Companion.instance.load()
 			try {
 				terminals.withContext { ctx ->
 					val model = NpaPacePinModel(connectToMf(ctx))
@@ -146,7 +143,7 @@ class NpaPacePinController(
 
 	private fun unblockPin(puk: String) {
 		CoroutineScope(Dispatchers.IO).launch {
-			val terminals = PcscTerminalFactory.instance.load()
+			val terminals = PcscTerminalFactory.Companion.instance.load()
 			try {
 				terminals.withContext { ctx ->
 					val model = NpaPacePinModel(connectToMf(ctx))

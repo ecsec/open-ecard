@@ -1,18 +1,18 @@
-package org.openecard.richclient.pinmanagement.ui
+package org.openecard.richclient.pinmanagement
 
 import javafx.application.Platform
 import javafx.fxml.FXMLLoader
 import javafx.scene.layout.StackPane
 import javafx.stage.Stage
 import org.openecard.cif.bundled.NpaDefinitions
-import org.openecard.richclient.MR.images.oec_logo
+import org.openecard.richclient.MR
 import org.openecard.richclient.gui.GuiUtils.toFXImage
-import org.openecard.richclient.pinmanagement.TerminalInfo
-import org.openecard.richclient.pinmanagement.controllers.CardSelectionController
-import org.openecard.richclient.pinmanagement.controllers.CardSelectionViewController
-import org.openecard.richclient.pinmanagement.controllers.NpaPacePinController
 import org.openecard.richclient.pinmanagement.controllers.PlaceholderPinController
-import org.openecard.richclient.pinmanagement.model.CardSelectionModel
+import org.openecard.richclient.pinmanagement.npa.NpaPacePinController
+import org.openecard.richclient.pinmanagement.npa.NpaPacePinView
+import org.openecard.richclient.pinmanagement.selection.CardSelectionController
+import org.openecard.richclient.pinmanagement.selection.CardSelectionModel
+import org.openecard.richclient.pinmanagement.selection.CardSelectionViewController
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.sc.CardWatcherCallback
 import org.openecard.richclient.sc.CardWatcherCallback.Companion.registerWith
@@ -30,7 +30,10 @@ class PinUiFactory(
 		val root = loader.load<StackPane>()
 		val viewController = loader.getController<CardSelectionViewController>()
 
-		stage.icons.add(oec_logo.image.toFXImage())
+		stage.icons.add(
+			MR.images.oec_logo.image
+				.toFXImage(),
+		)
 
 		return CardSelectionController(model, viewController, this, root)
 	}

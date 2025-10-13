@@ -1,4 +1,4 @@
-package org.openecard.richclient.pinmanagement.ui
+package org.openecard.richclient.pinmanagement.npa
 
 import javafx.application.Platform
 import javafx.fxml.FXMLLoader
@@ -7,11 +7,7 @@ import javafx.scene.Scene
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
-import org.openecard.richclient.pinmanagement.controllers.CanEntryController
-import org.openecard.richclient.pinmanagement.controllers.MessageViewController
-import org.openecard.richclient.pinmanagement.controllers.PinChangeController
-import org.openecard.richclient.pinmanagement.controllers.PinEntryController
-import org.openecard.richclient.pinmanagement.controllers.PukEntryController
+import org.openecard.richclient.pinmanagement.common.MessageViewController
 import java.util.Timer
 import java.util.TimerTask
 
@@ -121,16 +117,17 @@ class NpaPacePinView(
 			rootPane.children.setAll(layout)
 		}
 
-		Timer().schedule(
-			object : TimerTask() {
-				override fun run() {
-					Platform.runLater {
-						after()
+		Timer()
+			.schedule(
+				object : TimerTask() {
+					override fun run() {
+						Platform.runLater {
+							after()
+						}
 					}
-				}
-			},
-			3000,
-		)
+				},
+				3000,
+			)
 	}
 
 	private fun show(view: Parent) {

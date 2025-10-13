@@ -1,14 +1,9 @@
-package org.openecard.richclient.pinmanagement.controllers
+package org.openecard.richclient.pinmanagement.selection
 
 import javafx.application.Platform
 import javafx.scene.Scene
 import javafx.scene.layout.StackPane
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import org.openecard.richclient.pinmanagement.model.CardSelectionModel
-import org.openecard.richclient.pinmanagement.ui.PinUiFactory
-import org.openecard.richclient.sc.CardWatcher
+import org.openecard.richclient.pinmanagement.PinUiFactory
 
 class CardSelectionController(
 	private val model: CardSelectionModel,

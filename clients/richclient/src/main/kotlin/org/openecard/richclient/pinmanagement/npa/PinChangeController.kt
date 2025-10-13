@@ -1,4 +1,4 @@
-package org.openecard.richclient.pinmanagement.controllers
+package org.openecard.richclient.pinmanagement.npa
 
 import javafx.fxml.FXML
 import javafx.scene.control.Label
@@ -8,11 +8,14 @@ class PinChangeController {
 	@FXML
 	private lateinit var oldPinField: PasswordField
 
-	@FXML private lateinit var newPinField: PasswordField
+	@FXML
+	private lateinit var newPinField: PasswordField
 
-	@FXML private lateinit var repeatPinField: PasswordField
+	@FXML
+	private lateinit var repeatPinField: PasswordField
 
-	@FXML private lateinit var errorLabel: Label
+	@FXML
+	private lateinit var errorLabel: Label
 
 	var onSubmit: ((String, String, String, Label) -> Unit)? = null
 

@@ -1,7 +1,6 @@
 package org.openecard.richclient.pinmanagement
 
 import javafx.stage.Stage
-import org.openecard.richclient.pinmanagement.ui.PinUiFactory
 import org.openecard.richclient.sc.CardWatcher
 
 class PinManager(

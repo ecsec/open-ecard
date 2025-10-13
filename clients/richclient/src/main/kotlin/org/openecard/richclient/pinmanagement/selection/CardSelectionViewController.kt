@@ -1,4 +1,4 @@
-package org.openecard.richclient.pinmanagement.controllers
+package org.openecard.richclient.pinmanagement.selection
 
 import javafx.application.Platform
 import javafx.collections.ObservableList
@@ -20,8 +20,8 @@ import javafx.stage.Modality
 import javafx.stage.Stage
 import org.openecard.richclient.gui.GuiUtils.toFXImage
 import org.openecard.richclient.pinmanagement.TerminalInfo
-import org.openecard.richclient.sc.CifDb.Companion.Bundled.getCardImage
-import org.openecard.richclient.sc.CifDb.Companion.Bundled.getCardType
+import org.openecard.richclient.pinmanagement.common.ErrorMessageController
+import org.openecard.richclient.sc.CifDb
 import java.util.Timer
 import java.util.TimerTask
 
@@ -79,7 +79,10 @@ class CardSelectionViewController {
 	}
 
 	private fun createCardGraphic(item: TerminalInfo): Node {
-		val image = getCardImage(item.cardType).toFXImage()
+		val image =
+			CifDb.Companion.Bundled
+				.getCardImage(item.cardType)
+				.toFXImage()
 		val imageView =
 			ImageView(image).apply {
 				fitWidth = 80.0
@@ -87,7 +90,7 @@ class CardSelectionViewController {
 				isPreserveRatio = true
 			}
 		val cardTypeLabel =
-			Label(getCardType(item.cardType)).apply {
+			Label(CifDb.Companion.Bundled.getCardType(item.cardType)).apply {
 				styleClass.add("card-label")
 			}
 		val terminalLabel =

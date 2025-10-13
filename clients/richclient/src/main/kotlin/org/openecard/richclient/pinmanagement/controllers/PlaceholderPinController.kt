@@ -1,8 +1,8 @@
 package org.openecard.richclient.pinmanagement.controllers
 
+import org.openecard.richclient.pinmanagement.PinManagementUI
 import org.openecard.richclient.pinmanagement.TerminalInfo
-import org.openecard.richclient.pinmanagement.ui.NpaPacePinView
-import org.openecard.richclient.pinmanagement.ui.PinManagementUI
+import org.openecard.richclient.pinmanagement.npa.NpaPacePinView
 
 class PlaceholderPinController(
 	private val terminal: TerminalInfo,

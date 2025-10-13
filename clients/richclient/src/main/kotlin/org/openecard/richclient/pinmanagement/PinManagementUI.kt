@@ -1,4 +1,4 @@
-package org.openecard.richclient.pinmanagement.ui
+package org.openecard.richclient.pinmanagement
 
 interface PinManagementUI {
 	fun show()

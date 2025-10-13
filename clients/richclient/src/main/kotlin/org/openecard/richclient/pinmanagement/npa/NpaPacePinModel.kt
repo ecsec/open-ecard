@@ -1,4 +1,4 @@
-package org.openecard.richclient.pinmanagement.model
+package org.openecard.richclient.pinmanagement.npa
 
 import org.openecard.sal.iface.dids.PaceDid
 import org.openecard.sal.iface.dids.PinDid

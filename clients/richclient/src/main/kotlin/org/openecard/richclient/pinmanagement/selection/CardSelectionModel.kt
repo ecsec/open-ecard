@@ -1,10 +1,8 @@
-package org.openecard.richclient.pinmanagement.model
+package org.openecard.richclient.pinmanagement.selection
 
 import javafx.application.Platform
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import org.openecard.richclient.pinmanagement.TerminalInfo
 import org.openecard.richclient.sc.CardState
 import org.openecard.richclient.sc.CardWatcher

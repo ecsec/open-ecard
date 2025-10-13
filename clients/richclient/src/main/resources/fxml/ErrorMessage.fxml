@@ -5,7 +5,7 @@
 
 <?import javafx.geometry.Insets?>
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-		   fx:controller="org.openecard.richclient.pinmanagement.controllers.ErrorMessageController">
+		   fx:controller="org.openecard.richclient.pinmanagement.common.ErrorMessageController">
 	<padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
 <Label fx:id="messageLabel" wrapText="true" maxWidth="400" alignment="CENTER" style="-fx-font-size: 14px;" />
 </VBox>

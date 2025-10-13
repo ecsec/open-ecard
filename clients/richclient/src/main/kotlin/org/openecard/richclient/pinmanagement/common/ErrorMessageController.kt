@@ -1,4 +1,4 @@
-package org.openecard.richclient.pinmanagement.controllers
+package org.openecard.richclient.pinmanagement.common
 
 import javafx.fxml.FXML
 import javafx.scene.control.Label

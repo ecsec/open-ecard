@@ -227,7 +227,8 @@ internal class UiStepImpl(
 
 				EidServerStepImpl(this, ctx.eserviceClient, ctx.eidServer, pace.application.device)
 			}
-		}.onFailure {
+		}.onFailure { ex ->
+			log.warn(ex.takeIf { log.isDebugEnabled() }) { "Received error while processing EAC protocol: ${ex.message}" }
 			disconnectCard()
 		}.getOrThrow()
 

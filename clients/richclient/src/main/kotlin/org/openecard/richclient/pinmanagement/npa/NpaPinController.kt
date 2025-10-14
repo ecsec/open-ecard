@@ -8,8 +8,10 @@ import org.openecard.cif.bundled.CompleteTree
 import org.openecard.cif.bundled.NpaCif
 import org.openecard.cif.bundled.NpaDefinitions
 import org.openecard.cif.definition.recognition.removeUnsupported
+import org.openecard.richclient.pinmanagement.PinManagementStage
 import org.openecard.richclient.pinmanagement.PinManagementUI
 import org.openecard.richclient.pinmanagement.TerminalInfo
+import org.openecard.richclient.pinmanagement.common.MessageController
 import org.openecard.sal.sc.SmartcardApplication
 import org.openecard.sal.sc.SmartcardSal
 import org.openecard.sal.sc.recognition.DirectCardRecognition
@@ -19,10 +21,14 @@ import org.openecard.sc.iface.withContext
 import org.openecard.sc.pace.PaceFeatureSoftwareFactory
 import org.openecard.sc.pcsc.PcscTerminalFactory
 
-class NpaPacePinController(
+class NpaPinController(
 	private val terminal: TerminalInfo,
-	private val view: NpaPacePinView,
+	private val stage: PinManagementStage,
+	private val bgTaskScope: CoroutineScope,
 ) : PinManagementUI {
+	private val npaViews = NpaPacePinViews(stage)
+	private val msgController = MessageController(stage.rootPane, bgTaskScope)
+
 	override fun show() {
 		CoroutineScope(Dispatchers.IO).launch {
 			val terminals = PcscTerminalFactory.Companion.instance.load()
@@ -32,21 +38,21 @@ class NpaPacePinController(
 					val status = model.getPinStatus()
 					Platform.runLater {
 						when (status) {
-							PinStatus.OK -> view.showChangeFlow { old, new -> changePin(old, new) }
-							PinStatus.Suspended -> view.showCanAndPinFlow { can, pin -> suspendRecovery(can, pin) }
-							PinStatus.Blocked -> view.showPukFlow { puk -> unblockPin(puk) }
-							PinStatus.Unknown -> view.showMessage("Unable to determine PIN status.") {}
+							PinStatus.OK -> npaViews.showChangeFlow { old, new -> changePin(old, new) }
+							PinStatus.Suspended -> npaViews.showCanAndPinFlow { can, pin -> suspendRecovery(can, pin) }
+							PinStatus.Blocked -> npaViews.showPukFlow { puk -> unblockPin(puk) }
+							PinStatus.Unknown -> msgController.showMessage("Unable to determine PIN status.") {}
 						}
 					}
 				}
 			} catch (e: Exception) {
-				Platform.runLater { view.showMessage("Error: ${e.message}") {} }
+				Platform.runLater { msgController.showMessage("Error: ${e.message}") {} }
 			}
 		}
 	}
 
 	override fun abortProcess() {
-		view.showMessage("PIN process aborted.") {}
+		msgController.showMessage("PIN process aborted.") {}
 	}
 
 	private fun changePin(
@@ -63,34 +69,34 @@ class NpaPacePinController(
 
 					Platform.runLater {
 						if (success) {
-							view.showMessage("PIN changed successfully.") {
-								view.showChangeFlow { o, n -> changePin(o, n) }
+							msgController.showMessage("PIN changed successfully.") {
+								npaViews.showChangeFlow { o, n -> changePin(o, n) }
 							}
 						} else {
 							when (retries) {
 								2 ->
-									view.showMessage("PIN incorrect. 2 retries left.") {
-										view.showChangeFlow { o, n -> changePin(o, n) }
+									msgController.showMessage("PIN incorrect. 2 retries left.") {
+										npaViews.showChangeFlow { o, n -> changePin(o, n) }
 									}
 
 								1 ->
-									view.showMessage("PIN suspended. Please enter CAN.") {
+									msgController.showMessage("PIN suspended. Please enter CAN.") {
 // 										view.showCanFlow { can -> suspendRecovery(can) }
-										view.showCanAndPinFlow { can, pin -> suspendRecovery(can, pin) }
+										npaViews.showCanAndPinFlow { can, pin -> suspendRecovery(can, pin) }
 									}
 
 								0 ->
-									view.showMessage("PIN blocked. Please enter PUK.") {
-										view.showPukFlow { puk -> unblockPin(puk) }
+									msgController.showMessage("PIN blocked. Please enter PUK.") {
+										npaViews.showPukFlow { puk -> unblockPin(puk) }
 									}
 
-								else -> view.showMessage("PIN change failed.") {}
+								else -> msgController.showMessage("PIN change failed.") {}
 							}
 						}
 					}
 				}
 			} catch (e: Exception) {
-				Platform.runLater { view.showMessage("Error: ${e.message}") {} }
+				Platform.runLater { msgController.showMessage("Error: ${e.message}") {} }
 			}
 		}
 	}
@@ -107,8 +113,8 @@ class NpaPacePinController(
 
 					if (!model.enterCan(can)) {
 						Platform.runLater {
-							view.showMessage("Wrong CAN. Please try again.") {
-								view.showCanAndPinFlow { retryCan, retryPin -> suspendRecovery(retryCan, retryPin) }
+							msgController.showMessage("Wrong CAN. Please try again.") {
+								npaViews.showCanAndPinFlow { retryCan, retryPin -> suspendRecovery(retryCan, retryPin) }
 							}
 						}
 					} else {
@@ -117,16 +123,16 @@ class NpaPacePinController(
 
 						Platform.runLater {
 							if (success) {
-								view.showMessage("PIN recovered successfully.") {
-									view.showChangeFlow { old, new -> changePin(old, new) }
+								msgController.showMessage("PIN recovered successfully.") {
+									npaViews.showChangeFlow { old, new -> changePin(old, new) }
 								}
 							} else if (retries == 0) {
-								view.showMessage("PIN blocked. Please enter PUK.") {
-									view.showPukFlow { puk -> unblockPin(puk) }
+								msgController.showMessage("PIN blocked. Please enter PUK.") {
+									npaViews.showPukFlow { puk -> unblockPin(puk) }
 								}
 							} else {
-								view.showMessage("PIN recovery failed. Please try again.") {
-									view.showCanAndPinFlow { retryCan, retryPin -> suspendRecovery(retryCan, retryPin) }
+								msgController.showMessage("PIN recovery failed. Please try again.") {
+									npaViews.showCanAndPinFlow { retryCan, retryPin -> suspendRecovery(retryCan, retryPin) }
 								}
 							}
 						}
@@ -134,7 +140,7 @@ class NpaPacePinController(
 				}
 			} catch (e: Exception) {
 				Platform.runLater {
-					view.showMessage("Error: ${e.message}") {}
+					msgController.showMessage("Error: ${e.message}") {}
 				}
 			}
 		}
@@ -148,20 +154,20 @@ class NpaPacePinController(
 					val model = NpaPacePinModel(connectToMf(ctx))
 					if (model.enterPuk(puk)) {
 						Platform.runLater {
-							view.showMessage("PIN unblocked successfully.") {
-								view.showChangeFlow { old, new -> changePin(old, new) }
+							msgController.showMessage("PIN unblocked successfully.") {
+								npaViews.showChangeFlow { old, new -> changePin(old, new) }
 							}
 						}
 					} else {
 						Platform.runLater {
-							view.showMessage("Wrong PUK. Please try again.") {
-								view.showPukFlow { retryPuk -> unblockPin(retryPuk) }
+							msgController.showMessage("Wrong PUK. Please try again.") {
+								npaViews.showPukFlow { retryPuk -> unblockPin(retryPuk) }
 							}
 						}
 					}
 				}
 			} catch (e: Exception) {
-				Platform.runLater { view.showMessage("Error: ${e.message}") {} }
+				Platform.runLater { msgController.showMessage("Error: ${e.message}") {} }
 			}
 		}
 	}

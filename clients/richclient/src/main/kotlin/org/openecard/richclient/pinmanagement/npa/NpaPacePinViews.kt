@@ -1,34 +1,12 @@
 package org.openecard.richclient.pinmanagement.npa
 
-import javafx.application.Platform
 import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
-import javafx.scene.Scene
-import javafx.scene.layout.StackPane
-import javafx.scene.layout.VBox
-import javafx.stage.Stage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.javafx.JavaFx
-import kotlinx.coroutines.launch
-import org.openecard.richclient.pinmanagement.common.MessageViewController
-import kotlin.time.Duration.Companion.seconds
+import org.openecard.richclient.pinmanagement.PinManagementStage
 
-class NpaPacePinView(
-	private val stage: Stage,
-	private val bgTaskScope: CoroutineScope,
+class NpaPacePinViews(
+	private val stage: PinManagementStage,
 ) {
-	private val rootPane = StackPane()
-
-	init {
-		Platform.runLater {
-			stage.scene = Scene(rootPane, 400.0, 350.0)
-			stage.title = "PIN Management"
-			stage.show()
-		}
-	}
-
 	fun showChangeFlow(onSubmit: (String, String) -> Unit) {
 		val (view, controller) = loadFXML<Parent, PinChangeViewController>("PinChangeView.fxml")
 		controller.onSubmit = { old, new, repeat, errorLabel ->
@@ -45,7 +23,7 @@ class NpaPacePinView(
 				else -> onSubmit(old, new)
 			}
 		}
-		show(view)
+		stage.show(view)
 	}
 
 	fun showCanFlow(onSubmit: (String) -> Unit) {
@@ -57,7 +35,7 @@ class NpaPacePinView(
 				else -> onSubmit(can)
 			}
 		}
-		show(view)
+		stage.show(view)
 	}
 
 	fun showPinRecoveryFlow(onSubmit: (String) -> Unit) {
@@ -70,7 +48,7 @@ class NpaPacePinView(
 				else -> onSubmit(pin)
 			}
 		}
-		show(view)
+		stage.show(view)
 	}
 
 	fun showCanAndPinFlow(onSubmit: (String, String) -> Unit) {
@@ -89,11 +67,11 @@ class NpaPacePinView(
 							else -> onSubmit(can, pin)
 						}
 					}
-					show(pinView)
+					stage.show(pinView)
 				}
 			}
 		}
-		show(canView)
+		stage.show(canView)
 	}
 
 	fun showPukFlow(onSubmit: (String) -> Unit) {
@@ -105,33 +83,7 @@ class NpaPacePinView(
 				else -> onSubmit(puk)
 			}
 		}
-		show(view)
-	}
-
-	fun showMessage(
-		message: String,
-		after: () -> Unit,
-	) {
-		val loader = FXMLLoader()
-		loader.location = javaClass.getResource("/fxml/MessageView.fxml")
-		val layout = loader.load<VBox>()
-		val controller = loader.getController<MessageViewController>()
-		controller.setMessage(message)
-
-		Platform.runLater {
-			rootPane.children.setAll(layout)
-		}
-
-		bgTaskScope.launch(Dispatchers.JavaFx) {
-			delay(3.seconds)
-			after()
-		}
-	}
-
-	private fun show(view: Parent) {
-		Platform.runLater {
-			rootPane.children.setAll(view)
-		}
+		stage.show(view)
 	}
 
 	private fun <V : Parent, C> loadFXML(fileName: String): Pair<V, C> {

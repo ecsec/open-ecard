@@ -26,14 +26,12 @@ class CardSelectionController(
 
 		view.setup(model.terminals) { selected ->
 			uiFactory.openPinUiForType(
-				cardType = selected.cardType,
 				terminal = selected,
 				onError = { error ->
 					view.showErrorDialog("Error: ${error.message}", bgTaskScope) {
 						root.children.setAll(view.cardListLayout)
 					}
 				},
-				model = model,
 			)
 		}
 

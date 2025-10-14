@@ -18,12 +18,16 @@ import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import javafx.stage.Modality
 import javafx.stage.Stage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 import org.openecard.richclient.gui.GuiUtils.toFXImage
 import org.openecard.richclient.pinmanagement.TerminalInfo
 import org.openecard.richclient.pinmanagement.common.ErrorMessageController
 import org.openecard.richclient.sc.CifDb
-import java.util.Timer
-import java.util.TimerTask
+import kotlin.time.Duration.Companion.seconds
 
 class CardSelectionViewController {
 	@FXML
@@ -106,6 +110,7 @@ class CardSelectionViewController {
 
 	fun showErrorDialog(
 		message: String,
+		bgTaskScope: CoroutineScope,
 		after: () -> Unit,
 	) {
 		val loader = FXMLLoader(javaClass.getResource("/fxml/ErrorMessage.fxml"))
@@ -123,16 +128,10 @@ class CardSelectionViewController {
 
 		errorStage.show()
 
-		Timer().schedule(
-			object : TimerTask() {
-				override fun run() {
-					Platform.runLater {
-						errorStage.close()
-						after()
-					}
-				}
-			},
-			3000,
-		)
+		bgTaskScope.launch(Dispatchers.JavaFx) {
+			delay(3.seconds)
+			errorStage.close()
+			after()
+		}
 	}
 }

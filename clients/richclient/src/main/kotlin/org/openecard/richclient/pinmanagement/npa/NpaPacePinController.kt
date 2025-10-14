@@ -111,24 +111,23 @@ class NpaPacePinController(
 								view.showCanAndPinFlow { retryCan, retryPin -> suspendRecovery(retryCan, retryPin) }
 							}
 						}
-						return@withContext
-					}
+					} else {
+						val success = model.enterPin(pin)
+						val retries = (model.pacePin.passwordStatus() as? SecurityCommandFailure)?.retries
 
-					val success = model.enterPin(pin)
-					val retries = (model.pacePin.passwordStatus() as? SecurityCommandFailure)?.retries
-
-					Platform.runLater {
-						if (success) {
-							view.showMessage("PIN recovered successfully.") {
-								view.showChangeFlow { old, new -> changePin(old, new) }
-							}
-						} else if (retries == 0) {
-							view.showMessage("PIN blocked. Please enter PUK.") {
-								view.showPukFlow { puk -> unblockPin(puk) }
-							}
-						} else {
-							view.showMessage("PIN recovery failed. Please try again.") {
-								view.showCanAndPinFlow { retryCan, retryPin -> suspendRecovery(retryCan, retryPin) }
+						Platform.runLater {
+							if (success) {
+								view.showMessage("PIN recovered successfully.") {
+									view.showChangeFlow { old, new -> changePin(old, new) }
+								}
+							} else if (retries == 0) {
+								view.showMessage("PIN blocked. Please enter PUK.") {
+									view.showPukFlow { puk -> unblockPin(puk) }
+								}
+							} else {
+								view.showMessage("PIN recovery failed. Please try again.") {
+									view.showCanAndPinFlow { retryCan, retryPin -> suspendRecovery(retryCan, retryPin) }
+								}
 							}
 						}
 					}

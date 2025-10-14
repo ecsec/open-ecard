@@ -7,12 +7,17 @@ import javafx.scene.Scene
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 import org.openecard.richclient.pinmanagement.common.MessageViewController
-import java.util.Timer
-import java.util.TimerTask
+import kotlin.time.Duration.Companion.seconds
 
 class NpaPacePinView(
 	private val stage: Stage,
+	private val bgTaskScope: CoroutineScope,
 ) {
 	private val rootPane = StackPane()
 
@@ -117,17 +122,10 @@ class NpaPacePinView(
 			rootPane.children.setAll(layout)
 		}
 
-		Timer()
-			.schedule(
-				object : TimerTask() {
-					override fun run() {
-						Platform.runLater {
-							after()
-						}
-					}
-				},
-				3000,
-			)
+		bgTaskScope.launch(Dispatchers.JavaFx) {
+			delay(3.seconds)
+			after()
+		}
 	}
 
 	private fun show(view: Parent) {

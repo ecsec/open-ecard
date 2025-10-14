@@ -162,7 +162,9 @@ class AppTray(
 								val stage = Stage()
 								pinManager =
 									PinManager(stage, cardWatcher).also { pm ->
-										stage.onCloseRequest = EventHandler { pinManager = null }
+										stage.addEventHandler(javafx.stage.WindowEvent.WINDOW_CLOSE_REQUEST) {
+											pinManager = null
+										}
 										pm.openManagerDialog()
 									}
 							}

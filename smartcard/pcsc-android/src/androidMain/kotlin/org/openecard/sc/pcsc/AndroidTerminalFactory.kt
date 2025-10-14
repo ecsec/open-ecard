@@ -5,13 +5,14 @@ import android.content.Intent
 import android.nfc.NfcAdapter
 import android.nfc.NfcManager
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.awaitCancellation
 import org.openecard.sc.iface.ReaderUnavailable
 import org.openecard.sc.iface.SmartCardStackMissing
 import org.openecard.sc.iface.Terminal
 import org.openecard.sc.iface.TerminalFactory
 import org.openecard.sc.iface.Terminals
 
-private val logger = KotlinLogging.logger {}
+private val log = KotlinLogging.logger {}
 
 class AndroidTerminalFactory internal constructor(
 	val androidActivity: Activity,
@@ -90,4 +91,13 @@ class AndroidTerminals internal constructor(
 	override fun list(): List<Terminal> = listOf(androidTerminal)
 
 	override fun getTerminal(name: String): Terminal = androidTerminal
+
+	override suspend fun waitForTerminalChange(currentState: List<String>) {
+		if (currentState.union(list().map { it.name }).isNotEmpty()) {
+			// requested state differs from actual state
+			return
+		}
+		log.warn { "AndroidTerminals.waitForTerminalChange will never detect a change" }
+		awaitCancellation()
+	}
 }

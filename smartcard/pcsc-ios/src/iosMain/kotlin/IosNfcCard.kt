@@ -36,8 +36,6 @@ class IosNfcCard(
 
 	override var setCapabilities: CardCapabilities? = null
 
-	override fun getCapabilities(): CardCapabilities? = atr().historicalBytes?.cardCapabilities ?: setCapabilities
-
 	override fun openLogicalChannel(): CardChannel {
 		TODO("Not yet implemented")
 	}

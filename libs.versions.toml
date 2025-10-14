@@ -37,7 +37,7 @@ android-slf4j = "2.0.+"
 
 # JVM dependencies
 bouncycastle = "1.82"
-jnasmartcardio = "25.03.11"
+kotlin-pcsc = "1.0.2"
 apache-batik="1.19"
 proxy-vole = "1.1.6"
 pdfbox = "3.0.5"
@@ -144,7 +144,7 @@ proxyvole = { group = "org.bidib.com.github.markusbernhardt", name = "proxy-vole
 
 pdfbox = { group = "org.apache.pdfbox", name = "pdfbox", version.ref = "pdfbox" }
 
-scio = { group = "com.github.martinpaljak", name = "apdu4j-jnasmartcardio", version.ref = "jnasmartcardio" }
+pcsc = { group = "org.electrologic.pcsc", name = "kotlin-pcsc", version.ref = "kotlin-pcsc" }
 
 jose4j = { group = "org.bitbucket.b_c", name = "jose4j", version.ref = "jose4j" }
 jwtkt-core = { module = "com.appstractive:jwt-kt", version.ref = "jwtkt" }

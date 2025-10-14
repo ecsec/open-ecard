@@ -14,7 +14,7 @@ interface Card {
 	 * Implementations can use the ones from the `ATR`, or it can be set explicitly after reading `EF.ATR`.
 	 */
 	@Throws(CommError::class, RemovedCard::class)
-	fun getCapabilities(): CardCapabilities?
+	fun getCapabilities(): CardCapabilities? = atr().historicalBytes?.cardCapabilities ?: setCapabilities
 
 	@Throws(CommError::class, RemovedCard::class)
 	fun atr(): Atr

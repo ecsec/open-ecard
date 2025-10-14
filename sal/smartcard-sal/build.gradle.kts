@@ -25,7 +25,7 @@ kotlin {
 
 		jvmTest.dependencies {
 			implementation(libs.bundles.test.jvm.kotlin)
-			implementation(project(":smartcard:pcsc-scio"))
+			implementation(project(":smartcard:pcsc-native"))
 			implementation(project(":smartcard:pace"))
 			implementation(project(":cif:bundled-cifs"))
 		}

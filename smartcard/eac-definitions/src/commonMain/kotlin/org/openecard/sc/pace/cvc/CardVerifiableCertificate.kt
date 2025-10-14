@@ -5,7 +5,6 @@ import org.openecard.sc.tlv.Tlv
 import org.openecard.sc.tlv.Tlv.Companion.tagAt
 import org.openecard.sc.tlv.TlvException
 import org.openecard.sc.tlv.toTlvBer
-import org.openecard.utils.common.returnIf
 
 /**
  * Card Verifiable Certificate (CVC) data structure according to TR-03110-3, Sec. C.

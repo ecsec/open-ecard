@@ -22,7 +22,6 @@
 
 package org.openecard.sc.tlv
 
-import org.openecard.utils.common.returnIf
 import org.openecard.utils.serialization.PrintableUByteArray
 import org.openecard.utils.serialization.toPrintable
 
@@ -122,7 +121,7 @@ sealed interface Tlv {
 			requiredTag: Tag,
 		): Tlv? {
 			val tlv = this[index]
-			return tlv.returnIf { it.tag == requiredTag }
+			return tlv.takeIf { it.tag == requiredTag }
 		}
 	}
 }

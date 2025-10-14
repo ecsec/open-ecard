@@ -94,7 +94,6 @@ interface Terminal {
 		ReaderUnavailable::class,
 		UnknownReader::class,
 		Timeout::class,
-		Cancelled::class,
 	)
 	suspend fun waitForCardPresent()
 
@@ -108,7 +107,6 @@ interface Terminal {
 		ReaderUnavailable::class,
 		UnknownReader::class,
 		Timeout::class,
-		Cancelled::class,
 	)
 	suspend fun waitForCardAbsent()
 }

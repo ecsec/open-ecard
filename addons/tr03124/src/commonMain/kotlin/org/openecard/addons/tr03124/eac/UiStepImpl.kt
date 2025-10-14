@@ -173,8 +173,6 @@ internal class UiStepImpl(
 					}
 				val idPicc =
 					checkNotNull(paceResponse.idIcc?.v) { "PACE did not yield a ID_PICC value, which is required for EAC" }
-				// remove type byte from the key
-				val idPiccRaw = idPicc.sliceArray(1 until idPicc.size)
 
 				val cars =
 					listOfNotNull(paceResponse.carCurr, paceResponse.carPrev).map {
@@ -196,7 +194,7 @@ internal class UiStepImpl(
 						certificateHolderAuthorizationTemplate = chat,
 						certificationAuthorityReference = cars.map { it.joinToString() },
 						efCardAccess = paceResponse.efCardAccess,
-						idPICC = idPiccRaw.toPrintable(),
+						idPICC = idPicc.toPrintable(),
 						challenge = challenge.toPrintable(),
 					)
 				val eac2In =

@@ -69,12 +69,15 @@ class PaceProtocol
 			channel.removeSecureMessaging()
 			channel.setSecureMessaging(sm)
 
+			// the PACE establish channel response expects a key without encoding byte, so cut it off here
+			val idIccRaw = paceResult.idIcc?.let { idIcc -> idIcc.sliceArray(1 until idIcc.size) }
+
 			return PaceEstablishChannelResponse(
 				paceResult.mseStatus,
 				efca.efCaData.toPrintable(),
 				paceResult.currentCar?.toPrintable(),
 				paceResult.previousCar?.toPrintable(),
-				paceResult.idIcc?.toPrintable(),
+				idIccRaw?.toPrintable(),
 			)
 		}
 

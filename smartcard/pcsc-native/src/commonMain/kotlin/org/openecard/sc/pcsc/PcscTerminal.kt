@@ -1,13 +1,10 @@
 package org.openecard.sc.pcsc
 
 import au.id.micolous.kotlin.pcsc.Context
-import au.id.micolous.kotlin.pcsc.ReaderState
-import au.id.micolous.kotlin.pcsc.State
 import au.id.micolous.kotlin.pcsc.connect
 import au.id.micolous.kotlin.pcsc.getStatus
 import au.id.micolous.kotlin.pcsc.getStatusChangeSuspend
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.sc.iface.InternalSystemError
 import org.openecard.sc.iface.PreferredCardProtocol
 import org.openecard.sc.iface.ShareMode
 import org.openecard.sc.iface.Terminal

@@ -6,15 +6,12 @@ import au.id.micolous.kotlin.pcsc.getAllReaderStatus
 import au.id.micolous.kotlin.pcsc.getStatus
 import au.id.micolous.kotlin.pcsc.getStatusChangeSuspend
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.delay
 import org.openecard.sc.iface.InvalidHandle
 import org.openecard.sc.iface.ReaderUnavailable
 import org.openecard.sc.iface.ReaderUnsupported
-import org.openecard.sc.iface.Terminal
 import org.openecard.sc.iface.TerminalFactory
 import org.openecard.sc.iface.Terminals
 import org.openecard.sc.iface.UnknownReader
-import kotlin.time.Duration.Companion.seconds
 
 private val log = KotlinLogging.logger { }
 

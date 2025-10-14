@@ -16,7 +16,6 @@ class CardSelectionModel(
 	private val bgTaskScope: CoroutineScope,
 ) {
 	val terminals: ObservableList<TerminalInfo> = FXCollections.observableArrayList()
-	var selectedTerminal: TerminalInfo? = null
 
 	fun registerWatcher(
 		onUpdate: () -> Unit,
@@ -55,25 +54,10 @@ class CardSelectionModel(
 					val removed = terminals.find { it.terminalName == terminalName }
 					if (removed != null) {
 						terminals.remove(removed)
-						if (selectedTerminal?.terminalName == terminalName) {
-							selectedTerminal = null
-						}
 						onUpdate()
 					}
 				}
 			}
-
-			override fun onTerminalRemoved(terminalName: String) {
-				Platform.runLater {
-					if (selectedTerminal?.terminalName == terminalName) {
-						selectedTerminal = null
-					}
-				}
-			}
 		}.registerWith(cardWatcher, bgTaskScope)
-	}
-
-	fun selectTerminal(terminal: TerminalInfo) {
-		selectedTerminal = terminal
 	}
 }

@@ -19,21 +19,17 @@ class CardSelectionController(
 			onUpdate = { view.updateTerminals(model.terminals) },
 			onError = { message ->
 				view.showErrorDialog(message, bgTaskScope) {
-					model.selectedTerminal = null
 					root.children.setAll(view.cardListLayout)
 				}
 			},
 		)
 
 		view.setup(model.terminals) { selected ->
-			model.selectTerminal(selected)
-
 			uiFactory.openPinUiForType(
 				cardType = selected.cardType,
 				terminal = selected,
 				onError = { error ->
 					view.showErrorDialog("Error: ${error.message}", bgTaskScope) {
-						model.selectedTerminal = null
 						root.children.setAll(view.cardListLayout)
 					}
 				},

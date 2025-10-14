@@ -62,7 +62,6 @@ class PinUiFactory(
 						Platform.runLater {
 							view.showMessage("The selected card or card terminal has been removed.") {
 								val controller = createSelectionUi()
-								model.selectedTerminal = null
 								controller.start()
 							}
 						}

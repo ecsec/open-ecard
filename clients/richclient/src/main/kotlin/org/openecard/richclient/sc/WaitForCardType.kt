@@ -2,7 +2,6 @@ package org.openecard.richclient.sc
 
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapNotNull
-import org.openecard.utils.common.returnIf
 
 object WaitForCardType {
 	/**
@@ -24,7 +23,7 @@ object WaitForCardType {
 									.takeIf { it.isNotEmpty() }
 							is CardStateEvent.CardRecognized ->
 								evt
-									.returnIf {
+									.takeIf {
 										it.cardType in cardTypes
 									}?.let { listOf(CardState.RecognizedCard(it.terminalName, it.cardType)) }
 							else -> null

@@ -8,7 +8,6 @@ import org.openecard.sal.iface.selectForProtocol
 import org.openecard.sal.sc.dids.SmartcardDid
 import org.openecard.sc.iface.CardChannel
 import org.openecard.sc.iface.CardDisposition
-import org.openecard.utils.common.returnIf
 
 class SmartcardDeviceConnection(
 	override val connectionId: String,
@@ -32,7 +31,7 @@ class SmartcardDeviceConnection(
 			.mapNotNull { app ->
 				app.selectAcl
 					.selectForProtocol(channel.card.protocol)
-					.returnIf {
+					.takeIf {
 						it.hasSolution()
 					}?.let { SmartcardApplication(this, app, it) }
 			}

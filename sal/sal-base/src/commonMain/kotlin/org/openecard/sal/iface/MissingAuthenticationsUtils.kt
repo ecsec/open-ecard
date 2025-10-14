@@ -6,7 +6,6 @@ import org.openecard.cif.definition.acl.BoolTreeOr
 import org.openecard.cif.definition.acl.CifAclOr
 import org.openecard.cif.definition.acl.DidStateReference
 import org.openecard.sal.iface.dids.AuthenticationDid
-import org.openecard.utils.common.returnIf
 
 fun CifAclOr.missingAuthentications(
 	allDids: List<AuthenticationDid>,
@@ -39,7 +38,7 @@ fun CifAclOr.missingAuthentications(
 								}
 							}
 						// remove this branch if there are no entries in it
-						andBranch.returnIf { it.isNotEmpty() }?.let { BoolTreeAnd(it) }
+						andBranch.takeIf { it.isNotEmpty() }?.let { BoolTreeAnd(it) }
 					},
 				)
 

@@ -1,7 +1,5 @@
 package org.openecard.sc.pace.cvc
 
-import org.openecard.utils.common.returnIf
-
 typealias CardVerifiableCertificates = Collection<CardVerifiableCertificate>
 
 class CvcChain(
@@ -12,7 +10,7 @@ class CvcChain(
 	companion object {
 		fun CardVerifiableCertificates.toChain(car: PublicKeyReference): CvcChain? {
 			val chain = buildChain(car)
-			return chain.returnIf { it.isNotEmpty() }?.let { CvcChain(it) }
+			return chain.takeIf { it.isNotEmpty() }?.let { CvcChain(it) }
 		}
 
 		private fun CardVerifiableCertificates.buildChain(car: PublicKeyReference): List<CardVerifiableCertificate> {

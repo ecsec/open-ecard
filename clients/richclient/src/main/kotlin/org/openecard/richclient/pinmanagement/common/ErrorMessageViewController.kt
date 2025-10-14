@@ -3,7 +3,7 @@ package org.openecard.richclient.pinmanagement.common
 import javafx.fxml.FXML
 import javafx.scene.control.Label
 
-class ErrorMessageController {
+class ErrorMessageViewController {
 	@FXML
 	lateinit var messageLabel: Label
 

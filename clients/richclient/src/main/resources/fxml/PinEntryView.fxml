@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 
 <?import javafx.geometry.Insets?>
-<VBox fx:controller="org.openecard.richclient.pinmanagement.npa.PinEntryController"
+<VBox fx:controller="org.openecard.richclient.pinmanagement.npa.PinEntryViewController"
 	  xmlns:fx="http://javafx.com/fxml"
 	  alignment="CENTER" spacing="10">
 	<padding>

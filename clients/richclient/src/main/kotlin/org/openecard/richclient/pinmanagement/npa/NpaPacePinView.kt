@@ -30,7 +30,7 @@ class NpaPacePinView(
 	}
 
 	fun showChangeFlow(onSubmit: (String, String) -> Unit) {
-		val (view, controller) = loadFXML<Parent, PinChangeController>("PinChangeView.fxml")
+		val (view, controller) = loadFXML<Parent, PinChangeViewController>("PinChangeView.fxml")
 		controller.onSubmit = { old, new, repeat, errorLabel ->
 			when {
 				old.isBlank() || new.isBlank() || repeat.isBlank() ->
@@ -49,7 +49,7 @@ class NpaPacePinView(
 	}
 
 	fun showCanFlow(onSubmit: (String) -> Unit) {
-		val (view, controller) = loadFXML<Parent, CanEntryController>("CanEntryView.fxml")
+		val (view, controller) = loadFXML<Parent, CanEntryViewController>("CanEntryView.fxml")
 		controller.onSubmit = { can, errorLabel ->
 			when {
 				can.isBlank() -> errorLabel.text = "CAN cannot be empty."
@@ -61,7 +61,7 @@ class NpaPacePinView(
 	}
 
 	fun showPinRecoveryFlow(onSubmit: (String) -> Unit) {
-		val (view, controller) = loadFXML<Parent, PinEntryController>("PinEntryView.fxml")
+		val (view, controller) = loadFXML<Parent, PinEntryViewController>("PinEntryView.fxml")
 		controller.setTitle("Enter your PIN - last attempt.")
 		controller.onSubmit = { pin, errorLabel ->
 			when {
@@ -74,13 +74,13 @@ class NpaPacePinView(
 	}
 
 	fun showCanAndPinFlow(onSubmit: (String, String) -> Unit) {
-		val (canView, canController) = loadFXML<Parent, CanEntryController>("CanEntryView.fxml")
+		val (canView, canController) = loadFXML<Parent, CanEntryViewController>("CanEntryView.fxml")
 		canController.onSubmit = { can, canError ->
 			when {
 				can.isBlank() -> canError.text = "CAN cannot be empty."
 				can.length !in 5..6 -> canError.text = "CAN must be 5 or 6 digits."
 				else -> {
-					val (pinView, pinController) = loadFXML<Parent, PinEntryController>("PinEntryView.fxml")
+					val (pinView, pinController) = loadFXML<Parent, PinEntryViewController>("PinEntryView.fxml")
 					pinController.setTitle("Enter your PIN - last attempt.")
 					pinController.onSubmit = { pin, pinError ->
 						when {
@@ -97,7 +97,7 @@ class NpaPacePinView(
 	}
 
 	fun showPukFlow(onSubmit: (String) -> Unit) {
-		val (view, controller) = loadFXML<Parent, PukEntryController>("PukEntryView.fxml")
+		val (view, controller) = loadFXML<Parent, PukEntryViewController>("PukEntryView.fxml")
 		controller.onSubmit = { puk, errorLabel ->
 			when {
 				puk.isBlank() -> errorLabel.text = "PUK cannot be empty."

@@ -7,21 +7,6 @@ import org.openecard.sc.apdu.command.SecurityCommandFailure
 import org.openecard.sc.apdu.command.SecurityCommandSuccess
 import org.openecard.sc.iface.feature.PaceError
 
-@OptIn(ExperimentalUnsignedTypes::class)
-fun PaceDid.enterPassword(pin: String): SecurityCommandFailure? {
-	try {
-		establishChannel(pin, null, null)
-		return null
-	} catch (ex: PaceError) {
-		val secErr = ex.securityError
-		if (secErr != null) {
-			return secErr
-		} else {
-			throw ex
-		}
-	}
-}
-
 class NpaPacePinModel(
 	application: SmartcardApplication,
 ) {
@@ -62,11 +47,19 @@ class NpaPacePinModel(
 			false
 		}
 	}
-}
 
-enum class PinStatus {
-	OK,
-	Suspended,
-	Blocked,
-	Unknown,
+	@OptIn(ExperimentalUnsignedTypes::class)
+	private fun PaceDid.enterPassword(pin: String): SecurityCommandFailure? {
+		try {
+			establishChannel(pin, null, null)
+			return null
+		} catch (ex: PaceError) {
+			val secErr = ex.securityError
+			if (secErr != null) {
+				return secErr
+			} else {
+				throw ex
+			}
+		}
+	}
 }

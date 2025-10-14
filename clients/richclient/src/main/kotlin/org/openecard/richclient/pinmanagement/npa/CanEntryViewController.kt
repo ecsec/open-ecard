@@ -4,9 +4,9 @@ import javafx.fxml.FXML
 import javafx.scene.control.Label
 import javafx.scene.control.PasswordField
 
-class PukEntryController {
+class CanEntryViewController {
 	@FXML
-	lateinit var pukField: PasswordField
+	lateinit var canField: PasswordField
 
 	@FXML
 	lateinit var errorLabel: Label
@@ -15,7 +15,7 @@ class PukEntryController {
 
 	@FXML
 	fun handleSubmit() {
-		onSubmit?.invoke(pukField.text, errorLabel)
+		onSubmit?.invoke(canField.text, errorLabel)
 	}
 
 	fun setError(message: String) {

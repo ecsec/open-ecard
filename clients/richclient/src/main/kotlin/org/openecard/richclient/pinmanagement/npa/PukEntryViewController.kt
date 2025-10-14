@@ -4,12 +4,9 @@ import javafx.fxml.FXML
 import javafx.scene.control.Label
 import javafx.scene.control.PasswordField
 
-class PinEntryController {
+class PukEntryViewController {
 	@FXML
-	lateinit var titleLabel: Label
-
-	@FXML
-	lateinit var pinField: PasswordField
+	lateinit var pukField: PasswordField
 
 	@FXML
 	lateinit var errorLabel: Label
@@ -18,11 +15,7 @@ class PinEntryController {
 
 	@FXML
 	fun handleSubmit() {
-		onSubmit?.invoke(pinField.text, errorLabel)
-	}
-
-	fun setTitle(text: String) {
-		titleLabel.text = text
+		onSubmit?.invoke(pukField.text, errorLabel)
 	}
 
 	fun setError(message: String) {

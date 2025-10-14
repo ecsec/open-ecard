@@ -4,7 +4,7 @@ import javafx.fxml.FXML
 import javafx.scene.control.Label
 import javafx.scene.control.PasswordField
 
-class PinChangeController {
+class PinChangeViewController {
 	@FXML
 	private lateinit var oldPinField: PasswordField
 

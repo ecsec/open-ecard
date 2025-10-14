@@ -25,7 +25,7 @@ import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import org.openecard.richclient.gui.GuiUtils.toFXImage
 import org.openecard.richclient.pinmanagement.TerminalInfo
-import org.openecard.richclient.pinmanagement.common.ErrorMessageController
+import org.openecard.richclient.pinmanagement.common.ErrorMessageViewController
 import org.openecard.richclient.sc.CifDb
 import kotlin.time.Duration.Companion.seconds
 
@@ -115,7 +115,7 @@ class CardSelectionViewController {
 	) {
 		val loader = FXMLLoader(javaClass.getResource("/fxml/ErrorMessage.fxml"))
 		val view = loader.load<VBox>()
-		val controller = loader.getController<ErrorMessageController>()
+		val controller = loader.getController<ErrorMessageViewController>()
 		controller.setMessage(message)
 
 		val errorStage =

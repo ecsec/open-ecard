@@ -6,7 +6,7 @@
 
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
-	  fx:controller="org.openecard.richclient.pinmanagement.npa.CanEntryController"
+	  fx:controller="org.openecard.richclient.pinmanagement.npa.CanEntryViewController"
 	  alignment="CENTER" spacing="10">
 	<padding>
 		<Insets top="20" right="20" bottom="20" left="20"/>

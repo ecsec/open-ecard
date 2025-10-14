@@ -53,12 +53,19 @@ class PcscTerminal(
 		mapScioError {
 			var statusChanged = false
 			while (!statusChanged) {
-				val oldState = ReaderState(reader = name, currentState = State(empty = true))
-				log.debug { "Wait for card present in terminal $name" }
-				val state = context.getStatusChangeSuspend(Int.MAX_VALUE, listOf(oldState)).first()
-				if (state.eventState.empty) {
-					log.debug { "Card is not present after status call: ${state.eventState}" }
+				log.trace { "calling PCSC [$this] Context.getStatus($name)" }
+				val oldState = context.getStatus(listOf(name)).first()
+				if (oldState.eventState.empty) {
+					log.debug { "Wait for card present in terminal $name" }
+					val reqState = oldState.copy(currentState = oldState.eventState)
+					val state = context.getStatusChangeSuspend(Int.MAX_VALUE, listOf(reqState)).first()
+					if (state.eventState.empty) {
+						log.debug { "Card is not present after status call: ${state.eventState}" }
+					} else {
+						statusChanged = true
+					}
 				} else {
+					// no card present in initial assumption
 					statusChanged = true
 				}
 			}
@@ -68,12 +75,19 @@ class PcscTerminal(
 		mapScioError {
 			var statusChanged = false
 			while (!statusChanged) {
-				val oldState = ReaderState(reader = name, currentState = State(present = true))
-				log.debug { "Wait for card absent in terminal $name" }
-				val state = context.getStatusChangeSuspend(Int.MAX_VALUE, listOf(oldState)).first()
-				if (state.eventState.present) {
-					log.debug { "Card is not absent after status call: ${state.eventState}" }
+				log.trace { "calling PCSC [$this] Context.getStatus($name)" }
+				val oldState = context.getStatus(listOf(name)).first()
+				if (oldState.eventState.present) {
+					log.debug { "Wait for card absent in terminal $name" }
+					val reqState = oldState.copy(currentState = oldState.eventState)
+					val state = context.getStatusChangeSuspend(Int.MAX_VALUE, listOf(reqState)).first()
+					if (state.eventState.present) {
+						log.debug { "Card is not absent after status call: ${state.eventState}" }
+					} else {
+						statusChanged = true
+					}
 				} else {
+					// no card present in initial assumption
 					statusChanged = true
 				}
 			}

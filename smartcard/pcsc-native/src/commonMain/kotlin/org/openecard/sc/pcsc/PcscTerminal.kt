@@ -30,7 +30,7 @@ class PcscTerminal(
 	override fun connectTerminalOnly(): TerminalConnection =
 		mapScioError {
 			val shareMode = au.id.micolous.kotlin.pcsc.ShareMode.Direct
-			val protocol = setOf(au.id.micolous.kotlin.pcsc.Protocol.Raw)
+			val protocol = setOf(au.id.micolous.kotlin.pcsc.Protocol.Undefined)
 			log.trace { "calling PCSC [$this] Context.connect($name, $shareMode, $protocol)" }
 			val card = context.connect(name, shareMode, protocol)
 			return PcscTerminalConnection(card, this)

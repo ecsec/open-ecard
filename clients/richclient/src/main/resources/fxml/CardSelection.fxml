@@ -1,23 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.VBox?>
 
-<StackPane xmlns="http://javafx.com/javafx"
-		   xmlns:fx="http://javafx.com/fxml"
-		   fx:controller="org.openecard.richclient.pinmanagement.selection.CardSelectionViewController"
-		   stylesheets="@../styles.css"
-		   fx:id="rootPane">
-
-	<VBox fx:id="cardListLayout"
-		  alignment="CENTER"
-		  spacing="10">
-		<Label text="Select a card by clicking on it" styleClass="card-list-title"/>
-		<ScrollPane fitToWidth="true" prefHeight="320">
-			<content>
-				<ListView fx:id="cardListView"/>
-			</content>
-		</ScrollPane>
-	</VBox>
-
-</StackPane>
+<VBox alignment="TOP_CENTER" spacing="10" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openecard.richclient.pinmanagement.selection.CardSelectionViewController">
+	<Label styleClass="card-list-title" text="Select a card by clicking on it" />
+	<ListView fx:id="cardListView" VBox.vgrow="ALWAYS" />
+   <padding>
+      <Insets top="10.0" />
+   </padding>
+</VBox>

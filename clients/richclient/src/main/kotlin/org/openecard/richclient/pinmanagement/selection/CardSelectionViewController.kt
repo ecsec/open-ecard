@@ -12,19 +12,12 @@ import javafx.scene.control.ListCell
 import javafx.scene.control.ListView
 import javafx.scene.image.ImageView
 import javafx.scene.layout.HBox
-import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import org.openecard.richclient.gui.JfxUtils.toJfxImage
 import org.openecard.richclient.pinmanagement.TerminalInfo
 import org.openecard.richclient.sc.CifDb
 
 class CardSelectionViewController {
-	@FXML
-	lateinit var rootPane: StackPane
-
-	@FXML
-	lateinit var cardListLayout: VBox
-
 	@FXML
 	lateinit var cardListView: ListView<TerminalInfo>
 
@@ -62,7 +55,6 @@ class CardSelectionViewController {
 						}
 						setOnMouseClicked {
 							cardListView.selectionModel.select(item)
-							rootPane.children.clear()
 							onCardSelected(item)
 						}
 					}

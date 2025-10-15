@@ -4,13 +4,13 @@ import javafx.application.Platform
 import javafx.stage.Stage
 import kotlinx.coroutines.CoroutineScope
 import org.openecard.cif.bundled.NpaDefinitions
+import org.openecard.i18n.I18N
 import org.openecard.richclient.MR
 import org.openecard.richclient.gui.JfxUtils.toJfxImage
 import org.openecard.richclient.pinmanagement.common.MessageController
 import org.openecard.richclient.pinmanagement.npa.NpaPinController
 import org.openecard.richclient.pinmanagement.selection.CardSelectionController
 import org.openecard.richclient.pinmanagement.selection.CardSelectionModel
-import org.openecard.richclient.pinmanagement.unsupported.PlaceholderPinController
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.sc.CardWatcherCallback
 import org.openecard.richclient.sc.CardWatcherCallback.Companion.registerWith
@@ -40,7 +40,14 @@ class PinUiFactory(
 		val controller: PinManagementUI =
 			when (terminal.cardType) {
 				NpaDefinitions.cardType -> NpaPinController(terminal, pmStage, bgTaskScope)
-				else -> PlaceholderPinController(terminal, pmStage, bgTaskScope)
+				else -> {
+					// make sure the dialog is closed and cleanup runs
+					MessageController(pmStage, bgTaskScope).showErrorDialog(I18N.strings.pinplugin_action_error_unknown.localized()) {
+						pmStage.stage.close()
+					}
+					// then signal an error that the application is fucked
+					throw IllegalArgumentException("PIN Management UI allowed to select an unsupported card type")
+				}
 			}
 
 		// watch card for removal event

@@ -52,6 +52,7 @@ class NpaPinController(
 	}
 
 	override fun abortProcess() {
+		// TODO: call this function, do cleanup here and close stage
 		msgController.showMessage("PIN process aborted.") {}
 	}
 

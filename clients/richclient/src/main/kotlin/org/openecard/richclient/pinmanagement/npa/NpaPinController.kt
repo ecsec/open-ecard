@@ -1,8 +1,6 @@
 package org.openecard.richclient.pinmanagement.npa
 
-import javafx.application.Platform
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.openecard.cif.bundled.CompleteTree
 import org.openecard.cif.bundled.NpaCif
@@ -12,10 +10,12 @@ import org.openecard.richclient.pinmanagement.PinManagementStage
 import org.openecard.richclient.pinmanagement.PinManagementUI
 import org.openecard.richclient.pinmanagement.TerminalInfo
 import org.openecard.richclient.pinmanagement.common.MessageController
+import org.openecard.richclient.pinmanagement.npa.CanEntryViewController.Companion.showCanPinFlow
+import org.openecard.richclient.pinmanagement.npa.PinChangeViewController.Companion.showChangeFlow
+import org.openecard.richclient.pinmanagement.npa.PukEntryViewController.Companion.showPukFlow
 import org.openecard.sal.sc.SmartcardApplication
 import org.openecard.sal.sc.SmartcardSal
 import org.openecard.sal.sc.recognition.DirectCardRecognition
-import org.openecard.sc.apdu.command.SecurityCommandFailure
 import org.openecard.sc.iface.Terminals
 import org.openecard.sc.iface.withContext
 import org.openecard.sc.pace.PaceFeatureSoftwareFactory
@@ -26,28 +26,25 @@ class NpaPinController(
 	private val stage: PinManagementStage,
 	private val bgTaskScope: CoroutineScope,
 ) : PinManagementUI {
-	private val npaViews = NpaPacePinViews(stage)
 	private val msgController = MessageController(stage, bgTaskScope)
 
 	override fun show() {
-		CoroutineScope(Dispatchers.IO).launch {
-			val terminals = PcscTerminalFactory.Companion.instance.load()
-			try {
-				terminals.withContext { ctx ->
-					val model = NpaPacePinModel(connectToMf(ctx))
-					val status = model.getPinStatus()
-					Platform.runLater {
-						when (status) {
-							PinStatus.OK -> npaViews.showChangeFlow { old, new -> changePin(old, new) }
-							PinStatus.Suspended -> npaViews.showCanAndPinFlow { can, pin -> suspendRecovery(can, pin) }
-							PinStatus.Blocked -> npaViews.showPukFlow { puk -> unblockPin(puk) }
-							PinStatus.Unknown -> msgController.showMessage("Unable to determine PIN status.") {}
-						}
-					}
+		val terminals = PcscTerminalFactory.instance.load()
+		try {
+			terminals.withContext { ctx ->
+				val model = NpaPacePinModel(connectToMf(ctx))
+				// check pin status and decide which UI we need
+				val status = model.getPinStatus()
+
+				when (status) {
+					PinStatus.OK -> stage.showChangeFlow { _, old, new -> changePin(old, new) }
+					PinStatus.Suspended -> stage.showCanPinFlow { view, can, pin -> suspendRecovery(view, can, pin) }
+					PinStatus.Blocked -> stage.showPukFlow { _, puk -> unblockPin(puk) }
+					PinStatus.Unknown -> msgController.showMessage("Unable to determine PIN status.") {}
 				}
-			} catch (e: Exception) {
-				Platform.runLater { msgController.showMessage("Error: ${e.message}") {} }
 			}
+		} catch (e: Exception) {
+			msgController.showMessage("Error: ${e.message}") {}
 		}
 	}
 
@@ -60,115 +57,100 @@ class NpaPinController(
 		old: String,
 		new: String,
 	) {
-		CoroutineScope(Dispatchers.IO).launch {
-			val terminals = PcscTerminalFactory.Companion.instance.load()
+		bgTaskScope.launch {
 			try {
+				val terminals = PcscTerminalFactory.instance.load()
 				terminals.withContext { ctx ->
 					val model = NpaPacePinModel(connectToMf(ctx))
 					val success = model.changePin(old, new)
-					val retries = (model.pacePin.passwordStatus() as? SecurityCommandFailure)?.retries
 
-					Platform.runLater {
-						if (success) {
-							msgController.showMessage("PIN changed successfully.") {
-								npaViews.showChangeFlow { o, n -> changePin(o, n) }
-							}
-						} else {
-							when (retries) {
-								2 ->
-									msgController.showMessage("PIN incorrect. 2 retries left.") {
-										npaViews.showChangeFlow { o, n -> changePin(o, n) }
-									}
-
-								1 ->
-									msgController.showMessage("PIN suspended. Please enter CAN.") {
-// 										view.showCanFlow { can -> suspendRecovery(can) }
-										npaViews.showCanAndPinFlow { can, pin -> suspendRecovery(can, pin) }
-									}
-
-								0 ->
-									msgController.showMessage("PIN blocked. Please enter PUK.") {
-										npaViews.showPukFlow { puk -> unblockPin(puk) }
-									}
-
-								else -> msgController.showMessage("PIN change failed.") {}
-							}
+					if (success) {
+						msgController.showMessage("PIN changed successfully.") {
+							stage.showChangeFlow { _, old, new -> changePin(old, new) }
+						}
+					} else {
+						val status = model.getPinStatus()
+						when (status) {
+							PinStatus.OK ->
+								msgController.showMessage("PIN incorrect. 2 retries left.") {
+									stage.showChangeFlow { _, old, new -> changePin(old, new) }
+								}
+							PinStatus.Suspended ->
+								msgController.showMessage("PIN suspended. Please enter CAN.") {
+									stage.showCanPinFlow { view, can, pin -> suspendRecovery(view, can, pin) }
+								}
+							PinStatus.Blocked ->
+								msgController.showMessage("PIN blocked. Please enter PUK.") {
+									stage.showPukFlow { _, puk -> unblockPin(puk) }
+								}
+							else -> msgController.showMessage("PIN change failed.") {}
 						}
 					}
 				}
 			} catch (e: Exception) {
-				Platform.runLater { msgController.showMessage("Error: ${e.message}") {} }
+				msgController.showMessage("Error: ${e.message}") {}
 			}
 		}
 	}
 
 	private fun suspendRecovery(
+		view: CanEntryViewController,
 		can: String,
 		pin: String,
 	) {
-		CoroutineScope(Dispatchers.IO).launch {
-			val terminals = PcscTerminalFactory.Companion.instance.load()
+		bgTaskScope.launch {
 			try {
+				val terminals = PcscTerminalFactory.instance.load()
 				terminals.withContext { ctx ->
 					val model = NpaPacePinModel(connectToMf(ctx))
 
 					if (!model.enterCan(can)) {
-						Platform.runLater {
-							msgController.showMessage("Wrong CAN. Please try again.") {
-								npaViews.showCanAndPinFlow { retryCan, retryPin -> suspendRecovery(retryCan, retryPin) }
-							}
-						}
+						view.errorLabel.text = "Wrong CAN. Please try again."
 					} else {
 						val success = model.enterPin(pin)
-						val retries = (model.pacePin.passwordStatus() as? SecurityCommandFailure)?.retries
-
-						Platform.runLater {
-							if (success) {
-								msgController.showMessage("PIN recovered successfully.") {
-									npaViews.showChangeFlow { old, new -> changePin(old, new) }
-								}
-							} else if (retries == 0) {
-								msgController.showMessage("PIN blocked. Please enter PUK.") {
-									npaViews.showPukFlow { puk -> unblockPin(puk) }
-								}
-							} else {
-								msgController.showMessage("PIN recovery failed. Please try again.") {
-									npaViews.showCanAndPinFlow { retryCan, retryPin -> suspendRecovery(retryCan, retryPin) }
-								}
+						if (success) {
+							msgController.showMessage("PIN recovered successfully.") {
+								stage.showChangeFlow { _, old, new -> changePin(old, new) }
+							}
+						} else {
+							val status = model.getPinStatus()
+							when (status) {
+								PinStatus.Blocked ->
+									msgController.showMessage("PIN blocked. Please enter PUK.") {
+										stage.showPukFlow { _, puk -> unblockPin(puk) }
+									}
+								else ->
+									msgController.showMessage("PIN recovery failed. Please try again.") {
+										stage.showCanPinFlow { view, retryCan, retryPin -> suspendRecovery(view, retryCan, retryPin) }
+									}
 							}
 						}
 					}
 				}
 			} catch (e: Exception) {
-				Platform.runLater {
-					msgController.showMessage("Error: ${e.message}") {}
-				}
+				msgController.showMessage("Error: ${e.message}") {}
 			}
 		}
 	}
 
 	private fun unblockPin(puk: String) {
-		CoroutineScope(Dispatchers.IO).launch {
-			val terminals = PcscTerminalFactory.Companion.instance.load()
+		bgTaskScope.launch {
 			try {
+				val terminals = PcscTerminalFactory.instance.load()
 				terminals.withContext { ctx ->
 					val model = NpaPacePinModel(connectToMf(ctx))
 					if (model.enterPuk(puk)) {
-						Platform.runLater {
-							msgController.showMessage("PIN unblocked successfully.") {
-								npaViews.showChangeFlow { old, new -> changePin(old, new) }
-							}
+						msgController.showMessage("PIN unblocked successfully.") {
+							stage.showChangeFlow { _, old, new -> changePin(old, new) }
 						}
 					} else {
-						Platform.runLater {
-							msgController.showMessage("Wrong PUK. Please try again.") {
-								npaViews.showPukFlow { retryPuk -> unblockPin(retryPuk) }
-							}
+						msgController.showMessage("Wrong PUK. Please try again.") {
+							stage.showPukFlow { _, retryPuk -> unblockPin(retryPuk) }
 						}
 					}
 				}
 			} catch (e: Exception) {
-				Platform.runLater { msgController.showMessage("Error: ${e.message}") {} }
+				msgController.showMessage("Error: ${e.message}") {}
 			}
 		}
 	}

@@ -12,8 +12,10 @@
 		<Insets top="20" right="20" bottom="20" left="20"/>
 	</padding>
 
-	<Label text="Enter your CAN"/>
+	<Label fx:id="canLabel" text="Enter your CAN"/>
 	<PasswordField fx:id="canField" promptText="Enter CAN"/>
+	<Label fx:id="pinLabel"/>
+	<PasswordField fx:id="pinField" promptText="Enter PIN"/>
 	<Button text="Submit" onAction="#handleSubmit"/>
 	<Label fx:id="errorLabel" styleClass="error-label"/>
 </VBox>

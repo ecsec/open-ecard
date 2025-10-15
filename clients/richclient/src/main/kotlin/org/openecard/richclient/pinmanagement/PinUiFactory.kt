@@ -66,8 +66,6 @@ class PinUiFactory(
 			}
 		}.registerWith(cardWatcher, bgTaskScope)
 
-		Platform.runLater {
-			controller.show()
-		}
+		controller.show()
 	}
 }

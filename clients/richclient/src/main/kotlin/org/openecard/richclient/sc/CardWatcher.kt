@@ -32,7 +32,9 @@ class CardWatcher(
 	private val context: CoroutineScope,
 	private val recognition: CardRecognition,
 	private val factory: TerminalFactory,
-	private val pollingDelay: Duration = 1000.milliseconds,
+	private val joinTimeout: Duration = 5.seconds,
+	private val errorRetryDelay: Duration = 5.seconds,
+	private val pollingDelay: Duration = 1.seconds,
 ) {
 	private val mutex = Mutex()
 
@@ -154,10 +156,10 @@ class CardWatcher(
 							throw ex
 						} else if (ex is ReaderUnsupported) {
 							// reader events not supported on this system, just try again shortly
-							delay(1.seconds)
+							delay(pollingDelay)
 						} else {
 							logger.info(ex) { "Error while waiting for terminal change, waiting 5 seconds before trying again" }
-							delay(5.seconds)
+							delay(errorRetryDelay)
 						}
 					}
 				}
@@ -249,7 +251,7 @@ class CardWatcher(
 						// handle cancellation of our job
 						logger.warn { "${terminal.name}: ${e.message}" }
 						// wait and try again, if the terminal is removed, someone will cancel us
-						delay(1000.milliseconds)
+						delay(errorRetryDelay)
 					}
 				}
 			}
@@ -258,7 +260,7 @@ class CardWatcher(
 	private suspend fun stopWatchJob(
 		terminal: String,
 		activeJobs: MutableMap<String, Job>,
-		joinTimeout: Duration = 5000.milliseconds,
+		joinTimeout: Duration = this.joinTimeout,
 	) {
 		activeJobs.remove(terminal)?.let { job ->
 			job.cancel()
@@ -272,13 +274,13 @@ class CardWatcher(
 		}
 	}
 
-	fun stop() {
+	fun stop(joinTimeout: Duration = this.joinTimeout) {
 		runBlocking {
-			stopSuspending()
+			stopSuspending(joinTimeout)
 		}
 	}
 
-	suspend fun stopSuspending() {
+	suspend fun stopSuspending(joinTimeout: Duration = this.joinTimeout) {
 		unregisterAll()
 
 		val state = checkNotNull(this.state)
@@ -289,7 +291,7 @@ class CardWatcher(
 
 			state.job.cancel()
 			try {
-				withTimeout(5000.milliseconds) {
+				withTimeout(joinTimeout) {
 					state.job.join()
 				}
 			} catch (e: TimeoutCancellationException) {

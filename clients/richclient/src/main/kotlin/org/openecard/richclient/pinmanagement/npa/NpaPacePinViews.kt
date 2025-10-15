@@ -1,14 +1,14 @@
 package org.openecard.richclient.pinmanagement.npa
 
-import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
+import org.openecard.richclient.gui.JfxUtils
 import org.openecard.richclient.pinmanagement.PinManagementStage
 
 class NpaPacePinViews(
 	private val stage: PinManagementStage,
 ) {
 	fun showChangeFlow(onSubmit: (String, String) -> Unit) {
-		val (view, controller) = loadFXML<Parent, PinChangeViewController>("PinChangeView.fxml")
+		val (view, controller) = JfxUtils.loadFxml<Parent, PinChangeViewController>("PinChange.fxml")
 		controller.onSubmit = { old, new, repeat, errorLabel ->
 			when {
 				old.isBlank() || new.isBlank() || repeat.isBlank() ->
@@ -23,11 +23,11 @@ class NpaPacePinViews(
 				else -> onSubmit(old, new)
 			}
 		}
-		stage.show(view)
+		stage.replaceView(view)
 	}
 
 	fun showCanFlow(onSubmit: (String) -> Unit) {
-		val (view, controller) = loadFXML<Parent, CanEntryViewController>("CanEntryView.fxml")
+		val (view, controller) = JfxUtils.loadFxml<Parent, CanEntryViewController>("CanEntry.fxml")
 		controller.onSubmit = { can, errorLabel ->
 			when {
 				can.isBlank() -> errorLabel.text = "CAN cannot be empty."
@@ -35,11 +35,11 @@ class NpaPacePinViews(
 				else -> onSubmit(can)
 			}
 		}
-		stage.show(view)
+		stage.replaceView(view)
 	}
 
 	fun showPinRecoveryFlow(onSubmit: (String) -> Unit) {
-		val (view, controller) = loadFXML<Parent, PinEntryViewController>("PinEntryView.fxml")
+		val (view, controller) = JfxUtils.loadFxml<Parent, PinEntryViewController>("PinEntry.fxml")
 		controller.setTitle("Enter your PIN - last attempt.")
 		controller.onSubmit = { pin, errorLabel ->
 			when {
@@ -48,17 +48,17 @@ class NpaPacePinViews(
 				else -> onSubmit(pin)
 			}
 		}
-		stage.show(view)
+		stage.replaceView(view)
 	}
 
 	fun showCanAndPinFlow(onSubmit: (String, String) -> Unit) {
-		val (canView, canController) = loadFXML<Parent, CanEntryViewController>("CanEntryView.fxml")
+		val (canView, canController) = JfxUtils.loadFxml<Parent, CanEntryViewController>("CanEntry.fxml")
 		canController.onSubmit = { can, canError ->
 			when {
 				can.isBlank() -> canError.text = "CAN cannot be empty."
 				can.length !in 5..6 -> canError.text = "CAN must be 5 or 6 digits."
 				else -> {
-					val (pinView, pinController) = loadFXML<Parent, PinEntryViewController>("PinEntryView.fxml")
+					val (pinView, pinController) = JfxUtils.loadFxml<Parent, PinEntryViewController>("PinEntry.fxml")
 					pinController.setTitle("Enter your PIN - last attempt.")
 					pinController.onSubmit = { pin, pinError ->
 						when {
@@ -67,15 +67,15 @@ class NpaPacePinViews(
 							else -> onSubmit(can, pin)
 						}
 					}
-					stage.show(pinView)
+					stage.replaceView(pinView)
 				}
 			}
 		}
-		stage.show(canView)
+		stage.replaceView(canView)
 	}
 
 	fun showPukFlow(onSubmit: (String) -> Unit) {
-		val (view, controller) = loadFXML<Parent, PukEntryViewController>("PukEntryView.fxml")
+		val (view, controller) = JfxUtils.loadFxml<Parent, PukEntryViewController>("PukEntry.fxml")
 		controller.onSubmit = { puk, errorLabel ->
 			when {
 				puk.isBlank() -> errorLabel.text = "PUK cannot be empty."
@@ -83,13 +83,6 @@ class NpaPacePinViews(
 				else -> onSubmit(puk)
 			}
 		}
-		stage.show(view)
-	}
-
-	private fun <V : Parent, C> loadFXML(fileName: String): Pair<V, C> {
-		val loader = FXMLLoader(javaClass.getResource("/fxml/$fileName"))
-		val view = loader.load<V>()
-		val controller = loader.getController<C>()
-		return view to controller
+		stage.replaceView(view)
 	}
 }

@@ -27,7 +27,7 @@ class NpaPinController(
 	private val bgTaskScope: CoroutineScope,
 ) : PinManagementUI {
 	private val npaViews = NpaPacePinViews(stage)
-	private val msgController = MessageController(stage.rootPane, bgTaskScope)
+	private val msgController = MessageController(stage, bgTaskScope)
 
 	override fun show() {
 		CoroutineScope(Dispatchers.IO).launch {

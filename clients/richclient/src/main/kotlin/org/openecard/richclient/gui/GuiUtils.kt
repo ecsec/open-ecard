@@ -67,8 +67,6 @@ object GuiUtils {
 		return img
 	}
 
-	fun BufferedImage.toFXImage(): javafx.scene.image.Image = SwingFXUtils.toFXImage(this, null)
-
 	private fun getImageData(name: String): ByteArray {
 		var imageUrl = GuiUtils::class.java.getResource("images/$name")
 		if (imageUrl == null) {

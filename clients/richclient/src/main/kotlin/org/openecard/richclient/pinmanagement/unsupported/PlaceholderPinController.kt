@@ -11,7 +11,7 @@ class PlaceholderPinController(
 	private val stage: PinManagementStage,
 	private val bgTaskScope: CoroutineScope,
 ) : PinManagementUI {
-	private val msgController by lazy { MessageController(stage.rootPane, bgTaskScope) }
+	private val msgController by lazy { MessageController(stage, bgTaskScope) }
 
 	override fun show() {
 		msgController.showMessage(

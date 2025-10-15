@@ -3,12 +3,10 @@ package org.openecard.richclient.pinmanagement.selection
 import javafx.application.Platform
 import javafx.collections.ObservableList
 import javafx.fxml.FXML
-import javafx.fxml.FXMLLoader
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.Node
-import javafx.scene.Scene
 import javafx.scene.control.Label
 import javafx.scene.control.ListCell
 import javafx.scene.control.ListView
@@ -16,18 +14,9 @@ import javafx.scene.image.ImageView
 import javafx.scene.layout.HBox
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
-import javafx.stage.Modality
-import javafx.stage.Stage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.javafx.JavaFx
-import kotlinx.coroutines.launch
-import org.openecard.richclient.gui.GuiUtils.toFXImage
+import org.openecard.richclient.gui.JfxUtils.toJfxImage
 import org.openecard.richclient.pinmanagement.TerminalInfo
-import org.openecard.richclient.pinmanagement.common.ErrorMessageViewController
 import org.openecard.richclient.sc.CifDb
-import kotlin.time.Duration.Companion.seconds
 
 class CardSelectionViewController {
 	@FXML
@@ -86,7 +75,7 @@ class CardSelectionViewController {
 		val image =
 			CifDb.Companion.Bundled
 				.getCardImage(item.cardType)
-				.toFXImage()
+				.toJfxImage()
 		val imageView =
 			ImageView(image).apply {
 				fitWidth = 80.0
@@ -105,33 +94,6 @@ class CardSelectionViewController {
 			alignment = Pos.CENTER_LEFT
 			padding = Insets(10.0)
 			styleClass.add("card-box")
-		}
-	}
-
-	fun showErrorDialog(
-		message: String,
-		bgTaskScope: CoroutineScope,
-		after: () -> Unit,
-	) {
-		val loader = FXMLLoader(javaClass.getResource("/fxml/ErrorMessage.fxml"))
-		val view = loader.load<VBox>()
-		val controller = loader.getController<ErrorMessageViewController>()
-		controller.setMessage(message)
-
-		val errorStage =
-			Stage().apply {
-				title = "Error"
-				scene = Scene(view)
-				sizeToScene()
-				initModality(Modality.WINDOW_MODAL)
-			}
-
-		errorStage.show()
-
-		bgTaskScope.launch(Dispatchers.JavaFx) {
-			delay(3.seconds)
-			errorStage.close()
-			after()
 		}
 	}
 }

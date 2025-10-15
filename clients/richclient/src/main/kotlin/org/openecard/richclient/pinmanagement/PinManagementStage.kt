@@ -6,24 +6,38 @@ import javafx.scene.Scene
 import javafx.scene.layout.StackPane
 import javafx.stage.Stage
 import kotlinx.coroutines.CoroutineScope
+import org.openecard.i18n.I18N
 
 class PinManagementStage(
 	val stage: Stage,
-	val bgTaskScope: CoroutineScope,
 ) {
-	val rootPane = StackPane()
-
 	init {
 		Platform.runLater {
-			stage.scene = Scene(rootPane, 400.0, 350.0)
-			stage.title = "PIN Management"
-			stage.show()
+			stage.title = defaultTitle()
 		}
 	}
 
-	fun show(view: Parent) {
+	fun showScene(scene: Scene) {
 		Platform.runLater {
-			rootPane.children.setAll(view)
+			stage.scene = scene
+			if (!stage.isShowing) {
+				stage.show()
+			}
 		}
+	}
+
+	fun replaceView(root: Parent) {
+		Platform.runLater {
+			stage.scene.root = root
+		}
+	}
+
+	companion object {
+		const val DEFAULT_WIDTH: Double = 450.0
+		const val DEFAULT_HEIGHT: Double = 350.0
+
+		fun defaultTitle(): String = I18N.strings.pinplugin_name.localized()
+
+		fun makeScene(root: Parent): Scene = Scene(root, DEFAULT_WIDTH, DEFAULT_HEIGHT)
 	}
 }

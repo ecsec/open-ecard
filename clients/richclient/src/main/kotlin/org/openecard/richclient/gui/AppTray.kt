@@ -156,21 +156,20 @@ class AppTray(
 				MenuItem(
 					I18N.strings.pinplugin_name.localized(),
 				) {
-					Platform.runLater {
-						when (val pm = pinManager) {
-							null -> {
-								val stage = Stage()
+					when (val pm = pinManager) {
+						null -> {
+							Platform.runLater {
 								pinManager =
-									PinManager(stage, cardWatcher).also { pm ->
-										stage.addEventHandler(javafx.stage.WindowEvent.WINDOW_CLOSE_REQUEST) {
+									PinManager.create(cardWatcher).also { pm ->
+										pm.addOnCloseHandler {
 											pinManager = null
 										}
 										pm.openManagerDialog()
 									}
 							}
-							else -> {
-								pm.toFront()
-							}
+						}
+						else -> {
+							pm.toFront()
 						}
 					}
 				},

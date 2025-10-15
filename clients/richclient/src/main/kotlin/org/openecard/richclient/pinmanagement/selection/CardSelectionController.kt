@@ -1,44 +1,49 @@
 package org.openecard.richclient.pinmanagement.selection
 
-import javafx.application.Platform
-import javafx.scene.Scene
-import javafx.scene.layout.StackPane
+import javafx.scene.Parent
 import kotlinx.coroutines.CoroutineScope
-import org.openecard.i18n.I18N
+import org.openecard.richclient.gui.JfxUtils
+import org.openecard.richclient.pinmanagement.PinManagementStage
 import org.openecard.richclient.pinmanagement.PinUiFactory
+import org.openecard.richclient.pinmanagement.common.MessageController
 
 class CardSelectionController(
 	private val model: CardSelectionModel,
-	private val view: CardSelectionViewController,
 	private val uiFactory: PinUiFactory,
-	private val root: StackPane,
-	private val bgTaskScope: CoroutineScope,
+	private val stage: PinManagementStage,
+	bgTaskScope: CoroutineScope,
 ) {
+	private val msgCtl = MessageController(stage, bgTaskScope)
+	private val view: Parent
+	private val viewCtl: CardSelectionViewController
+
+	init {
+		val (view, viewCtl) = JfxUtils.loadFxml<Parent, CardSelectionViewController>("CardSelection.fxml")
+		this.view = view
+		this.viewCtl = viewCtl
+	}
+
 	fun start() {
 		model.registerWatcher(
-			onUpdate = { view.updateTerminals(model.terminals) },
+			onUpdate = { viewCtl.updateTerminals(model.terminals) },
 			onError = { message ->
-				view.showErrorDialog(message, bgTaskScope) {
-					root.children.setAll(view.cardListLayout)
+				msgCtl.showErrorDialog(message) {
+					stage.replaceView(view)
 				}
 			},
 		)
 
-		view.setup(model.terminals) { selected ->
+		viewCtl.setup(model.terminals) { selected ->
 			uiFactory.openPinUiForType(
 				terminal = selected,
 				onError = { error ->
-					view.showErrorDialog("Error: ${error.message}", bgTaskScope) {
-						root.children.setAll(view.cardListLayout)
+					msgCtl.showErrorDialog("Error: ${error.message}") {
+						stage.replaceView(view)
 					}
 				},
 			)
 		}
 
-		Platform.runLater {
-			uiFactory.dialogStage.scene = Scene(root, 400.0, 350.0)
-			uiFactory.dialogStage.title = I18N.strings.pinplugin_name.localized()
-			uiFactory.dialogStage.show()
-		}
+		stage.showScene(PinManagementStage.makeScene(view))
 	}
 }

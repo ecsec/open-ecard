@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<string name="pinmanage_select_card">Select a card by clicking on it</string>
+
+	<string name="pinmanage_npa_pin_suspend_title">Resume PIN</string>
+	<string name="pinmanage_npa_pin_suspend_description">
+		Your PIN is suspended because you have entered the PIN two times wrong.
+		To reset the PIN status, you need to enter the card access number (CAN) and the current PIN.
+		You will find the CAN right on the front of your ID card.\n
+		Note that if the provided PIN is not correct, the card will be blocked an needs to be unblocked with the PUK.
+	</string>
+	<string name="pinmanage_npa_pin_suspend_can_field_initial">Enter CAN</string>
+	<string name="pinmanage_npa_pin_suspend_pin_field_initial">Enter PIN</string>
+</resources>

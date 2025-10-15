@@ -10,13 +10,10 @@ import org.openecard.richclient.pinmanagement.PinManagementStage
 
 class CanEntryViewController {
 	@FXML
-	lateinit var canLabel: Label
+	lateinit var infoLabel: Label
 
 	@FXML
 	lateinit var canField: PasswordField
-
-	@FXML
-	lateinit var pinLabel: Label
 
 	@FXML
 	lateinit var pinField: PasswordField
@@ -70,7 +67,6 @@ class CanEntryViewController {
 		fun PinManagementStage.showCanPinFlow(onSubmit: CanPinEntryCallback<CanEntryViewController>): CanEntryViewController {
 			val (view, controller) = JfxUtils.loadFxml<Parent, CanEntryViewController>("CanPinEntry.fxml")
 			controller.onSubmit = onSubmit
-			controller.pinLabel.text = "Enter your PIN - last attempt."
 			replaceView(view)
 			return controller
 		}

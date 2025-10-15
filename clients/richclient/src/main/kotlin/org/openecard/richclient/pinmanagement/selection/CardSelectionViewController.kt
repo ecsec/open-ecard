@@ -47,6 +47,8 @@ class CardSelectionViewController {
 						graphic = createCardGraphic(item)
 						cursor = Cursor.HAND
 						style = "-fx-background-color: transparent;"
+
+						// register events
 						setOnMouseEntered {
 							style = "-fx-background-color: #e0e0e0;"
 						}

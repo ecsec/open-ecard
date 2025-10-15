@@ -36,40 +36,31 @@ class PinUiFactory(
 		return CardSelectionController(model, this, pmStage, bgTaskScope)
 	}
 
-	fun openPinUiForType(
-		terminal: TerminalInfo,
-		onError: (Throwable) -> Unit,
-	) {
-		try {
-			val controller: PinManagementUI =
-				when (terminal.cardType) {
-					NpaDefinitions.cardType -> NpaPinController(terminal, pmStage, bgTaskScope)
-					else -> PlaceholderPinController(terminal, pmStage, bgTaskScope)
-				}
+	fun openPinUiForType(terminal: TerminalInfo) {
+		val controller: PinManagementUI =
+			when (terminal.cardType) {
+				NpaDefinitions.cardType -> NpaPinController(terminal, pmStage, bgTaskScope)
+				else -> PlaceholderPinController(terminal, pmStage, bgTaskScope)
+			}
 
-			// watch card for removal event
-			// run callback in task scope, so it gets removed when we are finished
-			object : CardWatcherCallback.CardWatcherCallbackDefault() {
-				override fun onCardRemoved(terminalName: String) {
-					if (terminal.terminalName == terminalName) {
-						Platform.runLater {
-							val msgController = MessageController(pmStage, bgTaskScope)
-							msgController.showMessage("The selected card or card terminal has been removed.") {
-								val controller = createSelectionUi()
-								controller.start()
-							}
+		// watch card for removal event
+		// run callback in task scope, so it gets removed when we are finished
+		object : CardWatcherCallback.CardWatcherCallbackDefault() {
+			override fun onCardRemoved(terminalName: String) {
+				if (terminal.terminalName == terminalName) {
+					Platform.runLater {
+						val msgController = MessageController(pmStage, bgTaskScope)
+						msgController.showMessage("The selected card or card terminal has been removed.") {
+							val controller = createSelectionUi()
+							controller.start()
 						}
 					}
 				}
-			}.registerWith(cardWatcher, bgTaskScope)
+			}
+		}.registerWith(cardWatcher, bgTaskScope)
 
-			Platform.runLater {
-				controller.show()
-			}
-		} catch (e: Exception) {
-			Platform.runLater {
-				onError(e)
-			}
+		Platform.runLater {
+			controller.show()
 		}
 	}
 }

@@ -5,7 +5,6 @@ import kotlinx.coroutines.CoroutineScope
 import org.openecard.richclient.gui.JfxUtils
 import org.openecard.richclient.pinmanagement.PinManagementStage
 import org.openecard.richclient.pinmanagement.PinUiFactory
-import org.openecard.richclient.pinmanagement.common.MessageController
 
 class CardSelectionController(
 	private val model: CardSelectionModel,
@@ -13,7 +12,6 @@ class CardSelectionController(
 	private val stage: PinManagementStage,
 	bgTaskScope: CoroutineScope,
 ) {
-	private val msgCtl = MessageController(stage, bgTaskScope)
 	private val view: Parent
 	private val viewCtl: CardSelectionViewController
 
@@ -26,22 +24,11 @@ class CardSelectionController(
 	fun start() {
 		model.registerWatcher(
 			onUpdate = { viewCtl.updateTerminals(model.terminals) },
-			onError = { message ->
-				msgCtl.showErrorDialog(message) {
-					stage.replaceView(view)
-				}
-			},
 		)
 
 		viewCtl.setup(model.terminals) { selected ->
-			uiFactory.openPinUiForType(
-				terminal = selected,
-				onError = { error ->
-					msgCtl.showErrorDialog("Error: ${error.message}") {
-						stage.replaceView(view)
-					}
-				},
-			)
+			model.stopWatcher()
+			uiFactory.openPinUiForType(terminal = selected)
 		}
 
 		stage.showScene(PinManagementStage.makeScene(view))

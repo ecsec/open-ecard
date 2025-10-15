@@ -33,8 +33,8 @@ class PinManagementStage(
 	}
 
 	companion object {
-		const val DEFAULT_WIDTH: Double = 450.0
-		const val DEFAULT_HEIGHT: Double = 350.0
+		const val DEFAULT_WIDTH: Double = 420.0
+		const val DEFAULT_HEIGHT: Double = 300.0
 
 		fun defaultTitle(): String = I18N.strings.pinplugin_name.localized()
 

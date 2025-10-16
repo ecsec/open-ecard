@@ -42,6 +42,7 @@ apache-batik="1.19"
 proxy-vole = "1.1.7"
 pdfbox = "3.0.5"
 jfx = "24.0.2"
+jna = "5.18.1"
 systray = "4.5"
 logback = "1.5.+"
 
@@ -153,6 +154,10 @@ jwtkt-ecdsa = { module = "com.appstractive:jwt-ecdsa-kt", version.ref = "jwtkt" 
 jwtkt-jwks = { module = "com.appstractive:jwt-jwks-kt", version.ref = "jwtkt" }
 
 systray = { group = "com.dorkbox", name = "SystemTray", version.ref = "systray" }
+jna-core = { module = "net.java.dev.jna:jna", version.ref = "jna" }
+jna-jpms = { module = "net.java.dev.jna:jna-jpms", version.ref = "jna" }
+jna-core-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
+jna-jpms-platform = { module = "net.java.dev.jna:jna-platform-jpms", version.ref = "jna" }
 
 semver = { module = "io.github.z4kn4fein:semver", version.ref = "semver" }
 

@@ -58,6 +58,9 @@ dependencies {
 	implementation(libs.apache.batik)
 	implementation(libs.systray)
 
+	implementation(libs.jna.jpms)
+	implementation(libs.jna.jpms.platform)
+
 	implementation(project(":releases"))
 	implementation(project(":build-info"))
 

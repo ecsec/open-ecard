@@ -5,8 +5,8 @@ import javafx.application.Platform
 import javafx.stage.Stage
 import kotlinx.coroutines.CoroutineScope
 import org.openecard.cif.bundled.NpaDefinitions
-import org.openecard.i18n.I18N
 import org.openecard.richclient.MR
+import org.openecard.richclient.gui.JfxUtils
 import org.openecard.richclient.gui.JfxUtils.toJfxImage
 import org.openecard.richclient.pinmanagement.common.MessageController
 import org.openecard.richclient.pinmanagement.npa.NpaPinController
@@ -28,6 +28,8 @@ class PinUiFactory(
 	private val pmStage = PinManagementStage(stage)
 
 	private var activeController: PinManagementUI? = null
+
+	private val resources = JfxUtils.richclientResourceBundle
 
 	init {
 		stage.icons.add(
@@ -58,7 +60,9 @@ class PinUiFactory(
 				NpaDefinitions.cardType -> NpaPinController(terminal, pmStage, bgTaskScope)
 				else -> {
 					// make sure the dialog is closed and cleanup runs
-					MessageController(pmStage, bgTaskScope).showErrorDialog(I18N.strings.pinplugin_action_error_unknown.localized()) {
+					MessageController(pmStage, bgTaskScope).showErrorDialog(
+						resources.getString("pinplugin_action_error_unknown"),
+					) {
 						pmStage.stage.close()
 					}
 					// then signal an error that the application is fucked
@@ -74,7 +78,9 @@ class PinUiFactory(
 					closeActiveController()
 					Platform.runLater {
 						val msgController = MessageController(pmStage, bgTaskScope)
-						msgController.showMessage("The selected card or card terminal has been removed.") {
+						msgController.showMessage(
+							resources.getString("pinmanage_message_card_removed"),
+						) {
 							openSelectionUi()
 						}
 					}

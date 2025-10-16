@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
-	<string name="pinmanage_select_card">Select a card by clicking on it</string>
+	<string name="pinmanage_select_card">Select a card</string>
 
+	<!-- Resume PIN -->
 	<string name="pinmanage_npa_pin_suspend_title">Resume PIN</string>
 	<string name="pinmanage_npa_pin_suspend_description">
 		Your PIN is suspended because you have entered the PIN two times wrong.
@@ -11,4 +12,43 @@
 	</string>
 	<string name="pinmanage_npa_pin_suspend_can_field_initial">Enter CAN</string>
 	<string name="pinmanage_npa_pin_suspend_pin_field_initial">Enter PIN</string>
+	<string name="pinmanage_npa_pin_suspend_error_empty_can">Please enter the CAN.</string>
+	<string name="pinmanage_npa_pin_suspend_error_invalid_can">The CAN must be 5 or 6 digits long.</string>
+	<string name="pinmanage_npa_pin_suspend_error_empty_pin">Please enter your PIN.</string>
+	<string name="pinmanage_npa_pin_suspend_error_invalid_pin">The PIN must be 5 or 6 digits long.</string>
+
+	<!-- Change PIN -->
+	<string name="pinmanage_npa_pin_change_title">Change PIN</string>
+	<string name="pinmanage_npa_pin_change_description">You can change your PIN here.</string>
+	<string name="pinmanage_npa_pin_change_old_field_initial">Current PIN</string>
+	<string name="pinmanage_npa_pin_change_new_field_initial">New PIN</string>
+	<string name="pinmanage_npa_pin_change_repeat_field_initial">Repeat new PIN</string>
+	<string name="pinmanage_npa_pin_change_error_empty_fields">All fields must be filled in.</string>
+	<string name="pinmanage_npa_pin_change_error_invalid_length">Each PIN must be 5 or 6 digits long.</string>
+	<string name="pinmanage_npa_pin_change_error_mismatch">The new PIN entries do not match.</string>
+
+	<!-- Unblock PIN -->
+	<string name="pinmanage_npa_pin_unblock_title">Unblock PIN</string>
+	<string name="pinmanage_npa_pin_unblock_description">Your PIN is blocked and must be unblocked using your personal unblocking key (PUK).</string>
+	<string name="pinmanage_npa_pin_unblock_puk_field_initial">PUK</string>
+	<string name="pinmanage_npa_pin_unblock_error_empty_puk">Please enter the PUK.</string>
+	<string name="pinmanage_npa_pin_unblock_error_invalid_puk">The PUK must be exactly 10 digits long.</string>
+
+	<!-- Common -->
+	<string name="pinmanage_common_submit_button">Confirm</string>
+	<string name="pinmanage_common_error_title">Error</string>
+	<string name="pinmanage_common_success_title">Success</string>
+
+	<string name="pinmanage_message_unknown_status">Unable to determine PIN status.</string>
+	<string name="pinmanage_message_pin_changed">PIN changed successfully.</string>
+	<string name="pinmanage_message_pin_incorrect">PIN incorrect. 2 retries left.</string>
+	<string name="pinmanage_message_pin_suspended">PIN suspended. Please enter CAN.</string>
+	<string name="pinmanage_message_pin_blocked">PIN blocked. Please enter PUK.</string>
+	<string name="pinmanage_message_pin_change_failed">PIN change failed.</string>
+	<string name="pinmanage_message_wrong_can">Wrong CAN. Please try again.</string>
+	<string name="pinmanage_message_pin_recovered">PIN recovered successfully.</string>
+	<string name="pinmanage_message_pin_recovery_failed">PIN recovery failed. Please try again.</string>
+	<string name="pinmanage_message_pin_unblocked">PIN unblocked successfully.</string>
+	<string name="pinmanage_message_wrong_puk">Wrong PUK. Please try again.</string>
+	<string name="pinmanage_message_card_removed">Card or card terminal has been removed.</string>
 </resources>

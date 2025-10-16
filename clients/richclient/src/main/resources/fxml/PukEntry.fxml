@@ -7,13 +7,13 @@
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.openecard.richclient.pinmanagement.npa.PukEntryViewController"
-	  alignment="CENTER" spacing="10">
+	  alignment="CENTER" spacing="10" stylesheets="@../styles.css">
 	<padding>
 		<Insets top="20" right="20" bottom="20" left="20"/>
 	</padding>
-
-	<Label text="Enter your PUK"/>
-	<PasswordField fx:id="pukField" promptText="Enter PUK"/>
-	<Button text="Submit" onAction="#handleSubmit"/>
+	<Label styleClass="title" text="%pinmanage_npa_pin_unblock_title"/>
+	<Label text="%pinmanage_npa_pin_unblock_description" wrapText="true"/>
+	<PasswordField fx:id="pukField" promptText="%pinmanage_npa_pin_unblock_puk_field_initial"/>
+	<Button text="%pinmanage_common_submit_button" onAction="#handleSubmit"/>
 	<Label fx:id="errorLabel" styleClass="error-label"/>
 </VBox>

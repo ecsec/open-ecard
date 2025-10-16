@@ -4,6 +4,7 @@ import javafx.fxml.FXML
 import javafx.scene.Parent
 import javafx.scene.control.Label
 import javafx.scene.control.PasswordField
+import org.openecard.richclient.MokoResourceBundle
 import org.openecard.richclient.gui.JfxUtils
 import org.openecard.richclient.pinmanagement.PinChangeCallback
 import org.openecard.richclient.pinmanagement.PinManagementStage
@@ -21,6 +22,9 @@ class PinChangeViewController {
 	@FXML
 	private lateinit var errorLabel: Label
 
+	@FXML
+	private lateinit var resources: MokoResourceBundle
+
 	var onSubmit: PinChangeCallback<PinChangeViewController>? = null
 
 	@FXML
@@ -34,21 +38,20 @@ class PinChangeViewController {
 		val old = oldPinField.text
 		val new = newPinField.text
 		val repeat = repeatPinField.text
+
 		return when {
 			old.isBlank() || new.isBlank() || repeat.isBlank() -> {
-				errorLabel.text = "PIN fields cannot be empty."
+				errorLabel.text = resources.getString("pinmanage_npa_pin_change_error_empty_fields")
 				false
 			}
 			old.length !in 5..6 || new.length !in 5..6 || repeat.length !in 5..6 -> {
-				errorLabel.text = "Each PIN must be 5 or 6 digits."
+				errorLabel.text = resources.getString("pinmanage_npa_pin_change_error_invalid_length")
 				false
 			}
-
 			new != repeat -> {
-				errorLabel.text = "New PINs do not match."
+				errorLabel.text = resources.getString("pinmanage_npa_pin_change_error_mismatch")
 				false
 			}
-
 			else -> true
 		}
 	}

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<string name="pinmanage_select_card">Sélectionnez une carte</string>
+
+	<!-- Resume PIN -->
+	<string name="pinmanage_npa_pin_suspend_title">Restaurer le PIN</string>
+	<string name="pinmanage_npa_pin_suspend_description">
+		Votre code PIN est suspendu car vous l’avez saisi deux fois de manière incorrecte.
+		Pour réinitialiser le statut du PIN, vous devez entrer le numéro d’accès à la carte (CAN) ainsi que le PIN actuel.
+		Vous trouverez le CAN sur le devant de votre carte d’identité.\n
+		Veuillez noter que si le PIN fourni est incorrect, la carte sera bloquée et devra être débloquée avec le code PUK.
+	</string>
+	<string name="pinmanage_npa_pin_suspend_can_field_initial">Saisir le CAN</string>
+	<string name="pinmanage_npa_pin_suspend_pin_field_initial">Saisir le PIN</string>
+	<string name="pinmanage_npa_pin_suspend_error_empty_can">Veuillez saisir le CAN.</string>
+	<string name="pinmanage_npa_pin_suspend_error_invalid_can">Le CAN doit comporter 5 ou 6 chiffres.</string>
+	<string name="pinmanage_npa_pin_suspend_error_empty_pin">Veuillez saisir votre PIN.</string>
+	<string name="pinmanage_npa_pin_suspend_error_invalid_pin">Le PIN doit comporter 5 ou 6 chiffres.</string>
+
+	<!-- Change PIN -->
+	<string name="pinmanage_npa_pin_change_title">Changer le PIN</string>
+	<string name="pinmanage_npa_pin_change_description">Vous pouvez changer votre PIN ici.</string>
+	<string name="pinmanage_npa_pin_change_old_field_initial">PIN actuel</string>
+	<string name="pinmanage_npa_pin_change_new_field_initial">Nouveau PIN</string>
+	<string name="pinmanage_npa_pin_change_repeat_field_initial">Répéter le nouveau PIN</string>
+	<string name="pinmanage_npa_pin_change_error_empty_fields">Tous les champs doivent être remplis.</string>
+	<string name="pinmanage_npa_pin_change_error_invalid_length">Chaque PIN doit comporter 5 ou 6 chiffres.</string>
+	<string name="pinmanage_npa_pin_change_error_mismatch">Les saisies du nouveau PIN ne correspondent pas.</string>
+
+	<!-- Unblock PIN -->
+	<string name="pinmanage_npa_pin_unblock_title">Débloquer le PIN</string>
+	<string name="pinmanage_npa_pin_unblock_description">Votre PIN est bloqué et doit être débloqué avec votre clé de déblocage personnelle (PUK).</string>
+	<string name="pinmanage_npa_pin_unblock_puk_field_initial">PUK</string>
+	<string name="pinmanage_npa_pin_unblock_error_empty_puk">Veuillez saisir le PUK.</string>
+	<string name="pinmanage_npa_pin_unblock_error_invalid_puk">Le PUK doit comporter exactement 10 chiffres.</string>
+
+	<!-- Common -->
+	<string name="pinmanage_common_submit_button">Confirmer</string>
+	<string name="pinmanage_common_error_title">Erreur</string>
+	<string name="pinmanage_common_success_title">Succès</string>
+
+	<string name="pinmanage_message_unknown_status">Impossible de déterminer le statut du PIN.</string>
+	<string name="pinmanage_message_pin_changed">PIN changé avec succès.</string>
+	<string name="pinmanage_message_pin_incorrect">PIN incorrect. Il reste 2 tentatives.</string>
+	<string name="pinmanage_message_pin_suspended">PIN suspendu. Veuillez saisir le CAN.</string>
+	<string name="pinmanage_message_pin_blocked">PIN bloqué. Veuillez saisir le PUK.</string>
+	<string name="pinmanage_message_pin_change_failed">Échec du changement de PIN.</string>
+	<string name="pinmanage_message_wrong_can">CAN incorrect. Veuillez réessayer.</string>
+	<string name="pinmanage_message_pin_recovered">PIN restauré avec succès.</string>
+	<string name="pinmanage_message_pin_recovery_failed">Échec de la restauration du PIN. Veuillez réessayer.</string>
+	<string name="pinmanage_message_pin_unblocked">PIN débloqué avec succès.</string>
+	<string name="pinmanage_message_wrong_puk">PUK incorrect. Veuillez réessayer.</string>
+	<string name="pinmanage_message_card_removed">Carte ou terminal de carte retiré.</string>
+</resources>

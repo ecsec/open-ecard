@@ -11,10 +11,11 @@
 	<padding>
 		<Insets top="20" right="20" bottom="20" left="20"/>
 	</padding>
-	<Label text="Change your PIN"/>
-	<PasswordField fx:id="oldPinField" promptText="Old PIN"/>
-	<PasswordField fx:id="newPinField" promptText="New PIN"/>
-	<PasswordField fx:id="repeatPinField" promptText="Repeat New PIN"/>
-	<Button text="Submit" onAction="#handleSubmit"/>
+	<Label styleClass="title" text="%pinmanage_npa_pin_change_title"/>
+	<Label text="%pinmanage_npa_pin_change_description" wrapText="true"/>
+	<PasswordField fx:id="oldPinField" promptText="%pinmanage_npa_pin_change_old_field_initial"/>
+	<PasswordField fx:id="newPinField" promptText="%pinmanage_npa_pin_change_new_field_initial"/>
+	<PasswordField fx:id="repeatPinField" promptText="%pinmanage_npa_pin_change_repeat_field_initial"/>
+	<Button text="%pinmanage_common_submit_button" onAction="#handleSubmit"/>
 	<Label fx:id="errorLabel" styleClass="error-label"/>
 </VBox>

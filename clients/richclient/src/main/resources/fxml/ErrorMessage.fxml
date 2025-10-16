@@ -4,7 +4,10 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openecard.richclient.pinmanagement.common.ErrorMessageViewController">
-	<padding><Insets bottom="20" left="20" right="20" top="20" /></padding>
-	<Label fx:id="messageLabel" alignment="CENTER" maxWidth="400" style="-fx-font-size: 14px;" wrapText="true" />
+<VBox alignment="CENTER" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
+	  fx:controller="org.openecard.richclient.pinmanagement.common.ErrorMessageViewController">
+	<padding>
+		<Insets bottom="20" left="20" right="20" top="20"/>
+	</padding>
+	<Label fx:id="messageLabel" alignment="CENTER" maxWidth="400" style="-fx-font-size: 14px;" wrapText="true"/>
 </VBox>

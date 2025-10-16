@@ -5,10 +5,12 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="TOP_CENTER" spacing="10" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openecard.richclient.pinmanagement.selection.CardSelectionViewController">
-	<Label styleClass="card-list-title" text="%pinmanage_select_card" />
-	<ListView fx:id="cardListView" VBox.vgrow="ALWAYS" />
-   <padding>
-      <Insets top="10.0" />
-   </padding>
+<VBox alignment="TOP_CENTER" spacing="10" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1"
+	  fx:controller="org.openecard.richclient.pinmanagement.selection.CardSelectionViewController"
+	  stylesheets="@../styles.css">
+	<Label styleClass="title" text="%pinmanage_select_card"/>
+	<ListView fx:id="cardListView" VBox.vgrow="ALWAYS"/>
+	<padding>
+		<Insets top="10.0"/>
+	</padding>
 </VBox>

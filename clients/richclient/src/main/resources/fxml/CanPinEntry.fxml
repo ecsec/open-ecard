@@ -6,15 +6,17 @@
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" spacing="10" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openecard.richclient.pinmanagement.npa.CanEntryViewController">
+<?import javafx.scene.text.TextFlow?>
+<VBox alignment="CENTER" spacing="10" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1"
+	  fx:controller="org.openecard.richclient.pinmanagement.npa.CanEntryViewController" stylesheets="@../styles.css">
 	<padding>
-		<Insets bottom="20" left="20" right="20" top="20" />
+		<Insets bottom="20" left="20" right="20" top="20"/>
 	</padding>
 
-	<Label text="%pinmanage_npa_pin_suspend_title" />
-	<Label fx:id="infoLabel" text="%pinmanage_npa_pin_suspend_description" />
-	<PasswordField fx:id="canField" promptText="%pinmanage_npa_pin_suspend_can_field_initial" />
-	<PasswordField fx:id="pinField" promptText="%pinmanage_npa_pin_suspend_pin_field_initial" />
-	<Button onAction="#handleSubmit" text="Submit" />
-	<Label fx:id="errorLabel" styleClass="error-label" />
+	<Label styleClass="title" text="%pinmanage_npa_pin_suspend_title"/>
+	<TextFlow fx:id="infoTextFlow" maxWidth="400" textAlignment="JUSTIFY" />
+	<PasswordField fx:id="canField" promptText="%pinmanage_npa_pin_suspend_can_field_initial"/>
+	<PasswordField fx:id="pinField" promptText="%pinmanage_npa_pin_suspend_pin_field_initial"/>
+	<Button text="%pinmanage_common_submit_button" onAction="#handleSubmit"/>
+	<Label fx:id="errorLabel" styleClass="error-label"/>
 </VBox>

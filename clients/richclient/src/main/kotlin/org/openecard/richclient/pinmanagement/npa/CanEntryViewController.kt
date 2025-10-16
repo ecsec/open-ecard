@@ -4,24 +4,36 @@ import javafx.fxml.FXML
 import javafx.scene.Parent
 import javafx.scene.control.Label
 import javafx.scene.control.PasswordField
+import javafx.scene.text.Text
+import javafx.scene.text.TextFlow
+import org.openecard.richclient.MokoResourceBundle
 import org.openecard.richclient.gui.JfxUtils
 import org.openecard.richclient.pinmanagement.CanPinEntryCallback
 import org.openecard.richclient.pinmanagement.PinManagementStage
 
 class CanEntryViewController {
 	@FXML
-	lateinit var infoLabel: Label
+	private lateinit var infoTextFlow: TextFlow
 
 	@FXML
-	lateinit var canField: PasswordField
+	private lateinit var canField: PasswordField
 
 	@FXML
-	lateinit var pinField: PasswordField
+	private lateinit var pinField: PasswordField
 
 	@FXML
-	lateinit var errorLabel: Label
+	private lateinit var errorLabel: Label
+
+	@FXML
+	private lateinit var resources: MokoResourceBundle
 
 	var onSubmit: CanPinEntryCallback<CanEntryViewController>? = null
+
+	@FXML
+	fun initialize() {
+		val description = resources.getString("pinmanage_npa_pin_suspend_description")
+		infoTextFlow.children.setAll(Text(description))
+	}
 
 	@FXML
 	fun handleSubmit() {
@@ -37,25 +49,22 @@ class CanEntryViewController {
 
 		return when {
 			can.isBlank() -> {
-				errorLabel.text = "CAN cannot be empty."
+				errorLabel.text = resources.getString("pinmanage_npa_pin_suspend_error_empty_can")
 				false
 			}
 			can.length !in 5..6 -> {
-				errorLabel.text = "CAN must be 5 or 6 digits."
+				errorLabel.text = resources.getString("pinmanage_npa_pin_suspend_error_invalid_can")
 				false
 			}
-			else ->
-				when {
-					pin.isBlank() -> {
-						errorLabel.text = "PIN cannot be empty."
-						false
-					}
-					pin.length !in 5..6 -> {
-						errorLabel.text = "PIN must be 5 or 6 digits."
-						false
-					}
-					else -> true
-				}
+			pin.isBlank() -> {
+				errorLabel.text = resources.getString("pinmanage_npa_pin_suspend_error_empty_pin")
+				false
+			}
+			pin.length !in 5..6 -> {
+				errorLabel.text = resources.getString("pinmanage_npa_pin_suspend_error_invalid_pin")
+				false
+			}
+			else -> true
 		}
 	}
 

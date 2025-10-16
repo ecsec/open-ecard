@@ -21,7 +21,7 @@
  ***************************************************************************/
 package org.openecard.gui.swing
 
-import oecImage
+import org.openecard.gui.graphics.oecImage
 import org.junit.jupiter.api.Disabled
 import org.openecard.gui.UserConsent
 import org.openecard.gui.message.DialogType

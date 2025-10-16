@@ -444,7 +444,7 @@ tasks.register("prepareIsccFile", Copy::class) {
 			.replace("\$outPath", "$projectDir\\build\\dist")
 			.replace("\$iconFile", iconPath)
 			.replace("\$bmpPath", bmpPath)
-			.replace("\$msiPath", "$projectDir\\build\\jpfiles\\images\\win-msi.image\\Open-eCard-App")
+			.replace("\$msiPath", "$projectDir\\build\\jpfiles\\image\\Open-eCard-App")
 	}
 
 	into(issWorkDir)

@@ -31,8 +31,11 @@ class NpaPacePinModel(
 			is SecurityCommandSuccess -> PinStatus.OK
 			is SecurityCommandFailure ->
 				when (status.retries) {
+					3 -> PinStatus.OK
+					2 -> PinStatus.OK
+					1 -> PinStatus.Suspended
 					0 -> PinStatus.Blocked
-					else -> PinStatus.Suspended
+					else -> PinStatus.Unknown
 				}
 		}
 

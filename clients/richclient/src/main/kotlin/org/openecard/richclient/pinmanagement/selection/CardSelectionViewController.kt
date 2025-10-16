@@ -5,7 +5,6 @@ import javafx.collections.ObservableList
 import javafx.fxml.FXML
 import javafx.geometry.Insets
 import javafx.geometry.Pos
-import javafx.scene.Cursor
 import javafx.scene.Node
 import javafx.scene.control.Label
 import javafx.scene.control.ListCell
@@ -42,10 +41,8 @@ class CardSelectionViewController {
 					if (item == null || empty) {
 						text = null
 						graphic = null
-						style = ""
 					} else {
 						graphic = createCardGraphic(item)
-						cursor = Cursor.HAND
 						style = "-fx-background-color: transparent;"
 
 						// register events

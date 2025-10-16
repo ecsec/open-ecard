@@ -98,8 +98,10 @@ class RichClient : Application() {
 		primaryStage.isIconified = true
 		primaryStage.hide()
 
-		// start richclient init
-		setup()
+		// start richclient init outside of JavaFX Thread
+		Thread({
+			setup()
+		}, "Richclient-Setup").start()
 	}
 
 	fun setup() {

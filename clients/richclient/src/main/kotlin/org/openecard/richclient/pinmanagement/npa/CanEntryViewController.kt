@@ -22,7 +22,7 @@ class CanEntryViewController {
 	private lateinit var pinField: PasswordField
 
 	@FXML
-	private lateinit var errorLabel: Label
+	lateinit var errorLabel: Label
 
 	@FXML
 	private lateinit var resources: MokoResourceBundle

@@ -1,6 +1,7 @@
 deploy-mvn-artifacts:
   stage: deploy
-  image: docker.io/cimg/android:2025.09
+  image: public.docker.ecsec.de/ecsec/tools/cimg-android-jdk25:2025.10
+  #image: docker.io/cimg/android:2025.10
   tags:
     - "podman"
   cache:

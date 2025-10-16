@@ -1,5 +1,6 @@
 import com.sun.jna.Platform
 import org.gradle.util.internal.VersionNumber
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.panteleyev.jpackage.ImageType
 import org.panteleyev.jpackage.JPackageTask
 import java.io.FileOutputStream
@@ -27,6 +28,16 @@ javafx {
 
 application {
 	mainClass = "org.openecard.richclient.RichClient"
+}
+
+val richclientJavaTargetVersion: String by project
+kotlin {
+	compilerOptions.jvmTarget = JvmTarget.fromTarget(richclientJavaTargetVersion)
+}
+java {
+	val jVersion = JavaVersion.toVersion(richclientJavaTargetVersion)
+	sourceCompatibility = jVersion
+	targetCompatibility = jVersion
 }
 
 dependencies {

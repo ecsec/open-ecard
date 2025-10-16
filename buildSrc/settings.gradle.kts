@@ -11,8 +11,3 @@ dependencyResolutionManagement {
 		}
 	}
 }
-
-plugins {
-	// apply toolchain plugin, version comes from root project
-	id("org.gradle.toolchains.foojay-resolver-convention")
-}

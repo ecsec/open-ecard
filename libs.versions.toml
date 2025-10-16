@@ -41,7 +41,7 @@ kotlin-pcsc = "1.0.2"
 apache-batik="1.19"
 proxy-vole = "1.1.6"
 pdfbox = "3.0.5"
-jfx = "23.0.2"
+jfx = "24.0.2"
 systray = "4.5"
 logback = "1.5.+"
 

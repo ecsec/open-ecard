@@ -1,5 +1,6 @@
 package org.openecard.richclient.pinmanagement
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import javafx.application.Platform
 import javafx.stage.Stage
 import kotlinx.coroutines.CoroutineScope
@@ -15,6 +16,8 @@ import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.sc.CardWatcherCallback
 import org.openecard.richclient.sc.CardWatcherCallback.Companion.registerWith
 
+private val log = KotlinLogging.logger { }
+
 class PinUiFactory(
 	stage: Stage,
 	private val cardWatcher: CardWatcher,
@@ -24,6 +27,8 @@ class PinUiFactory(
 
 	private val pmStage = PinManagementStage(stage)
 
+	private var activeController: PinManagementUI? = null
+
 	init {
 		stage.icons.add(
 			MR.images.oec_logo.image
@@ -31,12 +36,23 @@ class PinUiFactory(
 		)
 	}
 
-	fun createSelectionUi(): CardSelectionController {
+	fun openSelectionUi() {
+		if (activeController == null) {
+			// when going back to the selection view, always destroy the active controller
+			closeActiveController()
+		}
+
 		val model = CardSelectionModel(supportedCardTypes, cardWatcher, bgTaskScope)
-		return CardSelectionController(model, this, pmStage, bgTaskScope)
+		val controller = CardSelectionController(model, this, pmStage, bgTaskScope)
+		controller.start()
 	}
 
 	fun openPinUiForType(terminal: TerminalInfo) {
+		if (activeController == null) {
+			log.warn { "There is an uncleaned active controller, removing it before creating a new one" }
+			closeActiveController()
+		}
+
 		val controller: PinManagementUI =
 			when (terminal.cardType) {
 				NpaDefinitions.cardType -> NpaPinController(terminal, pmStage, bgTaskScope)
@@ -55,11 +71,11 @@ class PinUiFactory(
 		object : CardWatcherCallback.CardWatcherCallbackDefault() {
 			override fun onCardRemoved(terminalName: String) {
 				if (terminal.terminalName == terminalName) {
+					closeActiveController()
 					Platform.runLater {
 						val msgController = MessageController(pmStage, bgTaskScope)
 						msgController.showMessage("The selected card or card terminal has been removed.") {
-							val controller = createSelectionUi()
-							controller.start()
+							openSelectionUi()
 						}
 					}
 				}
@@ -67,5 +83,11 @@ class PinUiFactory(
 		}.registerWith(cardWatcher, bgTaskScope)
 
 		controller.show()
+		activeController = controller
+	}
+
+	fun closeActiveController() {
+		activeController?.closeProcess()
+		activeController = null
 	}
 }

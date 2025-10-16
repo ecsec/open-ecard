@@ -1,14 +1,22 @@
 package org.openecard.richclient.pinmanagement.npa
 
+import org.openecard.cif.bundled.NpaCif
+import org.openecard.cif.bundled.NpaDefinitions
+import org.openecard.richclient.pinmanagement.TerminalInfo
 import org.openecard.sal.iface.dids.PaceDid
 import org.openecard.sal.iface.dids.PinDid
 import org.openecard.sal.sc.SmartcardApplication
+import org.openecard.sal.sc.SmartcardSal
+import org.openecard.sal.sc.recognition.CardRecognition
 import org.openecard.sc.apdu.command.SecurityCommandFailure
 import org.openecard.sc.apdu.command.SecurityCommandSuccess
+import org.openecard.sc.iface.CardChannel
 import org.openecard.sc.iface.feature.PaceError
+import org.openecard.sc.pace.PaceFeatureSoftwareFactory
+import org.openecard.sc.pcsc.PcscTerminalFactory
 
 class NpaPacePinModel(
-	application: SmartcardApplication,
+	private val application: SmartcardApplication,
 ) {
 	val pacePin: PaceDid =
 		application.dids.filterIsInstance<PaceDid>().find { it.name == "PACE_PIN" }
@@ -60,6 +68,41 @@ class NpaPacePinModel(
 			} else {
 				throw ex
 			}
+		}
+	}
+
+	fun shutdownStack() {
+		val terminals = application.device.channel.card.terminalConnection.terminal.terminals
+		terminals.releaseContext()
+	}
+
+	companion object {
+		fun createConnectedModel(terminal: TerminalInfo): NpaPacePinModel {
+			val app = connectCard(terminal)
+			return NpaPacePinModel(app)
+		}
+
+		private fun connectCard(terminal: TerminalInfo): SmartcardApplication {
+			val ctx = PcscTerminalFactory.instance.load()
+			ctx.establishContext()
+			val sal =
+				SmartcardSal(
+					ctx,
+					setOf(NpaCif),
+					object : CardRecognition {
+						override fun recognizeCard(channel: CardChannel) = NpaDefinitions.cardType
+					},
+					PaceFeatureSoftwareFactory(),
+				)
+			val session = sal.startSession()
+			val connection = session.connect(terminal.terminalName)
+
+			if (connection.deviceType != NpaCif.metadata.id) {
+				throw IllegalStateException("Card is not an nPA")
+			}
+
+			return connection.applications.find { it.name == NpaDefinitions.Apps.Mf.name }
+				?: throw IllegalStateException("MF application not found")
 		}
 	}
 }

@@ -20,6 +20,7 @@ class PinManager(
 	init {
 		addOnCloseHandler {
 			// cleanup when pin management is stopped
+			uiFactory.closeActiveController()
 			bgTaskScope.cancel()
 		}
 	}
@@ -32,8 +33,7 @@ class PinManager(
 	}
 
 	fun openManagerDialog() {
-		val controller = uiFactory.createSelectionUi()
-		controller.start()
+		uiFactory.openSelectionUi()
 	}
 
 	fun closeManagementDialog() {

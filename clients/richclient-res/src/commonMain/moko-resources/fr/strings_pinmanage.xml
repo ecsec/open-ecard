@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
+	<string name="pinmanage_name">PIN Management</string>
 	<string name="pinmanage_select_card">Sélectionnez une carte</string>
 
 	<!-- Resume PIN -->
 	<string name="pinmanage_npa_pin_suspend_title">Restaurer le PIN</string>
 	<string name="pinmanage_npa_pin_suspend_description">
 		Votre code PIN est suspendu car vous l’avez saisi deux fois de manière incorrecte.
-		Pour réinitialiser le statut du PIN, vous devez entrer le numéro d’accès à la carte (CAN) ainsi que le PIN actuel.
+		Pour réinitialiser le statut du PIN, vous devez entrer le numéro d’accès à la carte (CAN) ainsi que le PIN
+		actuel.
 		Vous trouverez le CAN sur le devant de votre carte d’identité.\n
-		Veuillez noter que si le PIN fourni est incorrect, la carte sera bloquée et devra être débloquée avec le code PUK.
+		Veuillez noter que si le PIN fourni est incorrect, la carte sera bloquée et devra être débloquée avec le code
+		PUK.
 	</string>
 	<string name="pinmanage_npa_pin_suspend_can_field_initial">Saisir le CAN</string>
 	<string name="pinmanage_npa_pin_suspend_pin_field_initial">Saisir le PIN</string>
@@ -29,7 +32,9 @@
 
 	<!-- Unblock PIN -->
 	<string name="pinmanage_npa_pin_unblock_title">Débloquer le PIN</string>
-	<string name="pinmanage_npa_pin_unblock_description">Votre PIN est bloqué et doit être débloqué avec votre clé de déblocage personnelle (PUK).</string>
+	<string name="pinmanage_npa_pin_unblock_description">Votre PIN est bloqué et doit être débloqué avec votre clé de
+		déblocage personnelle (PUK).
+	</string>
 	<string name="pinmanage_npa_pin_unblock_puk_field_initial">PUK</string>
 	<string name="pinmanage_npa_pin_unblock_error_empty_puk">Veuillez saisir le PUK.</string>
 	<string name="pinmanage_npa_pin_unblock_error_invalid_puk">Le PUK doit comporter exactement 10 chiffres.</string>

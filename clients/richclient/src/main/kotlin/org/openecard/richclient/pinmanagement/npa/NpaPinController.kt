@@ -3,7 +3,7 @@ package org.openecard.richclient.pinmanagement.npa
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.openecard.richclient.gui.JfxUtils
+import org.openecard.richclient.MR
 import org.openecard.richclient.pinmanagement.PinManagementStage
 import org.openecard.richclient.pinmanagement.PinManagementUI
 import org.openecard.richclient.pinmanagement.TerminalInfo
@@ -21,7 +21,6 @@ class NpaPinController(
 ) : PinManagementUI {
 	private val msgController = MessageController(stage, bgTaskScope)
 	private var model: NpaPacePinModel? = null
-	private val resources = JfxUtils.richclientResourceBundle
 
 	override fun show() {
 		try {
@@ -35,11 +34,11 @@ class NpaPinController(
 				PinStatus.OK -> stage.showChangeFlow { _, old, new -> changePin(old, new) }
 				PinStatus.Suspended -> stage.showCanPinFlow { view, can, pin -> suspendRecovery(view, can, pin) }
 				PinStatus.Blocked -> stage.showPukFlow { _, puk -> unblockPin(puk) }
-				PinStatus.Unknown -> msgController.showMessage(resources.getString("pinmanage_message_unknown_status")) {}
+				PinStatus.Unknown -> msgController.showMessage(MR.strings.pinmanage_message_unknown_status.localized()) {}
 			}
 		} catch (e: Exception) {
 			closeProcess()
-			msgController.showMessage("${resources.getString("pinmanage_common_error_title")}: ${e.message}") {}
+			msgController.showMessage("${MR.strings.pinmanage_common_error_title.localized()}: ${e.message}") {}
 		}
 	}
 
@@ -62,28 +61,31 @@ class NpaPinController(
 				val success = model.changePin(old, new)
 
 				if (success) {
-					msgController.showMessage(resources.getString("pinmanage_message_pin_changed")) {
+					msgController.showMessage(MR.strings.pinmanage_message_pin_changed.localized()) {
 						stage.showChangeFlow { _, old, new -> changePin(old, new) }
 					}
 				} else {
 					when (model.getPinStatus()) {
 						PinStatus.OK ->
-							msgController.showMessage(resources.getString("pinmanage_message_pin_incorrect")) {
+							msgController.showMessage(MR.strings.pinmanage_message_pin_incorrect.localized()) {
 								stage.showChangeFlow { _, old, new -> changePin(old, new) }
 							}
+
 						PinStatus.Suspended ->
-							msgController.showMessage(resources.getString("pinmanage_message_pin_suspended")) {
+							msgController.showMessage(MR.strings.pinmanage_message_pin_suspended.localized()) {
 								stage.showCanPinFlow { view, can, pin -> suspendRecovery(view, can, pin) }
 							}
+
 						PinStatus.Blocked ->
-							msgController.showMessage(resources.getString("pinmanage_message_pin_blocked")) {
+							msgController.showMessage(MR.strings.pinmanage_message_pin_blocked.localized()) {
 								stage.showPukFlow { _, puk -> unblockPin(puk) }
 							}
-						else -> msgController.showMessage(resources.getString("pinmanage_message_pin_change_failed")) {}
+
+						else -> msgController.showMessage(MR.strings.pinmanage_message_pin_change_failed.localized()) {}
 					}
 				}
 			} catch (e: Exception) {
-				msgController.showMessage("${resources.getString("pinmanage_common_error_title")}: ${e.message}") {}
+				msgController.showMessage("${MR.strings.pinmanage_common_error_title.localized()}: ${e.message}") {}
 			}
 		}
 	}
@@ -98,28 +100,35 @@ class NpaPinController(
 				val model = checkNotNull(model)
 
 				if (!model.enterCan(can)) {
-					view.errorLabel.text = resources.getString("pinmanage_message_wrong_can")
+					view.errorLabel.text = MR.strings.pinmanage_message_wrong_can.localized()
 				} else {
 					val success = model.enterPin(pin)
 					if (success) {
-						msgController.showMessage(resources.getString("pinmanage_message_pin_recovered")) {
+						msgController.showMessage(MR.strings.pinmanage_message_pin_recovered.localized()) {
 							stage.showChangeFlow { _, old, new -> changePin(old, new) }
 						}
 					} else {
 						when (model.getPinStatus()) {
 							PinStatus.Blocked ->
-								msgController.showMessage(resources.getString("pinmanage_message_pin_blocked")) {
+								msgController.showMessage(MR.strings.pinmanage_message_pin_blocked.localized()) {
 									stage.showPukFlow { _, puk -> unblockPin(puk) }
 								}
+
 							else ->
-								msgController.showMessage(resources.getString("pinmanage_message_pin_recovery_failed")) {
-									stage.showCanPinFlow { view, retryCan, retryPin -> suspendRecovery(view, retryCan, retryPin) }
+								msgController.showMessage(MR.strings.pinmanage_message_pin_recovery_failed.localized()) {
+									stage.showCanPinFlow { view, retryCan, retryPin ->
+										suspendRecovery(
+											view,
+											retryCan,
+											retryPin,
+										)
+									}
 								}
 						}
 					}
 				}
 			} catch (e: Exception) {
-				msgController.showMessage("${resources.getString("pinmanage_common_error_title")}: ${e.message}") {}
+				msgController.showMessage("${MR.strings.pinmanage_common_error_title.localized()}: ${e.message}") {}
 			}
 		}
 	}
@@ -130,16 +139,16 @@ class NpaPinController(
 				val model = checkNotNull(model)
 
 				if (model.enterPuk(puk)) {
-					msgController.showMessage(resources.getString("pinmanage_message_pin_unblocked")) {
+					msgController.showMessage(MR.strings.pinmanage_message_pin_unblocked.localized()) {
 						stage.showChangeFlow { _, old, new -> changePin(old, new) }
 					}
 				} else {
-					msgController.showMessage(resources.getString("pinmanage_message_wrong_puk")) {
+					msgController.showMessage(MR.strings.pinmanage_message_wrong_puk.localized()) {
 						stage.showPukFlow { _, retryPuk -> unblockPin(retryPuk) }
 					}
 				}
 			} catch (e: Exception) {
-				msgController.showMessage("${resources.getString("pinmanage_common_error_title")}: ${e.message}") {}
+				msgController.showMessage("${MR.strings.pinmanage_common_error_title.localized()}: ${e.message}") {}
 			}
 		}
 	}

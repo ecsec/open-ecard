@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
+	<string name="pinmanage_name">PIN Management</string>
 	<string name="pinmanage_select_card">Select a card</string>
 
 	<!-- Resume PIN -->
@@ -29,7 +30,9 @@
 
 	<!-- Unblock PIN -->
 	<string name="pinmanage_npa_pin_unblock_title">Unblock PIN</string>
-	<string name="pinmanage_npa_pin_unblock_description">Your PIN is blocked and must be unblocked using your personal unblocking key (PUK).</string>
+	<string name="pinmanage_npa_pin_unblock_description">Your PIN is blocked and must be unblocked using your personal
+		unblocking key (PUK).
+	</string>
 	<string name="pinmanage_npa_pin_unblock_puk_field_initial">PUK</string>
 	<string name="pinmanage_npa_pin_unblock_error_empty_puk">Please enter the PUK.</string>
 	<string name="pinmanage_npa_pin_unblock_error_invalid_puk">The PUK must be exactly 10 digits long.</string>

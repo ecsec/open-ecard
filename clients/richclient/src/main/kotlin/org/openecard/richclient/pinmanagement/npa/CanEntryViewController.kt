@@ -6,7 +6,7 @@ import javafx.scene.control.Label
 import javafx.scene.control.PasswordField
 import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
-import org.openecard.richclient.MokoResourceBundle
+import org.openecard.richclient.MR
 import org.openecard.richclient.gui.JfxUtils
 import org.openecard.richclient.pinmanagement.CanPinEntryCallback
 import org.openecard.richclient.pinmanagement.PinManagementStage
@@ -24,14 +24,11 @@ class CanEntryViewController {
 	@FXML
 	lateinit var errorLabel: Label
 
-	@FXML
-	private lateinit var resources: MokoResourceBundle
-
 	var onSubmit: CanPinEntryCallback<CanEntryViewController>? = null
 
 	@FXML
 	fun initialize() {
-		val description = resources.getString("pinmanage_npa_pin_suspend_description")
+		val description = MR.strings.pinmanage_npa_pin_suspend_description.localized()
 		infoTextFlow.children.setAll(Text(description))
 	}
 
@@ -49,21 +46,25 @@ class CanEntryViewController {
 
 		return when {
 			can.isBlank() -> {
-				errorLabel.text = resources.getString("pinmanage_npa_pin_suspend_error_empty_can")
+				errorLabel.text = MR.strings.pinmanage_npa_pin_suspend_error_empty_can.localized()
 				false
 			}
+
 			can.length !in 5..6 -> {
-				errorLabel.text = resources.getString("pinmanage_npa_pin_suspend_error_invalid_can")
+				errorLabel.text = MR.strings.pinmanage_npa_pin_suspend_error_invalid_can.localized()
 				false
 			}
+
 			pin.isBlank() -> {
-				errorLabel.text = resources.getString("pinmanage_npa_pin_suspend_error_empty_pin")
+				errorLabel.text = MR.strings.pinmanage_npa_pin_suspend_error_empty_pin.localized()
 				false
 			}
+
 			pin.length !in 5..6 -> {
-				errorLabel.text = resources.getString("pinmanage_npa_pin_suspend_error_invalid_pin")
+				errorLabel.text = MR.strings.pinmanage_npa_pin_suspend_error_invalid_pin.localized()
 				false
 			}
+
 			else -> true
 		}
 	}

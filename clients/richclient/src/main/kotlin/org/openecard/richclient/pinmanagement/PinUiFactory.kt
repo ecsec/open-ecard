@@ -6,7 +6,6 @@ import javafx.stage.Stage
 import kotlinx.coroutines.CoroutineScope
 import org.openecard.cif.bundled.NpaDefinitions
 import org.openecard.richclient.MR
-import org.openecard.richclient.gui.JfxUtils
 import org.openecard.richclient.gui.JfxUtils.toJfxImage
 import org.openecard.richclient.pinmanagement.common.MessageController
 import org.openecard.richclient.pinmanagement.npa.NpaPinController
@@ -28,8 +27,6 @@ class PinUiFactory(
 	private val pmStage = PinManagementStage(stage)
 
 	private var activeController: PinManagementUI? = null
-
-	private val resources = JfxUtils.richclientResourceBundle
 
 	init {
 		stage.icons.add(
@@ -61,7 +58,7 @@ class PinUiFactory(
 				else -> {
 					// make sure the dialog is closed and cleanup runs
 					MessageController(pmStage, bgTaskScope).showErrorDialog(
-						resources.getString("pinplugin_action_error_unknown"),
+						MR.strings.pinmanage_message_unknown_status.localized(),
 					) {
 						pmStage.stage.close()
 					}
@@ -79,7 +76,7 @@ class PinUiFactory(
 					Platform.runLater {
 						val msgController = MessageController(pmStage, bgTaskScope)
 						msgController.showMessage(
-							resources.getString("pinmanage_message_card_removed"),
+							MR.strings.pinmanage_message_card_removed.localized(),
 						) {
 							openSelectionUi()
 						}

@@ -10,6 +10,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import org.openecard.i18n.I18N
+import org.openecard.richclient.MR
 import org.openecard.richclient.gui.JfxUtils
 import org.openecard.richclient.pinmanagement.PinManagementStage
 import kotlin.time.Duration
@@ -36,7 +37,7 @@ class MessageController(
 
 	fun showErrorDialog(
 		message: String,
-		dialogTitle: String = I18N.strings.pinplugin_action_error_title.localized(),
+		dialogTitle: String = MR.strings.pinmanage_common_error_title.localized(),
 		waitDelay: Duration = 3.seconds,
 		after: () -> Unit,
 	) {

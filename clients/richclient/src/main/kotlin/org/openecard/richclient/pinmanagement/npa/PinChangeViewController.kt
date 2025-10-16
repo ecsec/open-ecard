@@ -4,7 +4,7 @@ import javafx.fxml.FXML
 import javafx.scene.Parent
 import javafx.scene.control.Label
 import javafx.scene.control.PasswordField
-import org.openecard.richclient.MokoResourceBundle
+import org.openecard.richclient.MR
 import org.openecard.richclient.gui.JfxUtils
 import org.openecard.richclient.pinmanagement.PinChangeCallback
 import org.openecard.richclient.pinmanagement.PinManagementStage
@@ -22,9 +22,6 @@ class PinChangeViewController {
 	@FXML
 	private lateinit var errorLabel: Label
 
-	@FXML
-	private lateinit var resources: MokoResourceBundle
-
 	var onSubmit: PinChangeCallback<PinChangeViewController>? = null
 
 	@FXML
@@ -41,17 +38,20 @@ class PinChangeViewController {
 
 		return when {
 			old.isBlank() || new.isBlank() || repeat.isBlank() -> {
-				errorLabel.text = resources.getString("pinmanage_npa_pin_change_error_empty_fields")
+				errorLabel.text = MR.strings.pinmanage_npa_pin_change_error_empty_fields.localized()
 				false
 			}
+
 			old.length !in 5..6 || new.length !in 5..6 || repeat.length !in 5..6 -> {
-				errorLabel.text = resources.getString("pinmanage_npa_pin_change_error_invalid_length")
+				errorLabel.text = MR.strings.pinmanage_npa_pin_change_error_invalid_length.localized()
 				false
 			}
+
 			new != repeat -> {
-				errorLabel.text = resources.getString("pinmanage_npa_pin_change_error_mismatch")
+				errorLabel.text = MR.strings.pinmanage_npa_pin_change_error_mismatch.localized()
 				false
 			}
+
 			else -> true
 		}
 	}

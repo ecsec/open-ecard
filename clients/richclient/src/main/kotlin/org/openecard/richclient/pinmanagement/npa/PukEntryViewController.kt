@@ -4,7 +4,7 @@ import javafx.fxml.FXML
 import javafx.scene.Parent
 import javafx.scene.control.Label
 import javafx.scene.control.PasswordField
-import org.openecard.richclient.MokoResourceBundle
+import org.openecard.richclient.MR
 import org.openecard.richclient.gui.JfxUtils
 import org.openecard.richclient.pinmanagement.PasswordEntryCallback
 import org.openecard.richclient.pinmanagement.PinManagementStage
@@ -15,9 +15,6 @@ class PukEntryViewController {
 
 	@FXML
 	lateinit var errorLabel: Label
-
-	@FXML
-	lateinit var resources: MokoResourceBundle
 
 	var onSubmit: PasswordEntryCallback<PukEntryViewController>? = null
 
@@ -33,12 +30,12 @@ class PukEntryViewController {
 
 		return when {
 			puk.isBlank() -> {
-				errorLabel.text = resources.getString("pinmanage_npa_pin_unblock_error_empty_puk")
+				errorLabel.text = MR.strings.pinmanage_npa_pin_unblock_error_empty_puk.localized()
 				false
 			}
 
 			puk.length != 10 -> {
-				errorLabel.text = resources.getString("pinmanage_npa_pin_unblock_error_invalid_puk")
+				errorLabel.text = MR.strings.pinmanage_npa_pin_unblock_error_invalid_puk.localized()
 				false
 			}
 

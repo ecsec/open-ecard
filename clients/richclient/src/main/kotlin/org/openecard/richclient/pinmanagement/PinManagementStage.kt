@@ -3,10 +3,8 @@ package org.openecard.richclient.pinmanagement
 import javafx.application.Platform
 import javafx.scene.Parent
 import javafx.scene.Scene
-import javafx.scene.layout.StackPane
 import javafx.stage.Stage
-import kotlinx.coroutines.CoroutineScope
-import org.openecard.i18n.I18N
+import org.openecard.richclient.MR
 
 class PinManagementStage(
 	val stage: Stage,
@@ -36,7 +34,7 @@ class PinManagementStage(
 		const val DEFAULT_WIDTH: Double = 420.0
 		const val DEFAULT_HEIGHT: Double = 300.0
 
-		fun defaultTitle(): String = I18N.strings.pinplugin_name.localized()
+		fun defaultTitle(): String = MR.strings.pinmanage_name.localized()
 
 		fun makeScene(root: Parent): Scene = Scene(root, DEFAULT_WIDTH, DEFAULT_HEIGHT)
 	}

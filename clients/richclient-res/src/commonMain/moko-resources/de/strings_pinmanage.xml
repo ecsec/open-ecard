@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
+	<string name="pinmanage_name">PIN-Verwaltung</string>
 	<string name="pinmanage_select_card">Wählen Sie eine Karte aus</string>
 
 	<!-- Resume PIN -->

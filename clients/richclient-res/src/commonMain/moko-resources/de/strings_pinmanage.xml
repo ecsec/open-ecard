@@ -57,4 +57,5 @@
 	<string name="pinmanage_message_pin_unblocked">PIN wurde erfolgreich entsperrt.</string>
 	<string name="pinmanage_message_wrong_puk">Falsche PUK. Bitte erneut versuchen.</string>
 	<string name="pinmanage_message_card_removed">Karte oder Kartenterminal wurde entfernt.</string>
+	<string name="pinmanage_message_terminal_not_supported">Dieses Kartenlesegerät wird nicht unterstützt.</string>
 </resources>

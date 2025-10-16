@@ -27,6 +27,11 @@ class NpaPinController(
 			val model = NpaPacePinModel.createConnectedModel(terminal)
 			this.model = model
 
+			if (model.pacePin.capturePasswordInHardware()) {
+				msgController.showMessage(MR.strings.pinmanage_message_terminal_not_supported.localized()) {}
+				return
+			}
+
 			// check pin status and decide which UI we need
 			val status = model.getPinStatus()
 

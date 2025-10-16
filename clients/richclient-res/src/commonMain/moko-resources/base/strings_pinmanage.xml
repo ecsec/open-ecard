@@ -54,4 +54,5 @@
 	<string name="pinmanage_message_pin_unblocked">PIN unblocked successfully.</string>
 	<string name="pinmanage_message_wrong_puk">Wrong PUK. Please try again.</string>
 	<string name="pinmanage_message_card_removed">Card or card terminal has been removed.</string>
+	<string name="pinmanage_message_terminal_not_supported">This card terminal is not supported.</string>
 </resources>

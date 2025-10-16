@@ -56,4 +56,5 @@
 	<string name="pinmanage_message_pin_unblocked">PIN débloqué avec succès.</string>
 	<string name="pinmanage_message_wrong_puk">PUK incorrect. Veuillez réessayer.</string>
 	<string name="pinmanage_message_card_removed">Carte ou terminal de carte retiré.</string>
+	<string name="pinmanage_message_terminal_not_supported">Ce lecteur de carte n’est pas pris en charge.</string>
 </resources>

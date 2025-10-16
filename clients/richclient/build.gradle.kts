@@ -40,7 +40,64 @@ java {
 	targetCompatibility = jVersion
 }
 
+class JnaCapability : ComponentMetadataRule {
+	override fun execute(context: ComponentMetadataContext) =
+		context.details.run {
+			if (setOf("jna", "jna-jpms").contains(id.name)) {
+				allVariants {
+					withCapabilities {
+						addCapability("jna", "jna", id.version)
+					}
+				}
+			}
+		}
+}
+
+class JnaPlatformCapability : ComponentMetadataRule {
+	override fun execute(context: ComponentMetadataContext) =
+		context.details.run {
+			if (setOf("jna-platform", "jna-platform-jpms").contains(id.name)) {
+				allVariants {
+					withCapabilities {
+						addCapability("jna", "jna-platform", id.version)
+					}
+				}
+			}
+		}
+}
+
+configurations.all {
+	resolutionStrategy.capabilitiesResolution.withCapability("jna:jna") {
+		val toBeSelected =
+			candidates.firstOrNull {
+				it.id.let { id ->
+					id is ModuleComponentIdentifier &&
+						id.module == "jna-jpms"
+				}
+			}
+		if (toBeSelected != null) {
+			select(toBeSelected)
+		}
+		because("use jna jpms module instead of plain jna")
+	}
+	resolutionStrategy.capabilitiesResolution.withCapability("jna:jna-platform") {
+		val toBeSelected =
+			candidates.firstOrNull {
+				it.id.let { id ->
+					id is ModuleComponentIdentifier &&
+						id.module == "jna-platform-jpms"
+				}
+			}
+		if (toBeSelected != null) {
+			select(toBeSelected)
+		}
+		because("use jna-platform jpms module instead of plain jna-platform")
+	}
+}
+
 dependencies {
+	components.all(JnaCapability::class.java)
+	components.all(JnaPlatformCapability::class.java)
 
 	implementation(libs.kotlin.logging)
 	implementation(libs.logback.classic)

@@ -17,6 +17,6 @@ kotlin {
 }
 
 multiplatformResources {
-	resourcesPackage.set("org.openecard.richclient") // required
+	resourcesPackage.set("org.openecard.richclient.res") // required
 	// resourcesClassName.set("Res") // optional, default MR
 }

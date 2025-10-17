@@ -3,7 +3,6 @@ package org.openecard.richclient.pinmanagement.npa
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.openecard.richclient.MR
 import org.openecard.richclient.pinmanagement.PinManagementStage
 import org.openecard.richclient.pinmanagement.PinManagementUI
 import org.openecard.richclient.pinmanagement.TerminalInfo
@@ -11,6 +10,7 @@ import org.openecard.richclient.pinmanagement.common.MessageController
 import org.openecard.richclient.pinmanagement.npa.CanEntryViewController.Companion.showCanPinFlow
 import org.openecard.richclient.pinmanagement.npa.PinChangeViewController.Companion.showChangeFlow
 import org.openecard.richclient.pinmanagement.npa.PukEntryViewController.Companion.showPukFlow
+import org.openecard.richclient.res.MR
 
 private val log = KotlinLogging.logger { }
 

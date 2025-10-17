@@ -4,8 +4,8 @@ import javafx.embed.swing.SwingFXUtils
 import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
 import javafx.scene.image.Image
-import org.openecard.richclient.MR
 import org.openecard.richclient.MokoResourceBundle
+import org.openecard.richclient.res.MR
 import java.awt.image.BufferedImage
 import java.util.ResourceBundle
 

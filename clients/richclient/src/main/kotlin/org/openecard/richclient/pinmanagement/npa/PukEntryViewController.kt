@@ -4,10 +4,10 @@ import javafx.fxml.FXML
 import javafx.scene.Parent
 import javafx.scene.control.Label
 import javafx.scene.control.PasswordField
-import org.openecard.richclient.MR
 import org.openecard.richclient.gui.JfxUtils
 import org.openecard.richclient.pinmanagement.PasswordEntryCallback
 import org.openecard.richclient.pinmanagement.PinManagementStage
+import org.openecard.richclient.res.MR
 
 class PukEntryViewController {
 	@FXML

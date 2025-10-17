@@ -4,7 +4,7 @@ import javafx.application.Platform
 import javafx.scene.Parent
 import javafx.scene.Scene
 import javafx.stage.Stage
-import org.openecard.richclient.MR
+import org.openecard.richclient.res.MR
 
 class PinManagementStage(
 	val stage: Stage,

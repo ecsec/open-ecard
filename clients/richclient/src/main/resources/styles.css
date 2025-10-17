@@ -17,6 +17,14 @@
     -fx-font-size: 16px;
 }
 
+.card-list-item {
+    -fx-background-color: transparent;
+}
+
+.card-list-item:hover {
+    -fx-background-color: #e0e0e0;
+}
+
 .card-box {
     -fx-background-color: #f0f0f0;
     -fx-background-radius: 8;

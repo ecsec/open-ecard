@@ -41,17 +41,13 @@ class CardSelectionViewController {
 					if (item == null || empty) {
 						text = null
 						graphic = null
+						styleClass.remove("card-list-item")
+
+						setOnMouseClicked {}
 					} else {
 						graphic = createCardGraphic(item)
-						style = "-fx-background-color: transparent;"
+						styleClass.add("card-list-item")
 
-						// register events
-						setOnMouseEntered {
-							style = "-fx-background-color: #e0e0e0;"
-						}
-						setOnMouseExited {
-							style = "-fx-background-color: transparent;"
-						}
 						setOnMouseClicked {
 							cardListView.selectionModel.select(item)
 							onCardSelected(item)
@@ -63,16 +59,17 @@ class CardSelectionViewController {
 	}
 
 	private fun createCardGraphic(item: TerminalInfo): Node {
-		val image =
+		val cardImge =
 			CifDb.Companion.Bundled
 				.getCardImage(item.cardType)
 				.toJfxImage()
 		val imageView =
-			ImageView(image).apply {
+			ImageView(cardImge).apply {
 				fitWidth = 80.0
 				fitHeight = 60.0
 				isPreserveRatio = true
 			}
+
 		val cardTypeLabel =
 			Label(CifDb.Companion.Bundled.getCardType(item.cardType)).apply {
 				styleClass.add("card-label")
@@ -81,6 +78,7 @@ class CardSelectionViewController {
 			Label(item.terminalName).apply {
 				styleClass.add("terminal-label")
 			}
+
 		return HBox(10.0, imageView, VBox(2.0, cardTypeLabel, terminalLabel)).apply {
 			alignment = Pos.CENTER_LEFT
 			padding = Insets(10.0)

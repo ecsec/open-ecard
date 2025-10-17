@@ -102,6 +102,9 @@ configurations.all {
 			}
 		}
 	}
+
+	// already covered by java.xml
+	exclude("xml-apis", "xml-apis")
 }
 
 dependencies {

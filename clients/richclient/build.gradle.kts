@@ -1,4 +1,5 @@
 import com.sun.jna.Platform
+import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.util.internal.VersionNumber
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.panteleyev.jpackage.ImageType
@@ -226,6 +227,15 @@ fun JPackageTask.applyDefaults(imageType: ImageType) {
 	copyright = "Copyright (C) ${LocalDate.now().year} ecsec GmbH"
 	appDescription = "Client side implementation of the eCard-API-Framework (BSI TR-03112)"
 
+	// configure icons
+	if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+		icon = layout.projectDirectory.file("src/main/package/win/Open-eCard-App.ico")
+	} else if (Os.isFamily(Os.FAMILY_MAC)) {
+		icon = layout.projectDirectory.file("src/main/package/mac/Open-eCard-App.icns")
+	} else if (Os.isFamily(Os.FAMILY_UNIX)) {
+		icon = layout.projectDirectory.file("src/main/package/linux/Open-eCard-App.png")
+	}
+
 	System.getenv("RUNTIME_JDK_PATH")?.let {
 		jLinkOptions.add("--modulePath")
 		jLinkOptions.add(it)
@@ -234,23 +244,19 @@ fun JPackageTask.applyDefaults(imageType: ImageType) {
 
 // configs for the packages
 
-fun JPackageTask.linuxConfigs(imageType: ImageType) {
+fun JPackageTask.linuxConfigs() {
 // 	resourceDir = layout.projectDirectory.dir("src/main/package/linux")
-	icon = layout.projectDirectory.file("src/main/package/linux/Open-eCard-App.png")
-	if (imageType != ImageType.APP_IMAGE) {
-		linuxDebMaintainer = "tobias.wich@ecsec.de"
-		linuxPackageName = "open-ecard-app"
-		linuxAppCategory = "utils"
-		// linuxRpmLicenseType = "GPLv3+"
-		linuxMenuGroup = "Network"
-		// linuxPackageDeps = false
-	}
+
+	linuxDebMaintainer = "tobias.wich@ecsec.de"
+	linuxPackageName = "open-ecard-app"
+	linuxAppCategory = "utils"
+	// linuxRpmLicenseType = "GPLv3+"
+	linuxMenuGroup = "Network"
+	// linuxPackageDeps = false
 }
 
 fun JPackageTask.windowsConfigs() {
 	resourceDir = layout.projectDirectory.dir("src/main/package/win")
-
-	icon = layout.projectDirectory.file("src/main/package/win/Open-eCard-App.ico")
 
 	winDirChooser = true
 	winMenuGroup = "misc"
@@ -262,7 +268,6 @@ fun JPackageTask.windowsConfigs() {
 fun JPackageTask.macConfigs() {
 	resourceDir = layout.projectDirectory.dir("src/main/package/mac")
 
-	icon = layout.projectDirectory.file("src/main/package/mac/Open-eCard-App.icns")
 	macPackageName = "Open-eCard-App"
 	macPackageIdentifier = "org.openecard.versioncheck.MainLoader"
 
@@ -279,6 +284,20 @@ fun JPackageTask.macConfigs() {
 	}
 }
 
+// packaging jobs for debugging and manual operations
+
+val buildAppImage by tasks.registering(JPackageTask::class) {
+	group = "Distribution"
+	description = "Creates a AppImage artifact for further processing."
+
+	onlyIf("OS is not Linux") {
+		Platform.isLinux()
+	}
+	dependsOn(copyDependencies)
+
+	applyDefaults(ImageType.APP_IMAGE)
+}
+
 // linux packaging
 
 val packageDeb by tasks.registering(JPackageTask::class) {
@@ -291,7 +310,7 @@ val packageDeb by tasks.registering(JPackageTask::class) {
 	dependsOn(copyDependencies)
 
 	applyDefaults(ImageType.DEB)
-	linuxConfigs(ImageType.DEB)
+	linuxConfigs()
 }
 
 val packageRpm by tasks.registering(JPackageTask::class) {
@@ -304,20 +323,7 @@ val packageRpm by tasks.registering(JPackageTask::class) {
 	dependsOn(copyDependencies)
 
 	applyDefaults(ImageType.RPM)
-	linuxConfigs(ImageType.RPM)
-}
-
-val packageAppImage by tasks.registering(JPackageTask::class) {
-	group = "Distribution"
-	description = "Creates a AppImage package for installation."
-
-	onlyIf("OS is not Linux") {
-		Platform.isLinux()
-	}
-	dependsOn(copyDependencies)
-
-	applyDefaults(ImageType.APP_IMAGE)
-	linuxConfigs(ImageType.APP_IMAGE)
+	linuxConfigs()
 }
 
 val packageLinux by tasks.registering {
@@ -327,7 +333,6 @@ val packageLinux by tasks.registering {
 	dependsOn(
 		packageDeb,
 		packageRpm,
-		// packageAppImage,
 	)
 }
 

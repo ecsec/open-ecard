@@ -166,22 +166,20 @@ val setAppVersion =
 	}
 val macSigningId: String? = System.getenv("MAC_SIGNING_ID")
 
-val copyJars by tasks.register<Copy>("copyJars") {
+val copyJars by tasks.registering(Copy::class) {
 	from(configurations.runtimeClasspath) {
 		exclude { it.name.startsWith("javafx") }
 	}.into(layout.buildDirectory.dir("jars"))
 }
-val copyMods =
-	tasks.register<Copy>("copyMods") {
-		from(configurations.runtimeClasspath) {
-			include { it.name.startsWith("javafx") }
-		}.into(layout.buildDirectory.dir("jars/mods"))
-	}
-val copyJar =
-	tasks.register<Copy>("copyJar") {
-		from(tasks.jar).into(layout.buildDirectory.dir("jars"))
-	}
-tasks.register<Copy>("copyDependencies") {
+val copyMods by tasks.registering(Copy::class) {
+	from(configurations.runtimeClasspath) {
+		include { it.name.startsWith("javafx") }
+	}.into(layout.buildDirectory.dir("jars/mods"))
+}
+val copyJar by tasks.registering(Copy::class) {
+	from(tasks.jar).into(layout.buildDirectory.dir("jars"))
+}
+val copyDependencies by tasks.registering {
 	dependsOn(copyJars)
 	dependsOn(copyMods)
 	dependsOn(copyJar)
@@ -210,7 +208,7 @@ fun JPackageTask.applyDefaults() {
 			"-Djavax.xml.stream.isSupportingExternalEntities=false",
 			"-Djavax.xml.stream.supportDTD=false",
 			"--module-path",
-			"\$APPDIR/mods",
+			"\$APPDIR${File.separator}mods",
 			"--add-modules",
 			"javafx.swing,javafx.controls,javafx.fxml",
 		)
@@ -275,14 +273,14 @@ fun JPackageTask.macConfigs() {
 
 // linux packaging
 
-tasks.register("packageDeb", JPackageTask::class) {
+val packageDeb by tasks.registering(JPackageTask::class) {
 	group = "Distribution"
 	description = "Creates a DEB package for installation."
 
 	onlyIf("OS is not Linux") {
 		Platform.isLinux()
 	}
-	dependsOn("copyDependencies")
+	dependsOn(copyDependencies)
 
 	applyDefaults()
 	linuxConfigs()
@@ -290,14 +288,14 @@ tasks.register("packageDeb", JPackageTask::class) {
 	type = ImageType.DEB
 }
 
-tasks.register("packageRpm", JPackageTask::class) {
+val packageRpm by tasks.registering(JPackageTask::class) {
 	group = "Distribution"
 	description = "Creates a RPM package for installation."
 
 	onlyIf("OS is not Linux") {
 		Platform.isLinux()
 	}
-	dependsOn("copyDependencies")
+	dependsOn(copyDependencies)
 
 	applyDefaults()
 	linuxConfigs()
@@ -305,13 +303,13 @@ tasks.register("packageRpm", JPackageTask::class) {
 	type = ImageType.RPM
 }
 
-tasks.register("packageLinux") {
+val packageLinux by tasks.registering {
 	group = "Distribution"
 	description = "Creates DEB and RPM packages for linux systems."
 
 	dependsOn(
-		"packageDeb",
-		"packageRpm",
+		packageDeb,
+		packageRpm,
 	)
 }
 
@@ -406,11 +404,11 @@ abstract class MacSignLibrariesTask
 		}
 	}
 
-tasks.register<MacSignLibrariesTask>("prepareMacBundle") {
+val prepareMacBundle by tasks.registering(MacSignLibrariesTask::class) {
 	onlyIf("OS is not Mac") {
 		Platform.isMac()
 	}
-	dependsOn("copyDependencies")
+	dependsOn(copyDependencies)
 
 	// skip this task if no signingId is configured
 	if (macSigningId != null) {
@@ -441,14 +439,14 @@ tasks.register<MacSignLibrariesTask>("prepareMacBundle") {
 	compressionLevel = Deflater.BEST_COMPRESSION
 }
 
-tasks.register("packageDmg", JPackageTask::class) {
+val packageDmg by tasks.registering(JPackageTask::class) {
 	group = "Distribution"
 	description = "Creates a DMG package for installation."
 
 	onlyIf("OS is not Mac") {
 		Platform.isMac()
 	}
-	dependsOn("prepareMacBundle")
+	dependsOn(prepareMacBundle)
 
 	applyDefaults()
 	macConfigs()
@@ -456,14 +454,14 @@ tasks.register("packageDmg", JPackageTask::class) {
 	type = ImageType.DMG
 }
 
-tasks.register("packagePkg", JPackageTask::class) {
+val packagePkg by tasks.registering(JPackageTask::class) {
 	group = "Distribution"
 	description = "Creates a PKG package for installation."
 
 	onlyIf("OS is not Mac") {
 		Platform.isMac()
 	}
-	dependsOn("prepareMacBundle")
+	dependsOn(prepareMacBundle)
 
 	applyDefaults()
 	macConfigs()
@@ -476,14 +474,14 @@ tasks.register("packageMac") {
 	description = "Creates DMG and PKG packages for Mac systems."
 
 	dependsOn(
-		"packagePkg",
-		"packageDmg",
+		packagePkg,
+		packageDmg,
 	)
 }
 
 // windows packaging
 
-tasks.register("packageMsi", JPackageTask::class) {
+val packageMsi by tasks.registering(JPackageTask::class) {
 	group = "Distribution"
 	description = "Creates a MSI package for installation."
 
@@ -498,7 +496,7 @@ tasks.register("packageMsi", JPackageTask::class) {
 	onlyIf("OS is not Windows") {
 		Platform.isWindows()
 	}
-	dependsOn("copyDependencies")
+	dependsOn(copyDependencies)
 
 	applyDefaults()
 	windowsConfigs()
@@ -507,7 +505,7 @@ tasks.register("packageMsi", JPackageTask::class) {
 }
 
 val issWorkDir = layout.buildDirectory.dir("iscc")
-tasks.register("prepareIsccFile", Copy::class) {
+val prepareIsccFile by tasks.registering(Copy::class) {
 
 	val iconPath = projectDir.resolve("src/main/package/win/Open-eCard-App.ico").toString()
 	val bmpPath = projectDir.resolve("src/main/package/win/Open-eCard-App-setup-icon.bmp").toString()
@@ -533,14 +531,14 @@ tasks.register("prepareIsccFile", Copy::class) {
 	outputs.upToDateWhen { false }
 }
 
-tasks.register("packageExe", Exec::class) {
+val packageExe by tasks.registering(Exec::class) {
 	group = "Distribution"
 	description = "Creates a EXE for installation."
 
 	onlyIf("OS is not Windows") {
 		Platform.isWindows()
 	}
-	dependsOn("copyDependencies", "packageMsi", "prepareIsccFile")
+	dependsOn(copyDependencies, packageMsi, prepareIsccFile)
 
 	workingDir(issWorkDir)
 	executable("iscc")
@@ -552,7 +550,7 @@ tasks.register("packageWindows") {
 	description = "Creates EXE and MSI packages for Windows systems."
 
 	dependsOn(
-		"packageExe",
-		"packageMsi",
+		packageExe,
+		packageMsi,
 	)
 }

@@ -5,12 +5,12 @@ import javafx.application.Platform
 import javafx.stage.Stage
 import kotlinx.coroutines.CoroutineScope
 import org.openecard.cif.bundled.NpaDefinitions
-import org.openecard.richclient.MR
 import org.openecard.richclient.gui.JfxUtils.toJfxImage
 import org.openecard.richclient.pinmanagement.common.MessageController
 import org.openecard.richclient.pinmanagement.npa.NpaPinController
 import org.openecard.richclient.pinmanagement.selection.CardSelectionController
 import org.openecard.richclient.pinmanagement.selection.CardSelectionModel
+import org.openecard.richclient.res.MR
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.sc.CardWatcherCallback
 import org.openecard.richclient.sc.CardWatcherCallback.Companion.registerWith

@@ -42,6 +42,7 @@ apache-batik="1.19"
 proxy-vole = "1.1.7"
 pdfbox = "3.0.5"
 jfx = "24.0.2"
+jna = "5.18.1"
 systray = "4.5"
 logback = "1.5.+"
 
@@ -58,7 +59,7 @@ kover = "0.9.2"
 
 
 [libraries]
-apache-batik = {module = "org.apache.xmlgraphics:batik-all", version.ref="apache-batik"}
+apache-batik-transcoder = {module = "org.apache.xmlgraphics:batik-transcoder", version.ref="apache-batik"}
 ktlint-githubreporter = { module = "io.github.tobi2k:ktlint-gitlab-reporter", version.ref = "ktlint-githubreporter" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 
@@ -153,6 +154,10 @@ jwtkt-ecdsa = { module = "com.appstractive:jwt-ecdsa-kt", version.ref = "jwtkt" 
 jwtkt-jwks = { module = "com.appstractive:jwt-jwks-kt", version.ref = "jwtkt" }
 
 systray = { group = "com.dorkbox", name = "SystemTray", version.ref = "systray" }
+jna-core = { module = "net.java.dev.jna:jna", version.ref = "jna" }
+jna-jpms = { module = "net.java.dev.jna:jna-jpms", version.ref = "jna" }
+jna-core-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
+jna-jpms-platform = { module = "net.java.dev.jna:jna-platform-jpms", version.ref = "jna" }
 
 semver = { module = "io.github.z4kn4fein:semver", version.ref = "semver" }
 
@@ -192,4 +197,4 @@ versions = { id = "com.github.ben-manes.versions", version.ref = "gradle-version
 
 jfx = { id =  "org.openjfx.javafxplugin", version.ref = "gradle-jfx" }
 
-jpackage = { id = "org.panteleyev.jpackageplugin", version = "1.6.0" }
+jpackage = { id = "org.panteleyev.jpackageplugin", version = "1.7.6" }

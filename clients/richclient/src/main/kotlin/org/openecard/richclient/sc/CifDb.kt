@@ -9,7 +9,7 @@ import org.openecard.cif.bundled.NpaCif
 import org.openecard.cif.bundled.NpaDefinitions
 import org.openecard.cif.definition.CardInfoDefinition
 import org.openecard.cif.definition.recognition.removeUnsupported
-import org.openecard.richclient.MR
+import org.openecard.richclient.res.MR
 import org.openecard.sal.sc.recognition.DirectCardRecognition
 import java.awt.image.BufferedImage
 

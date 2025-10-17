@@ -6,10 +6,10 @@ import javafx.scene.control.Label
 import javafx.scene.control.PasswordField
 import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
-import org.openecard.richclient.MR
 import org.openecard.richclient.gui.JfxUtils
 import org.openecard.richclient.pinmanagement.CanPinEntryCallback
 import org.openecard.richclient.pinmanagement.PinManagementStage
+import org.openecard.richclient.res.MR
 
 class CanEntryViewController {
 	@FXML

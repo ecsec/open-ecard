@@ -9,10 +9,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
-import org.openecard.i18n.I18N
-import org.openecard.richclient.MR
 import org.openecard.richclient.gui.JfxUtils
 import org.openecard.richclient.pinmanagement.PinManagementStage
+import org.openecard.richclient.res.MR
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 

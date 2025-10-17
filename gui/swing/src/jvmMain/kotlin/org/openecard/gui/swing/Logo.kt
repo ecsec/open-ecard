@@ -21,7 +21,7 @@
  ***************************************************************************/
 package org.openecard.gui.swing
 
-import oecImage
+import org.openecard.gui.graphics.oecImage
 import java.awt.Dimension
 import javax.swing.BoxLayout
 import javax.swing.ImageIcon

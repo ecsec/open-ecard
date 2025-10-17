@@ -40,7 +40,76 @@ java {
 	targetCompatibility = jVersion
 }
 
+class JnaCapability : ComponentMetadataRule {
+	override fun execute(context: ComponentMetadataContext) =
+		context.details.run {
+			if (setOf("jna", "jna-jpms").contains(id.name)) {
+				allVariants {
+					withCapabilities {
+						addCapability("jna", "jna", id.version)
+					}
+				}
+			}
+		}
+}
+
+class JnaPlatformCapability : ComponentMetadataRule {
+	override fun execute(context: ComponentMetadataContext) =
+		context.details.run {
+			if (setOf("jna-platform", "jna-platform-jpms").contains(id.name)) {
+				allVariants {
+					withCapabilities {
+						addCapability("jna", "jna-platform", id.version)
+					}
+				}
+			}
+		}
+}
+
+configurations.all {
+	resolutionStrategy.capabilitiesResolution.withCapability("jna:jna") {
+		val toBeSelected =
+			candidates.firstOrNull {
+				it.id.let { id ->
+					id is ModuleComponentIdentifier &&
+						id.module == "jna-jpms"
+				}
+			}
+		if (toBeSelected != null) {
+			select(toBeSelected)
+		}
+		because("use jna jpms module instead of plain jna")
+	}
+	resolutionStrategy.capabilitiesResolution.withCapability("jna:jna-platform") {
+		val toBeSelected =
+			candidates.firstOrNull {
+				it.id.let { id ->
+					id is ModuleComponentIdentifier &&
+						id.module == "jna-platform-jpms"
+				}
+			}
+		if (toBeSelected != null) {
+			select(toBeSelected)
+		}
+		because("use jna-platform jpms module instead of plain jna-platform")
+	}
+
+	resolutionStrategy {
+		eachDependency {
+			if (requested.group == "org.apache.xmlgraphics" && requested.name.contains("batik")) {
+				useTarget("${requested.group}:${requested.name}:${libs.versions.apache.batik.get()}")
+				because("Old versions of batik are not Java module aware")
+			}
+		}
+	}
+
+	// already covered by java.xml
+	exclude("xml-apis", "xml-apis")
+}
+
 dependencies {
+	components.all(JnaCapability::class.java)
+	components.all(JnaPlatformCapability::class.java)
 
 	implementation(libs.kotlin.logging)
 	implementation(libs.logback.classic)
@@ -55,8 +124,11 @@ dependencies {
 
 	// basic runtime deps
 	implementation(project(":clients:richclient-res"))
-	implementation(libs.apache.batik)
+	// implementation(libs.apache.batik)
 	implementation(libs.systray)
+
+	implementation(libs.jna.jpms)
+	implementation(libs.jna.jpms.platform)
 
 	implementation(project(":releases"))
 	implementation(project(":build-info"))
@@ -86,7 +158,7 @@ tasks.withType<AbstractTestTask>().configureEach {
 
 val setAppName = "Open-eCard-App"
 val setAppVendor = "ecsec GmbH"
-val setAppLicenseFile: String = projectDir.resolve("../../LICENSE.GPL").path
+val setAppLicenseFile = projectDir.resolve("../../LICENSE.GPL")
 val setAppAboutUrl = "https://openecard.org/"
 val setAppVersion =
 	VersionNumber.parse(project.version.toString()).let {
@@ -94,19 +166,30 @@ val setAppVersion =
 	}
 val macSigningId: String? = System.getenv("MAC_SIGNING_ID")
 
-tasks.register<Copy>("copyDependencies") {
-	from(configurations.runtimeClasspath).into(layout.buildDirectory.dir("jars"))
+val copyJars by tasks.registering(Copy::class) {
+	from(configurations.runtimeClasspath) {
+		exclude { it.name.startsWith("javafx") }
+		rename("oec_smartcard_pcsc-native", "oec_smartcard_pcsc-nativelib")
+	}.into(layout.buildDirectory.dir("jars"))
 }
-tasks.register<Copy>("copyJar") {
+val copyMods by tasks.registering(Copy::class) {
+	from(configurations.runtimeClasspath) {
+		include { it.name.startsWith("javafx") }
+	}.into(layout.buildDirectory.dir("jars/mods"))
+}
+val copyJar by tasks.registering(Copy::class) {
 	from(tasks.jar).into(layout.buildDirectory.dir("jars"))
 }
+val copyDependencies by tasks.registering {
+	dependsOn(copyJars)
+	dependsOn(copyMods)
+	dependsOn(copyJar)
+}
 
-fun JPackageTask.applyDefaults() {
-	input =
-		layout.buildDirectory
-			.dir("jars")
-			.get()
-			.toString()
+fun JPackageTask.applyDefaults(imageType: ImageType) {
+	verbose = false
+
+	input = layout.buildDirectory.dir("jars")
 	mainJar =
 		tasks.jar
 			.get()
@@ -114,11 +197,8 @@ fun JPackageTask.applyDefaults() {
 			.get()
 	mainClass = application.mainClass.get()
 
-	destination =
-		layout.buildDirectory
-			.dir("dist")
-			.get()
-			.toString()
+	type = imageType
+	destination = layout.buildDirectory.dir("dist/${imageType.name}")
 	javaOptions =
 		listOf(
 			"-XX:-UsePerfData",
@@ -131,12 +211,18 @@ fun JPackageTask.applyDefaults() {
 			"-XX:G1ReservePercent=5",
 			"-Djavax.xml.stream.isSupportingExternalEntities=false",
 			"-Djavax.xml.stream.supportDTD=false",
+			"--module-path",
+			"\$APPDIR${File.separator}mods",
+			"--add-modules",
+			"javafx.swing,javafx.controls,javafx.fxml",
 		)
 	appName = setAppName
 	appVersion = setAppVersion
 	vendor = setAppVendor
-	licenseFile = setAppLicenseFile
-	aboutUrl = setAppAboutUrl
+	if (imageType != ImageType.APP_IMAGE) {
+		licenseFile = setAppLicenseFile
+		aboutUrl = setAppAboutUrl
+	}
 	copyright = "Copyright (C) ${LocalDate.now().year} ecsec GmbH"
 	appDescription = "Client side implementation of the eCard-API-Framework (BSI TR-03112)"
 
@@ -148,21 +234,23 @@ fun JPackageTask.applyDefaults() {
 
 // configs for the packages
 
-fun JPackageTask.linuxConfigs() {
-// 	resourceDir = layout.projectDirectory.dir("src/main/package/linux").toString()
-	icon = layout.projectDirectory.dir("src/main/package/linux/Open-eCard-App.png").toString()
-	linuxDebMaintainer = "tobias.wich@ecsec.de"
-	linuxPackageName = "open-ecard-app"
-	linuxAppCategory = "utils"
-// 	linuxRpmLicenseType = "GPLv3+"
-	linuxMenuGroup = "Network"
-// 	linuxPackageDeps = false
+fun JPackageTask.linuxConfigs(imageType: ImageType) {
+// 	resourceDir = layout.projectDirectory.dir("src/main/package/linux")
+	icon = layout.projectDirectory.file("src/main/package/linux/Open-eCard-App.png")
+	if (imageType != ImageType.APP_IMAGE) {
+		linuxDebMaintainer = "tobias.wich@ecsec.de"
+		linuxPackageName = "open-ecard-app"
+		linuxAppCategory = "utils"
+		// linuxRpmLicenseType = "GPLv3+"
+		linuxMenuGroup = "Network"
+		// linuxPackageDeps = false
+	}
 }
 
 fun JPackageTask.windowsConfigs() {
-	resourceDir = layout.projectDirectory.dir("src/main/package/win").toString()
+	resourceDir = layout.projectDirectory.dir("src/main/package/win")
 
-	icon = layout.projectDirectory.dir("src/main/package/win/Open-eCard-App.ico").toString()
+	icon = layout.projectDirectory.file("src/main/package/win/Open-eCard-App.ico")
 
 	winDirChooser = true
 	winMenuGroup = "misc"
@@ -172,9 +260,9 @@ fun JPackageTask.windowsConfigs() {
 }
 
 fun JPackageTask.macConfigs() {
-	resourceDir = layout.projectDirectory.dir("src/main/package/mac").toString()
+	resourceDir = layout.projectDirectory.dir("src/main/package/mac")
 
-	icon = layout.projectDirectory.dir("src/main/package/mac/Open-eCard-App.icns").toString()
+	icon = layout.projectDirectory.file("src/main/package/mac/Open-eCard-App.icns")
 	macPackageName = "Open-eCard-App"
 	macPackageIdentifier = "org.openecard.versioncheck.MainLoader"
 
@@ -193,43 +281,53 @@ fun JPackageTask.macConfigs() {
 
 // linux packaging
 
-tasks.register("packageDeb", JPackageTask::class) {
+val packageDeb by tasks.registering(JPackageTask::class) {
 	group = "Distribution"
 	description = "Creates a DEB package for installation."
 
 	onlyIf("OS is not Linux") {
 		Platform.isLinux()
 	}
-	dependsOn("copyDependencies", "copyJar")
+	dependsOn(copyDependencies)
 
-	applyDefaults()
-	linuxConfigs()
-
-	type = ImageType.DEB
+	applyDefaults(ImageType.DEB)
+	linuxConfigs(ImageType.DEB)
 }
 
-tasks.register("packageRpm", JPackageTask::class) {
+val packageRpm by tasks.registering(JPackageTask::class) {
 	group = "Distribution"
 	description = "Creates a RPM package for installation."
 
 	onlyIf("OS is not Linux") {
 		Platform.isLinux()
 	}
-	dependsOn("copyDependencies", "copyJar")
+	dependsOn(copyDependencies)
 
-	applyDefaults()
-	linuxConfigs()
-
-	type = ImageType.RPM
+	applyDefaults(ImageType.RPM)
+	linuxConfigs(ImageType.RPM)
 }
 
-tasks.register("packageLinux") {
+val packageAppImage by tasks.registering(JPackageTask::class) {
+	group = "Distribution"
+	description = "Creates a AppImage package for installation."
+
+	onlyIf("OS is not Linux") {
+		Platform.isLinux()
+	}
+	dependsOn(copyDependencies)
+
+	applyDefaults(ImageType.APP_IMAGE)
+	linuxConfigs(ImageType.APP_IMAGE)
+}
+
+val packageLinux by tasks.registering {
 	group = "Distribution"
 	description = "Creates DEB and RPM packages for linux systems."
 
 	dependsOn(
-		"packageDeb",
-		"packageRpm",
+		packageDeb,
+		packageRpm,
+		// packageAppImage,
 	)
 }
 
@@ -324,11 +422,11 @@ abstract class MacSignLibrariesTask
 		}
 	}
 
-tasks.register<MacSignLibrariesTask>("prepareMacBundle") {
+val prepareMacBundle by tasks.registering(MacSignLibrariesTask::class) {
 	onlyIf("OS is not Mac") {
 		Platform.isMac()
 	}
-	dependsOn("copyDependencies", "copyJar")
+	dependsOn(copyDependencies)
 
 	// skip this task if no signingId is configured
 	if (macSigningId != null) {
@@ -359,34 +457,30 @@ tasks.register<MacSignLibrariesTask>("prepareMacBundle") {
 	compressionLevel = Deflater.BEST_COMPRESSION
 }
 
-tasks.register("packageDmg", JPackageTask::class) {
+val packageDmg by tasks.registering(JPackageTask::class) {
 	group = "Distribution"
 	description = "Creates a DMG package for installation."
 
 	onlyIf("OS is not Mac") {
 		Platform.isMac()
 	}
-	dependsOn("prepareMacBundle")
+	dependsOn(prepareMacBundle)
 
-	applyDefaults()
+	applyDefaults(ImageType.DMG)
 	macConfigs()
-
-	type = ImageType.DMG
 }
 
-tasks.register("packagePkg", JPackageTask::class) {
+val packagePkg by tasks.registering(JPackageTask::class) {
 	group = "Distribution"
 	description = "Creates a PKG package for installation."
 
 	onlyIf("OS is not Mac") {
 		Platform.isMac()
 	}
-	dependsOn("prepareMacBundle")
+	dependsOn(prepareMacBundle)
 
-	applyDefaults()
+	applyDefaults(ImageType.PKG)
 	macConfigs()
-
-	type = ImageType.PKG
 }
 
 tasks.register("packageMac") {
@@ -394,14 +488,14 @@ tasks.register("packageMac") {
 	description = "Creates DMG and PKG packages for Mac systems."
 
 	dependsOn(
-		"packagePkg",
-		"packageDmg",
+		packagePkg,
+		packageDmg,
 	)
 }
 
 // windows packaging
 
-tasks.register("packageMsi", JPackageTask::class) {
+val packageMsi by tasks.registering(JPackageTask::class) {
 	group = "Distribution"
 	description = "Creates a MSI package for installation."
 
@@ -416,16 +510,14 @@ tasks.register("packageMsi", JPackageTask::class) {
 	onlyIf("OS is not Windows") {
 		Platform.isWindows()
 	}
-	dependsOn("copyDependencies", "copyJar")
+	dependsOn(copyDependencies)
 
-	applyDefaults()
+	applyDefaults(ImageType.MSI)
 	windowsConfigs()
-
-	type = ImageType.MSI
 }
 
 val issWorkDir = layout.buildDirectory.dir("iscc")
-tasks.register("prepareIsccFile", Copy::class) {
+val prepareIsccFile by tasks.registering(Copy::class) {
 
 	val iconPath = projectDir.resolve("src/main/package/win/Open-eCard-App.ico").toString()
 	val bmpPath = projectDir.resolve("src/main/package/win/Open-eCard-App-setup-icon.bmp").toString()
@@ -440,8 +532,8 @@ tasks.register("prepareIsccFile", Copy::class) {
 			.replace("\$vendor", setAppVendor)
 			.replace("\$appUrl", setAppAboutUrl)
 			.replace("\$identifier", setAppName)
-			.replace("\$licensePath", setAppLicenseFile)
-			.replace("\$outPath", "$projectDir\\build\\dist")
+			.replace("\$licensePath", setAppLicenseFile.path)
+			.replace("\$outPath", "$projectDir\\build\\dist\\EXE")
 			.replace("\$iconFile", iconPath)
 			.replace("\$bmpPath", bmpPath)
 			.replace("\$msiPath", "$projectDir\\build\\jpfiles\\image\\Open-eCard-App")
@@ -451,14 +543,14 @@ tasks.register("prepareIsccFile", Copy::class) {
 	outputs.upToDateWhen { false }
 }
 
-tasks.register("packageExe", Exec::class) {
+val packageExe by tasks.registering(Exec::class) {
 	group = "Distribution"
 	description = "Creates a EXE for installation."
 
 	onlyIf("OS is not Windows") {
 		Platform.isWindows()
 	}
-	dependsOn("copyDependencies", "copyJar", "packageMsi", "prepareIsccFile")
+	dependsOn(copyDependencies, packageMsi, prepareIsccFile)
 
 	workingDir(issWorkDir)
 	executable("iscc")
@@ -470,7 +562,7 @@ tasks.register("packageWindows") {
 	description = "Creates EXE and MSI packages for Windows systems."
 
 	dependsOn(
-		"packageExe",
-		"packageMsi",
+		packageExe,
+		packageMsi,
 	)
 }

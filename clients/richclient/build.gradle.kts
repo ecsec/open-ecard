@@ -186,7 +186,9 @@ val copyDependencies by tasks.registering {
 	dependsOn(copyJar)
 }
 
-fun JPackageTask.applyDefaults() {
+fun JPackageTask.applyDefaults(imageType: ImageType) {
+	verbose = false
+
 	input = layout.buildDirectory.dir("jars")
 	mainJar =
 		tasks.jar
@@ -195,7 +197,8 @@ fun JPackageTask.applyDefaults() {
 			.get()
 	mainClass = application.mainClass.get()
 
-	destination = layout.buildDirectory.dir("dist")
+	type = imageType
+	destination = layout.buildDirectory.dir("dist/${imageType.name}")
 	javaOptions =
 		listOf(
 			"-XX:-UsePerfData",
@@ -216,8 +219,10 @@ fun JPackageTask.applyDefaults() {
 	appName = setAppName
 	appVersion = setAppVersion
 	vendor = setAppVendor
-	licenseFile = setAppLicenseFile
-	aboutUrl = setAppAboutUrl
+	if (imageType != ImageType.APP_IMAGE) {
+		licenseFile = setAppLicenseFile
+		aboutUrl = setAppAboutUrl
+	}
 	copyright = "Copyright (C) ${LocalDate.now().year} ecsec GmbH"
 	appDescription = "Client side implementation of the eCard-API-Framework (BSI TR-03112)"
 
@@ -229,15 +234,17 @@ fun JPackageTask.applyDefaults() {
 
 // configs for the packages
 
-fun JPackageTask.linuxConfigs() {
+fun JPackageTask.linuxConfigs(imageType: ImageType) {
 // 	resourceDir = layout.projectDirectory.dir("src/main/package/linux")
 	icon = layout.projectDirectory.file("src/main/package/linux/Open-eCard-App.png")
-	linuxDebMaintainer = "tobias.wich@ecsec.de"
-	linuxPackageName = "open-ecard-app"
-	linuxAppCategory = "utils"
-// 	linuxRpmLicenseType = "GPLv3+"
-	linuxMenuGroup = "Network"
-// 	linuxPackageDeps = false
+	if (imageType != ImageType.APP_IMAGE) {
+		linuxDebMaintainer = "tobias.wich@ecsec.de"
+		linuxPackageName = "open-ecard-app"
+		linuxAppCategory = "utils"
+		// linuxRpmLicenseType = "GPLv3+"
+		linuxMenuGroup = "Network"
+		// linuxPackageDeps = false
+	}
 }
 
 fun JPackageTask.windowsConfigs() {
@@ -283,10 +290,8 @@ val packageDeb by tasks.registering(JPackageTask::class) {
 	}
 	dependsOn(copyDependencies)
 
-	applyDefaults()
-	linuxConfigs()
-
-	type = ImageType.DEB
+	applyDefaults(ImageType.DEB)
+	linuxConfigs(ImageType.DEB)
 }
 
 val packageRpm by tasks.registering(JPackageTask::class) {
@@ -298,10 +303,21 @@ val packageRpm by tasks.registering(JPackageTask::class) {
 	}
 	dependsOn(copyDependencies)
 
-	applyDefaults()
-	linuxConfigs()
+	applyDefaults(ImageType.RPM)
+	linuxConfigs(ImageType.RPM)
+}
 
-	type = ImageType.RPM
+val packageAppImage by tasks.registering(JPackageTask::class) {
+	group = "Distribution"
+	description = "Creates a AppImage package for installation."
+
+	onlyIf("OS is not Linux") {
+		Platform.isLinux()
+	}
+	dependsOn(copyDependencies)
+
+	applyDefaults(ImageType.APP_IMAGE)
+	linuxConfigs(ImageType.APP_IMAGE)
 }
 
 val packageLinux by tasks.registering {
@@ -311,6 +327,7 @@ val packageLinux by tasks.registering {
 	dependsOn(
 		packageDeb,
 		packageRpm,
+		// packageAppImage,
 	)
 }
 
@@ -449,10 +466,8 @@ val packageDmg by tasks.registering(JPackageTask::class) {
 	}
 	dependsOn(prepareMacBundle)
 
-	applyDefaults()
+	applyDefaults(ImageType.DMG)
 	macConfigs()
-
-	type = ImageType.DMG
 }
 
 val packagePkg by tasks.registering(JPackageTask::class) {
@@ -464,10 +479,8 @@ val packagePkg by tasks.registering(JPackageTask::class) {
 	}
 	dependsOn(prepareMacBundle)
 
-	applyDefaults()
+	applyDefaults(ImageType.PKG)
 	macConfigs()
-
-	type = ImageType.PKG
 }
 
 tasks.register("packageMac") {
@@ -499,10 +512,8 @@ val packageMsi by tasks.registering(JPackageTask::class) {
 	}
 	dependsOn(copyDependencies)
 
-	applyDefaults()
+	applyDefaults(ImageType.MSI)
 	windowsConfigs()
-
-	type = ImageType.MSI
 }
 
 val issWorkDir = layout.buildDirectory.dir("iscc")
@@ -522,7 +533,7 @@ val prepareIsccFile by tasks.registering(Copy::class) {
 			.replace("\$appUrl", setAppAboutUrl)
 			.replace("\$identifier", setAppName)
 			.replace("\$licensePath", setAppLicenseFile.path)
-			.replace("\$outPath", "$projectDir\\build\\dist")
+			.replace("\$outPath", "$projectDir\\build\\dist\\EXE")
 			.replace("\$iconFile", iconPath)
 			.replace("\$bmpPath", bmpPath)
 			.replace("\$msiPath", "$projectDir\\build\\jpfiles\\image\\Open-eCard-App")

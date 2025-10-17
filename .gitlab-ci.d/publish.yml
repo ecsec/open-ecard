@@ -25,6 +25,7 @@ publish-to-github:
     #     https://uploads.github.com/repos/ecsec/open-ecard/releases/${RELEASE_ID}/assets?name=OpenEcard-CocoaPod.zip
 
     # Upload all installers
+    - mv clients/richclient/build/dist/*/* clients/richclient/build/dist/
     - INSTALLERS=(clients/richclient/build/dist/*)
     - >-
       for INSTALLER in "${INSTALLERS[@]}"; do

@@ -13,11 +13,11 @@ collect-installers:
       - "*.exe"
   script:
     - >-
-      cp  clients/richclient/build/dist/*.pkg \
-          clients/richclient/build/dist/*.dmg \
-          clients/richclient/build/dist/*.deb \
-          clients/richclient/build/dist/*.rpm \
-          clients/richclient/build/dist/*.exe \
+      cp  clients/richclient/build/dist/PKG/*.pkg \
+          clients/richclient/build/dist/DMG/*.dmg \
+          clients/richclient/build/dist/DEB/*.deb \
+          clients/richclient/build/dist/RPM/*.rpm \
+          clients/richclient/build/dist/EXE/*.exe \
           .
   dependencies:
     - "package-linux"

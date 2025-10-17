@@ -169,6 +169,7 @@ val macSigningId: String? = System.getenv("MAC_SIGNING_ID")
 val copyJars by tasks.registering(Copy::class) {
 	from(configurations.runtimeClasspath) {
 		exclude { it.name.startsWith("javafx") }
+		rename("oec_smartcard_pcsc-native", "oec_smartcard_pcsc-nativelib")
 	}.into(layout.buildDirectory.dir("jars"))
 }
 val copyMods by tasks.registering(Copy::class) {

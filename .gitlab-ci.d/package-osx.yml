@@ -43,8 +43,8 @@ notarize-osx:
       - clients/richclient/build/dist
   script:
     - security unlock-keychain -p ${MAC_OS_KEYCHAIN_PW}
-    - DMG_FILE_PATH=$(find clients/richclient/build/dist -name 'Open-eCard-App-*.dmg')
-    - PKG_FILE_PATH=$(find clients/richclient/build/dist -name 'Open-eCard-App-*.pkg')
+    - DMG_FILE_PATH=$(find clients/richclient/build/dist/DMG -name 'Open-eCard-App-*.dmg')
+    - PKG_FILE_PATH=$(find clients/richclient/build/dist/PKG -name 'Open-eCard-App-*.pkg')
     - xcrun notarytool submit ${DMG_FILE_PATH}
         --keychain-profile "oec-installers"
         --wait

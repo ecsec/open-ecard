@@ -1,3 +1,5 @@
+package org.openecard.gui.graphics
+
 /****************************************************************************
  * Copyright (C) 2025 ecsec GmbH.
  * All rights reserved.

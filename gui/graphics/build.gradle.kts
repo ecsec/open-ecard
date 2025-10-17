@@ -20,7 +20,7 @@ kotlin {
 		}
 		val jvmMain by getting {
 			dependencies {
-				api(libs.apache.batik)
+				api(libs.apache.batik.transcoder)
 			}
 		}
 		val jvmTest by getting {

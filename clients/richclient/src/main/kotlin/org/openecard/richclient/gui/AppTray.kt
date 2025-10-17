@@ -27,6 +27,9 @@ import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.Separator
 import dorkbox.systemTray.SystemTray
 import io.github.oshai.kotlinlogging.KotlinLogging
+import javafx.application.Platform
+import javafx.event.EventHandler
+import javafx.stage.Stage
 import org.openecard.build.BuildInfo
 import org.openecard.common.util.SysUtils
 import org.openecard.i18n.I18N
@@ -34,6 +37,7 @@ import org.openecard.richclient.RichClient
 import org.openecard.richclient.gui.graphics.OecIconType
 import org.openecard.richclient.gui.graphics.oecImage
 import org.openecard.richclient.gui.manage.ManagementDialog
+import org.openecard.richclient.pinmanagement.PinManager
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.sc.CifDb
 import java.awt.Color
@@ -41,8 +45,6 @@ import java.awt.Container
 import java.awt.Dimension
 import java.awt.Frame
 import java.awt.Image
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.util.concurrent.ExecutionException
@@ -52,7 +54,6 @@ import java.util.concurrent.TimeoutException
 import javax.swing.ImageIcon
 import javax.swing.JFrame
 import javax.swing.JLabel
-import kotlin.system.exitProcess
 
 private val LOG = KotlinLogging.logger { }
 
@@ -70,13 +71,15 @@ private const val ICON_LOGO: String = "logo"
  * @author Tobias Wich
  */
 class AppTray(
-	private val client: RichClient,
+	val client: RichClient,
 ) {
 	private var tray: SystemTray? = null
 	var status: Status? = null
 		private set
 	private var frame: InfoFrame? = null
 	private var infoPopupActive = false
+
+	private var pinManager: PinManager? = null
 
 	/**
 	 * Starts the setup process.
@@ -113,8 +116,6 @@ class AppTray(
 	/**
 	 * Finishes the setup process.
 	 * The loading icon is replaced with the eCard logo.
-	 *
-	 * @param manager
 	 */
 	fun endSetup(
 		cifDb: CifDb,
@@ -136,55 +137,59 @@ class AppTray(
 			tray.menu.add(
 				MenuItem(
 					I18N.strings.richclient_tray_card_status.localized(),
-					object : ActionListener {
-						override fun actionPerformed(e: ActionEvent) {
-							if (!infoPopupActive) {
-								val frame = setupFrame(false)
-								frame.setStatusPane(statusObj)
-								frame.addWindowListener(
-									object : WindowAdapter() {
-										override fun windowClosed(e: WindowEvent) {
-											infoPopupActive = false
+				) {
+					if (!infoPopupActive) {
+						val frame = setupFrame(false)
+						frame.setStatusPane(statusObj)
+						frame.addWindowListener(
+							object : WindowAdapter() {
+								override fun windowClosed(e: WindowEvent) {
+									infoPopupActive = false
+								}
+							},
+						)
+						infoPopupActive = true
+					}
+				},
+			)
+			tray.menu.add(
+				MenuItem(
+					I18N.strings.pinplugin_name.localized(),
+				) {
+					when (val pm = pinManager) {
+						null -> {
+							Platform.runLater {
+								pinManager =
+									PinManager.create(cardWatcher).also { pm ->
+										pm.addOnCloseHandler {
+											pinManager = null
 										}
-									},
-								)
-								infoPopupActive = true
+										pm.openManagerDialog()
+									}
 							}
 						}
-					},
-				),
+						else -> {
+							pm.toFront()
+						}
+					}
+				},
 			)
 			tray.menu.add(Separator())
 			tray.menu.add(
 				MenuItem(
 					I18N.strings.richclient_tray_about.localized(),
-					object : ActionListener {
-						override fun actionPerformed(e: ActionEvent) {
-							AboutDialog.showDialog()
-						}
-					},
-				),
+				) { AboutDialog.showDialog() },
 			)
 			tray.menu.add(
 				MenuItem(
 					I18N.strings.richclient_tray_config.localized(),
-					object : ActionListener {
-						override fun actionPerformed(e: ActionEvent) {
-							ManagementDialog.showDialog()
-						}
-					},
-				),
+				) { ManagementDialog.showDialog() },
 			)
 			tray.menu.add(Separator())
 			tray.menu.add(
 				MenuItem(
 					I18N.strings.richclient_tray_exit.localized(),
-					object : ActionListener {
-						override fun actionPerformed(e: ActionEvent) {
-							shutdown()
-						}
-					},
-				),
+				) { client.teardown() },
 			)
 		}
 
@@ -194,12 +199,15 @@ class AppTray(
 	/**
 	 * Removes the tray icon from the tray and terminates the application.
 	 */
-	fun shutdown() {
+	fun shutdownUi() {
+		// TODO: remove tray menu elements and show status
+		pinManager?.closeManagementDialog()
 		status?.stopCardWatcher()
+	}
+
+	fun removeTray() {
 		tray?.shutdown()
 		tray = null
-		client.teardown()
-		exitProcess(0)
 	}
 
 	private fun setupFrame(standalone: Boolean): InfoFrame =

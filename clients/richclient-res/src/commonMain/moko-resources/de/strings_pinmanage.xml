@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<string name="pinmanage_name">PIN-Verwaltung</string>
+	<string name="pinmanage_select_card">Wählen Sie eine Karte aus</string>
+
+	<!-- Resume PIN -->
+	<string name="pinmanage_npa_pin_suspend_title">PIN entsperren</string>
+	<string name="pinmanage_npa_pin_suspend_description">
+		Ihre PIN wurde auf Grund zweier Falscheingaben gesperrt.
+		Um die PIN zu entsperren, müssen Sie die Kartenkennnummer (CAN) und die aktuellen PIN eingeben.
+		Die CAN finden Sie auf der Vorderseite Ihres Personalausweises.\n
+		Bitte beachten Sie: Wenn die eingegebene PIN nicht korrekt ist, wird die Karte gesperrt und muss mit dem PUK
+		entsperrt werden.
+	</string>
+
+	<string name="pinmanage_npa_pin_suspend_can_field_initial">CAN eingeben</string>
+	<string name="pinmanage_npa_pin_suspend_pin_field_initial">PIN eingeben</string>
+	<string name="pinmanage_npa_pin_suspend_error_empty_can">Bitte geben Sie die CAN ein.</string>
+	<string name="pinmanage_npa_pin_suspend_error_invalid_can">Die CAN muss 5 oder 6 Ziffern lang sein.</string>
+	<string name="pinmanage_npa_pin_suspend_error_empty_pin">Bitte geben Sie Ihre PIN ein.</string>
+	<string name="pinmanage_npa_pin_suspend_error_invalid_pin">Die PIN muss 5 oder 6 Ziffern lang sein.</string>
+
+	<!-- Change PIN -->
+	<string name="pinmanage_npa_pin_change_title">PIN ändern</string>
+	<string name="pinmanage_npa_pin_change_description">Hier können Sie Ihre PIN ändern.</string>
+	<string name="pinmanage_npa_pin_change_old_field_initial">Bisherige PIN</string>
+	<string name="pinmanage_npa_pin_change_new_field_initial">Neue PIN</string>
+	<string name="pinmanage_npa_pin_change_repeat_field_initial">Erneut neue PIN</string>
+	<string name="pinmanage_npa_pin_change_error_empty_fields">Alle Felder müssen ausgefüllt sein.</string>
+	<string name="pinmanage_npa_pin_change_error_invalid_length">Jede PIN muss 5 oder 6 Ziffern lang sein.</string>
+	<string name="pinmanage_npa_pin_change_error_mismatch">Die Eingaben der neuen PIN stimmen nicht überein.</string>
+
+	<!-- Unblock PIN -->
+	<string name="pinmanage_npa_pin_unblock_title">PIN entsperren</string>
+	<string name="pinmanage_npa_pin_unblock_description">Ihre PIN ist gesperrt und muss mit Ihrem Personal Unblocking
+		Key (PUK) entsperrt werden.
+	</string>
+	<string name="pinmanage_npa_pin_unblock_puk_field_initial">PUK</string>
+	<string name="pinmanage_npa_pin_unblock_error_empty_puk">Bitte geben Sie den PUK ein.</string>
+	<string name="pinmanage_npa_pin_unblock_error_invalid_puk">Der PUK muss genau 10 Ziffern lang sein.</string>
+
+	<!-- Common -->
+	<string name="pinmanage_common_submit_button">Bestätigen</string>
+	<string name="pinmanage_common_error_title">Fehler</string>
+	<string name="pinmanage_common_success_title">Erfolg</string>
+
+	<string name="pinmanage_message_unknown_status">PIN-Status konnte nicht ermittelt werden.</string>
+	<string name="pinmanage_message_pin_changed">PIN wurde erfolgreich geändert.</string>
+	<string name="pinmanage_message_pin_incorrect">PIN falsch. Noch 2 Versuche übrig.</string>
+	<string name="pinmanage_message_pin_suspended">PIN ist gesperrt. Bitte geben Sie die CAN ein.</string>
+	<string name="pinmanage_message_pin_blocked">PIN ist blockiert. Bitte geben Sie die PUK ein.</string>
+	<string name="pinmanage_message_pin_change_failed">PIN-Änderung fehlgeschlagen.</string>
+	<string name="pinmanage_message_wrong_can">Falsche CAN. Bitte erneut versuchen.</string>
+	<string name="pinmanage_message_pin_recovered">PIN wurde erfolgreich entsperrt.</string>
+	<string name="pinmanage_message_pin_recovery_failed">PIN-Wiederherstellung fehlgeschlagen. Bitte erneut versuchen.
+	</string>
+	<string name="pinmanage_message_pin_unblocked">PIN wurde erfolgreich entsperrt.</string>
+	<string name="pinmanage_message_wrong_puk">Falsche PUK. Bitte erneut versuchen.</string>
+	<string name="pinmanage_message_card_removed">Karte oder Kartenterminal wurde entfernt.</string>
+	<string name="pinmanage_message_terminal_not_supported">Dieses Kartenlesegerät wird nicht unterstützt.</string>
+</resources>

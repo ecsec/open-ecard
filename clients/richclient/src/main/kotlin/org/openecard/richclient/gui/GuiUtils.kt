@@ -23,13 +23,16 @@
 package org.openecard.richclient.gui
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import javafx.embed.swing.SwingFXUtils
 import java.awt.Image
 import java.awt.Toolkit
+import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
 import javax.imageio.ImageIO
 import javax.swing.ImageIcon
+import javax.swing.SwingUtilities
 
 private val LOG = KotlinLogging.logger { }
 

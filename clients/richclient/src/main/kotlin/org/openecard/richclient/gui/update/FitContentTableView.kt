@@ -63,6 +63,9 @@ class FitContentTableView<T> : TableView<T>() {
 				// resize columns to fit content and prevent further resizing by the user
 				super.setColumnResizePolicy(Callback { p: ResizeFeatures<*>? -> true })
 			}
+			else -> {
+				// no-op
+			}
 		}
 	}
 }

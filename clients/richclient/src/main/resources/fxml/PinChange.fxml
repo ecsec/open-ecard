@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.openecard.richclient.pinmanagement.npa.PinChangeViewController"
+	  alignment="CENTER" spacing="10" stylesheets="@../styles.css">
+	<padding>
+		<Insets top="20" right="20" bottom="20" left="20"/>
+	</padding>
+	<Label styleClass="title" text="%pinmanage_npa_pin_change_title"/>
+	<Label text="%pinmanage_npa_pin_change_description" wrapText="true"/>
+	<PasswordField fx:id="oldPinField" promptText="%pinmanage_npa_pin_change_old_field_initial"/>
+	<PasswordField fx:id="newPinField" promptText="%pinmanage_npa_pin_change_new_field_initial"/>
+	<PasswordField fx:id="repeatPinField" promptText="%pinmanage_npa_pin_change_repeat_field_initial"/>
+	<Button text="%pinmanage_common_submit_button" onAction="#handleSubmit"/>
+	<Label fx:id="errorLabel" styleClass="error-label"/>
+</VBox>

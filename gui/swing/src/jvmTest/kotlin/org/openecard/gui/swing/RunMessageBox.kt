@@ -21,9 +21,8 @@
  ***************************************************************************/
 package org.openecard.gui.swing
 
-import org.openecard.gui.graphics.oecImage
-import org.junit.jupiter.api.Disabled
 import org.openecard.gui.UserConsent
+import org.openecard.gui.graphics.oecImage
 import org.openecard.gui.message.DialogType
 import org.openecard.gui.message.MessageDialogResult
 import org.openecard.gui.message.OptionType
@@ -32,6 +31,7 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import javax.imageio.ImageIO
 import kotlin.test.BeforeTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -64,14 +64,14 @@ class RunMessageBox {
 			return imageInByte
 		}
 
-	@Disabled
+	@Ignore
 	@Test
 	fun showMessage() {
 		val messageBox = uc.obtainMessageDialog()
 		messageBox.showMessageDialog(MSG, TITLE)
 	}
 
-	@Disabled
+	@Ignore
 	@Test
 	fun showMessage2() {
 		val messageBox = uc.obtainMessageDialog()
@@ -82,7 +82,7 @@ class RunMessageBox {
 		)
 	}
 
-	@Disabled
+	@Ignore
 	@Test
 	@Throws(IOException::class)
 	fun showMessage3() {
@@ -95,7 +95,7 @@ class RunMessageBox {
 		)
 	}
 
-	@Disabled
+	@Ignore
 	@Test
 	fun showConfirmDialog() {
 		val messageBox = uc.obtainMessageDialog()
@@ -107,7 +107,7 @@ class RunMessageBox {
 		assertEquals(result.returnValue, ReturnType.CANCEL)
 	}
 
-	@Disabled
+	@Ignore
 	@Test
 	fun showConfirmDialog2() {
 		val messageBox = uc.obtainMessageDialog()
@@ -116,7 +116,7 @@ class RunMessageBox {
 		assertEquals(result.returnValue, ReturnType.OK)
 	}
 
-	@Disabled
+	@Ignore
 	@Test
 	fun showConfirmDialog3() {
 		val messageBox = uc.obtainMessageDialog()
@@ -130,7 +130,7 @@ class RunMessageBox {
 		assertEquals(result.returnValue, ReturnType.OK)
 	}
 
-	@Disabled
+	@Ignore
 	@Test
 	@Throws(IOException::class)
 	fun showConfirmDialog4() {
@@ -146,7 +146,7 @@ class RunMessageBox {
 		assertEquals(result.returnValue, ReturnType.OK)
 	}
 
-	@Disabled
+	@Ignore
 	@Test
 	fun showInputDialog() {
 		val messageBox = uc.obtainMessageDialog()
@@ -155,7 +155,7 @@ class RunMessageBox {
 		assertEquals(result.userInput, "test")
 	}
 
-	@Disabled
+	@Ignore
 	@Test
 	fun showInputDialog2() {
 		val messageBox = uc.obtainMessageDialog()
@@ -164,7 +164,7 @@ class RunMessageBox {
 		assertEquals(result.userInput, "initialValue")
 	}
 
-	@Disabled
+	@Ignore
 	@Test
 	fun showInputDialog3() {
 		val messageBox = uc.obtainMessageDialog()
@@ -173,7 +173,7 @@ class RunMessageBox {
 		assertEquals(result.returnValue, ReturnType.OK)
 	}
 
-	@Disabled
+	@Ignore
 	@Test
 	@Throws(IOException::class)
 	fun showInputDialog4() {
@@ -191,7 +191,7 @@ class RunMessageBox {
 		assertEquals(result.userInput, "three")
 	}
 
-	@Disabled
+	@Ignore
 	@Test
 	@Throws(IOException::class)
 	fun showOptionDialog() {

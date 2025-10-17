@@ -166,11 +166,25 @@ val setAppVersion =
 	}
 val macSigningId: String? = System.getenv("MAC_SIGNING_ID")
 
-tasks.register<Copy>("copyDependencies") {
-	from(configurations.runtimeClasspath).into(layout.buildDirectory.dir("jars"))
+val copyJars by tasks.register<Copy>("copyJars") {
+	from(configurations.runtimeClasspath) {
+		exclude { it.name.startsWith("javafx") }
+	}.into(layout.buildDirectory.dir("jars"))
 }
-tasks.register<Copy>("copyJar") {
-	from(tasks.jar).into(layout.buildDirectory.dir("jars"))
+val copyMods =
+	tasks.register<Copy>("copyMods") {
+		from(configurations.runtimeClasspath) {
+			include { it.name.startsWith("javafx") }
+		}.into(layout.buildDirectory.dir("jars/mods"))
+	}
+val copyJar =
+	tasks.register<Copy>("copyJar") {
+		from(tasks.jar).into(layout.buildDirectory.dir("jars"))
+	}
+tasks.register<Copy>("copyDependencies") {
+	dependsOn(copyJars)
+	dependsOn(copyMods)
+	dependsOn(copyJar)
 }
 
 fun JPackageTask.applyDefaults() {
@@ -195,6 +209,10 @@ fun JPackageTask.applyDefaults() {
 			"-XX:G1ReservePercent=5",
 			"-Djavax.xml.stream.isSupportingExternalEntities=false",
 			"-Djavax.xml.stream.supportDTD=false",
+			"--module-path",
+			"\$APPDIR/mods",
+			"--add-modules",
+			"javafx.swing,javafx.controls,javafx.fxml",
 		)
 	appName = setAppName
 	appVersion = setAppVersion
@@ -264,7 +282,7 @@ tasks.register("packageDeb", JPackageTask::class) {
 	onlyIf("OS is not Linux") {
 		Platform.isLinux()
 	}
-	dependsOn("copyDependencies", "copyJar")
+	dependsOn("copyDependencies")
 
 	applyDefaults()
 	linuxConfigs()
@@ -279,7 +297,7 @@ tasks.register("packageRpm", JPackageTask::class) {
 	onlyIf("OS is not Linux") {
 		Platform.isLinux()
 	}
-	dependsOn("copyDependencies", "copyJar")
+	dependsOn("copyDependencies")
 
 	applyDefaults()
 	linuxConfigs()
@@ -392,7 +410,7 @@ tasks.register<MacSignLibrariesTask>("prepareMacBundle") {
 	onlyIf("OS is not Mac") {
 		Platform.isMac()
 	}
-	dependsOn("copyDependencies", "copyJar")
+	dependsOn("copyDependencies")
 
 	// skip this task if no signingId is configured
 	if (macSigningId != null) {
@@ -480,7 +498,7 @@ tasks.register("packageMsi", JPackageTask::class) {
 	onlyIf("OS is not Windows") {
 		Platform.isWindows()
 	}
-	dependsOn("copyDependencies", "copyJar")
+	dependsOn("copyDependencies")
 
 	applyDefaults()
 	windowsConfigs()
@@ -522,7 +540,7 @@ tasks.register("packageExe", Exec::class) {
 	onlyIf("OS is not Windows") {
 		Platform.isWindows()
 	}
-	dependsOn("copyDependencies", "copyJar", "packageMsi", "prepareIsccFile")
+	dependsOn("copyDependencies", "packageMsi", "prepareIsccFile")
 
 	workingDir(issWorkDir)
 	executable("iscc")

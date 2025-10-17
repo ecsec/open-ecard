@@ -93,6 +93,15 @@ configurations.all {
 		}
 		because("use jna-platform jpms module instead of plain jna-platform")
 	}
+
+	resolutionStrategy {
+		eachDependency {
+			if (requested.group == "org.apache.xmlgraphics" && requested.name.contains("batik")) {
+				useTarget("${requested.group}:${requested.name}:${libs.versions.apache.batik.get()}")
+				because("Old versions of batik are not Java module aware")
+			}
+		}
+	}
 }
 
 dependencies {
@@ -112,7 +121,7 @@ dependencies {
 
 	// basic runtime deps
 	implementation(project(":clients:richclient-res"))
-	implementation(libs.apache.batik)
+	// implementation(libs.apache.batik)
 	implementation(libs.systray)
 
 	implementation(libs.jna.jpms)

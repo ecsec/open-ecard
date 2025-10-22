@@ -32,6 +32,7 @@ sealed class AlgorithmIdentifier(
 	) : AlgorithmIdentifier(algorithm, parameters)
 
 	companion object {
+		@Throws(IllegalArgumentException::class)
 		@OptIn(ExperimentalUnsignedTypes::class)
 		fun Tlv.toAlgorithmIdentifier(): AlgorithmIdentifier {
 			val childTags = requireNotNull(this.asConstructed?.child).asList()

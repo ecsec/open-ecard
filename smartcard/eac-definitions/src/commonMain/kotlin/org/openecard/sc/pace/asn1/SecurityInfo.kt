@@ -1,6 +1,7 @@
 package org.openecard.sc.pace.asn1
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.serialization.SerializationException
 import org.openecard.sc.pace.asn1.ChipAuthenticationDomainParameterInfo.Companion.toChipAuthenticationDomainParameterInfo
 import org.openecard.sc.pace.asn1.ChipAuthenticationInfo.Companion.toChipAuthenticationInfo
 import org.openecard.sc.pace.asn1.ChipAuthenticationPublicKeyInfo.Companion.toChipAuthenticationPublicKeyInfo
@@ -10,6 +11,7 @@ import org.openecard.sc.pace.asn1.PsPublicKeyInfo.Companion.toPsPublicKeyInfo
 import org.openecard.sc.pace.asn1.PsaInfo.Companion.toPsaInfo
 import org.openecard.sc.tlv.ObjectIdentifier
 import org.openecard.sc.tlv.Tlv
+import org.openecard.sc.tlv.TlvException
 import org.openecard.sc.tlv.toObjectIdentifier
 
 private val log = KotlinLogging.logger { }
@@ -18,6 +20,7 @@ sealed class SecurityInfo(
 	val protocol: ObjectIdentifier,
 ) {
 	companion object {
+		@Throws(IllegalArgumentException::class, TlvException::class, SerializationException::class)
 		@OptIn(ExperimentalUnsignedTypes::class)
 		fun Tlv.toSecurityInfo(): Set<SecurityInfo> {
 			// the tlv is a set of SecurityInfos

@@ -101,6 +101,7 @@ fun UByteArray.toObjectIdentifier(): ObjectIdentifier {
 	return ObjectIdentifier(oidStr)
 }
 
+@Throws(IllegalArgumentException::class)
 @OptIn(ExperimentalUnsignedTypes::class)
 fun Tlv.toObjectIdentifier(tag: Tag = Tag.OID_TAG): ObjectIdentifier {
 	require(this.tag == tag) { "The tag of the TLV ($tag) is not the expected tag." }

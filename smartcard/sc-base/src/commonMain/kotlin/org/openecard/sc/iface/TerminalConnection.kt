@@ -4,9 +4,21 @@ import org.openecard.sc.iface.feature.Feature
 
 interface TerminalConnection {
 	val terminal: Terminal
-
-	val isCardConnected: Boolean
 	val card: Card?
+
+	@Throws(
+		InsufficientBuffer::class,
+		InvalidHandle::class,
+		InvalidParameter::class,
+		NoMemory::class,
+		NoService::class,
+		ReaderUnavailable::class,
+		CommError::class,
+		InternalSystemError::class,
+		ResetCard::class,
+		RemovedCard::class,
+	)
+	fun isCardConnected(): Boolean
 
 	@Throws(
 		InvalidHandle::class,

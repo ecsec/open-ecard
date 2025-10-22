@@ -4,6 +4,7 @@ import dev.whyoleg.cryptography.bigint.decodeToBigInt
 import dev.whyoleg.cryptography.bigint.toUInt
 import dev.whyoleg.cryptography.serialization.asn1.Der
 import dev.whyoleg.cryptography.serialization.asn1.modules.SubjectPublicKeyInfo
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromByteArray
 import org.openecard.sc.pace.asn1.AlgorithmIdentifier.Companion.toAlgorithmIdentifier
 import org.openecard.sc.pace.oid.CaObjectIdentifier
@@ -64,6 +65,7 @@ class ChipAuthenticationPublicKeyInfo(
 
 		fun isResponsible(protocol: ObjectIdentifier): Boolean = protocol.value in possibleProtocols
 
+		@Throws(IllegalArgumentException::class, SerializationException::class)
 		@OptIn(ExperimentalUnsignedTypes::class)
 		fun List<Tlv>.toChipAuthenticationPublicKeyInfo(protocol: ObjectIdentifier): ChipAuthenticationPublicKeyInfo {
 			val chipAuthenticationPublicKey: SubjectPublicKeyInfo = Der.decodeFromByteArray(this[1].toBer().toByteArray())
@@ -102,6 +104,7 @@ class ChipAuthenticationDomainParameterInfo(
 
 		fun isResponsible(protocol: ObjectIdentifier): Boolean = protocol.value in possibleProtocols
 
+		@Throws(IllegalArgumentException::class)
 		@OptIn(ExperimentalUnsignedTypes::class)
 		fun List<Tlv>.toChipAuthenticationDomainParameterInfo(
 			protocol: ObjectIdentifier,
@@ -141,6 +144,7 @@ class PsaInfo(
 
 		fun isResponsible(protocol: ObjectIdentifier): Boolean = protocol.value in possibleProtocols
 
+		@Throws(IllegalArgumentException::class, SerializationException::class)
 		@OptIn(ExperimentalUnsignedTypes::class)
 		fun List<Tlv>.toPsaInfo(protocol: ObjectIdentifier): PsaInfo {
 			// TODO: parse requiredData correctly
@@ -150,6 +154,7 @@ class PsaInfo(
 			return PsaInfo(protocol, requiredData, keyId)
 		}
 
+		@Throws(IllegalArgumentException::class, SerializationException::class)
 		@OptIn(ExperimentalUnsignedTypes::class)
 		private fun Tlv.toRequiredData(): RequiredData {
 			val children =
@@ -199,6 +204,7 @@ class PsPublicKeyInfo(
 
 		fun isResponsible(protocol: ObjectIdentifier): Boolean = protocol.value in possibleProtocols
 
+		@Throws(IllegalArgumentException::class, SerializationException::class)
 		@OptIn(ExperimentalUnsignedTypes::class)
 		fun List<Tlv>.toPsPublicKeyInfo(protocol: ObjectIdentifier): PsPublicKeyInfo {
 			// PSPKRequiredData ::= SEQUENCE {

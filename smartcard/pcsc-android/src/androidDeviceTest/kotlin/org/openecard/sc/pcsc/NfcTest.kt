@@ -39,7 +39,7 @@ class TestActivity : Activity() {
 
 	/**
 	 * In a test below we want to check if nfc-stack is working after a user pauses and resumes the app
-	 * Since "onNewIntent" causes a pause/resume we have to make sure the we don't set this flag if resumption
+	 * Since "onNewIntent" causes a pause/resume we have to make sure that we don't set this flag if resumption
 	 * was caused by "onNewIntent"
 	 */
 	var wasPaused = false
@@ -177,7 +177,7 @@ class NfcTest {
 	fun testConnect() {
 		runBackgroundTestJobWithActivity { activity ->
 			connectWithTimeout(activity) { connection ->
-				assertTrue(connection.isCardConnected, "Card not connected")
+				assertTrue(connection.isCardConnected(), "Card not connected")
 				assertNotNull(connection.card.atr()) { "Atr could not be read" }
 			}
 		}
@@ -188,7 +188,7 @@ class NfcTest {
 	fun testTerminalState() {
 		runBackgroundTestJobWithActivity { activity ->
 			connectWithTimeout(activity) { connection ->
-				assertTrue(connection.isCardConnected, "Card not connected")
+				assertTrue(connection.isCardConnected(), "Card not connected")
 
 				val androidTerminal = connection.terminal
 				assertEquals(TerminalStateType.PRESENT, androidTerminal.getState())
@@ -282,7 +282,7 @@ class NfcTest {
 
 						terminals.androidTerminal.waitForCardPresent()
 						countDown.cancelAndJoin()
-						assertTrue { terminals.androidTerminal.connect().isCardConnected }
+						assertTrue { terminals.androidTerminal.connect().isCardConnected() }
 					}
 				} ?: fail("Could not establish context")
 			}
@@ -317,7 +317,7 @@ class NfcTest {
 
 						terminals.androidTerminal.waitForCardPresent()
 						countDown.cancelAndJoin()
-						assertTrue { terminals.androidTerminal.connect().isCardConnected }
+						assertTrue { terminals.androidTerminal.connect().isCardConnected() }
 					}
 				}
 			}

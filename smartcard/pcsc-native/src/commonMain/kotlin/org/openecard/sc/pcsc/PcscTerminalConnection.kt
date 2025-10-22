@@ -14,11 +14,10 @@ class PcscTerminalConnection(
 	private val hwCard: au.id.micolous.kotlin.pcsc.Card,
 	override val terminal: PcscTerminal,
 ) : TerminalConnection {
-	override val isCardConnected: Boolean
-		get() {
-			log.trace { "calling PCSC [$this] Card.status()" }
-			return mapScioError { hwCard.status().present }
-		}
+	override fun isCardConnected(): Boolean {
+		log.trace { "calling PCSC [$this] Card.status()" }
+		return mapScioError { hwCard.status().present }
+	}
 
 	private var _card: PcscCard? = getCardInstance()
 

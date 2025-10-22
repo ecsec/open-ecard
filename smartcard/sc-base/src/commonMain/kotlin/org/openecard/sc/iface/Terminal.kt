@@ -22,6 +22,7 @@ interface Terminal {
 		UnknownReader::class,
 		Timeout::class,
 		Cancelled::class,
+		InternalSystemError::class,
 	)
 	fun isCardPresent(): Boolean
 
@@ -34,6 +35,7 @@ interface Terminal {
 		UnknownReader::class,
 		Timeout::class,
 		Cancelled::class,
+		InternalSystemError::class,
 	)
 	fun getState(): TerminalStateType
 
@@ -94,6 +96,7 @@ interface Terminal {
 		ReaderUnavailable::class,
 		UnknownReader::class,
 		Timeout::class,
+		InternalSystemError::class,
 	)
 	suspend fun waitForCardPresent()
 
@@ -107,6 +110,7 @@ interface Terminal {
 		ReaderUnavailable::class,
 		UnknownReader::class,
 		Timeout::class,
+		InternalSystemError::class,
 	)
 	suspend fun waitForCardAbsent()
 }
@@ -122,6 +126,7 @@ interface Terminal {
 	UnknownReader::class,
 	Timeout::class,
 	Cancelled::class,
+	InternalSystemError::class,
 )
 fun Terminal.waitForCardPresent(
 	timeout: Duration,
@@ -141,6 +146,7 @@ fun Terminal.waitForCardPresent(
 	UnknownReader::class,
 	Timeout::class,
 	Cancelled::class,
+	InternalSystemError::class,
 )
 fun Terminal.waitForCardAbsent(
 	timeout: Duration,

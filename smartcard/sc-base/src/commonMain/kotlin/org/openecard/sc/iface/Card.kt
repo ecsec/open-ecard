@@ -13,10 +13,18 @@ interface Card {
 	 * Card Capabilities object.
 	 * Implementations can use the ones from the `ATR`, or it can be set explicitly after reading `EF.ATR`.
 	 */
-	@Throws(CommError::class, RemovedCard::class)
+	@Throws(
+		CommError::class,
+		RemovedCard::class,
+		InternalSystemError::class,
+	)
 	fun getCapabilities(): CardCapabilities? = atr().historicalBytes?.cardCapabilities ?: setCapabilities
 
-	@Throws(CommError::class, RemovedCard::class)
+	@Throws(
+		CommError::class,
+		RemovedCard::class,
+		InternalSystemError::class,
+	)
 	fun atr(): Atr
 
 	@Throws(
@@ -32,6 +40,7 @@ interface Card {
 		ResetCard::class,
 		RemovedCard::class,
 		LogicalChannelException::class,
+		InternalSystemError::class,
 	)
 	fun openLogicalChannel(): CardChannel
 }

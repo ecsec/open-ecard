@@ -16,8 +16,7 @@ class IosTerminalConnection(
 
 	override var card: IosNfcCard = IosNfcCard(this)
 
-	override val isCardConnected
-		get() = terminal.currentSession?.tag?.available == true
+	override fun isCardConnected() = terminal.currentSession?.tag?.available == true
 
 	override fun disconnect(disposition: CardDisposition) =
 		logger.debug {

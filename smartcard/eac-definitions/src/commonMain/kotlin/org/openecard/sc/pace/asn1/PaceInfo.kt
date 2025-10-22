@@ -1,10 +1,12 @@
 package org.openecard.sc.pace.asn1
 
 import dev.whyoleg.cryptography.serialization.asn1.Der
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromByteArray
 import org.openecard.sc.pace.oid.PaceObjectIdentifier
 import org.openecard.sc.tlv.ObjectIdentifier
 import org.openecard.sc.tlv.Tlv
+import org.openecard.sc.tlv.TlvException
 
 interface PaceParameterIdentifiable {
 	val parameterId: UInt?
@@ -118,6 +120,7 @@ class PaceInfo(
 
 		fun isResponsible(protocol: ObjectIdentifier): Boolean = protocol.value in possibleProtocols
 
+		@Throws(TlvException::class, IllegalArgumentException::class, SerializationException::class)
 		@OptIn(ExperimentalUnsignedTypes::class)
 		fun List<Tlv>.toPaceInfo(protocol: ObjectIdentifier): PaceInfo {
 			val version: Int = Der.decodeFromByteArray(this[1].toBer().toByteArray())
@@ -144,6 +147,7 @@ class PaceDomainParameterInfo(
 
 		fun isResponsible(protocol: ObjectIdentifier): Boolean = protocol.value in possibleProtocols
 
+		@Throws(IllegalArgumentException::class, SerializationException::class)
 		@OptIn(ExperimentalUnsignedTypes::class)
 		fun List<Tlv>.toPaceDomainParameterInfo(protocol: ObjectIdentifier): PaceDomainParameterInfo {
 			val domainParameter: AlgorithmIdentifier = Der.decodeFromByteArray(this[1].toBer().toByteArray())

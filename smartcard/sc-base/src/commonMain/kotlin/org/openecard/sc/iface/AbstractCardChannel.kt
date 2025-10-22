@@ -15,7 +15,7 @@ abstract class AbstractCardChannel : CardChannel {
 
 	override fun setSecureMessaging(sm: SecureMessaging) {
 		if (smHandler != null) {
-			throw IllegalStateException("Secure Messaging is already active in this channel")
+			throw InternalSystemError("Secure Messaging is already active in this channel")
 		}
 		smHandler = sm
 	}

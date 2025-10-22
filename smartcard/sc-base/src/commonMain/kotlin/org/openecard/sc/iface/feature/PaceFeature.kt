@@ -6,6 +6,7 @@ import org.openecard.sc.apdu.command.SecurityCommandFailure
 import org.openecard.sc.apdu.toStatusWord
 import org.openecard.sc.iface.CommError
 import org.openecard.sc.iface.InsufficientBuffer
+import org.openecard.sc.iface.InternalSystemError
 import org.openecard.sc.iface.InvalidHandle
 import org.openecard.sc.iface.InvalidParameter
 import org.openecard.sc.iface.InvalidValue
@@ -54,6 +55,7 @@ interface PaceFeature : Feature {
 		ResetCard::class,
 		RemovedCard::class,
 		PaceError::class,
+		InternalSystemError::class,
 		CancellationException::class,
 	)
 	suspend fun establishChannel(req: PaceEstablishChannelRequest): PaceEstablishChannelResponse

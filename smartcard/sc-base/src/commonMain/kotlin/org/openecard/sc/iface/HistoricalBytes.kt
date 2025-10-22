@@ -1,6 +1,7 @@
 package org.openecard.sc.iface
 
 import org.openecard.sc.iface.info.ApplicationIdentifier
+import org.openecard.sc.tlv.TlvException
 import org.openecard.sc.tlv.TlvPrimitive
 import org.openecard.sc.tlv.toTlvCompact
 import org.openecard.utils.common.toUShort
@@ -39,6 +40,7 @@ class HistoricalBytes
 	}
 
 @OptIn(ExperimentalUnsignedTypes::class)
+@Throws(IndexOutOfBoundsException::class, IllegalArgumentException::class, TlvException::class)
 fun UByteArray.toHistoricalBytes(): HistoricalBytes? {
 	if (this.isEmpty()) {
 		return null

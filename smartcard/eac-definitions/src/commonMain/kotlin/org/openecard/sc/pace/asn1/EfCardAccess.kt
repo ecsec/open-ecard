@@ -1,5 +1,6 @@
 package org.openecard.sc.pace.asn1
 
+import kotlinx.serialization.SerializationException
 import org.openecard.sc.apdu.ApduProcessingError
 import org.openecard.sc.apdu.command.ReadBinary
 import org.openecard.sc.apdu.command.Select
@@ -18,6 +19,7 @@ import org.openecard.sc.iface.RemovedCard
 import org.openecard.sc.iface.ResetCard
 import org.openecard.sc.pace.asn1.SecurityInfo.Companion.toSecurityInfo
 import org.openecard.sc.pace.oid.PaceObjectIdentifier
+import org.openecard.sc.tlv.TlvException
 import org.openecard.sc.tlv.toTlvBer
 
 class EfCardAccess
@@ -90,6 +92,7 @@ class EfCardAccess
 			val efCardAccessFileId: UShort = 0x011Cu
 			val efCardAccessShortFileId: UByte = 0x1Cu
 
+			@Throws(TlvException::class, IllegalArgumentException::class, SerializationException::class)
 			@OptIn(ExperimentalUnsignedTypes::class)
 			fun UByteArray.toEfCardAccess(): EfCardAccess {
 				val tlv = this.toTlvBer().tlv

@@ -21,8 +21,7 @@ class AndroidTerminalConnection(
 
 	override var card = AndroidNfcCard(this)
 
-	override val isCardConnected
-		get() = tag?.isConnected == true
+	override fun isCardConnected() = tag?.isConnected == true
 
 	override fun disconnect(disposition: CardDisposition) {
 		when (disposition) {

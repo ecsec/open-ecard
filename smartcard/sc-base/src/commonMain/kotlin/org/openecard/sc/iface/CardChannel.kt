@@ -26,6 +26,7 @@ interface CardChannel {
 		ResetCard::class,
 		RemovedCard::class,
 		SecureMessagingException::class,
+		InternalSystemError::class,
 	)
 	fun transmit(apdu: CommandApdu): ResponseApdu
 
@@ -42,10 +43,13 @@ interface CardChannel {
 		ResetCard::class,
 		RemovedCard::class,
 		LogicalChannelException::class,
+		InternalSystemError::class,
 	)
 	fun close()
 
+	@Throws(InternalSystemError::class)
 	fun setSecureMessaging(sm: SecureMessaging)
 
+	@Throws(InternalSystemError::class)
 	fun removeSecureMessaging()
 }

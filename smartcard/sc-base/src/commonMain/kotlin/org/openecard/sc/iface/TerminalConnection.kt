@@ -26,6 +26,7 @@ interface TerminalConnection {
 		NoService::class,
 		NoSmartcard::class,
 		CommError::class,
+		InternalSystemError::class,
 	)
 	fun disconnect(disposition: CardDisposition = CardDisposition.LEAVE)
 
@@ -67,6 +68,7 @@ interface TerminalConnection {
 		CommError::class,
 		RemovedCard::class,
 		ResetCard::class,
+		InternalSystemError::class,
 	)
 	fun getFeatures(): Set<Feature>
 
@@ -77,6 +79,7 @@ interface TerminalConnection {
 		ReaderUnavailable::class,
 		SharingViolation::class,
 		CommError::class,
+		InternalSystemError::class,
 	)
 	fun beginTransaction()
 
@@ -87,6 +90,7 @@ interface TerminalConnection {
 		ReaderUnavailable::class,
 		SharingViolation::class,
 		CommError::class,
+		InternalSystemError::class,
 	)
 	fun endTransaction()
 }
@@ -103,5 +107,6 @@ interface TerminalConnection {
 	CommError::class,
 	RemovedCard::class,
 	ResetCard::class,
+	InternalSystemError::class,
 )
 inline fun <reified FT : Feature> TerminalConnection.feature(): FT? = getFeatures().filterIsInstance<FT>().firstOrNull()

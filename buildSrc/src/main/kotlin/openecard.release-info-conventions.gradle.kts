@@ -54,6 +54,9 @@ abstract class ReleaseInfoTask : DefaultTask() {
 	var releaseJwtPath = "release-info.jwt"
 
 	@get:Input
+	var tagPrefix = "v"
+
+	@get:Input
 	val currentVersion: Property<String> = project.objects.property()
 
 	@get:Input
@@ -76,7 +79,7 @@ abstract class ReleaseInfoTask : DefaultTask() {
 		val curVersion = currentVersion.get().toVersion()
 		val currentArtifacts = getCurrentArtifacts(curVersion)
 
-		val tagVersions = getLatestGitReleaseVersions(curVersion)
+		val tagVersions = getLatestGitReleaseVersions(curVersion = curVersion, tagPrefix = tagPrefix)
 		logger.info("Found versions in git tags: ${tagVersions.joinToString(", ")}")
 		val latestVersion = tagVersions.first()
 		val isMaintenanceRelease = latestVersion != curVersion
@@ -152,13 +155,16 @@ abstract class ReleaseInfoTask : DefaultTask() {
 		}
 	}
 
-	private fun getLatestGitReleaseVersions(curVersion: Version): List<Version> =
+	private fun getLatestGitReleaseVersions(
+		curVersion: Version,
+		tagPrefix: String,
+	): List<Version> =
 		Git.open(project.rootDir).use { git ->
-			val tags = git.repository.refDatabase.getRefsByPrefix("refs/tags/v")
+			val tags = git.repository.refDatabase.getRefsByPrefix("refs/tags/$tagPrefix")
 			val versions: List<Version> =
 				tags
 					.mapNotNull {
-						val versionStr = it.name.removePrefix("refs/tags/v")
+						val versionStr = it.name.removePrefix("refs/tags/$tagPrefix")
 						versionStr.toVersionOrNull()
 					}.filter {
 						it.isStable

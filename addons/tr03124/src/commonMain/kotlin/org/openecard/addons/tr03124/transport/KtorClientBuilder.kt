@@ -8,7 +8,7 @@ interface KtorClientBuilder {
 	val redirectClient: HttpClient
 	val checkCertClient: CertValidationClient
 
-	fun buildEidServerClient(token: TcToken): HttpClient
+	fun buildEidServerClient(token: TcToken.TcTokenOk): HttpClient
 }
 
 expect fun newKtorClientBuilder(certTracker: EserviceCertTracker): KtorClientBuilder

@@ -1,69 +1,63 @@
 package org.openecard.addons.tr03124.xml
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
-import nl.adaptivity.xmlutil.XmlDeclMode
-import nl.adaptivity.xmlutil.serialization.XML
-import nl.adaptivity.xmlutil.serialization.XmlElement
-import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import org.openecard.utils.serialization.PrintableUByteArray
+import kotlin.jvm.Throws
 
-@Serializable
-@SerialName("TCTokenType")
-data class TcToken(
-	@SerialName("ServerAddress")
-	@XmlElement
-	val serverAddress: String,
-	@SerialName("SessionIdentifier")
-	@XmlElement
-	val sessionIdentifier: String,
-	@SerialName("RefreshAddress")
-	@XmlElement
-	val refreshAddress: String,
-	@SerialName("CommunicationErrorAddress")
-	@XmlElement
-	val communicationErrorAddress: String?,
-	@XmlSerialName("Binding")
-	val binding: BindingType,
-	@XmlSerialName("PathSecurity-Protocol")
-	val securityProtocol: SecurityProtocolType?,
-	@XmlSerialName("PathSecurity-Parameters")
-	val securityParameters: PskParams?,
-) {
-	enum class BindingType {
-		@SerialName("urn:liberty:paos:2006-08")
-		PAOS,
+sealed interface TcToken {
+	val communicationErrorAddress: String?
+
+	sealed interface TcTokenOk : TcToken {
+		val serverAddress: String
+		val sessionIdentifier: String
+		val refreshAddress: String
+		override val communicationErrorAddress: String?
+		val binding: TcTokenXml.BindingType
 	}
 
-	enum class SecurityProtocolType {
-		@SerialName("urn:ietf:rfc:4279")
-		TLS_PSK,
-	}
+	data class TcTokenPsk(
+		override val serverAddress: String,
+		override val sessionIdentifier: String,
+		override val refreshAddress: String,
+		override val communicationErrorAddress: String?,
+		override val binding: TcTokenXml.BindingType,
+		val psk: PrintableUByteArray,
+	) : TcTokenOk
 
-	// Polymorphic serializer is very tricky as discriminator (PathSecurity-Protocol) is in the parent element
-	// When only doing nPA, we don't need this, so skip it for now
-	@Serializable
-	sealed interface SecurityParameters
+	data class TcTokenAttached(
+		override val serverAddress: String,
+		override val sessionIdentifier: String,
+		override val refreshAddress: String,
+		override val communicationErrorAddress: String?,
+		override val binding: TcTokenXml.BindingType,
+	) : TcTokenOk
 
-	@Serializable
-	class PskParams
-		@OptIn(ExperimentalUnsignedTypes::class)
-		constructor(
-			@SerialName("PSK")
-			@XmlElement
-			val psk: PrintableUByteArray,
-		) : SecurityParameters
+	data class TcTokenError(
+		override val communicationErrorAddress: String,
+	) : TcToken
 
 	companion object {
-		val Xml =
-			XML {
-				xmlDeclMode = XmlDeclMode.None
-				defaultPolicy {
-					this.verifyElementOrder = false
+		@Throws(IllegalArgumentException::class)
+		fun TcTokenXml.toTcToken(): TcToken =
+			if (serverAddress != null && serverAddress.isNotEmpty() && sessionIdentifier != null && refreshAddress != null &&
+				refreshAddress.isNotEmpty() &&
+				binding != null
+			) {
+				if (securityProtocol == TcTokenXml.SecurityProtocolType.TLS_PSK && securityParameters != null) {
+					TcTokenPsk(
+						serverAddress,
+						sessionIdentifier,
+						refreshAddress,
+						communicationErrorAddress,
+						binding,
+						securityParameters.psk,
+					)
+				} else {
+					TcTokenAttached(serverAddress, sessionIdentifier, refreshAddress, communicationErrorAddress, binding)
 				}
+			} else if (communicationErrorAddress != null) {
+				TcTokenError(communicationErrorAddress)
+			} else {
+				throw IllegalArgumentException("Received TCToken which neither usable, nor represents an error")
 			}
-
-		fun String.toTcToken(): TcToken = eacXml.decodeFromString(this)
 	}
 }

@@ -147,20 +147,18 @@ class CertTrackingClientBuilder(
 		}
 	}
 
-	override fun buildEidServerClient(token: TcToken): HttpClient {
-		val params = token.securityParameters
-		return when (token.securityProtocol) {
-			null if params == null -> {
+	@OptIn(ExperimentalUnsignedTypes::class)
+	override fun buildEidServerClient(token: TcToken.TcTokenOk): HttpClient =
+		when (token) {
+			is TcToken.TcTokenAttached -> {
 				log.info { "Building attached eID-Server PAOS client" }
 				buildAttachedClient()
 			}
-			TcToken.SecurityProtocolType.TLS_PSK if params != null -> {
+			is TcToken.TcTokenPsk -> {
 				log.info { "Building PSK PAOS client" }
-				buildPskClient(token.sessionIdentifier, params)
+				buildPskClient(token.sessionIdentifier, token.psk.v.toByteArray())
 			}
-			else -> throw IllegalArgumentException("TCToken contains invalid combination of eID-Server coordinates")
 		}
-	}
 
 	private fun buildAttachedClient(): HttpClient =
 		HttpClient(OkHttp) {
@@ -201,7 +199,7 @@ class CertTrackingClientBuilder(
 
 	private fun buildPskClient(
 		session: String,
-		psk: TcToken.PskParams,
+		psk: ByteArray,
 	): HttpClient =
 		HttpClient(OkHttp) {
 			engine {
@@ -248,7 +246,7 @@ object SslSettings {
 	@OptIn(ExperimentalUnsignedTypes::class)
 	fun getPskSocketFactory(
 		session: String,
-		psk: TcToken.PskParams,
+		psk: ByteArray,
 	): SSLSocketFactory =
 		BcPskSSLSocketFactory(
 			BcPskTlsParams(
@@ -262,7 +260,7 @@ object SslSettings {
 						CipherSuite.TLS_RSA_PSK_WITH_AES_128_GCM_SHA256,
 					),
 			),
-			BasicTlsPSKIdentity(session, psk.psk.v.toByteArray()),
+			BasicTlsPSKIdentity(session, psk),
 		)
 
 	@OptIn(ExperimentalUnsignedTypes::class)

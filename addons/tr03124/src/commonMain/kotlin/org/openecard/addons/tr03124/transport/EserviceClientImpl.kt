@@ -16,6 +16,7 @@ import org.openecard.addons.tr03124.UnkownServerError
 import org.openecard.addons.tr03124.xml.StartPaos
 import org.openecard.addons.tr03124.xml.TcToken
 import org.openecard.addons.tr03124.xml.TcToken.Companion.toTcToken
+import org.openecard.addons.tr03124.xml.TcTokenXml.Companion.parseTcToken
 import kotlin.random.Random
 
 private val log = KotlinLogging.logger { }
@@ -27,8 +28,9 @@ internal class EserviceClientImpl(
 ) : EserviceClient {
 	private var tokenUrl: String? = null
 	private var token: TcToken? = null
+	private var tokenOk: TcToken.TcTokenOk? = null
 
-	override suspend fun fetchToken(tokenUrl: String): TcToken {
+	override suspend fun fetchToken(tokenUrl: String): TcToken.TcTokenOk {
 		log.info { "Fetching TCToken from '$tokenUrl'" }
 		check(token == null) { "Fetching multiple TCTokens with the same client" }
 		this.tokenUrl = tokenUrl
@@ -45,35 +47,47 @@ internal class EserviceClientImpl(
 		}
 
 		val tokenStr = tokenRes.bodyAsText()
-		val receivedToken = tokenStr.toTcToken()
-		token = receivedToken
+		try {
+			val receivedToken = tokenStr.parseTcToken().toTcToken()
+			token = receivedToken
 
-		// make some basic checks as specified in TR-03124-1, Sec.
-		checkToken(receivedToken)
-
-		return receivedToken
+			// make some basic checks as specified in TR-03124-1, Sec.
+			val tokenOk = checkToken(receivedToken)
+			this.tokenOk = tokenOk
+			return tokenOk
+		} catch (ex: IllegalArgumentException) {
+			throw InvalidServerData(this, "The retrieved TCToken could not be parsed correctly", ex)
+		}
 	}
 
 	@Throws(BindingException::class)
-	private fun checkToken(token: TcToken) {
+	private fun checkToken(token: TcToken): TcToken.TcTokenOk {
 		log.info { "Performing basic validation checks on received TCToken" }
-		// check if this is an error token and we need to stop right away
-		if (token.refreshAddress.isEmpty() && token.serverAddress.isEmpty()) {
-			throw UnkownServerError(this, "Server aborted by sending an error TCToken")
-		}
-
-		val nonHttpsUrl =
-			listOfNotNull(token.refreshAddress, token.serverAddress, token.communicationErrorAddress).any {
-				!it.startsWith("https://")
+		when (token) {
+			is TcToken.TcTokenOk -> {
+				val nonHttpsUrl =
+					listOfNotNull(token.refreshAddress, token.serverAddress, token.communicationErrorAddress).any {
+						!it.startsWith("https://")
+					}
+				if (nonHttpsUrl) {
+					throw InvalidServerData(this, "Insecure URL scheme used in TCToken")
+				}
+				return token
 			}
-		if (nonHttpsUrl) {
-			throw InvalidServerData(this, "Insecure URL scheme used in TCToken")
+			is TcToken.TcTokenError -> {
+				if (!token.communicationErrorAddress.startsWith("https://")) {
+					// forbid to use this address by deleting the token
+					this.token = null
+					throw InvalidServerData(this, "Insecure URL scheme used in TCToken")
+				}
+				throw UnkownServerError(this, "Server aborted by sending an error TCToken")
+			}
 		}
 	}
 
 	override fun buildEidServerInterface(startPaos: StartPaos): EidServerInterface {
 		log.info { "Creating PAOS client" }
-		val token = checkNotNull(token) { "Trying to build eID-Server client without fetching TCToken first" }
+		val token = checkNotNull(tokenOk) { "Trying to build eID-Server client without fetching TCToken first" }
 		val paosClient = serviceClient.buildEidServerClient(token)
 		return EidServerPaos(this, token.serverAddress, paosClient, startPaos, random)
 	}
@@ -82,6 +96,7 @@ internal class EserviceClientImpl(
 		determineRefreshUrl()?.let {
 			BindingResponse.RedirectResponse(HttpStatusCode.SeeOther.value, it.addOk())
 		} ?: reportCommunicationError()
+			?: returnCommunicationErrorPage()
 
 	override suspend fun redirectToEservice(
 		minorError: String,
@@ -90,14 +105,16 @@ internal class EserviceClientImpl(
 		determineRefreshUrl()?.let {
 			BindingResponse.RedirectResponse(HttpStatusCode.SeeOther.value, it.addError(minorError, errorMsg))
 		} ?: reportCommunicationError()
+			?: returnCommunicationErrorPage()
 
 	private suspend fun determineRefreshUrl(): String? {
 		log.info { "Determining refresh URL" }
 		try {
 			val tokenUrl = tokenUrl
-			val token = token
+			val token = tokenOk
 			if (tokenUrl == null || token == null) {
 				// no refresh detection possible as there is no token
+				log.info { "No refresh URL determination possible as there is no non-error TCToken" }
 				return null
 			}
 
@@ -147,14 +164,16 @@ internal class EserviceClientImpl(
 		}
 	}
 
-	private fun reportCommunicationError(): BindingResponse =
+	private fun reportCommunicationError() =
 		token?.communicationErrorAddress?.let {
 			BindingResponse.RedirectResponse(HttpStatusCode.SeeOther.value, it.addError("communicationError"))
 		}
-			?: BindingResponse.ReferencedContentResponse(
-				HttpStatusCode.BadRequest.value,
-				BindingResponse.ContentCode.COMMUNICATION_ERROR,
-			)
+
+	private fun returnCommunicationErrorPage() =
+		BindingResponse.ReferencedContentResponse(
+			HttpStatusCode.BadRequest.value,
+			BindingResponse.ContentCode.COMMUNICATION_ERROR,
+		)
 
 	private fun String.addOk(): String {
 		val refreshUrl = URLBuilder(this)

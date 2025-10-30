@@ -1,7 +1,7 @@
 package org.openecard.addons.tr03124.xml
 
 import org.junit.jupiter.api.assertInstanceOf
-import org.openecard.addons.tr03124.xml.TcToken.Companion.toTcToken
+import org.openecard.addons.tr03124.xml.TcTokenXml.Companion.parseTcToken
 import org.openecard.utils.common.hex
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
@@ -26,13 +26,13 @@ class TcTokenTest {
 			</TCTokenType>
 			""".trimIndent()
 
-		val token: TcToken = tokenStr.toTcToken()
+		val token = tokenStr.parseTcToken()
 		assertEquals("https://eid-server.example.de/entrypoint", token.serverAddress)
 		assertEquals("1A2BB129", token.sessionIdentifier)
 		assertEquals("https://service.example.de/loggedin?7eb39f62", token.refreshAddress)
 		assertEquals("https://service.example.de/ComError?7eb39f62", token.communicationErrorAddress)
-		assertEquals(TcToken.BindingType.PAOS, token.binding)
-		assertEquals(TcToken.SecurityProtocolType.TLS_PSK, token.securityProtocol)
-		assertContentEquals(hex("4BC1A0B5"), assertInstanceOf<TcToken.PskParams>(token.securityParameters).psk.v)
+		assertEquals(TcTokenXml.BindingType.PAOS, token.binding)
+		assertEquals(TcTokenXml.SecurityProtocolType.TLS_PSK, token.securityProtocol)
+		assertContentEquals(hex("4BC1A0B5"), assertInstanceOf<TcTokenXml.PskParams>(token.securityParameters).psk.v)
 	}
 }

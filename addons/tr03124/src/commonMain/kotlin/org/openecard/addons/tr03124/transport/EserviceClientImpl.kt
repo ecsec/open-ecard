@@ -17,7 +17,6 @@ import org.openecard.addons.tr03124.xml.StartPaos
 import org.openecard.addons.tr03124.xml.TcToken
 import org.openecard.addons.tr03124.xml.TcToken.Companion.toTcToken
 import org.openecard.addons.tr03124.xml.TcTokenXml.Companion.parseTcToken
-import org.openecard.utils.common.throwIf
 import kotlin.random.Random
 
 private val log = KotlinLogging.logger { }
@@ -97,6 +96,7 @@ internal class EserviceClientImpl(
 		determineRefreshUrl()?.let {
 			BindingResponse.RedirectResponse(HttpStatusCode.SeeOther.value, it.addOk())
 		} ?: reportCommunicationError()
+			?: returnCommunicationErrorPage()
 
 	override suspend fun redirectToEservice(
 		minorError: String,
@@ -105,6 +105,7 @@ internal class EserviceClientImpl(
 		determineRefreshUrl()?.let {
 			BindingResponse.RedirectResponse(HttpStatusCode.SeeOther.value, it.addError(minorError, errorMsg))
 		} ?: reportCommunicationError()
+			?: returnCommunicationErrorPage()
 
 	private suspend fun determineRefreshUrl(): String? {
 		log.info { "Determining refresh URL" }
@@ -113,6 +114,7 @@ internal class EserviceClientImpl(
 			val token = tokenOk
 			if (tokenUrl == null || token == null) {
 				// no refresh detection possible as there is no token
+				log.info { "No refresh URL determination possible as there is no non-error TCToken" }
 				return null
 			}
 
@@ -162,14 +164,16 @@ internal class EserviceClientImpl(
 		}
 	}
 
-	private fun reportCommunicationError(): BindingResponse =
+	private fun reportCommunicationError() =
 		token?.communicationErrorAddress?.let {
 			BindingResponse.RedirectResponse(HttpStatusCode.SeeOther.value, it.addError("communicationError"))
 		}
-			?: BindingResponse.ReferencedContentResponse(
-				HttpStatusCode.BadRequest.value,
-				BindingResponse.ContentCode.COMMUNICATION_ERROR,
-			)
+
+	private fun returnCommunicationErrorPage() =
+		BindingResponse.ReferencedContentResponse(
+			HttpStatusCode.BadRequest.value,
+			BindingResponse.ContentCode.COMMUNICATION_ERROR,
+		)
 
 	private fun String.addOk(): String {
 		val refreshUrl = URLBuilder(this)

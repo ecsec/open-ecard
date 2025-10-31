@@ -32,6 +32,11 @@ class IosNfcCard(
 	override val protocol = CardProtocol.TCL
 	override val isContactless = true
 
+	/**
+	 * iOS is always contactless, so this value is ignored.
+	 */
+	override var setContactless: Boolean? = null
+
 	override val basicChannel = IosCardChannel(this)
 
 	override var setCapabilities: CardCapabilities? = null

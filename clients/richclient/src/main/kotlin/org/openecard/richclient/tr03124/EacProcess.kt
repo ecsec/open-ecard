@@ -22,14 +22,10 @@
 
 package org.openecard.richclient.tr03124
 
-import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runInterruptible
 import org.openecard.addons.tr03124.BindingException
 import org.openecard.addons.tr03124.BindingResponse

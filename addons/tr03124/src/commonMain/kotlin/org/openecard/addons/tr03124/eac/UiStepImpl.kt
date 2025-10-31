@@ -136,6 +136,11 @@ internal class UiStepImpl(
 	private fun connectIfNeeded(): DeviceConnection =
 		ctx.card ?: run {
 			val card = ctx.session.connect(ctx.terminalName, true)
+
+			// force the card to be recognized as contactless, as there might be readers such as PersoSIM which don't
+			// detect it properly
+			card.channel.card.setContactless = true
+
 			if (card.deviceType != NpaDefinitions.cardType) {
 				runCatching { card.close(CardDisposition.LEAVE) }
 				throw DeviceUnsupported("Connected card is of type ${card.deviceType}, which is unsupported")

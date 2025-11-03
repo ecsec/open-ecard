@@ -41,7 +41,7 @@ private val logger = KotlinLogging.logger { }
 /**
  * Class capable of displaying and executing a user consent. <br></br>
  * This class is a helper to display the steps of a user consent. It displays one after the other and reacts differently
- * depending of the outcome of a step. It also executes actions associated with the steps after they are finished.
+ * depending on the outcome of a step. It also executes actions associated with the steps after they are finished.
  *
  * @author Tobias Wich
  */
@@ -55,9 +55,7 @@ class ExecutionEngine(
 		 *
 		 * @return Mapping of the step results with step ID as key.
 		 */
-		get() {
-			return Collections.unmodifiableMap(results)
-		}
+		get() = Collections.unmodifiableMap(_results)
 
 	/**
 	 * Processes the user consent associated with this instance. <br></br>
@@ -79,7 +77,7 @@ class ExecutionEngine(
 			// loop over steps. break inside loop
 			while (true) {
 				val result = next?.status
-				logger.debug { "${"Step {} finished with result {}."} ${next?.stepID} $result" }
+				logger.debug { "Step ${next?.stepID} finished with result $result." }
 				// close dialog on cancel and interrupt
 				if (result == ResultStatus.INTERRUPTED || Thread.currentThread().isInterrupted) {
 					throw ThreadTerminateException("GUI has been interrupted.")
@@ -112,7 +110,7 @@ class ExecutionEngine(
 				// replace step if told by result value
 				val replaceStep = next.replacement
 				if (replaceStep != null) {
-					logger.debug { "${replaceStep.id} ${{ "Replacing with step.id={}." }}" }
+					logger.debug { "Replacing with step.id=${replaceStep.id}" }
 					when (next.status) {
 						ResultStatus.BACK -> next = navigator.replacePrevious(replaceStep)
 						ResultStatus.OK ->
@@ -136,7 +134,7 @@ class ExecutionEngine(
 					val actionResult: StepActionResult
 					try {
 						actionResult = actionFuture.get()!!
-						logger.debug { "${"Step Action {} finished with result {}."} ${action.stepID} ${actionResult.status}" }
+						logger.debug { "Step Action ${action.stepID} finished with result ${actionResult.status}." }
 					} catch (ex: CancellationException) {
 						logger.info(ex) { "StepAction was canceled." }
 						return ResultStatus.CANCEL
@@ -158,7 +156,7 @@ class ExecutionEngine(
 					// replace step if told by result value
 					val actionReplace = actionResult.replacement
 					if (actionReplace != null) {
-						logger.debug { "${actionReplace.id} ${{ "Replacing after action with step.id={}." }}" }
+						logger.debug { "Replacing after action with step.id=${actionReplace.id}." }
 						when (actionResult.status) {
 							StepActionResultStatus.BACK -> next = navigator.replacePrevious(actionReplace)
 							StepActionResultStatus.NEXT ->

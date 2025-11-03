@@ -39,7 +39,7 @@ import org.openecard.sal.iface.RemovedDevice
 import org.openecard.sal.iface.dids.PaceDid
 import org.openecard.sc.iface.feature.PaceError
 
-private val logger = KotlinLogging.logger { }
+private val log = KotlinLogging.logger { }
 
 private val pin: String = I18N.strings.pace_pin.localized()
 private val puk: String = I18N.strings.pace_puk.localized()
@@ -58,6 +58,7 @@ abstract class AbstractPasswordStepAction(
 		val result =
 			when (this) {
 				is PaceError -> {
+					log.info(this.takeIf { log.isDebugEnabled() }) { "PACE error: ${this.message}" }
 					securityError?.let { secErr ->
 						// only update when not in suspend resumption
 						if (!isSuspendRecovery) {
@@ -97,6 +98,7 @@ abstract class AbstractPasswordStepAction(
 				is RemovedDevice,
 				is DeviceUnavailable,
 				-> {
+					log.info(this.takeIf { log.isDebugEnabled() }) { "Device removed during PACE processing: ${this.message}" }
 					state.paceDid = null
 					StepActionResult(
 						StepActionResultStatus.REPEAT,
@@ -107,9 +109,15 @@ abstract class AbstractPasswordStepAction(
 					)
 				}
 
-				is PasswordError -> StepActionResult(StepActionResultStatus.REPEAT)
+				is PasswordError -> {
+					log.info { "Password error in PACE: ${this.message}" }
+					StepActionResult(StepActionResultStatus.REPEAT)
+				}
 
-				else -> StepActionResult(StepActionResultStatus.CANCEL)
+				else -> {
+					log.info(this.takeIf { log.isDebugEnabled() }) { "Exception triggered cancel: ${this.message}" }
+					StepActionResult(StepActionResultStatus.CANCEL)
+				}
 			}
 
 		return result

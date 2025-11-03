@@ -47,12 +47,13 @@ dependencyResolutionManagement {
 
 	repositories {
 		// mavenLocal()
-		// maven {
-		// 	name = "Central Portal Snapshots"
-		// 	url = uri("https://central.sonatype.com/repository/maven-snapshots/")
-		// }
 		google()
 		mavenCentral()
+
+		maven {
+			name = "Central Portal Snapshots"
+			url = uri("https://central.sonatype.com/repository/maven-snapshots/")
+		}
 
 		maven {
 			url = uri("https://mvn.ecsec.de/repository/openecard-public")

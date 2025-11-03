@@ -55,6 +55,13 @@ abstract class AbstractPasswordStepAction(
 		step,
 	) {
 	private fun Throwable.handleCardExceptions(isSuspendRecovery: Boolean = false): StepActionResult {
+		// end any open transaction before continuing
+		state.paceDid?.application?.device?.let {
+			if (it.isExclusive) {
+				runCatching { it.endExclusive() }
+			}
+		}
+
 		val result =
 			when (this) {
 				is PaceError -> {
@@ -130,7 +137,12 @@ abstract class AbstractPasswordStepAction(
 	): StepActionResult =
 		runCatching {
 			val pace = state.waitForNpa()
-
+			// start transaction before continuing with the logic
+			pace.application.device.let {
+				if (!it.isExclusive) {
+					it.beginExclusive()
+				}
+			}
 			val result =
 				if (state.nativePace) {
 					pace.establishChannel(
@@ -166,6 +178,13 @@ abstract class AbstractPasswordStepAction(
 	): StepActionResult? =
 		runCatching {
 			val pacePin = state.waitForNpa()
+			// start transaction before continuing with the logic
+			pacePin.application.device.let {
+				if (!it.isExclusive) {
+					it.beginExclusive()
+				}
+			}
+
 			val paceCan =
 				pacePin.application.dids
 					.filterIsInstance<PaceDid>()

@@ -14,9 +14,13 @@ class SmartcardDeviceConnection(
 	override val session: SmartcardSalSession,
 	val channel: CardChannel,
 	val cif: CardInfoDefinition,
-	val isExclusive: Boolean,
+	isExclusive: Boolean,
 ) : DeviceConnection {
 	override val deviceType: String = cif.metadata.id
+
+	private var _isExclusive: Boolean = isExclusive
+	override val isExclusive: Boolean
+		get() = _isExclusive
 
 	private var _cardState: CardState = CardState(null, null, setOf())
 	val cardState: CardState
@@ -42,6 +46,18 @@ class SmartcardDeviceConnection(
 	}
 
 	internal fun findAuthDid(name: String): AuthenticationDid? = allAuthDids.find { it.name == name }
+
+	override fun beginExclusive() =
+		mapSmartcardError {
+			channel.card.terminalConnection.beginTransaction()
+			_isExclusive = true
+		}
+
+	override fun endExclusive() =
+		mapSmartcardError {
+			channel.card.terminalConnection.endTransaction()
+			_isExclusive = false
+		}
 
 	override fun close(disposition: CardDisposition) =
 		mapSmartcardError {

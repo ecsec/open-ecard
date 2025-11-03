@@ -7,6 +7,7 @@ interface
 DeviceConnection {
 	val connectionId: String
 	val session: SalSession
+	val isExclusive: Boolean
 
 	/**
 	 * An identifier of the connected device.
@@ -16,6 +17,22 @@ DeviceConnection {
 
 	val applications: List<Application>
 	val authenticatedDids: List<AuthenticationDid>
+
+	@Throws(
+		NoService::class,
+		DeviceUnavailable::class,
+		SharingViolation::class,
+		InternalSystemError::class,
+	)
+	fun beginExclusive()
+
+	@Throws(
+		NoService::class,
+		DeviceUnavailable::class,
+		SharingViolation::class,
+		InternalSystemError::class,
+	)
+	fun endExclusive()
 
 	@Throws(
 		InternalSystemError::class,

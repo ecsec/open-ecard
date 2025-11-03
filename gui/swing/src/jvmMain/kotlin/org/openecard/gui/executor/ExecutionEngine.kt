@@ -22,7 +22,6 @@
 package org.openecard.gui.executor
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.common.ThreadTerminateException
 import org.openecard.gui.ResultStatus
 import org.openecard.gui.UserConsentNavigator
 import org.openecard.gui.definition.InputInfoUnit
@@ -39,7 +38,8 @@ import java.util.concurrent.Executors
 private val logger = KotlinLogging.logger { }
 
 /**
- * Class capable of displaying and executing a user consent. <br></br>
+ * Class capable of displaying and executing a user consent.
+ *
  * This class is a helper to display the steps of a user consent. It displays one after the other and reacts differently
  * depending on the outcome of a step. It also executes actions associated with the steps after they are finished.
  *
@@ -58,7 +58,8 @@ class ExecutionEngine(
 		get() = Collections.unmodifiableMap(_results)
 
 	/**
-	 * Processes the user consent associated with this instance. <br></br>
+	 * Processes the user consent associated with this instance.
+	 *
 	 * The following algorithm is used to process the dialog.
 	 *
 	 *  1. Display the first step.
@@ -69,8 +70,9 @@ class ExecutionEngine(
 	 *
 	 *
 	 * @return Overall result of the execution.
-	 * @throws ThreadTerminateException Thrown in case the GUI has been closed externally (interrupted).
+	 * @throws InterruptedException Thrown in case the GUI has been closed externally (interrupted).
 	 */
+	@Throws(InterruptedException::class)
 	fun process(): ResultStatus {
 		try {
 			var next = navigator.next() // get first step
@@ -80,7 +82,7 @@ class ExecutionEngine(
 				logger.debug { "Step ${next?.stepID} finished with result $result." }
 				// close dialog on cancel and interrupt
 				if (result == ResultStatus.INTERRUPTED || Thread.currentThread().isInterrupted) {
-					throw ThreadTerminateException("GUI has been interrupted.")
+					throw InterruptedException("GUI has been interrupted.")
 				} else if (result == ResultStatus.CANCEL) {
 					return result
 				}
@@ -141,7 +143,7 @@ class ExecutionEngine(
 					} catch (ex: InterruptedException) {
 						logger.info(ex) { "StepAction was interrupted." }
 						navigator.close()
-						throw ThreadTerminateException("GUI has been interrupted.")
+						throw InterruptedException("GUI has been interrupted.")
 					} catch (ex: ExecutionException) {
 						logger.error(ex.cause) { "StepAction failed with error." }
 						return ResultStatus.CANCEL
@@ -192,8 +194,8 @@ class ExecutionEngine(
 		}
 	}
 
-	private fun convertStatus(`in`: StepActionResultStatus): ResultStatus =
-		when (`in`) {
+	private fun convertStatus(status: StepActionResultStatus): ResultStatus =
+		when (status) {
 			StepActionResultStatus.BACK -> ResultStatus.BACK
 			StepActionResultStatus.NEXT -> ResultStatus.OK
 			else -> ResultStatus.OK // repeat undefined for this kind of status

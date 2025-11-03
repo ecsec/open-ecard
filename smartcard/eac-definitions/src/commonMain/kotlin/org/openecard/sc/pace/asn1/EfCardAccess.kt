@@ -1,5 +1,6 @@
 package org.openecard.sc.pace.asn1
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.SerializationException
 import org.openecard.sc.apdu.ApduProcessingError
 import org.openecard.sc.apdu.command.ReadBinary
@@ -21,6 +22,8 @@ import org.openecard.sc.pace.asn1.SecurityInfo.Companion.toSecurityInfo
 import org.openecard.sc.pace.oid.PaceObjectIdentifier
 import org.openecard.sc.tlv.TlvException
 import org.openecard.sc.tlv.toTlvBer
+
+private val log = KotlinLogging.logger { }
 
 class EfCardAccess
 	@OptIn(ExperimentalUnsignedTypes::class)
@@ -134,6 +137,7 @@ class EfCardAccess
 				efCaFileId: UShort = EfCardAccess.efCardAccessFileId,
 				efCaShortFileId: UByte = EfCardAccess.efCardAccessShortFileId,
 			): EfCardAccess {
+				log.info { "Reading EF.CardAccess" }
 				val extLen =
 					channel.card
 						.getCapabilities()

@@ -100,6 +100,10 @@ class NpaPacePinModel(
 			val session = sal.startSession()
 			val connection = session.connect(terminal.terminalName)
 
+			// force the card to be recognized as contactless, as there might be readers such as PersoSIM which don't
+			// detect it properly
+			connection.channel.card.setContactless = true
+
 			if (connection.deviceType != NpaCif.metadata.id) {
 				throw IllegalStateException("Card is not an nPA")
 			}

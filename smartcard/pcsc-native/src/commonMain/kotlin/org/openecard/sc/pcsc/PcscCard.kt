@@ -33,16 +33,22 @@ class PcscCard(
 			.toAtr()
 	}
 
-	override val isContactless: Boolean by lazy {
+	override var setContactless: Boolean? = null
+
+	private val isContactlessFromCard: Boolean by lazy {
 		try {
 			val getUidCmd = CommandApdu(0xFF.toUByte(), 0xCA.toUByte(), 0x00.toUByte(), 0x00.toUByte(), le = 0xFF.toUShort())
 			val response = basicChannel.transmit(getUidCmd)
 			response.isNormalProcessed
 		} catch (ex: Exception) {
-			// don't care
+			log.warn(ex) { "Failed to determine isContactless property" }
+			// assume no
 			false
 		}
 	}
+
+	override val isContactless: Boolean
+		get() = setContactless ?: isContactlessFromCard
 
 	override val basicChannel: PcscCardChannel by lazy {
 		PcscCardChannel(card, this, 0)

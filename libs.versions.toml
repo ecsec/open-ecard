@@ -37,7 +37,7 @@ android-slf4j = "2.0.+"
 
 # JVM dependencies
 bouncycastle = "1.82"
-kotlin-pcsc = "1.0.2"
+kotlin-pcsc = "1.1.0"
 apache-batik="1.19"
 proxy-vole = "1.1.7"
 pdfbox = "3.0.6"

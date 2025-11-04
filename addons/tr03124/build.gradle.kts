@@ -3,7 +3,7 @@ description = "TR03124 implementation"
 plugins {
 	id("openecard.kmp-lib-conventions")
 	id("openecard.kmp-jvm-conventions")
-	// id("openecard.kmp-ios-conventions")
+	id("openecard.kmp-ios-conventions")
 	// id("openecard.kmp-desktop-conventions")
 }
 

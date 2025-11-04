@@ -9,8 +9,8 @@ import org.openecard.utils.common.generateSessionId
 import kotlin.random.Random
 
 class SmartcardSal(
-	internal val terminals: Terminals,
-	internal val cifs: Set<CardInfoDefinition>,
+	val terminals: Terminals,
+	val cifs: Set<CardInfoDefinition>,
 	val cardRecognition: CardRecognition,
 	internal val paceFactory: PaceFeatureFactory? = null,
 	internal val readSmartcardInfo: Boolean = true,

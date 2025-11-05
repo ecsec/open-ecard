@@ -22,12 +22,14 @@ class IosNfcCard(
 	internal val tag
 		get() = terminalConnection.tag ?: throw RemovedCard()
 
-	override fun atr(): Atr {
+	internal val internalAtr: Atr by lazy {
 		logger.debug { "Historical bytes from card: ${tag.historicalBytes}" }
 		val hist = tag.historicalBytes?.toUByteArray() ?: ubyteArrayOf()
 		terminalConnection.terminal.currentSession?.setAlertMessage(IosNfcAlertMessages.cardConnectedMessage)
-		return Atr.fromHistoricalBytes(hist)
+		Atr.fromHistoricalBytes(hist)
 	}
+
+	override fun atr(): Atr = internalAtr
 
 	override val protocol = CardProtocol.TCL
 	override val isContactless = true

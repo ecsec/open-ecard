@@ -21,12 +21,15 @@ class AndroidNfcCard(
 		get() = terminalConnection.tag ?: throw RemovedCard()
 
 	@OptIn(ExperimentalUnsignedTypes::class)
-	override fun atr(): Atr {
+	private val internalAtr: Atr by lazy {
 		val histBytesTmp = tag.historicalBytes ?: tag.hiLayerResponse
-		return histBytesTmp?.let {
+		histBytesTmp?.let {
 			Atr.fromHistoricalBytes(histBytesTmp.toUByteArray())
 		} ?: throw CommError("Unsupported card or no valid historical bytes could be read.")
 	}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	override fun atr() = internalAtr
 
 	override val protocol = CardProtocol.TCL
 	override val isContactless = true

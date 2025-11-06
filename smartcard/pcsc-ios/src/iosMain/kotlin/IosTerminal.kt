@@ -32,7 +32,7 @@ internal class IosNfcTagReaderSession(
 	private var sessionDidActivate: CompletableDeferred<Nothing?>? = null
 	private var sessionDidDeactivate: CompletableDeferred<Nothing?>? = null
 
-	val deferredTag: CompletableDeferred<NFCISO7816TagProtocol> = CompletableDeferred()
+	lateinit var deferredTag: CompletableDeferred<NFCISO7816TagProtocol>
 
 	@OptIn(ExperimentalCoroutinesApi::class)
 	val tag: NFCISO7816TagProtocol
@@ -122,6 +122,7 @@ internal class IosNfcTagReaderSession(
 
 	internal fun activate() {
 		sessionDidActivate = CompletableDeferred()
+		deferredTag = CompletableDeferred()
 		nfcReaderSession.beginSession()
 		try {
 			runBlocking {

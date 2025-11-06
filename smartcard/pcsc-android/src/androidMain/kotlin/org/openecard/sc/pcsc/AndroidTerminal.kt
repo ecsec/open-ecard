@@ -188,6 +188,8 @@ class AndroidTerminal(
 	internal fun terminalOff() {
 		unRegisterLifeCycleCallbacks()
 		waitingForTag = false
+		deferredConnection = CompletableDeferred()
+		tag = null
 		nfcTagDiscoveryOff()
 	}
 

@@ -8,9 +8,10 @@ import org.openecard.addons.tr03124.xml.ECardConstants
 import org.openecard.addons.tr03124.xml.Result
 import org.openecard.addons.tr03124.xml.TransmitRequest
 import org.openecard.addons.tr03124.xml.TransmitResponse
+import kotlin.coroutines.cancellation.CancellationException
 
 interface EidServerInterface {
-	@Throws(BindingException::class)
+	@Throws(BindingException::class, CancellationException::class)
 	suspend fun start(): DidAuthenticateRequest
 
 	/**
@@ -26,7 +27,7 @@ interface EidServerInterface {
 	 * - an error or [org.openecard.addons.tr03124.xml.StartPaosResponse], the process is aborted with a binding exception.
 	 * - any other non error response, then it is saved for being returned in [getFirstDataRequest] and `null` is returned.
 	 */
-	@Throws(BindingException::class)
+	@Throws(BindingException::class, CancellationException::class)
 	suspend fun sendDidAuthResponse(protocolData: AuthenticationResponseProtocolData): AuthenticationRequestProtocolData?
 
 	/**
@@ -55,6 +56,6 @@ interface EidServerInterface {
 	 * This method returns a new request, when the server returns a new command. In case of
 	 * [org.openecard.addons.tr03124.xml.StartPaosResponse], `null` is returned.
 	 */
-	@Throws(BindingException::class)
+	@Throws(BindingException::class, CancellationException::class)
 	suspend fun sendDataResponse(message: TransmitResponse): TransmitRequest?
 }

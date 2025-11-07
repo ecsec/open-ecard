@@ -1,5 +1,6 @@
 package org.openecard.addons.tr03124.eac
 
+import kotlinx.coroutines.CancellationException
 import org.openecard.addons.tr03124.BindingException
 import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.sal.iface.DeviceUnsupported
@@ -36,7 +37,7 @@ interface UiStep {
 	/**
 	 * Process EAC terminal and chip authentication.
 	 */
-	@Throws(BindingException::class)
+	@Throws(BindingException::class, CancellationException::class)
 	suspend fun processAuthentication(paceResponse: PaceEstablishChannelResponse): EidServerStep
 }
 
@@ -49,6 +50,6 @@ interface EidServerStep {
 	/**
 	 * Process commands received by the eID-Server until there are no more commands.
 	 */
-	@Throws(BindingException::class)
+	@Throws(BindingException::class, CancellationException::class)
 	suspend fun processEidServerLogic(): BindingResponse
 }

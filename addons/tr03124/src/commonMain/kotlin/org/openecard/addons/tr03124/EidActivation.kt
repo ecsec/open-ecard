@@ -10,6 +10,7 @@ import org.openecard.addons.tr03124.xml.ECardConstants
 import org.openecard.addons.tr03124.xml.StartPaos
 import org.openecard.sal.sc.SmartcardSalSession
 import org.openecard.utils.serialization.toPrintable
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.random.Random
 
 object EidActivation {
@@ -19,7 +20,7 @@ object EidActivation {
 	 * Prior to returning the [UiStep], the EAC data are read from the server.
 	 */
 	@OptIn(ExperimentalUnsignedTypes::class)
-	@Throws(BindingException::class)
+	@Throws(BindingException::class, CancellationException::class)
 	suspend fun startEacProcess(
 		clientInfo: ClientInformation,
 		tokenUrl: String,

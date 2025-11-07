@@ -32,6 +32,9 @@ internal class EserviceClientImpl(
 
 	override suspend fun fetchToken(tokenUrl: String): TcToken.TcTokenOk {
 		log.info { "Fetching TCToken from '$tokenUrl'" }
+		if (!tokenUrl.startsWith("https://")) {
+			throw InvalidServerData(this, "Insecure TCToken URL used: $tokenUrl")
+		}
 		check(token == null) { "Fetching multiple TCTokens with the same client" }
 		this.tokenUrl = tokenUrl
 		val tokenClient = serviceClient.tokenClient

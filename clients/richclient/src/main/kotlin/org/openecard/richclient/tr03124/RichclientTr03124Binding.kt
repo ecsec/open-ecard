@@ -23,6 +23,7 @@
 package org.openecard.richclient.tr03124
 
 import io.ktor.http.ContentType
+import io.ktor.http.HeaderValue
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.withCharset
 import io.ktor.server.request.acceptItems
@@ -132,6 +133,7 @@ fun Routing.registerTr03124Binding(trBinding: Tr03124Binding) {
 				val status = trBinding.status()
 				call.request
 					.acceptItems()
+					.ifEmpty { listOf(HeaderValue("text/plain")) }
 					.asSequence()
 					.mapNotNull {
 						if (ContentType.Application.Json.match(it.value)) {

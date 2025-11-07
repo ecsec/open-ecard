@@ -29,6 +29,7 @@ import io.ktor.http.withCharset
 import io.ktor.server.request.acceptItems
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
+import javafx.application.Platform
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -46,6 +47,9 @@ import org.openecard.addons.tr03124.EcardStatus
 import org.openecard.addons.tr03124.Tr03124Binding
 import org.openecard.addons.tr03124.Tr03124Binding.Parameter.ShowUi.ShowUiModules.Companion.toUiModule
 import org.openecard.gui.UserConsent
+import org.openecard.richclient.gui.AboutDialog
+import org.openecard.richclient.gui.manage.ManagementDialog
+import org.openecard.richclient.pinmanagement.UiManager
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.sal.sc.recognition.CardRecognition
 import org.openecard.sc.iface.TerminalFactory
@@ -59,6 +63,7 @@ class RichclientTr03124Binding(
 	val cardWatcher: CardWatcher,
 	val gui: UserConsent,
 	val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+	val uiManager: UiManager,
 ) : Tr03124Binding {
 	private val paceFactory = PaceFeatureSoftwareFactory()
 
@@ -111,12 +116,34 @@ class RichclientTr03124Binding(
 				),
 			specs =
 				listOf(
-					EcardStatus.ProductEntry(name = "TR-03124-1", vendor = "Federal Office for Information Security", version = "1.4"),
+					EcardStatus.ProductEntry(
+						name = "TR-03124-1",
+						vendor = "Federal Office for Information Security",
+						version = "1.4",
+					),
 				),
 		)
 
 	override suspend fun showUi(module: Tr03124Binding.Parameter.ShowUi.ShowUiModules) {
-		// TODO: Not yet implemented
+		when (module) {
+			Tr03124Binding.Parameter.ShowUi.ShowUiModules.PIN_MANAGEMENT -> {
+				Platform.runLater {
+					uiManager.showDialog()
+				}
+			}
+
+			Tr03124Binding.Parameter.ShowUi.ShowUiModules.SETTINGS -> {
+				Platform.runLater {
+					ManagementDialog.showDialog()
+				}
+			}
+
+			Tr03124Binding.Parameter.ShowUi.ShowUiModules.UNKNOWN -> {
+				Platform.runLater {
+					AboutDialog.showDialog()
+				}
+			}
+		}
 	}
 }
 

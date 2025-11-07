@@ -188,6 +188,7 @@ class RichClient : Application() {
 						cardRecognition = eventCardRecognition,
 						cardWatcher = cardWatcher,
 						gui = gui,
+						uiManager = uiManager,
 					)
 
 				// start HTTP server

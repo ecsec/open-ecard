@@ -1,15 +1,16 @@
 package org.openecard.addons.tr03124
 
+import org.openecard.addons.tr03124.TrustedChannelEstablishmentError
 import org.openecard.addons.tr03124.eac.UiStep
 import org.openecard.addons.tr03124.eac.UiStepImpl
 import org.openecard.addons.tr03124.transport.EserviceCertTracker
 import org.openecard.addons.tr03124.transport.EserviceClientImpl
+import org.openecard.addons.tr03124.transport.UntrustedCertificateError
 import org.openecard.addons.tr03124.transport.newKtorClientBuilder
 import org.openecard.addons.tr03124.xml.ConnectionHandleType
 import org.openecard.addons.tr03124.xml.ECardConstants
 import org.openecard.addons.tr03124.xml.StartPaos
 import org.openecard.sal.sc.SmartcardSalSession
-import org.openecard.utils.common.generateSessionId
 import org.openecard.utils.serialization.toPrintable
 import kotlin.random.Random
 
@@ -48,12 +49,14 @@ object EidActivation {
 		val clientFactory = newKtorClientBuilder(certTracker)
 		val eserviceClient = EserviceClientImpl(certTracker, clientFactory, random)
 
-		val token = eserviceClient.fetchToken(tokenUrl)
-		val startPaos = startPaosBuilder.build(token.sessionIdentifier)
-		val eidServer = eserviceClient.buildEidServerInterface(startPaos)
-		val eac1Input = eidServer.start()
-		val uiStep: UiStep = UiStepImpl.createStep(session, terminalName, token, eserviceClient, eidServer, eac1Input)
-		return uiStep
+		return runEacCatching(eserviceClient) {
+			val token = eserviceClient.fetchToken(tokenUrl)
+			val startPaos = startPaosBuilder.build(token.sessionIdentifier)
+			val eidServer = eserviceClient.buildEidServerInterface(startPaos)
+			val eac1Input = eidServer.start()
+			val uiStep: UiStep = UiStepImpl.createStep(session, terminalName, token, eserviceClient, eidServer, eac1Input)
+			uiStep
+		}
 	}
 }
 

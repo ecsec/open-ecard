@@ -17,6 +17,6 @@ suspend fun <T> runEacCatching(
 	} catch (ex: BindingException) {
 		throw ex
 	} catch (ex: Exception) {
-		throw ClientError(eserviceClient, cause = ex)
+		throw UnknownClientError(eserviceClient, cause = ex)
 	}
 }

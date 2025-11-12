@@ -3,6 +3,7 @@ package org.openecard.addons.tr03124.eac
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.addons.tr03124.InvalidServerData
+import org.openecard.addons.tr03124.UnkownCvcChainError
 import org.openecard.addons.tr03124.UserCanceled
 import org.openecard.addons.tr03124.runEacCatching
 import org.openecard.addons.tr03124.transport.EidServerInterface
@@ -183,21 +184,23 @@ internal class UiStepImpl(
 					listOfNotNull(paceResponse.carCurr, paceResponse.carPrev).map {
 						it.v.toPublicKeyReference()
 					}
-				val chains =
-					cars
-						.asSequence()
-						.map { ctx.cvcs.toChain(it) }
-						.filterNotNull()
-				val chain =
-					chains
-						.firstOrNull()
-						?: throw IllegalArgumentException("Unknown trust chain referenced by CAR")
+				val preliminaryChains = cars.mapNotNull { ctx.cvcs.toChain(it) }
+				val preliminaryChain = preliminaryChains.firstOrNull()
 
+				// send cars when we don't have a chain
+				val carsParam =
+					if (preliminaryChain == null) {
+						log.debug { "Preliminary CVC chain could not be built" }
+						listOf()
+					} else {
+						log.debug { "CVC chain successfully built" }
+						cars.map { it.joinToString() }
+					}
 				val eac1Out =
 					Eac1Output(
 						protocol = ctx.eac1InputReq.data.protocol,
 						certificateHolderAuthorizationTemplate = chat,
-						certificationAuthorityReference = cars.map { it.joinToString() },
+						certificationAuthorityReference = carsParam,
 						efCardAccess = paceResponse.efCardAccess,
 						idPICC = idPicc.toPrintable(),
 						challenge = challenge.toPrintable(),
@@ -213,6 +216,24 @@ internal class UiStepImpl(
 						?.v
 						?.toTlvBer()
 						?.tlv
+
+				val chain =
+					preliminaryChain ?: run {
+						log.debug { "Building CVC chain with addidional certificates from the eID-Server" }
+						// build chain with the data we have and the additional certificates
+						val additionalCvcs =
+							eac2In.certificates.map {
+								runCatching {
+									it.v.toCardVerifiableCertificate()
+								}.getOrElse { ex -> throw InvalidServerData(ctx.eserviceClient, "Invalid CVC received in EAC2Input", ex) }
+							}
+						val cvcs = ctx.cvcs + additionalCvcs
+						val chains =
+							cars.mapNotNull { cvcs.toChain(it) }
+
+						chains.firstOrNull()
+							?: throw UnkownCvcChainError(ctx.eserviceClient, "Unknown trust chain referenced by CAR")
+					}
 
 				val eacAuth: EacAuthentication = EacAuthenticationImpl(ta, ca, eac2In, chain, aad)
 

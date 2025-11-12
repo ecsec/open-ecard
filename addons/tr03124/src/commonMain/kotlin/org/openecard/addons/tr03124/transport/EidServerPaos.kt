@@ -12,6 +12,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.xml.xml
+import org.openecard.addons.tr03124.BindingException
 import org.openecard.addons.tr03124.InvalidServerData
 import org.openecard.addons.tr03124.UnkownServerError
 import org.openecard.addons.tr03124.xml.AuthenticationRequestProtocolData
@@ -20,6 +21,7 @@ import org.openecard.addons.tr03124.xml.Body
 import org.openecard.addons.tr03124.xml.DidAuthenticateRequest
 import org.openecard.addons.tr03124.xml.DidAuthenticateResponse
 import org.openecard.addons.tr03124.xml.ECardConstants
+import org.openecard.addons.tr03124.xml.EmptyResponseDataType
 import org.openecard.addons.tr03124.xml.EndpointReference
 import org.openecard.addons.tr03124.xml.Envelope
 import org.openecard.addons.tr03124.xml.Header
@@ -145,7 +147,7 @@ internal class EidServerPaos(
 	override suspend fun sendDidAuthResponse(
 		protocolData: AuthenticationResponseProtocolData,
 	): AuthenticationRequestProtocolData? {
-		val msg = DidAuthenticateResponse(data = protocolData, result = Result(ECardConstants.Major.OK))
+		val msg = DidAuthenticateResponse(data = protocolData, result = Result.ok())
 		val req = msg.toBody().wrapWithSoapEnv()
 		val res = deliverMessage(req)
 
@@ -170,6 +172,33 @@ internal class EidServerPaos(
 			serviceClient,
 			"Server did not respond with DIDAuthenticateRequest or Transmit",
 		)
+	}
+
+	override suspend fun sendDidAuthError(
+		result: Result,
+		ex: BindingException,
+		protocol: String,
+	): Nothing {
+		runCatching {
+			log.debug { "Sending protocol error message to eID-Server" }
+			val protocolData = EmptyResponseDataType(protocol)
+			val msg = DidAuthenticateResponse(data = protocolData, result = Result.ok())
+			val req = msg.toBody().wrapWithSoapEnv()
+			val res = deliverMessage(req)
+
+			// error if we did't receive StartPaosResponse
+			if (res.body.startPaosResponse == null) {
+				// we received an unknown message from the server, there is no way to proceed
+				throw InvalidServerData(
+					serviceClient,
+					"Server did not respond with StartPaosResponse",
+				)
+			} else {
+				log.debug { "Received StartPaosResponse message" }
+			}
+		}.onFailure { ex -> log.warn(ex) { "Failed to send error message to eID-Server" } }
+
+		throw ex
 	}
 
 	override fun getFirstDataRequest(): TransmitRequest = checkNotNull(firstTransmit)

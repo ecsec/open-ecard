@@ -1,13 +1,11 @@
 package org.openecard.addons.tr03124.transport
 
 import org.openecard.addons.tr03124.BindingException
-import org.openecard.addons.tr03124.xml.AuthenticationProtocolData
 import org.openecard.addons.tr03124.xml.AuthenticationRequestProtocolData
 import org.openecard.addons.tr03124.xml.AuthenticationResponseProtocolData
 import org.openecard.addons.tr03124.xml.DidAuthenticateRequest
-import org.openecard.addons.tr03124.xml.Eac1Input
-import org.openecard.addons.tr03124.xml.RequestType
-import org.openecard.addons.tr03124.xml.ResponseType
+import org.openecard.addons.tr03124.xml.ECardConstants
+import org.openecard.addons.tr03124.xml.Result
 import org.openecard.addons.tr03124.xml.TransmitRequest
 import org.openecard.addons.tr03124.xml.TransmitResponse
 
@@ -25,6 +23,22 @@ interface EidServerInterface {
 	 */
 	@Throws(BindingException::class)
 	suspend fun sendDidAuthResponse(protocolData: AuthenticationResponseProtocolData): AuthenticationRequestProtocolData?
+
+	/**
+	 * Sends an error in a DID Authenticate Response message to the server.
+	 * This method throws the provided BindingException, so the EAC process can be terminated with the error which
+	 * caused the problem.
+	 *
+	 * @param result The result to send to the server.
+	 * @param ex The exception to throw after receiving the server response.
+	 * @param protocol The protocol to set in the protocol data message.
+	 */
+	@Throws(BindingException::class)
+	suspend fun sendDidAuthError(
+		result: Result,
+		ex: BindingException,
+		protocol: String = ECardConstants.Protocol.EAC2,
+	): Nothing
 
 	/**
 	 * Gets the first data request command after finishing the server authentication with [sendDidAuthResponse].

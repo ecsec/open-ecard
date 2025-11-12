@@ -75,12 +75,18 @@ internal class UiStepImpl(
 			}
 
 		fun disconnectCard() {
-			runCatching {
-				pace?.closeChannel()
+			pace?.let {
+				runCatching {
+					log.debug { "Closing PACE channel" }
+					pace?.closeChannel()
+				}
 				pace = null
 			}
 			card?.let {
-				runCatching { it.close(CardDisposition.RESET) }
+				runCatching {
+					log.debug { "Disconnect eID-Card" }
+					it.close(CardDisposition.RESET)
+				}
 				card = null
 			}
 		}

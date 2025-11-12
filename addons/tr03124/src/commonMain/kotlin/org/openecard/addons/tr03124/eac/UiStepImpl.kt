@@ -9,10 +9,12 @@ import org.openecard.addons.tr03124.runEacCatching
 import org.openecard.addons.tr03124.transport.EidServerInterface
 import org.openecard.addons.tr03124.transport.EserviceClient
 import org.openecard.addons.tr03124.xml.DidAuthenticateRequest
+import org.openecard.addons.tr03124.xml.ECardConstants
 import org.openecard.addons.tr03124.xml.Eac1Input
 import org.openecard.addons.tr03124.xml.Eac1Output
 import org.openecard.addons.tr03124.xml.Eac2Input
 import org.openecard.addons.tr03124.xml.EacAdditionalInput
+import org.openecard.addons.tr03124.xml.Result
 import org.openecard.addons.tr03124.xml.TcToken
 import org.openecard.cif.bundled.NpaDefinitions
 import org.openecard.cif.definition.acl.PaceAclQualifier
@@ -238,7 +240,15 @@ internal class UiStepImpl(
 							cars.mapNotNull { cvcs.toChain(it) }
 
 						chains.firstOrNull()
-							?: throw UnkownCvcChainError(ctx.eserviceClient, "Unknown trust chain referenced by CAR")
+							?: run {
+								ctx.eidServer.sendDidAuthError(
+									Result.error(
+										ECardConstants.Minor.SAL.EAC.DOC_VALID_FAILED,
+										"Trust chain could not be built for the user's eID Card",
+									),
+									UnkownCvcChainError(ctx.eserviceClient, "Unknown trust chain referenced by CAR"),
+								)
+							}
 					}
 
 				val eacAuth: EacAuthentication = EacAuthenticationImpl(ta, ca, eac2In, chain, aad)

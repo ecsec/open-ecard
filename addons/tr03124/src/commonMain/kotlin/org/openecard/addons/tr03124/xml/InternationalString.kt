@@ -9,5 +9,5 @@ data class InternationalString(
 	@XmlValue
 	val value: String,
 	@XmlSerialName("lang", prefix = Namespaces.XML.PREFIX, namespace = Namespaces.XML.NS)
-	val lang: String,
+	val lang: String = "en",
 )

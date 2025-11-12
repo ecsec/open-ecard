@@ -110,12 +110,7 @@ internal class EidServerStepImpl(
 
 		// convert response
 		return TransmitResponse(
-			result =
-				Result(
-					ECardConstants.Major.OK,
-					null,
-					null,
-				),
+			result = Result.ok(),
 			requestId = req.requestId,
 			outputAPDU =
 				result.map {

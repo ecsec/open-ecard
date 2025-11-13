@@ -8,7 +8,11 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @Serializable
 @XmlSerialName("DIDAuthenticate", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
 data class DidAuthenticateRequest(
+	@XmlSerialName("RequestID")
+	@XmlElement(false)
 	override val requestId: String?,
+	@SerialName("Profile")
+	@XmlElement(false)
 	override val profile: String? = ECardConstants.Profile.ECARD_1_1,
 	@XmlSerialName("ConnectionHandle", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
 	@XmlElement

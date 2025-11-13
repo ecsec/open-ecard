@@ -8,6 +8,8 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @Serializable
 @XmlSerialName("StartPAOS", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
 data class StartPaos(
+	@XmlSerialName("RequestID")
+	@XmlElement(false)
 	override val requestId: String? = null,
 	@SerialName("Profile")
 	@XmlElement(false)

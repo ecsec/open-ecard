@@ -28,7 +28,8 @@
 					   xmlns:ns6="http://www.w3.org/2009/xmlenc11#"
 					   xmlns:ns7="urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#"
 					   xmlns:ns8="http://uri.etsi.org/01903/v1.3.2#" xmlns:ns9="urn:oasis:names:tc:SAML:1.0:assertion"
-					   Profile="http://www.bsi.bund.de/ecard/api/1.1">
+					   Profile="http://www.bsi.bund.de/ecard/api/1.1"
+					   RequestID="req-id-1">
 			<ns3:SessionIdentifier>15311BF20D4F646874F2B4724EF8CE310E8535DF6ED72FFBBD8BF3B35BCBEA65
 			</ns3:SessionIdentifier>
 			<ns3:ConnectionHandle>

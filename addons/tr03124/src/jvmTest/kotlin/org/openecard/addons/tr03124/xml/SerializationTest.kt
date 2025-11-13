@@ -349,7 +349,7 @@ class SerializationTest {
 	}
 
 	fun assertStartPaosData(obj: StartPaos) {
-		assertTrue(obj.requestId.isNullOrEmpty())
+		assertEquals("req-id-1", obj.requestId)
 		assertEquals(
 			"15311BF20D4F646874F2B4724EF8CE310E8535DF6ED72FFBBD8BF3B35BCBEA65",
 			obj.sessionIdentifier.trim(),

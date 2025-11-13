@@ -54,6 +54,7 @@ import org.openecard.gui.swing.common.GUIDefaults
 import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.AppTray
 import org.openecard.richclient.gui.SettingsAndDefaultViewWrapper
+import org.openecard.richclient.pinmanagement.UiManager
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.sc.CardWatcherCallback.Companion.registerWith
 import org.openecard.richclient.sc.CifDb
@@ -92,6 +93,8 @@ class RichClient : Application() {
 	private var terminalFactory: TerminalFactory? = null
 	private var cardWatcher: CardWatcher? = null
 
+	private lateinit var uiManager: UiManager
+
 	override fun start(primaryStage: Stage) {
 		javafx.application.Platform.setImplicitExit(false)
 
@@ -116,10 +119,6 @@ class RichClient : Application() {
 		val gui = SwingUserConsent(SwingDialogWrapper())
 
 		try {
-			val tray = AppTray(this)
-			this.tray = tray
-			tray.beginSetup()
-
 			// Set up the IFD and card watcher
 			val terminalFactory = PcscTerminalFactory.instance
 			this.terminalFactory = terminalFactory
@@ -128,6 +127,12 @@ class RichClient : Application() {
 			val cardWatcher = CardWatcher(CoroutineScope(Dispatchers.IO), cifDb.getCardRecognition(), terminalFactory)
 			this.cardWatcher = cardWatcher
 			cardWatcher.start()
+
+			uiManager = UiManager(cardWatcher)
+
+			val tray = AppTray(this, uiManager)
+			this.tray = tray
+			tray.beginSetup()
 
 			// Set up Middleware SAL
 // 	    for (MiddlewareSALConfig mwSALConfig : mwSALConfigs) {
@@ -199,7 +204,10 @@ class RichClient : Application() {
 					val realPort = httpBinding!!.port
 					val regUrl = URI("http://127.0.0.1:24727/dp/register").toURL()
 					val ft: FutureTask<*> =
-						FutureTask(DispatcherRegistrator(regUrl, realPort, waitTime.milliseconds, timeout.milliseconds), 1)
+						FutureTask(
+							DispatcherRegistrator(regUrl, realPort, waitTime.milliseconds, timeout.milliseconds),
+							1,
+						)
 					val registerThread = Thread(ft, "Register-Dispatcher-Service")
 					registerThread.isDaemon = true
 					registerThread.start()
@@ -342,7 +350,8 @@ class RichClient : Application() {
 						if (resp.status == HttpStatusCode.NoContent) {
 							return@runBlocking
 						} else {
-							val msg = "Execution of dispatcher registration is not successful (code=${resp.status}), trying again ..."
+							val msg =
+								"Execution of dispatcher registration is not successful (code=${resp.status}), trying again ..."
 							LOG.info { msg }
 						}
 					} catch (ex: CancellationException) {

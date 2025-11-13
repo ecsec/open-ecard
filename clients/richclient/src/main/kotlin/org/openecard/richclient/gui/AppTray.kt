@@ -27,9 +27,6 @@ import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.Separator
 import dorkbox.systemTray.SystemTray
 import io.github.oshai.kotlinlogging.KotlinLogging
-import javafx.application.Platform
-import javafx.event.EventHandler
-import javafx.stage.Stage
 import org.openecard.build.BuildInfo
 import org.openecard.common.util.SysUtils
 import org.openecard.i18n.I18N
@@ -37,7 +34,7 @@ import org.openecard.richclient.RichClient
 import org.openecard.richclient.gui.graphics.OecIconType
 import org.openecard.richclient.gui.graphics.oecImage
 import org.openecard.richclient.gui.manage.ManagementDialog
-import org.openecard.richclient.pinmanagement.PinManager
+import org.openecard.richclient.pinmanagement.UiManager
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.sc.CifDb
 import java.awt.Color
@@ -72,14 +69,13 @@ private const val ICON_LOGO: String = "logo"
  */
 class AppTray(
 	val client: RichClient,
+	val uiManager: UiManager,
 ) {
 	private var tray: SystemTray? = null
 	var status: Status? = null
 		private set
 	private var frame: InfoFrame? = null
 	private var infoPopupActive = false
-
-	private var pinManager: PinManager? = null
 
 	/**
 	 * Starts the setup process.
@@ -156,22 +152,7 @@ class AppTray(
 				MenuItem(
 					I18N.strings.pinplugin_name.localized(),
 				) {
-					when (val pm = pinManager) {
-						null -> {
-							Platform.runLater {
-								pinManager =
-									PinManager.create(cardWatcher).also { pm ->
-										pm.addOnCloseHandler {
-											pinManager = null
-										}
-										pm.openManagerDialog()
-									}
-							}
-						}
-						else -> {
-							pm.toFront()
-						}
-					}
+					uiManager.showDialog()
 				},
 			)
 			tray.menu.add(Separator())
@@ -201,7 +182,7 @@ class AppTray(
 	 */
 	fun shutdownUi() {
 		// TODO: remove tray menu elements and show status
-		pinManager?.closeManagementDialog()
+		uiManager.closeDialog()
 		status?.stopCardWatcher()
 	}
 

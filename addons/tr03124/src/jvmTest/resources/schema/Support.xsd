@@ -7,7 +7,7 @@
 	elementFormDefault="qualified" attributeFormDefault="unqualified">
 
 	<import namespace="urn:oasis:names:tc:dss:1.0:core:schema"
-		schemaLocation="http://docs.oasis-open.org/dss/v1.0/oasis-dss-core-schema-v1.0-os.xsd" />
+		schemaLocation="deps/oasis-dss-core-schema-v1.0-os.xsd" />
 
 	<import namespace="urn:iso:std:iso-iec:24727:tech:schema"
 		schemaLocation="ISOCommon.xsd" />

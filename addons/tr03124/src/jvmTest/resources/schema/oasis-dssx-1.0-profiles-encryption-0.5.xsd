@@ -54,13 +54,13 @@
 	elementFormDefault="qualified" attributeFormDefault="unqualified">
 
 	<xs:import namespace="http://www.w3.org/2000/09/xmldsig#"
-		schemaLocation="http://www.w3.org/TR/xmldsig-core/xmldsig-core-schema.xsd" />
+		schemaLocation="deps/xmldsig-core-schema.xsd" />
 	<xs:import namespace="http://www.w3.org/2001/04/xmlenc#"
-		schemaLocation="http://www.w3.org/TR/xmlenc-core/xenc-schema.xsd" />
+		schemaLocation="deps/xenc-schema.xsd" />
 	<xs:import namespace="urn:oasis:names:tc:dss:1.0:core:schema"
-		schemaLocation="http://docs.oasis-open.org/dss/v1.0/oasis-dss-core-schema-v1.0-os.xsd" />
+		schemaLocation="deps/oasis-dss-core-schema-v1.0-os.xsd" />
 	<xs:import namespace="http://www.w3.org/XML/1998/namespace"
-		schemaLocation="http://www.w3.org/2001/xml.xsd" />
+		schemaLocation="deps/xml.xsd" />
 
 	<xs:element name="EncryptRequest" type="dss:RequestBaseType">
 		<xs:annotation>

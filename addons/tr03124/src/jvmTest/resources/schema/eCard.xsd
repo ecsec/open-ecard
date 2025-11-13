@@ -12,13 +12,13 @@
 	elementFormDefault="qualified" attributeFormDefault="unqualified">
 
 	<import namespace="http://www.w3.org/2000/09/xmldsig#"
-		schemaLocation="http://www.w3.org/TR/xmldsig-core/xmldsig-core-schema.xsd" />
+		schemaLocation="deps/xmldsig-core-schema.xsd" />
 
 	<import namespace="http://www.w3.org/2001/04/xmlenc#"
-		schemaLocation="http://www.w3.org/TR/xmlenc-core/xenc-schema.xsd" />
+		schemaLocation="deps/xenc-schema.xsd" />
 
 	<import namespace="http://uri.etsi.org/01903/v1.3.2#"
-		schemaLocation="http://uri.etsi.org/01903/v1.3.2/XAdES.xsd" />
+		schemaLocation="deps/XAdES.xsd" />
 	<import namespace="urn:iso:std:iso-iec:24727:tech:schema"
 		schemaLocation="ISO24727-Protocols.xsd" />
 <!-- not necessary
@@ -26,9 +26,9 @@
 		schemaLocation="ISO24727-3.xsd" />
 -->
 	<import namespace="urn:oasis:names:tc:dss:1.0:core:schema"
-		schemaLocation="http://docs.oasis-open.org/dss/v1.0/oasis-dss-core-schema-v1.0-os.xsd" />
+		schemaLocation="deps/oasis-dss-core-schema-v1.0-os.xsd" />
 	<import namespace="urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#"
-		schemaLocation="http://docs.oasis-open.org/dss-x/profiles/verificationreport/oasis-dssx-1.0-profiles-vr-cd02.xsd" />
+		schemaLocation="deps/oasis-dssx-1.0-profiles-vr-cd02.xsd" />
 	<import namespace="http://www.setcce.org/schemas/ers"
 		schemaLocation="xmlers-schema-draft-v0.3.xsd" />
 

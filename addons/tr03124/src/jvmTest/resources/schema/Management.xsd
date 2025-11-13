@@ -13,30 +13,30 @@
 	elementFormDefault="qualified" attributeFormDefault="unqualified">
 
 	<import namespace="urn:oasis:names:tc:dss:1.0:core:schema"
-		schemaLocation="http://docs.oasis-open.org/dss/v1.0/oasis-dss-core-schema-v1.0-os.xsd" />
+		schemaLocation="deps/oasis-dss-core-schema-v1.0-os.xsd" />
 
 	<import namespace="http://uri.etsi.org/01903/v1.3.2#"
-		schemaLocation="http://uri.etsi.org/01903/v1.3.2/XAdES.xsd" />
+		schemaLocation="deps/XAdES.xsd" />
 
 	<import namespace="urn:iso:std:iso-iec:24727:tech:schema"
 		schemaLocation="CardInfo.xsd" />
 	<import namespace="urn:iso:std:iso-iec:24727:tech:schema"
 		schemaLocation="ISOCommon.xsd" />
 	<import namespace="http://www.w3.org/2000/09/xmldsig#"
-		schemaLocation="http://www.w3.org/TR/xmldsig-core/xmldsig-core-schema.xsd" />
+		schemaLocation="deps/xmldsig-core-schema.xsd" />
 
 	<import namespace="http://uri.etsi.org/02231/v3.1.2#"
-		schemaLocation="http://uri.etsi.org/02231/v3.1.2/ts_102231v030102_xsd.xsd">
+		schemaLocation="deps/ts_102231v030102_xsd.xsd">
 	</import>
 
 	<import namespace="http://www.w3.org/2001/04/xmlenc#"
-		schemaLocation="http://www.w3.org/TR/xmlenc-core/xenc-schema.xsd">
+		schemaLocation="deps/xenc-schema.xsd">
 	</import>
 	<import namespace="urn:iso:std:iso-iec:24727:tech:schema"
 		schemaLocation="ISOIFD.xsd">
 	</import>
 	<import namespace="http://www.w3.org/XML/1998/namespace"
-		schemaLocation="http://www.w3.org/2001/xml.xsd">
+		schemaLocation="deps/xml.xsd">
 	</import>
 
 	<include schemaLocation="eCard.xsd" />

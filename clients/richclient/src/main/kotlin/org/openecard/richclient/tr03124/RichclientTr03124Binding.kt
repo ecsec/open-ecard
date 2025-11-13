@@ -147,6 +147,8 @@ fun Routing.registerTr03124Binding(trBinding: Tr03124Binding) {
 				)
 			} else if (gui != null) {
 				trBinding.showUi(gui.toUiModule())
+				// the eID-testsuite (module A1) wants status code 200, however 204 is the right choice
+				// the spec does not demand to see 200, so this is fine
 				BindingResponse.NoContent()
 			} else {
 				BindingResponse.ReferencedContentResponse(

@@ -53,8 +53,7 @@ import org.openecard.gui.swing.SwingUserConsent
 import org.openecard.gui.swing.common.GUIDefaults
 import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.AppTray
-import org.openecard.richclient.gui.SettingsAndDefaultViewWrapper
-import org.openecard.richclient.pinmanagement.UiManager
+import org.openecard.richclient.gui.UiManager
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.sc.CardWatcherCallback.Companion.registerWith
 import org.openecard.richclient.sc.CifDb
@@ -93,7 +92,7 @@ class RichClient : Application() {
 	private var terminalFactory: TerminalFactory? = null
 	private var cardWatcher: CardWatcher? = null
 
-	private lateinit var uiManager: UiManager
+	private var uiManager: UiManager? = null
 
 	override fun start(primaryStage: Stage) {
 		javafx.application.Platform.setImplicitExit(false)
@@ -128,7 +127,8 @@ class RichClient : Application() {
 			this.cardWatcher = cardWatcher
 			cardWatcher.start()
 
-			uiManager = UiManager(cardWatcher)
+			val uiManager = UiManager(cardWatcher)
+			this.uiManager = uiManager
 
 			val tray = AppTray(this, uiManager)
 			this.tray = tray
@@ -147,7 +147,6 @@ class RichClient : Application() {
 			eventCardRecognition.registerWith(cardWatcher)
 
 			// Start up control interface
-			val guiWrapper = SettingsAndDefaultViewWrapper()
 			try {
 				// initialize http binding
 				var port = 24727
@@ -292,6 +291,7 @@ class RichClient : Application() {
 	override fun stop() {
 		try {
 			tray?.shutdownUi()
+			uiManager?.shutdown()
 
 			cardWatcher?.stop()
 
@@ -351,15 +351,14 @@ class RichClient : Application() {
 						if (resp.status == HttpStatusCode.NoContent) {
 							return@runBlocking
 						} else {
-							val msg =
-								"Execution of dispatcher registration is not successful (code=${resp.status}), trying again ..."
+							val msg = "Execution of dispatcher registration is not successful (code=${resp.status}), trying again ..."
 							LOG.info { msg }
 						}
 					} catch (ex: CancellationException) {
 						LOG.error(ex) { "Dispatcher registration interrupted" }
 						return@runBlocking
 					} catch (ex: Exception) {
-						LOG.error(ex) { "Failed to send dispatcher registration reguest" }
+						LOG.error(ex) { "Failed to send dispatcher registration request" }
 					}
 
 					// terminate in case there is no time left

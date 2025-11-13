@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.openecard.build.BuildInfo
 import org.openecard.i18n.I18N
-import org.openecard.richclient.gui.manage.ManagementDialog
+import org.openecard.richclient.RichClient
 import org.openecard.richclient.gui.update.UpdateWindow
 import org.openecard.richclient.sc.CardStateEvent
 import org.openecard.richclient.sc.CardWatcher
@@ -76,7 +76,8 @@ private val LOG = KotlinLogging.logger { }
  * @author Sebastian Schuberth
  */
 class Status(
-	private val appTray: AppTray,
+	private val client: RichClient,
+	private val uiManager: UiManager,
 	private val withControls: Boolean,
 	private val cifDb: CifDb,
 ) {
@@ -91,8 +92,6 @@ class Status(
 
 	/**
 	 * Constructor of Status class.
-	 *
-	 * @param appTray tray icon
 	 */
 	init {
 		setupBaseUI()
@@ -101,7 +100,6 @@ class Status(
 	/**
 	 * Shows the InfoPopup at the specified position p or at the default if no position is given.
 	 */
-	@JvmOverloads
 	fun showInfo(p: Point? = null) {
 		if (popup != null && popup is Window) {
 			(popup as Window).dispose()
@@ -161,7 +159,7 @@ class Status(
 		btnExit.addActionListener {
 			LOG.debug { "Shutdown button pressed." }
 			try {
-				appTray.client.teardown()
+				client.teardown()
 			} catch (ex: Throwable) {
 				LOG.error(ex) { "Exiting client threw an error." }
 				throw ex
@@ -175,7 +173,7 @@ class Status(
 		btnAbout.addActionListener {
 			LOG.debug { "About button pressed." }
 			try {
-				AboutDialog.showDialog()
+				uiManager.showAboutDialog()
 			} catch (ex: Throwable) {
 				LOG.error(ex) { "Show About dialog threw an error." }
 				throw ex
@@ -189,7 +187,7 @@ class Status(
 		btnSettings.addActionListener {
 			LOG.debug { "Settings button pressed." }
 			try {
-				ManagementDialog.showDialog()
+				uiManager.showSettingsDialog()
 			} catch (ex: Throwable) {
 				LOG.error(ex) { "Show Settings dialog threw an error." }
 				throw ex
@@ -208,10 +206,7 @@ class Status(
 	}
 
 	@Synchronized
-	private fun addInfo(
-		ifdName: String,
-		cardType: String?,
-	) {
+	private fun addInfo(ifdName: String) {
 		if (infoMap.containsKey(NO_TERMINAL_CONNECTED)) {
 			infoMap.remove(NO_TERMINAL_CONNECTED)
 			infoView!!.removeAll()
@@ -224,7 +219,7 @@ class Status(
 
 		val panel = JPanel()
 		panel.layout = FlowLayout(FlowLayout.LEFT)
-		panel.add(createInfoLabel(ifdName, cardType))
+		panel.add(createInfoLabel(ifdName, null))
 		infoMap[ifdName] = panel
 		infoView!!.add(panel)
 
@@ -313,12 +308,12 @@ class Status(
 				events.collect { evt ->
 					when (evt) {
 						is CardStateEvent.InitialCardState -> {
-							evt.cardState.terminals.forEach { addInfo(it, null) }
+							evt.cardState.terminals.forEach { addInfo(it) }
 							evt.cardState.terminalsWithCard.forEach { updateInfo(it, null) }
 							evt.cardState.recognizedCards.forEach { updateInfo(it.terminal, it.cardType) }
 						}
 						is CardStateEvent.TerminalAdded -> {
-							addInfo(evt.terminalName, null)
+							addInfo(evt.terminalName)
 						}
 						is CardStateEvent.TerminalRemoved -> {
 							removeInfo(evt.terminalName)

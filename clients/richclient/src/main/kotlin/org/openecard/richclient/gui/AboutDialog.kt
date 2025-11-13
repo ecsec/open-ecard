@@ -34,8 +34,6 @@ import java.awt.Color
 import java.awt.Font
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
-import java.awt.event.WindowAdapter
-import java.awt.event.WindowEvent
 import java.io.File
 import java.net.URI
 import javax.swing.ImageIcon
@@ -49,7 +47,6 @@ import javax.swing.JTabbedPane
 import javax.swing.JTextPane
 import javax.swing.SwingConstants
 import javax.swing.event.HyperlinkEvent
-import javax.swing.event.HyperlinkListener
 
 private val LOG = KotlinLogging.logger { }
 
@@ -62,7 +59,7 @@ private val LOG = KotlinLogging.logger { }
  * @author Tobias Wich
  */
 class AboutDialog private constructor() : JFrame() {
-	private val tabIndices = mutableMapOf<String, Int>()
+	private val tabIndices = mutableMapOf<AboutTabs, Int>()
 	private var tabbedPane = JTabbedPane(JTabbedPane.TOP)
 
 	init {
@@ -114,13 +111,13 @@ class AboutDialog private constructor() : JFrame() {
 		tabbedPane.background = Color.white
 
 		listOf(
-			Triple(ABOUT_TAB, I18N.strings.about_tab_about, I18N.strings.about_html),
-			Triple(FEEDBACK_TAB, I18N.strings.about_tab_feedback, I18N.strings.about_feedback_html),
-			Triple(LICENSE_TAB, I18N.strings.about_tab_support, I18N.strings.about_support_html),
-			Triple(SUPPORT_TAB, I18N.strings.about_tab_license, I18N.strings.about_license_html),
+			Triple(AboutTabs.ABOUT, I18N.strings.about_tab_about, I18N.strings.about_html),
+			Triple(AboutTabs.FEEDBACK, I18N.strings.about_tab_feedback, I18N.strings.about_feedback_html),
+			Triple(AboutTabs.LICENSE, I18N.strings.about_tab_support, I18N.strings.about_support_html),
+			Triple(AboutTabs.SUPPORT, I18N.strings.about_tab_license, I18N.strings.about_license_html),
 		).forEachIndexed { idx, it ->
 			tabbedPane.addTab(it.second.localized(), createTabContent(it.third))
-			tabIndices.put(it.first, idx)
+			tabIndices[it.first] = idx
 		}
 
 		contentPane.add(tabbedPane)
@@ -155,11 +152,9 @@ class AboutDialog private constructor() : JFrame() {
 				isEditable = false
 				contentType = "text/html"
 				text = textResource.localized()
-				addHyperlinkListener(
-					HyperlinkListener { e ->
-						openUrl(e)
-					},
-				)
+				addHyperlinkListener { e ->
+					openUrl(e)
+				}
 			}
 
 		val scrollPane = JScrollPane(editorPane)
@@ -179,15 +174,15 @@ class AboutDialog private constructor() : JFrame() {
 		}
 	}
 
+	enum class AboutTabs {
+		ABOUT,
+		FEEDBACK,
+		LICENSE,
+		SUPPORT,
+	}
+
 	companion object {
 		private const val serialVersionUID = 1L
-
-		const val ABOUT_TAB: String = "about"
-		const val FEEDBACK_TAB: String = "feedback"
-		const val LICENSE_TAB: String = "license"
-		const val SUPPORT_TAB: String = "support"
-
-		private var runningDialog: AboutDialog? = null
 
 		init {
 			try {
@@ -204,40 +199,19 @@ class AboutDialog private constructor() : JFrame() {
 		}
 
 		/**
-		 * Shows an about dialog and selects the specified index.
-		 * This method makes sure, that there is only one about dialog.
+		 * Creates an about dialog and selects the specified index.
 		 *
-		 * @param selectedTab The identifier of the tab which should be selected. Valid identifiers are defined as constants
-		 * in this class.
+		 * @param selectedTab The identifier of the tab which should be selected. Valid identifiers are defined as
+		 * constants in this class.
 		 */
-		@JvmStatic
-		@JvmOverloads
-		fun showDialog(selectedTab: String = ABOUT_TAB) {
-			when (val dialog = runningDialog) {
-				null -> {
-					runningDialog =
-						AboutDialog().apply {
-							addWindowListener(
-								object : WindowAdapter() {
-									override fun windowClosed(e: WindowEvent?) {
-										runningDialog = null
-									}
-								},
-							)
-							isVisible = true
-							selectTab(selectedTab, this)
-						}
-				}
-				else -> {
-					dialog.toFront()
-					selectTab(selectedTab, dialog)
-				}
+		fun createDialog(selectedTab: AboutTabs = AboutTabs.ABOUT): AboutDialog =
+			AboutDialog().also {
+				selectTab(selectedTab, it)
 			}
-		}
 
 		// select tab if it exists
 		private fun selectTab(
-			selectedTab: String,
+			selectedTab: AboutTabs,
 			dialog: AboutDialog,
 		) {
 			dialog.tabIndices[selectedTab]?.let {

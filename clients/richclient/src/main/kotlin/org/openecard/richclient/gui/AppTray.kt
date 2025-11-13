@@ -33,12 +33,8 @@ import org.openecard.i18n.I18N
 import org.openecard.richclient.RichClient
 import org.openecard.richclient.gui.graphics.OecIconType
 import org.openecard.richclient.gui.graphics.oecImage
-import org.openecard.richclient.gui.manage.ManagementDialog
-import org.openecard.richclient.pinmanagement.UiManager
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.sc.CifDb
-import java.awt.Color
-import java.awt.Container
 import java.awt.Dimension
 import java.awt.Frame
 import java.awt.Image
@@ -48,9 +44,6 @@ import java.util.concurrent.ExecutionException
 import java.util.concurrent.FutureTask
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
-import javax.swing.ImageIcon
-import javax.swing.JFrame
-import javax.swing.JLabel
 
 private val LOG = KotlinLogging.logger { }
 
@@ -59,7 +52,7 @@ private const val ICON_LOGO: String = "logo"
 
 /**
  * This class creates a tray icon on systems that do have a system tray.
- * Otherwise a normal window will be shown.
+ * If no systemtray is present, a normal window will be shown.
  *
  * @param client RichClient
  *
@@ -105,7 +98,7 @@ class AppTray(
 
 		// no tray, set up frame
 		if (tray == null) {
-			frame = setupFrame(true)
+			frame = InfoFrame.setupStandaloneFrame(client)
 		}
 	}
 
@@ -119,7 +112,8 @@ class AppTray(
 	) {
 		val statusObj =
 			Status(
-				this,
+				client,
+				uiManager,
 				tray == null,
 				cifDb,
 			)
@@ -135,7 +129,7 @@ class AppTray(
 					I18N.strings.richclient_tray_card_status.localized(),
 				) {
 					if (!infoPopupActive) {
-						val frame = setupFrame(false)
+						val frame = InfoFrame.setupPopupFrame()
 						frame.setStatusPane(statusObj)
 						frame.addWindowListener(
 							object : WindowAdapter() {
@@ -152,19 +146,19 @@ class AppTray(
 				MenuItem(
 					I18N.strings.pinplugin_name.localized(),
 				) {
-					uiManager.showDialog()
+					uiManager.showPinManager()
 				},
 			)
 			tray.menu.add(Separator())
 			tray.menu.add(
 				MenuItem(
 					I18N.strings.richclient_tray_about.localized(),
-				) { AboutDialog.showDialog() },
+				) { uiManager.showAboutDialog() },
 			)
 			tray.menu.add(
 				MenuItem(
 					I18N.strings.richclient_tray_config.localized(),
-				) { ManagementDialog.showDialog() },
+				) { uiManager.showSettingsDialog() },
 			)
 			tray.menu.add(Separator())
 			tray.menu.add(
@@ -182,7 +176,7 @@ class AppTray(
 	 */
 	fun shutdownUi() {
 		// TODO: remove tray menu elements and show status
-		uiManager.closeDialog()
+		uiManager.closePinManager()
 		status?.stopCardWatcher()
 	}
 
@@ -190,34 +184,6 @@ class AppTray(
 		tray?.shutdown()
 		tray = null
 	}
-
-	private fun setupFrame(standalone: Boolean): InfoFrame =
-		InfoFrame(
-			I18N.strings.richclient_tray_title
-				.format(BuildInfo.appName)
-				.localized(),
-		).also { frame ->
-			frame.iconImage = oecImage(OecIconType.COLORED, 256, 256)
-
-			if (standalone) {
-				frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
-
-				val logo = ImageIcon(oecImage(OecIconType.COLORED, 256, 256))
-				val label = JLabel(logo)
-				val c: Container = frame.contentPane
-				c.preferredSize = Dimension(logo.iconWidth, logo.iconHeight)
-				c.background = Color.white
-				c.add(label)
-
-				frame.pack()
-				frame.isResizable = false
-				frame.setLocationRelativeTo(null)
-				frame.isVisible = true
-			} else {
-				frame.defaultCloseOperation = JFrame.DISPOSE_ON_CLOSE
-				frame.isVisible = false
-			}
-		}
 }
 
 private fun InfoFrame.setStatusPane(statusObj: Status) {

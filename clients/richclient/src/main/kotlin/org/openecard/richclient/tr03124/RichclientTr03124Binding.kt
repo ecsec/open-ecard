@@ -47,9 +47,7 @@ import org.openecard.addons.tr03124.EcardStatus
 import org.openecard.addons.tr03124.Tr03124Binding
 import org.openecard.addons.tr03124.Tr03124Binding.Parameter.ShowUi.ShowUiModules.Companion.toUiModule
 import org.openecard.gui.UserConsent
-import org.openecard.richclient.gui.AboutDialog
-import org.openecard.richclient.gui.manage.ManagementDialog
-import org.openecard.richclient.pinmanagement.UiManager
+import org.openecard.richclient.gui.UiManager
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.sal.sc.recognition.CardRecognition
 import org.openecard.sc.iface.TerminalFactory
@@ -128,19 +126,19 @@ class RichclientTr03124Binding(
 		when (module) {
 			Tr03124Binding.Parameter.ShowUi.ShowUiModules.PIN_MANAGEMENT -> {
 				Platform.runLater {
-					uiManager.showDialog()
+					uiManager.showPinManager()
 				}
 			}
 
 			Tr03124Binding.Parameter.ShowUi.ShowUiModules.SETTINGS -> {
 				Platform.runLater {
-					ManagementDialog.showDialog()
+					uiManager.showSettingsDialog()
 				}
 			}
 
 			Tr03124Binding.Parameter.ShowUi.ShowUiModules.UNKNOWN -> {
 				Platform.runLater {
-					AboutDialog.showDialog()
+					uiManager.showAboutDialog()
 				}
 			}
 		}

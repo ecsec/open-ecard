@@ -101,8 +101,6 @@ internal class EidServerPaos(
 		val relatesTo = respMsg.header.relatesTo
 		setRemoteId(msgId, relatesTo)
 
-		// TODO: validate message against xml schema
-
 		return respMsg
 	}
 
@@ -236,15 +234,19 @@ internal class EidServerPaos(
 			install(ContentNegotiation) {
 				xml(
 					format = eacXml,
-					contentType = ContentType.Text.Xml,
-				)
-				xml(
-					format = eacXml,
-					contentType = ContentType.Application.Xml,
-				)
-				xml(
-					format = eacXml,
 					contentType = PaosContentType,
+				)
+				xml(
+					format = eacXml,
+					contentType = ContentType.Application.Soap.withParameter("q", "0.9"),
+				)
+				xml(
+					format = eacXml,
+					contentType = ContentType.Text.Xml.withParameter("q", "0.8"),
+				)
+				xml(
+					format = eacXml,
+					contentType = ContentType.Application.Xml.withParameter("q", "0.8"),
 				)
 			}
 		}

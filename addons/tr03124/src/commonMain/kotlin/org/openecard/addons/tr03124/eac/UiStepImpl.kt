@@ -1,6 +1,7 @@
 package org.openecard.addons.tr03124.eac
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.openecard.addons.tr03124.BindingException
 import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.addons.tr03124.InvalidServerData
 import org.openecard.addons.tr03124.UnkownCvcChainError
@@ -108,9 +109,13 @@ internal class UiStepImpl(
 		)
 
 	override suspend fun cancel(): BindingResponse {
-		log.info { "EAC UI Step cancelled" }
-		disconnectCard()
-		return UserCanceled(ctx.eserviceClient).toResponse()
+		try {
+			log.info { "EAC UI Step cancelled" }
+			disconnectCard()
+			ctx.eidServer.sendError(UserCanceled(ctx.eserviceClient))
+		} catch (ex: BindingException) {
+			return ex.toResponse()
+		}
 	}
 
 	override fun getPaceDid(terminalName: String?): SmartcardPaceDid {
@@ -165,7 +170,7 @@ internal class UiStepImpl(
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override suspend fun processAuthentication(paceResponse: PaceEstablishChannelResponse): EidServerStep =
 		runCatching {
-			runEacCatching(ctx.eserviceClient) {
+			runEacCatching(ctx.eserviceClient, ctx.eidServer) {
 				log.info { "Processing PACE response" }
 				val pace = getPaceDid()
 				check(pace.missingAuthAuthentications.isSolved)
@@ -227,7 +232,7 @@ internal class UiStepImpl(
 
 				val chain =
 					preliminaryChain ?: run {
-						log.debug { "Building CVC chain with addidional certificates from the eID-Server" }
+						log.debug { "Building CVC chain with additional certificates from the eID-Server" }
 						// build chain with the data we have and the additional certificates
 						val additionalCvcs =
 							eac2In.certificates.map {
@@ -241,11 +246,7 @@ internal class UiStepImpl(
 
 						chains.firstOrNull()
 							?: run {
-								ctx.eidServer.sendDidAuthError(
-									Result.error(
-										ECardConstants.Minor.SAL.EAC.DOC_VALID_FAILED,
-										"Trust chain could not be built for the user's eID Card",
-									),
+								ctx.eidServer.sendError(
 									UnkownCvcChainError(ctx.eserviceClient, "Unknown trust chain referenced by CAR"),
 								)
 							}

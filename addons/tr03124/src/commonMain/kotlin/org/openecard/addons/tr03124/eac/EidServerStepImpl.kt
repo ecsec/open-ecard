@@ -39,11 +39,11 @@ internal class EidServerStepImpl(
 	override suspend fun cancel(): BindingResponse =
 		try {
 			log.info { "EAC eID-Server Step cancelled" }
-			runEacCatching(eserviceClient) {
+			runEacCatching(eserviceClient, eidServer) {
 				processingJob?.cancelAndJoin()
 				processingJob = null
 				uiStep.disconnectCard()
-				UserCanceled(eserviceClient).toResponse()
+				throw UserCanceled(eserviceClient)
 			}
 		} catch (ex: BindingException) {
 			ex.toResponse()
@@ -51,7 +51,7 @@ internal class EidServerStepImpl(
 
 	override suspend fun processEidServerLogic(): BindingResponse =
 		try {
-			runEacCatching(eserviceClient) {
+			runEacCatching(eserviceClient, eidServer) {
 				log.info { "Processing eID-Server logic" }
 				coroutineScope {
 					val res =

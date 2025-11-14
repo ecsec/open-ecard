@@ -49,13 +49,18 @@ object EidActivation {
 		val clientFactory = newKtorClientBuilder(certTracker)
 		val eserviceClient = EserviceClientImpl(certTracker, clientFactory, random)
 
-		return runEacCatching(eserviceClient) {
+		return runEacCatching(eserviceClient, null) {
 			val token = eserviceClient.fetchToken(tokenUrl)
 			val startPaos = startPaosBuilder.build(token.sessionIdentifier)
 			val eidServer = eserviceClient.buildEidServerInterface(startPaos)
 			val eac1Input = eidServer.start()
-			val uiStep: UiStep = UiStepImpl.createStep(session, terminalName, token, eserviceClient, eidServer, eac1Input)
-			uiStep
+
+			// starting the step must can fail, and we want to guard it to perform cleanup
+			runEacCatching(eserviceClient, eidServer) {
+				val uiStep: UiStep =
+					UiStepImpl.createStep(session, terminalName, token, eserviceClient, eidServer, eac1Input)
+				uiStep
+			}
 		}
 	}
 }

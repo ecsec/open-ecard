@@ -14,7 +14,13 @@ import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.xml.xml
 import org.openecard.addons.tr03124.BindingException
 import org.openecard.addons.tr03124.InvalidServerData
+import org.openecard.addons.tr03124.NoTcToken
+import org.openecard.addons.tr03124.TlsError
+import org.openecard.addons.tr03124.UnknownClientError
+import org.openecard.addons.tr03124.UnknownTrustedChannelError
+import org.openecard.addons.tr03124.UnkownCvcChainError
 import org.openecard.addons.tr03124.UnkownServerError
+import org.openecard.addons.tr03124.UserCanceled
 import org.openecard.addons.tr03124.xml.AuthenticationRequestProtocolData
 import org.openecard.addons.tr03124.xml.AuthenticationResponseProtocolData
 import org.openecard.addons.tr03124.xml.Body
@@ -57,6 +63,8 @@ internal class EidServerPaos(
 	private val paosHeaderValue: String by lazy {
 		"ver=\"${ECardConstants.PAOS_VERSION_20}\"; $serviceString"
 	}
+
+	private var phase: ProcessPhase = ProcessPhase.START
 
 	private var curMsgId: String? = null
 	private var remoteId: String? = null
@@ -127,10 +135,12 @@ internal class EidServerPaos(
 		val res = deliverMessage(req)
 
 		res.body.didAuthenticateRequest?.let {
+			phase = ProcessPhase.AUTH
 			return it
 		}
 
 		// server terminated the connection
+		phase = ProcessPhase.DONE
 		res.body.startPaosResponse?.let {
 			throw UnkownServerError(serviceClient, "eID-Server terminated the connection")
 		}
@@ -156,11 +166,13 @@ internal class EidServerPaos(
 
 		// response is transmit
 		res.body.transmitRequest?.let {
+			phase = ProcessPhase.TRANSMIT
 			this.firstTransmit = it
 			return null
 		}
 
 		// server terminated the connection
+		phase = ProcessPhase.DONE
 		res.body.startPaosResponse?.let {
 			throw UnkownServerError(serviceClient, "eID-Server terminated the connection")
 		}
@@ -172,27 +184,60 @@ internal class EidServerPaos(
 		)
 	}
 
-	override suspend fun sendDidAuthError(
-		result: Result,
+	override suspend fun sendError(
 		ex: BindingException,
 		protocol: String,
 	): Nothing {
 		runCatching {
 			log.debug { "Sending protocol error message to eID-Server" }
-			val protocolData = EmptyResponseDataType(protocol)
-			val msg = DidAuthenticateResponse(data = protocolData, result = Result.ok())
-			val req = msg.toBody().wrapWithSoapEnv()
-			val res = deliverMessage(req)
 
-			// error if we did't receive StartPaosResponse
-			if (res.body.startPaosResponse == null) {
-				// we received an unknown message from the server, there is no way to proceed
-				throw InvalidServerData(
-					serviceClient,
-					"Server did not respond with StartPaosResponse",
+			val minor =
+				when (ex) {
+					is UnknownClientError -> ECardConstants.Minor.App.INT_ERROR
+					is UnkownCvcChainError -> ECardConstants.Minor.SAL.EAC.DOC_VALID_FAILED
+					is InvalidServerData -> ECardConstants.Minor.App.PARM_ERROR
+					is UnkownServerError -> ECardConstants.Minor.Disp.COMM_ERROR
+					is TlsError -> ECardConstants.Minor.Disp.CHANNEL_ESTABLISHMENT_FAILED
+					is UnknownTrustedChannelError -> ECardConstants.Minor.Disp.CHANNEL_ESTABLISHMENT_FAILED
+					is UserCanceled -> ECardConstants.Minor.SAL.CANCELLATION_BY_USER
+					is NoTcToken -> ECardConstants.Minor.App.INCORRECT_PARM
+				}
+			val result =
+				Result.error(
+					minor,
+					ex.message,
 				)
-			} else {
-				log.debug { "Received StartPaosResponse message" }
+
+			val req =
+				when (phase) {
+					ProcessPhase.AUTH -> {
+						val protocolData = EmptyResponseDataType(protocol)
+						val msg = DidAuthenticateResponse(data = protocolData, result = result)
+						msg.toBody().wrapWithSoapEnv()
+					}
+					ProcessPhase.TRANSMIT -> {
+						TransmitResponse(result, outputAPDU = listOf()).toBody().wrapWithSoapEnv()
+					}
+					else -> null
+				}
+
+			// update phase so we only send an error once
+			phase = ProcessPhase.DONE
+
+			// when we don't have a request, then we are not in a phase that needs to respond to the server
+			req?.let {
+				val res = deliverMessage(req)
+
+				// error if we did't receive StartPaosResponse
+				if (res.body.startPaosResponse == null) {
+					// we received an unknown message from the server, there is no way to proceed
+					throw InvalidServerData(
+						serviceClient,
+						"Server did not respond with StartPaosResponse",
+					)
+				} else {
+					log.debug { "Received StartPaosResponse message" }
+				}
 			}
 		}.onFailure { ex -> log.warn(ex) { "Failed to send error message to eID-Server" } }
 
@@ -211,6 +256,7 @@ internal class EidServerPaos(
 		}
 
 		// server terminated the connection
+		phase = ProcessPhase.DONE
 		res.body.startPaosResponse?.let { pr ->
 			if (pr.result.major == ECardConstants.Major.ERROR) {
 				throw UnkownServerError(serviceClient, "eID-Server terminated the connection")
@@ -225,6 +271,13 @@ internal class EidServerPaos(
 			serviceClient,
 			"Server did not respond with DIDAuthenticateRequest or Transmit",
 		)
+	}
+
+	private enum class ProcessPhase {
+		START,
+		AUTH,
+		TRANSMIT,
+		DONE,
 	}
 
 	companion object {

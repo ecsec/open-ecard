@@ -25,17 +25,16 @@ interface EidServerInterface {
 	suspend fun sendDidAuthResponse(protocolData: AuthenticationResponseProtocolData): AuthenticationRequestProtocolData?
 
 	/**
-	 * Sends an error in a DID Authenticate Response message to the server.
+	 * Sends an error response message to the server.
 	 * This method throws the provided BindingException, so the EAC process can be terminated with the error which
 	 * caused the problem.
+	 * The type of response message to send is determined by tracking the incoming request.
 	 *
-	 * @param result The result to send to the server.
 	 * @param ex The exception to throw after receiving the server response.
 	 * @param protocol The protocol to set in the protocol data message.
 	 */
 	@Throws(BindingException::class)
-	suspend fun sendDidAuthError(
-		result: Result,
+	suspend fun sendError(
 		ex: BindingException,
 		protocol: String = ECardConstants.Protocol.EAC2,
 	): Nothing

@@ -747,7 +747,7 @@ object ECardConstants {
 		object SAL {
 			private const val SAL_PFX = MINOR_PREFIX + "sal"
 			private const val SUPPORT_PFX = SAL_PFX + "/support#"
-			private const val EAC_PFX = SAL_PFX + "/mEAC#"
+			private const val EAC_PFX = SAL_PFX + "/EAC#"
 
 			/**
 			 * Cancellation by the user.

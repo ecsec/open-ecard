@@ -619,6 +619,15 @@ class SerializationTest {
 	}
 
 	@Test
+	fun `process StartPaosResponse Testsuite SOAP`() {
+		val original = readSoap("StartPaosResponseTestsuite")
+		val obj = xml.decodeFromString<Envelope>(original)
+		assertStartPaosResponseData(assertInstanceOf(assertInstanceOf<StartPaosResponse>(obj.body.content)))
+		val ser = xml.encodeToString(obj)
+		assertStartPaosResponseXml(ser, "/soap:Envelope/soap:Body/iso:StartPAOSResponse")
+	}
+
+	@Test
 	fun `process TransmitRequest SOAP`() {
 		val original = readSoap("TransmitRequest")
 		val obj = xml.decodeFromString<Envelope>(original)

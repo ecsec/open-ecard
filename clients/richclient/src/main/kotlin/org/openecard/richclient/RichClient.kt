@@ -59,6 +59,7 @@ import org.openecard.richclient.sc.CardWatcherCallback.Companion.registerWith
 import org.openecard.richclient.sc.CifDb
 import org.openecard.richclient.sc.EventCardRecognition
 import org.openecard.richclient.tr03124.RichclientTr03124Binding
+import org.openecard.richclient.tr03124.TransportLogging
 import org.openecard.richclient.tr03124.registerTr03124Binding
 import org.openecard.richclient.updater.VersionUpdateChecker
 import org.openecard.sc.iface.TerminalFactory
@@ -175,6 +176,7 @@ class RichClient : Application() {
 				}
 
 				// configure TR-03124 addon
+				TransportLogging.loadEidLogger()
 				val uaVersion =
 					BuildInfo.version.let { v ->
 						UserAgent.Version(v.major, v.minor, v.patch)

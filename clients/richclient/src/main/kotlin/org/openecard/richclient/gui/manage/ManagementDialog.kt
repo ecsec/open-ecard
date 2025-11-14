@@ -33,6 +33,7 @@ import org.openecard.richclient.gui.graphics.oecImage
 import org.openecard.richclient.gui.manage.core.AddonPanelBuilder.createConnectionSettingsAddon
 import org.openecard.richclient.gui.manage.core.AddonPanelBuilder.createGeneralSettingsAddon
 import org.openecard.richclient.gui.manage.core.AddonPanelBuilder.createLogSettingsAddon
+import org.openecard.richclient.res.MR
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.Font
@@ -184,7 +185,7 @@ class ManagementDialog : JFrame() {
 			createConnectionSettingsAddon(),
 		)
 		model.addElement(
-			I18N.strings.addon_list_core_logging.localized(),
+			MR.strings.addon_list_core_logging.localized(),
 			createLogSettingsAddon(),
 		)
 // 		model.addElement(

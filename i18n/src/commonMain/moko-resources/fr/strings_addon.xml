@@ -44,37 +44,6 @@
 		proxy ne doit être utilisé. * peut être utilisé comme wildcard.
 	</string>
 
-	<!-- Logging settings-->
-	<string name="addon_list_core_logging">Paramètres Logging</string>
-	<string name="addon_core_logging_group_name">Logging</string>
-	<string name="addon_core_logging_root">Niveau de base</string>
-	<string name="addon_core_logging_root_desc">Niveau de base utilisé quand aucune valeur plus précise est donnée.
-	</string>
-	<string name="addon.core.logging.paos">PAOS</string>
-	<string name="addon.core.logging.paos.desc">Connection between eCard-Client and eID-Server.</string>
-	<string name="addon.core.logging.eac">EAC</string>
-	<string name="addon.core.logging.eac.desc">Authentication protocol between card and eID-Server.</string>
-	<string name="addon.core.logging.pace">PACE</string>
-	<string name="addon.core.logging.pace.desc">Authentication protocol between card and eCard-Client.</string>
-	<string name="addon.core.logging.trchecks">TR-03112 checks</string>
-	<string name="addon.core.logging.trchecks.desc">Checks of the certificates and server addresses.</string>
-	<string name="addon.core.logging.tctoken">TCToken</string>
-	<string name="addon.core.logging.tctoken.desc">TCToken related operations.</string>
-	<string name="addon.core.logging.event">Event Manager</string>
-	<string name="addon.core.logging.event.desc">Low level events with cards.</string>
-	<string name="addon_core_logging_httpbind">HTTP Binding</string>
-	<string name="addon_core_logging_httpbind_desc">Interface HTTP sur http\://localhost\:24727.</string>
-	<string name="addon_core_logging_addon">Add-on Manager</string>
-	<string name="addon_core_logging_addon_desc">Les opérations liées à l’Add-on Manager.</string>
-	<string name="addon_core_logging_salstate">Etat SAL</string>
-	<string name="addon_core_logging_salstate_desc">Les événements qui affectent le comportement de l'état SAL.</string>
-	<string name="addon_core_logging_middleware">PKCS#11 Middleware</string>
-	<string name="addon_core_logging_middleware_desc">Opérations liés au Middleware.</string>
-	<string name="addon_core_logging_middleware-event">Middleware Event Manager</string>
-	<string name="addon_core_logging_middleware-event_desc">Les événements de bas niveau avec des cartes.</string>
-	<string name="addon_core_logging_chipgateway">ChipGateway protocole</string>
-	<string name="addon_core_logging_chipgateway_desc">Opérations de protocole liés au ChipGateway.</string>
-
 	<!-- Middleware settings-->
 	<string name="addon_list_core_middleware">PKCS#11</string>
 	<string name="addon_core_middleware_group_name">Choix du middleware PKCS#11</string>

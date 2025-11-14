@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- Logging settings-->
+	<string name="addon_list_core_logging">Paramètres Logging</string>
+	<string name="addon_core_logging_group_name">Logging</string>
+	<string name="addon_core_logging_root">Niveau de base</string>
+	<string name="addon_core_logging_root_desc">Niveau de base utilisé quand aucune valeur plus précise est donnée.</string>
+	<string name="addon.core.logging.eidchannel">eID-Canal</string>
+	<string name="addon.core.logging.eidchannel.desc">Connexion entre le client de carte électronique et le serveur d'identité électronique.</string>
+	<string name="addon.core.logging.eac">EAC</string>
+	<string name="addon.core.logging.eac.desc">Protocole d'authentification entre la carte et le serveur d'identité électronique.</string>
+	<string name="addon.core.logging.pace">PACE</string>
+	<string name="addon.core.logging.pace.desc">Protocole d'authentification entre la carte et le client de carte électronique.</string>
+	<string name="addon.core.logging.pcsc">PCSC</string>
+	<string name="addon.core.logging.pcsc.desc">Événements de bas niveau avec des cartes.</string>
+	<string name="addon_core_logging_httpbind">HTTP Binding</string>
+	<string name="addon_core_logging_httpbind_desc">Interface HTTP sur http\://localhost\:24727.</string>
+</resources>

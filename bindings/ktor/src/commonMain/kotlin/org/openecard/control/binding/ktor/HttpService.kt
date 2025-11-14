@@ -92,7 +92,6 @@ val SecurityHeader =
 	createApplicationPlugin("SecurityHeader") {
 		onCall { call ->
 			val headers = call.response.headers
-			headers.append("X-Custom-Header", "Hello, world!")
 			headers.append("X-XSS-Protection", "1")
 			headers.append(
 				"Content-Security-Policy",

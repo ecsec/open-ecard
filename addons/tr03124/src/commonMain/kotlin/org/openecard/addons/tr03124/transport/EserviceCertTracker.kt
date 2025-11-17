@@ -62,7 +62,7 @@ class EserviceCertTracker {
 
 			val allAllowed = certsSeen.all { toTest -> allowedCommCerts.any { it == toTest } }
 			if (!allAllowed) {
-				throw UntrustedCertificateError("")
+				throw UntrustedCertificateError("Certificate which is not hashed in the CertificateDescription found")
 			}
 		}
 	}

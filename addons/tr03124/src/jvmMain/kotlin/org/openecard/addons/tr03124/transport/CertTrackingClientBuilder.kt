@@ -18,8 +18,13 @@ import org.bouncycastle.tls.ProtocolVersion
 import org.openecard.addons.tr03124.Tr03124Config
 import org.openecard.addons.tr03124.transport.EidServerPaos.Companion.registerPaosNegotiation
 import org.openecard.addons.tr03124.xml.TcToken
+import org.openecard.utils.common.throwIf
+import java.security.PublicKey
 import java.security.cert.Certificate
 import java.security.cert.X509Certificate
+import java.security.interfaces.ECPublicKey
+import java.security.interfaces.EdECPublicKey
+import java.security.interfaces.RSAPublicKey
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSession
 import javax.net.ssl.SSLSocket
@@ -40,13 +45,36 @@ class CertTrackingClientBuilder(
 	private val httpClientBase =
 		OkHttpClient
 			.Builder()
-			.sslSocketFactory(sslCtx.socketFactory, tm)
+			// define TLS cipher suites and allowed protocols, overridden in PSK client
+			.connectionSpecs(
+				listOf(
+					ConnectionSpec
+						.Builder(
+							ConnectionSpec.RESTRICTED_TLS,
+						).cipherSuites(
+							// TLSv1.3
+							okhttp3.CipherSuite.TLS_AES_256_GCM_SHA384,
+							okhttp3.CipherSuite.TLS_AES_128_GCM_SHA256,
+							// TLSv1.2
+							okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+							okhttp3.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+							okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+							okhttp3.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+							// TLSv1.2 weak
+							okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
+							okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
+						).build(),
+				),
+			).sslSocketFactory(sslCtx.socketFactory, tm)
 			.addNetworkInterceptor { chain ->
-				// record TLS cert
 				chain.connection()!!.let { con ->
 					when (val sock = con.socket()) {
 						is SSLSocket -> {
 							sock.session.peerCertificates.firstOrNull()?.let { cert ->
+								// check key sizes
+								SslSettings.checkKeySize(cert.publicKey)
+
+								// record TLS cert
 								val hash = cert.contentSha256()
 								if (cert is X509Certificate) {
 									log.debug { "Recording certificate <${cert.subjectX500Principal}>" }
@@ -281,4 +309,22 @@ object SslSettings {
 
 			override fun getAcceptedIssuers(): Array<out X509Certificate> = arrayOf()
 		}
+
+	@Throws(InvalidTlsParameter::class)
+	fun checkKeySize(pk: PublicKey) {
+		when (pk) {
+			is RSAPublicKey -> {
+				throwIf(pk.modulus.bitLength() <= 3000) { InvalidTlsParameter("RSA key of the server certificate is too small") }
+			}
+			is ECPublicKey -> {
+				throwIf(pk.w.affineX.bitLength() <= 250) { InvalidTlsParameter("ECDSA key of the server certificate is too small") }
+			}
+			is EdECPublicKey -> {
+				throwIf(pk.point.y.bitLength() <= 250) { InvalidTlsParameter("EdDSA key of the server certificate is too small") }
+			}
+			else -> {
+				throw InvalidTlsParameter("Unsupported key type used in certificate")
+			}
+		}
+	}
 }

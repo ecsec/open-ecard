@@ -26,17 +26,27 @@ import org.openecard.i18n.I18N
 import org.openecard.richclient.tr03124.Tr03124SettingsLoader
 
 /**
- * Custom settings group for notification settings.
+ * Custom settings group for TLS settings.
  *
  * @author Tobias Wich
  */
-class GeneralSettingsNotificationGroup :
-	OpenecardPropertiesSettingsGroup(I18N.strings.addon_list_core_general_notification_group_name.localized()) {
+class ConnectionSettingsTlsGroup :
+	OpenecardPropertiesSettingsGroup(I18N.strings.addon_list_core_connection_tls_group_name.localized()) {
 	init {
 		addBoolItem(
-			I18N.strings.addon_list_core_general_notification_omit_show_remove_card.localized(),
-			I18N.strings.addon_list_core_general_notification_omit_show_remove_card_desc.localized(),
-			Tr03124SettingsLoader.REMOVE_CARD_DIALOG,
+			I18N.strings.addon_list_core_connection_tls_non_bsi_ciphers.localized(),
+			I18N.strings.addon_list_core_connection_tls_non_bsi_ciphers_desc.localized(),
+			Tr03124SettingsLoader.USE_NON_BSI_CIPHERS,
 		)
+		addBoolItem(
+			I18N.strings.addon_list_core_connection_tls_disable_keysize_check.localized(),
+			I18N.strings.addon_list_core_connection_tls_disable_keysize_check_desc.localized(),
+			Tr03124SettingsLoader.DISABLE_KEY_SIZE_CHECK,
+		)
+	}
+
+	override fun saveProperties() {
+		super.saveProperties()
+		Tr03124SettingsLoader.loadFromProperties()
 	}
 }

@@ -43,6 +43,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.openecard.addons.tr03124.ClientInformation
+import org.openecard.addons.tr03124.Tr03124Config
 import org.openecard.addons.tr03124.UserAgent
 import org.openecard.build.BuildInfo
 import org.openecard.common.OpenecardProperties
@@ -59,6 +60,7 @@ import org.openecard.richclient.sc.CardWatcherCallback.Companion.registerWith
 import org.openecard.richclient.sc.CifDb
 import org.openecard.richclient.sc.EventCardRecognition
 import org.openecard.richclient.tr03124.RichclientTr03124Binding
+import org.openecard.richclient.tr03124.Tr03124SettingsLoader
 import org.openecard.richclient.tr03124.TransportLogging
 import org.openecard.richclient.tr03124.registerTr03124Binding
 import org.openecard.richclient.updater.VersionUpdateChecker
@@ -177,6 +179,7 @@ class RichClient : Application() {
 
 				// configure TR-03124 addon
 				TransportLogging.loadEidLogger()
+				Tr03124SettingsLoader.loadFromProperties()
 				val uaVersion =
 					BuildInfo.version.let { v ->
 						UserAgent.Version(v.major, v.minor, v.patch)

@@ -84,7 +84,7 @@ class UiManager(
 						addWindowListener(
 							object : WindowAdapter() {
 								override fun windowClosed(e: WindowEvent?) {
-									about = null
+									settings = null
 								}
 							},
 						)

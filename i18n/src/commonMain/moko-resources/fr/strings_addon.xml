@@ -44,6 +44,13 @@
 		proxy ne doit être utilisé. * peut être utilisé comme wildcard.
 	</string>
 
+	<!-- TLS settings-->
+	<string name="addon_list_core_connection_tls_group_name">TLS</string>
+	<string name="addon_list_core_connection_tls_non_bsi_ciphers">Chiffres modernes</string>
+	<string name="addon_list_core_connection_tls_non_bsi_ciphers_desc">Utilisez des suites de chiffrement modernes non approuvées par le BSI.</string>
+	<string name="addon_list_core_connection_tls_disable_keysize_check">Vérification standard de la taille des clés</string>
+	<string name="addon_list_core_connection_tls_disable_keysize_check_desc">Utilisez la validation standard des certificats au lieu de la vérification personnalisée de la taille des clés conforme à la norme BSI.</string>
+
 	<!-- Middleware settings-->
 	<string name="addon_list_core_middleware">PKCS#11</string>
 	<string name="addon_core_middleware_group_name">Choix du middleware PKCS#11</string>

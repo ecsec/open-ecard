@@ -43,6 +43,13 @@
         werden soll. * kann als Wildcard benutzt werden.
     </string>
 
+	<!-- TLS settings-->
+	<string name="addon_list_core_connection_tls_group_name">TLS</string>
+	<string name="addon_list_core_connection_tls_non_bsi_ciphers">Modere Cipher</string>
+	<string name="addon_list_core_connection_tls_non_bsi_ciphers_desc">Benutze moderne cipher suites, die nicht vom BSI zugelassen sind.</string>
+	<string name="addon_list_core_connection_tls_disable_keysize_check">Standard Schlüssel check</string>
+	<string name="addon_list_core_connection_tls_disable_keysize_check_desc">Benutze die standard Zertifikatsvalidierung statt dem BSI konformen Schlüsselgrößen check.</string>
+
     <!-- Middleware settings -->
     <string name="addon_list_core_middleware">PKCS#11</string>
     <string name="addon_core_middleware_group_name">PKCS#11 Middleware Auswahl</string>

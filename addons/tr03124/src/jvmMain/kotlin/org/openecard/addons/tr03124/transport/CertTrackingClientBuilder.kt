@@ -18,6 +18,7 @@ import org.bouncycastle.tls.ProtocolVersion
 import org.openecard.addons.tr03124.Tr03124Config
 import org.openecard.addons.tr03124.transport.EidServerPaos.Companion.registerPaosNegotiation
 import org.openecard.addons.tr03124.xml.TcToken
+import org.openecard.utils.common.doIf
 import org.openecard.utils.common.throwIf
 import java.security.PublicKey
 import java.security.cert.Certificate
@@ -52,17 +53,26 @@ class CertTrackingClientBuilder(
 						.Builder(
 							ConnectionSpec.RESTRICTED_TLS,
 						).cipherSuites(
-							// TLSv1.3
-							okhttp3.CipherSuite.TLS_AES_256_GCM_SHA384,
-							okhttp3.CipherSuite.TLS_AES_128_GCM_SHA256,
-							// TLSv1.2
-							okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-							okhttp3.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-							okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-							okhttp3.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-							// TLSv1.2 weak
-							okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
-							okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
+							*buildList {
+								// TLSv1.3
+								doIf(Tr03124Config.nonBsiApprovedCiphers) {
+									add(okhttp3.CipherSuite.TLS_CHACHA20_POLY1305_SHA256)
+								}
+								add(okhttp3.CipherSuite.TLS_AES_256_GCM_SHA384)
+								add(okhttp3.CipherSuite.TLS_AES_128_GCM_SHA256)
+								// TLSv1.2
+								doIf(Tr03124Config.nonBsiApprovedCiphers) {
+									add(okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256)
+									add(okhttp3.CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256)
+								}
+								add(okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384)
+								add(okhttp3.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
+								add(okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256)
+								add(okhttp3.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256)
+								// TLSv1.2 weak
+								add(okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384)
+								add(okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256)
+							}.toTypedArray(),
 						).build(),
 				),
 			).sslSocketFactory(sslCtx.socketFactory, tm)
@@ -312,18 +322,22 @@ object SslSettings {
 
 	@Throws(InvalidTlsParameter::class)
 	fun checkKeySize(pk: PublicKey) {
-		when (pk) {
-			is RSAPublicKey -> {
-				throwIf(pk.modulus.bitLength() <= 3000) { InvalidTlsParameter("RSA key of the server certificate is too small") }
-			}
-			is ECPublicKey -> {
-				throwIf(pk.w.affineX.bitLength() <= 250) { InvalidTlsParameter("ECDSA key of the server certificate is too small") }
-			}
-			is EdECPublicKey -> {
-				throwIf(pk.point.y.bitLength() <= 250) { InvalidTlsParameter("EdDSA key of the server certificate is too small") }
-			}
-			else -> {
-				throw InvalidTlsParameter("Unsupported key type used in certificate")
+		if (!Tr03124Config.disableKeySizeCheck) {
+			when (pk) {
+				is RSAPublicKey -> {
+					throwIf(pk.modulus.bitLength() <= 3000) { InvalidTlsParameter("RSA key of the server certificate is too small") }
+				}
+				is ECPublicKey -> {
+					throwIf(
+						pk.w.affineX.bitLength() <= 250,
+					) { InvalidTlsParameter("ECDSA key of the server certificate is too small") }
+				}
+				is EdECPublicKey -> {
+					throwIf(pk.point.y.bitLength() <= 250) { InvalidTlsParameter("EdDSA key of the server certificate is too small") }
+				}
+				else -> {
+					throw InvalidTlsParameter("Unsupported key type used in certificate")
+				}
 			}
 		}
 	}

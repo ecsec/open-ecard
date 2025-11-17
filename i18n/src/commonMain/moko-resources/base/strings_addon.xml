@@ -44,6 +44,13 @@
 		used. * can be used as wildcard.
 	</string>
 
+	<!-- TLS settings-->
+	<string name="addon_list_core_connection_tls_group_name">TLS</string>
+	<string name="addon_list_core_connection_tls_non_bsi_ciphers">Modern Ciphers</string>
+	<string name="addon_list_core_connection_tls_non_bsi_ciphers_desc">Use modern cipher suites not approved by the BSI.</string>
+	<string name="addon_list_core_connection_tls_disable_keysize_check">Standard key size check</string>
+	<string name="addon_list_core_connection_tls_disable_keysize_check_desc">Use the standard certificate validation instead of the custom BSI compliant key size check.</string>
+
 	<!-- Middleware settings-->
 	<string name="addon_list_core_middleware">PKCS#11</string>
 	<string name="addon_core_middleware_group_name">PKCS#11 Middleware Selection</string>

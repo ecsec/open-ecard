@@ -89,6 +89,8 @@ class CertTrackingClientBuilder(
 					resp
 				}
 				followRedirects(false)
+				// don't allow protocol switching
+				followSslRedirects(false)
 			}.build()
 
 	@OptIn(ExperimentalUnsignedTypes::class)

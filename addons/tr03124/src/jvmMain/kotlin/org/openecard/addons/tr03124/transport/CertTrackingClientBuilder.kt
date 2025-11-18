@@ -238,14 +238,34 @@ class CertTrackingClientBuilder(
 								ConnectionSpec
 									.Builder(
 										ConnectionSpec.RESTRICTED_TLS,
-									).tlsVersions(TlsVersion.TLS_1_2)
-									.cipherSuites(
-										"TLS_RSA_PSK_WITH_AES_256_CBC_SHA",
-										"TLS_RSA_PSK_WITH_AES_256_CBC_SHA384",
-										"TLS_RSA_PSK_WITH_AES_128_CBC_SHA256",
-										"TLS_RSA_PSK_WITH_AES_256_GCM_SHA384",
-										"TLS_RSA_PSK_WITH_AES_128_GCM_SHA256",
-									).build(),
+									).apply {
+										val with13 = Tr03124Config.nonBsiApprovedCiphers
+										if (!with13) {
+											tlsVersions(TlsVersion.TLS_1_2)
+										}
+										cipherSuites(
+											*buildList {
+												// TLS 1.3
+												doIf(with13) {
+													add("TLS_AES_128_GCM_SHA256")
+													add("TLS_AES_256_GCM_SHA384")
+													add("TLS_CHACHA20_POLY1305_SHA256")
+												}
+												// Modern ECDHE ciphers -- disabled because OkHttp can't handle empty cert chains
+												// doIf(Tr03124Config.nonBsiApprovedCiphers) {
+												// 	add("TLS_ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256")
+												// 	add("TLS_ECDHE_PSK_WITH_AES_128_GCM_SHA256")
+												// 	add("TLS_ECDHE_PSK_WITH_AES_256_GCM_SHA384")
+												// }
+												// BSI approved TLS1.2
+												add("TLS_RSA_PSK_WITH_AES_256_CBC_SHA")
+												add("TLS_RSA_PSK_WITH_AES_256_CBC_SHA384")
+												add("TLS_RSA_PSK_WITH_AES_128_CBC_SHA256")
+												add("TLS_RSA_PSK_WITH_AES_256_GCM_SHA384")
+												add("TLS_RSA_PSK_WITH_AES_128_GCM_SHA256")
+											}.toTypedArray(),
+										)
+									}.build(),
 							),
 						).sslSocketFactory(SslSettings.getPskSocketFactory(tm, session, psk), tm)
 						.build()
@@ -295,17 +315,17 @@ object SslSettings {
 	): SSLSocketFactory =
 		BcPskSSLSocketFactory(
 			tm = tm,
-			BcPskTlsParams(
-				supportedProtocolVersions = arrayOf(ProtocolVersion.TLSv12),
-				supportedCipherSuiteCodes =
-					intArrayOf(
-						CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA,
-						CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA384,
-						CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA256,
-						CipherSuite.TLS_RSA_PSK_WITH_AES_256_GCM_SHA384,
-						CipherSuite.TLS_RSA_PSK_WITH_AES_128_GCM_SHA256,
-					),
-			),
+			BcPskTlsParams(),
+// 				supportedProtocolVersions = arrayOf(ProtocolVersion.TLSv12),
+// 				supportedCipherSuiteCodes =
+// 					intArrayOf(
+// 						CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA,
+// 						CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA384,
+// 						CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA256,
+// 						CipherSuite.TLS_RSA_PSK_WITH_AES_256_GCM_SHA384,
+// 						CipherSuite.TLS_RSA_PSK_WITH_AES_128_GCM_SHA256,
+// 					),
+// 			),
 			BasicTlsPSKIdentity(session, psk),
 		)
 

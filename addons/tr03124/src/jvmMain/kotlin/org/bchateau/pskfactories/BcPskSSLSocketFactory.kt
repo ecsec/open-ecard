@@ -477,7 +477,9 @@ open class BcPskSSLSocketFactory(
 					override fun getPacketBufferSize(): Int = MAX_SSL_PACKET_SIZE
 
 					@Throws(SSLPeerUnverifiedException::class)
-					override fun getPeerCertificates(): Array<Certificate>? = peerCerts?.toTypedArray()
+					override fun getPeerCertificates(): Array<Certificate> =
+						peerCerts?.toTypedArray()
+							?: throw SSLPeerUnverifiedException("No certificate received from server")
 
 					override fun getPeerHost(): String = host
 

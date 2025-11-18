@@ -2,7 +2,7 @@
 kotlin = "2.2.21"
 ktlint = "1.7.1"
 ktlint-githubreporter = "2.0.1"
-ktlint-plugin = "13.1.+"
+ktlint-plugin = "14.0.+"
 kx-co = "1.10.+"
 kx-serde = "1.9.+"
 kx-serde-xml = "0.91.3"
@@ -54,7 +54,7 @@ kotlinPoet = "2.2.0"
 # Testing
 junit = "6.0.+"
 wiremock = "3.13.+"
-mokkery = "2.10.1"
+mokkery = "2.10.2"
 kover = "0.9.2"
 
 

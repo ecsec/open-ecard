@@ -15,6 +15,7 @@
  */
 package org.bchateau.pskfactories
 
+import org.bouncycastle.tls.AlertDescription
 import org.bouncycastle.tls.BasicTlsPSKExternal
 import org.bouncycastle.tls.CertificateRequest
 import org.bouncycastle.tls.HashAlgorithm
@@ -29,6 +30,8 @@ import org.bouncycastle.tls.SignatureAndHashAlgorithm
 import org.bouncycastle.tls.TlsAuthentication
 import org.bouncycastle.tls.TlsClientProtocol
 import org.bouncycastle.tls.TlsCredentials
+import org.bouncycastle.tls.TlsFatalAlert
+import org.bouncycastle.tls.TlsPSK
 import org.bouncycastle.tls.TlsPSKExternal
 import org.bouncycastle.tls.TlsPSKIdentity
 import org.bouncycastle.tls.TlsServerCertificate
@@ -36,6 +39,7 @@ import org.bouncycastle.tls.TlsUtils
 import org.bouncycastle.tls.crypto.TlsCrypto
 import org.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto
 import org.openecard.addons.tr03124.Tr03124Config
+import org.openecard.utils.common.throwIfNull
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -392,6 +396,10 @@ open class BcPskSSLSocketFactory(
 							val secret = crypto.createSecret(pskIdentity.psk)
 							externals.add(BasicTlsPSKExternal(pskIdentity.pskIdentity, secret))
 							return externals
+						}
+
+						override fun notifySelectedPSK(selectedPSK: TlsPSK?) {
+							throwIfNull(selectedPSK) { TlsFatalAlert(AlertDescription.handshake_failure) }
 						}
 
 						override fun getSNIServerNames(): Vector<ServerName> = Vector(listOf(host.hostNameToServerName()))

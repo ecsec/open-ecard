@@ -245,7 +245,7 @@ class CertTrackingClientBuilder(
 										"TLS_RSA_PSK_WITH_AES_128_GCM_SHA256",
 									).build(),
 							),
-						).sslSocketFactory(SslSettings.getPskSocketFactory(session, psk), tm)
+						).sslSocketFactory(SslSettings.getPskSocketFactory(tm, session, psk), tm)
 						.build()
 			}
 
@@ -287,10 +287,12 @@ object SslSettings {
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	fun getPskSocketFactory(
+		tm: X509TrustManager,
 		session: String,
 		psk: ByteArray,
 	): SSLSocketFactory =
 		BcPskSSLSocketFactory(
+			tm = tm,
 			BcPskTlsParams(
 				supportedProtocolVersions = arrayOf(ProtocolVersion.TLSv12),
 				supportedCipherSuiteCodes =

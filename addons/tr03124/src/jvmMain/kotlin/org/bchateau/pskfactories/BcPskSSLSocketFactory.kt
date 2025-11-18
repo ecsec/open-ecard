@@ -48,6 +48,7 @@ import java.security.Principal
 import java.security.SecureRandom
 import java.security.cert.Certificate
 import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
 import java.util.Collections
 import java.util.Vector
 import javax.net.ssl.SSLPeerUnverifiedException
@@ -61,12 +62,12 @@ import javax.net.ssl.X509TrustManager
 /**
  * This SSLSocketFactory provides TLS pre-shared key (PSK) cipher suites via Bouncy Castle.
  *
- *
  * When using an instance of this class with OkHttpClient (and possibly other HTTP clients) you
  * must provide an instance of [X509TrustManager] because a null TrustManager is not
  * allowed, but the security of matching pre-shared keys is still enforced.
  */
 open class BcPskSSLSocketFactory(
+	private val tm: X509TrustManager,
 	private val params: BcPskTlsParams,
 	private val pskIdentity: TlsPSKIdentity?,
 ) : SSLSocketFactory() {
@@ -401,8 +402,13 @@ open class BcPskSSLSocketFactory(
 									val certFac = CertificateFactory.getInstance("X.509")
 									peerCerts =
 										serverCert?.certificate?.certificateList?.map {
-											certFac.generateCertificate(it.encoded.inputStream())
+											certFac.generateCertificate(it.encoded.inputStream()) as X509Certificate
 										}
+
+									// validate cert
+									peerCerts?.toTypedArray()?.let {
+										tm.checkServerTrusted(it, "UNKNOWN")
+									}
 								}
 
 								override fun getClientCredentials(certificateRequest: CertificateRequest?): TlsCredentials? = null
@@ -411,7 +417,7 @@ open class BcPskSSLSocketFactory(
 				)
 			}
 
-			private var peerCerts: List<Certificate>? = null
+			private var peerCerts: List<X509Certificate>? = null
 
 			private fun String.hostNameToServerName(): ServerName {
 				var name = this

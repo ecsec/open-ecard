@@ -156,6 +156,9 @@ internal class EserviceClientImpl(
 				if (certTracker.matchesSop(tokenUrl, nextAddr)) {
 					log.info { "Refresh URL is '$nextAddr'" }
 					return newUrl
+				} else if (!newUrl.startsWith("https://")) {
+					log.warn { "Received non https URL in redirect: $newUrl" }
+					return null
 				} else {
 					nextAddr = newUrl
 					log.debug { "Checking URL '$nextAddr'" }

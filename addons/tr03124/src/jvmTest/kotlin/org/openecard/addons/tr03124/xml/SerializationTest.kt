@@ -30,7 +30,7 @@ class SerializationTest {
 		validator.validate(str)
 		assertEquals(
 			"""
-			<Result xmlns="urn:oasis:names:tc:dss:1.0:core:schema"><ResultMajor>major</ResultMajor><ResultMinor>minor</ResultMinor><ResultMessage xml:lang="en">message</ResultMessage></Result>
+			<dss:Result xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"><dss:ResultMajor>major</dss:ResultMajor><dss:ResultMinor>minor</dss:ResultMinor><dss:ResultMessage xml:lang="en">message</dss:ResultMessage></dss:Result>
 			""".trim(),
 			str,
 		)

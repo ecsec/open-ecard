@@ -5,7 +5,7 @@ ktlint-githubreporter = "2.0.1"
 ktlint-plugin = "13.1.+"
 kx-co = "1.10.+"
 kx-serde = "1.9.+"
-kx-serde-xml = "0.91.2"
+kx-serde-xml = "0.91.3"
 kt-logging = "7.0.+"
 kx-datetime = "0.7.1"
 

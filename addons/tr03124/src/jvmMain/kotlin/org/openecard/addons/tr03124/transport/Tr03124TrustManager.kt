@@ -59,6 +59,7 @@ class Tr03124TrustManager(
 	@OptIn(ExperimentalUnsignedTypes::class)
 	fun checkEeCert(chain: Array<out X509Certificate>) {
 		val ee = chain[0]
+		log.debug { "Checking certificate: \n$ee" }
 
 		// check key sizes
 		checkKeySize(ee.publicKey)

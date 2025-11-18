@@ -1,10 +1,7 @@
 package org.openecard.addons.tr03124
 
-import kotlinx.coroutines.CancellationException
 import org.openecard.addons.tr03124.transport.EidServerInterface
 import org.openecard.addons.tr03124.transport.EserviceClient
-import org.openecard.addons.tr03124.transport.InvalidTlsParameter
-import org.openecard.addons.tr03124.transport.UntrustedCertificateError
 
 @Throws(BindingException::class)
 suspend fun <T> runEacCatching(
@@ -15,22 +12,16 @@ suspend fun <T> runEacCatching(
 	try {
 		return block()
 	} catch (ex: Exception) {
-		val bindEx =
-			when (ex) {
-				is CancellationException ->
-					UserCanceled(eserviceClient, cause = ex)
-				is UntrustedCertificateError ->
-					UnknownTrustedChannelError(eserviceClient, "Channel used untrusted certificate", ex)
-				is InvalidTlsParameter ->
-					UnknownTrustedChannelError(eserviceClient, "Channel used invalid parameters", ex)
-				is BindingException ->
-					ex
-				else ->
-					UnknownClientError(eserviceClient, cause = ex)
-			}
+		val bindEx = handleExeptions(eserviceClient, eidServer, ex)
 
 		// close channel to eID-Server if necessary
 		eidServer?.sendError(bindEx)
 		throw bindEx
 	}
 }
+
+expect fun handleExeptions(
+	eserviceClient: EserviceClient,
+	eidServer: EidServerInterface?,
+	ex: Exception,
+): BindingException

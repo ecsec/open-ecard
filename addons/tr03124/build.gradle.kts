@@ -29,6 +29,7 @@ kotlin {
 		jvmMain.dependencies {
 			implementation(libs.ktor.client.okhttp)
 			implementation(libs.bc.tls)
+			implementation(libs.bc.prov)
 		}
 
 		commonTest.dependencies {

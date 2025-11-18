@@ -12,6 +12,8 @@ import okhttp3.TlsVersion
 import okio.ByteString.Companion.toByteString
 import org.bchateau.pskfactories.BcPskSSLSocketFactory
 import org.bchateau.pskfactories.BcPskTlsParams
+import org.bouncycastle.jce.provider.BouncyCastleProvider
+import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider
 import org.bouncycastle.tls.BasicTlsPSKIdentity
 import org.bouncycastle.tls.CipherSuite
 import org.bouncycastle.tls.ProtocolVersion
@@ -19,13 +21,8 @@ import org.openecard.addons.tr03124.Tr03124Config
 import org.openecard.addons.tr03124.transport.EidServerPaos.Companion.registerPaosNegotiation
 import org.openecard.addons.tr03124.xml.TcToken
 import org.openecard.utils.common.doIf
-import org.openecard.utils.common.throwIf
-import java.security.PublicKey
+import java.security.Security
 import java.security.cert.Certificate
-import java.security.cert.X509Certificate
-import java.security.interfaces.ECPublicKey
-import java.security.interfaces.EdECPublicKey
-import java.security.interfaces.RSAPublicKey
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSession
 import javax.net.ssl.SSLSocket
@@ -38,7 +35,7 @@ private val log = KotlinLogging.logger { }
 class CertTrackingClientBuilder(
 	certTracker: EserviceCertTracker,
 ) : KtorClientBuilder {
-	private val tm = SslSettings.getTrustAllCertsManager()
+	private val tm = SslSettings.getTrustAllCertsManager(certTracker)
 	private val sslCtx = SslSettings.getSslContext(tm)
 	private val sslSessions = mutableSetOf<SSLSession>()
 
@@ -46,63 +43,53 @@ class CertTrackingClientBuilder(
 	private val httpClientBase =
 		OkHttpClient
 			.Builder()
-			// define TLS cipher suites and allowed protocols, overridden in PSK client
-			.connectionSpecs(
-				listOf(
-					ConnectionSpec
-						.Builder(
-							ConnectionSpec.RESTRICTED_TLS,
-						).cipherSuites(
-							*buildList {
-								// TLSv1.3
-								doIf(Tr03124Config.nonBsiApprovedCiphers) {
-									add(okhttp3.CipherSuite.TLS_CHACHA20_POLY1305_SHA256)
-								}
-								add(okhttp3.CipherSuite.TLS_AES_256_GCM_SHA384)
-								add(okhttp3.CipherSuite.TLS_AES_128_GCM_SHA256)
-								// TLSv1.2
-								doIf(Tr03124Config.nonBsiApprovedCiphers) {
-									add(okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256)
-									add(okhttp3.CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256)
-								}
-								add(okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384)
-								add(okhttp3.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
-								add(okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256)
-								add(okhttp3.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256)
-								// TLSv1.2 weak
-								add(okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384)
-								add(okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256)
-							}.toTypedArray(),
-						).build(),
-				),
-			).sslSocketFactory(sslCtx.socketFactory, tm)
-			.addNetworkInterceptor { chain ->
-				chain.connection()!!.let { con ->
-					when (val sock = con.socket()) {
-						is SSLSocket -> {
-							sock.session.peerCertificates.firstOrNull()?.let { cert ->
-								// check key sizes
-								SslSettings.checkKeySize(cert.publicKey)
-
-								// record TLS cert
-								val hash = cert.contentSha256()
-								if (cert is X509Certificate) {
-									log.debug { "Recording certificate <${cert.subjectX500Principal}>" }
-								}
-								certTracker.addCertHash(hash.toUByteArray())
+			.apply {
+				// define TLS cipher suites and allowed protocols, overridden in PSK client
+				connectionSpecs(
+					listOf(
+						ConnectionSpec
+							.Builder(
+								ConnectionSpec.RESTRICTED_TLS,
+							).cipherSuites(
+								*buildList {
+									// TLSv1.3
+									doIf(Tr03124Config.nonBsiApprovedCiphers) {
+										add(okhttp3.CipherSuite.TLS_CHACHA20_POLY1305_SHA256)
+									}
+									add(okhttp3.CipherSuite.TLS_AES_256_GCM_SHA384)
+									add(okhttp3.CipherSuite.TLS_AES_128_GCM_SHA256)
+									// TLSv1.2
+									doIf(Tr03124Config.nonBsiApprovedCiphers) {
+										add(okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256)
+										add(okhttp3.CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256)
+									}
+									add(okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384)
+									add(okhttp3.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
+									add(okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256)
+									add(okhttp3.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256)
+									// TLSv1.2 weak
+									add(okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384)
+									add(okhttp3.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256)
+								}.toTypedArray(),
+							).build(),
+					),
+				)
+				sslSocketFactory(sslCtx.socketFactory, tm)
+				addNetworkInterceptor { chain ->
+					chain.connection()!!.let { con ->
+						when (val sock = con.socket()) {
+							!is SSLSocket -> {
+								throw IllegalStateException("Non TLS socket used in eID Process")
 							}
 						}
-						else -> {
-							throw IllegalStateException("Non TLS socket used in eID Process")
-						}
 					}
-				}
 
-				val req = chain.request()
-				val resp = chain.proceed(req)
-				resp
-			}.followRedirects(false)
-			.build()
+					val req = chain.request()
+					val resp = chain.proceed(req)
+					resp
+				}
+				followRedirects(false)
+			}.build()
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override val tokenClient: HttpClient by lazy {
@@ -248,7 +235,7 @@ class CertTrackingClientBuilder(
 							listOf(
 								ConnectionSpec
 									.Builder(
-										ConnectionSpec.MODERN_TLS,
+										ConnectionSpec.RESTRICTED_TLS,
 									).tlsVersions(TlsVersion.TLS_1_2)
 									.cipherSuites(
 										"TLS_RSA_PSK_WITH_AES_256_CBC_SHA",
@@ -274,8 +261,25 @@ class CertTrackingClientBuilder(
 fun Certificate.contentSha256(): ByteArray = encoded.toByteString().sha256().toByteArray()
 
 object SslSettings {
+	init {
+		System.setProperty("jsse.enableFFDHE", "false")
+		val modernGroups = doIf(Tr03124Config.nonBsiApprovedCiphers) { ",x25519,x448" } ?: ""
+		System.setProperty("jdk.tls.namedGroups", "secp256r1,secp384r1,secp521r1$modernGroups")
+		val modernSigAlgs = doIf(Tr03124Config.nonBsiApprovedCiphers) { ",ed25519,ed448" } ?: ""
+		System.setProperty(
+			"jdk.tls.client.SignatureSchemes",
+			"ecdsa_secp256r1_sha256,ecdsa_secp384r1_sha384,ecdsa_secp521r1_sha512," +
+				"rsa_pkcs1_sha256,rsa_pkcs1_sha384,rsa_pkcs1_sha512," +
+				"rsa_pss_pss_sha256,rsa_pss_pss_sha384,rsa_pss_pss_sha512," +
+				"rsa_pss_rsae_sha256,rsa_pss_rsae_sha384,rsa_pss_rsae_sha512" +
+				modernSigAlgs,
+		)
+		Security.addProvider(BouncyCastleProvider())
+		Security.addProvider(BouncyCastleJsseProvider())
+	}
+
 	fun getSslContext(tm: TrustManager): SSLContext {
-		val sslContext = SSLContext.getInstance("TLS")
+		val sslContext = SSLContext.getInstance("TLS", "BCJSSE")
 		val tms = listOf(tm)
 		sslContext.init(null, tms.toTypedArray(), null)
 		return sslContext
@@ -302,43 +306,5 @@ object SslSettings {
 		)
 
 	@OptIn(ExperimentalUnsignedTypes::class)
-	fun getTrustAllCertsManager(): X509TrustManager =
-		@Suppress("CustomX509TrustManager")
-		object : X509TrustManager {
-			override fun checkClientTrusted(
-				chain: Array<out X509Certificate>,
-				authType: String?,
-			): Unit = throw UnsupportedOperationException("Client certificates are not permitted in TR-03124")
-
-			@Suppress("TrustAllX509TrustManager")
-			override fun checkServerTrusted(
-				chain: Array<out X509Certificate>,
-				authType: String,
-			) {
-			}
-
-			override fun getAcceptedIssuers(): Array<out X509Certificate> = arrayOf()
-		}
-
-	@Throws(InvalidTlsParameter::class)
-	fun checkKeySize(pk: PublicKey) {
-		if (!Tr03124Config.disableKeySizeCheck) {
-			when (pk) {
-				is RSAPublicKey -> {
-					throwIf(pk.modulus.bitLength() <= 3000) { InvalidTlsParameter("RSA key of the server certificate is too small") }
-				}
-				is ECPublicKey -> {
-					throwIf(
-						pk.w.affineX.bitLength() <= 250,
-					) { InvalidTlsParameter("ECDSA key of the server certificate is too small") }
-				}
-				is EdECPublicKey -> {
-					throwIf(pk.point.y.bitLength() <= 250) { InvalidTlsParameter("EdDSA key of the server certificate is too small") }
-				}
-				else -> {
-					throw InvalidTlsParameter("Unsupported key type used in certificate")
-				}
-			}
-		}
-	}
+	fun getTrustAllCertsManager(certTracker: EserviceCertTracker): X509TrustManager = Tr03124TrustManager(certTracker)
 }

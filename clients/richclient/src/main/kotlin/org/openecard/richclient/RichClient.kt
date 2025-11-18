@@ -43,7 +43,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.openecard.addons.tr03124.ClientInformation
-import org.openecard.addons.tr03124.Tr03124Config
 import org.openecard.addons.tr03124.UserAgent
 import org.openecard.build.BuildInfo
 import org.openecard.common.OpenecardProperties

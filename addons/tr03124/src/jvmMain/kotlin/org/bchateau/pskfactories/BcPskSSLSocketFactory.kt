@@ -17,19 +17,25 @@ package org.bchateau.pskfactories
 
 import org.bouncycastle.tls.BasicTlsPSKExternal
 import org.bouncycastle.tls.CertificateRequest
+import org.bouncycastle.tls.HashAlgorithm
 import org.bouncycastle.tls.NameType
+import org.bouncycastle.tls.NamedGroup
 import org.bouncycastle.tls.PSKTlsClient
 import org.bouncycastle.tls.ProtocolVersion
 import org.bouncycastle.tls.SecurityParameters
 import org.bouncycastle.tls.ServerName
+import org.bouncycastle.tls.SignatureAlgorithm
+import org.bouncycastle.tls.SignatureAndHashAlgorithm
 import org.bouncycastle.tls.TlsAuthentication
 import org.bouncycastle.tls.TlsClientProtocol
 import org.bouncycastle.tls.TlsCredentials
 import org.bouncycastle.tls.TlsPSKExternal
 import org.bouncycastle.tls.TlsPSKIdentity
 import org.bouncycastle.tls.TlsServerCertificate
+import org.bouncycastle.tls.TlsUtils
 import org.bouncycastle.tls.crypto.TlsCrypto
 import org.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto
+import org.openecard.addons.tr03124.Tr03124Config
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -292,6 +298,94 @@ open class BcPskSSLSocketFactory(
 						override fun getSupportedCipherSuites(): IntArray =
 							BcPskTlsParams.fromSupportedCipherSuiteCodes(getEnabledCipherSuites())
 
+						override fun getSupportedGroups(namedGroupRoles: Vector<*>?): Vector<*> {
+							val crypto = getCrypto()
+							val supportedGroups: Vector<*> = Vector<Any?>()
+
+							if (Tr03124Config.nonBsiApprovedCiphers) {
+								TlsUtils.addIfSupported(
+									supportedGroups,
+									crypto,
+									intArrayOf(NamedGroup.x25519, NamedGroup.x448),
+								)
+							}
+
+							TlsUtils.addIfSupported(
+								supportedGroups,
+								crypto,
+								intArrayOf(NamedGroup.secp256r1, NamedGroup.secp384r1, NamedGroup.secp521r1),
+							)
+
+							return supportedGroups
+						}
+
+						override fun getSupportedSignatureAlgorithms(): Vector<*> {
+							val crypto = getCrypto()
+							val supportedAlgs: Vector<*> = Vector<Any?>()
+
+							if (Tr03124Config.nonBsiApprovedCiphers) {
+								TlsUtils.addIfSupported(supportedAlgs, crypto, SignatureAndHashAlgorithm.ed25519)
+								TlsUtils.addIfSupported(supportedAlgs, crypto, SignatureAndHashAlgorithm.ed448)
+							}
+
+							TlsUtils.addIfSupported(
+								supportedAlgs,
+								crypto,
+								SignatureAndHashAlgorithm.getInstance(
+									HashAlgorithm.sha256,
+									SignatureAlgorithm.ecdsa,
+								),
+							)
+							TlsUtils.addIfSupported(
+								supportedAlgs,
+								crypto,
+								SignatureAndHashAlgorithm.getInstance(
+									HashAlgorithm.sha384,
+									SignatureAlgorithm.ecdsa,
+								),
+							)
+							TlsUtils.addIfSupported(
+								supportedAlgs,
+								crypto,
+								SignatureAndHashAlgorithm.getInstance(
+									HashAlgorithm.sha512,
+									SignatureAlgorithm.ecdsa,
+								),
+							)
+							TlsUtils.addIfSupported(supportedAlgs, crypto, SignatureAndHashAlgorithm.rsa_pss_pss_sha256)
+							TlsUtils.addIfSupported(supportedAlgs, crypto, SignatureAndHashAlgorithm.rsa_pss_pss_sha384)
+							TlsUtils.addIfSupported(supportedAlgs, crypto, SignatureAndHashAlgorithm.rsa_pss_pss_sha512)
+							TlsUtils.addIfSupported(supportedAlgs, crypto, SignatureAndHashAlgorithm.rsa_pss_rsae_sha256)
+							TlsUtils.addIfSupported(supportedAlgs, crypto, SignatureAndHashAlgorithm.rsa_pss_rsae_sha384)
+							TlsUtils.addIfSupported(supportedAlgs, crypto, SignatureAndHashAlgorithm.rsa_pss_rsae_sha512)
+							TlsUtils.addIfSupported(
+								supportedAlgs,
+								crypto,
+								SignatureAndHashAlgorithm.getInstance(
+									HashAlgorithm.sha256,
+									SignatureAlgorithm.rsa,
+								),
+							)
+							TlsUtils.addIfSupported(
+								supportedAlgs,
+								crypto,
+								SignatureAndHashAlgorithm.getInstance(
+									HashAlgorithm.sha384,
+									SignatureAlgorithm.rsa,
+								),
+							)
+							TlsUtils.addIfSupported(
+								supportedAlgs,
+								crypto,
+								SignatureAndHashAlgorithm.getInstance(
+									HashAlgorithm.sha512,
+									SignatureAlgorithm.rsa,
+								),
+							)
+
+							return supportedAlgs
+						}
+
 						override fun getExternalPSKs(): Vector<*> {
 							val externals = Vector<TlsPSKExternal>()
 							val secret = crypto.createSecret(pskIdentity.psk)
@@ -301,7 +395,7 @@ open class BcPskSSLSocketFactory(
 
 						override fun getSNIServerNames(): Vector<ServerName> = Vector(listOf(host.hostNameToServerName()))
 
-						override fun getAuthentication(): TlsAuthentication? =
+						override fun getAuthentication(): TlsAuthentication =
 							object : TlsAuthentication {
 								override fun notifyServerCertificate(serverCert: TlsServerCertificate?) {
 									val certFac = CertificateFactory.getInstance("X.509")

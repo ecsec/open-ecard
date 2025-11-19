@@ -10,12 +10,10 @@ import org.openecard.addons.tr03124.runEacCatching
 import org.openecard.addons.tr03124.transport.EidServerInterface
 import org.openecard.addons.tr03124.transport.EserviceClient
 import org.openecard.addons.tr03124.xml.DidAuthenticateRequest
-import org.openecard.addons.tr03124.xml.ECardConstants
 import org.openecard.addons.tr03124.xml.Eac1Input
 import org.openecard.addons.tr03124.xml.Eac1Output
 import org.openecard.addons.tr03124.xml.Eac2Input
 import org.openecard.addons.tr03124.xml.EacAdditionalInput
-import org.openecard.addons.tr03124.xml.Result
 import org.openecard.addons.tr03124.xml.TcToken
 import org.openecard.cif.bundled.NpaDefinitions
 import org.openecard.cif.definition.acl.PaceAclQualifier
@@ -42,8 +40,6 @@ import org.openecard.sc.pace.cvc.PublicKeyReference.Companion.toPublicKeyReferen
 import org.openecard.sc.tlv.TlvException
 import org.openecard.sc.tlv.toTlvBer
 import org.openecard.utils.common.cast
-import org.openecard.utils.common.throwIf
-import org.openecard.utils.common.throwIfNull
 import org.openecard.utils.serialization.PrintableUByteArray
 import org.openecard.utils.serialization.toPrintable
 
@@ -312,6 +308,8 @@ internal class UiStepImpl(
 							it.isTerminalCertificate
 						},
 					) { "No terminal certificate in received certificates" }
+				terminalCert.checkDescriptionHash(certDesc)
+
 				val terminalCertChat =
 					requireNotNull(
 						terminalCert.chat.cast<AuthenticationTerminalChat>(),

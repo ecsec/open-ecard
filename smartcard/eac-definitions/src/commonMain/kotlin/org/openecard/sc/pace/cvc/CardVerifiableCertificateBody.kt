@@ -71,7 +71,7 @@ interface CardVerifiableCertificateBody {
 					.findTlv(
 						CvcTags.certExtensions,
 					)?.toCvcExtensions()
-					?: CvcExtensions(listOf())
+					?: CvcExtensions(listOf(), listOf())
 
 			return CardVerifiableCertificateBodyImpl(profileId, car, pk, chr, chat, validFrom, validUntil, extensions)
 		}

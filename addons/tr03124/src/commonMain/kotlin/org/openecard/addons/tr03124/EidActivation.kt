@@ -47,10 +47,10 @@ object EidActivation {
 	): UiStep {
 		val certTracker = EserviceCertTracker()
 		val clientFactory = newKtorClientBuilder(certTracker)
-		val eserviceClient = EserviceClientImpl(certTracker, clientFactory, random)
+		val eserviceClient = EserviceClientImpl(tokenUrl, certTracker, clientFactory, random)
 
 		return runEacCatching(eserviceClient, null) {
-			val token = eserviceClient.fetchToken(tokenUrl)
+			val token = eserviceClient.fetchToken()
 			val startPaos = startPaosBuilder.build(token.sessionIdentifier)
 			val eidServer = eserviceClient.buildEidServerInterface(startPaos)
 			val eac1Input = eidServer.start()

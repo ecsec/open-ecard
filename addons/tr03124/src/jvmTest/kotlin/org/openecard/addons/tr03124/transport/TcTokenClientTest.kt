@@ -14,9 +14,9 @@ class TcTokenClientTest {
 
 			val certTracker = EserviceCertTracker()
 			val clientFactory = newKtorClientBuilder(certTracker)
-			val client = EserviceClientImpl(certTracker, clientFactory)
+			val client = EserviceClientImpl(tokenUrl, certTracker, clientFactory)
 
-			val token = client.fetchToken(tokenUrl)
+			val token = client.fetchToken()
 			assertEquals("https://testpaos.governikus-eid.de:443/ecardpaos/paosreceiver", token.serverAddress)
 		}
 }

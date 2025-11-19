@@ -298,7 +298,11 @@ internal class UiStepImpl(
 				eserviceClient.certTracker.setCertDesc(certDesc)
 				// check that cert desc contains subjectUrl (optional in data structure, but required here)
 				requireNotNull(certDesc.subjectUrl) {
-					"SubjectURL is missing in CertificateDescription"
+					"Subject URL is missing in CertificateDescription"
+				}
+				// check that tctoken and subjectUrl have matching sop
+				require(eserviceClient.certTracker.matchesSop(eserviceClient.tcTokenUrl, certDesc.subjectUrl!!)) {
+					"TCToken URL does not match Subject URL"
 				}
 
 				// find chats

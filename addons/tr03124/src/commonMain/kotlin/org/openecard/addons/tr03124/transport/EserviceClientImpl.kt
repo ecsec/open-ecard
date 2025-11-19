@@ -22,25 +22,26 @@ import kotlin.random.Random
 private val log = KotlinLogging.logger { }
 
 internal class EserviceClientImpl(
+	override val tcTokenUrl: String,
 	override val certTracker: EserviceCertTracker,
 	private val serviceClient: KtorClientBuilder,
 	private val random: Random = Random.Default,
 ) : EserviceClient {
-	private var tokenUrl: String? = null
+	private var checkedTokenUrl: String? = null
 	private var token: TcToken? = null
 	private var tokenOk: TcToken.TcTokenOk? = null
 
-	override suspend fun fetchToken(tokenUrl: String): TcToken.TcTokenOk {
-		log.info { "Fetching TCToken from '$tokenUrl'" }
-		if (!tokenUrl.startsWith("https://")) {
-			throw InvalidServerData(this, "Insecure TCToken URL used: $tokenUrl")
+	override suspend fun fetchToken(): TcToken.TcTokenOk {
+		log.info { "Fetching TCToken from '$tcTokenUrl'" }
+		if (!tcTokenUrl.startsWith("https://")) {
+			throw InvalidServerData(this, "Insecure TCToken URL used: $tcTokenUrl")
 		}
 		check(token == null) { "Fetching multiple TCTokens with the same client" }
-		this.tokenUrl = tokenUrl
+		this.checkedTokenUrl = tcTokenUrl
 		val tokenClient = serviceClient.tokenClient
 		val tokenRes =
 			tokenClient
-				.get(tokenUrl) {
+				.get(tcTokenUrl) {
 					headers {
 						append(HttpHeaders.Accept, "text/xml, */*;q=0.8")
 					}
@@ -113,7 +114,7 @@ internal class EserviceClientImpl(
 	private suspend fun determineRefreshUrl(): String? {
 		log.info { "Determining refresh URL" }
 		try {
-			val tokenUrl = tokenUrl
+			val tokenUrl = checkedTokenUrl
 			val token = tokenOk
 			if (tokenUrl == null || token == null) {
 				// no refresh detection possible as there is no token

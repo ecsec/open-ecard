@@ -7,10 +7,11 @@ import org.openecard.addons.tr03124.xml.TcToken
 import org.openecard.sc.pace.cvc.CertificateDescription
 
 interface EserviceClient {
+	val tcTokenUrl: String
 	val certTracker: EserviceCertTracker
 
 	@Throws(BindingException::class)
-	suspend fun fetchToken(tokenUrl: String): TcToken
+	suspend fun fetchToken(): TcToken
 
 	fun buildEidServerInterface(startPaos: StartPaos): EidServerInterface
 

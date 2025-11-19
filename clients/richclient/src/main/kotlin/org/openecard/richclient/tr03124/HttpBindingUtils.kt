@@ -24,9 +24,10 @@ package org.openecard.richclient.tr03124
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.response.respond
 import io.ktor.server.response.respondBytes
-import io.ktor.server.response.respondRedirect
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.RoutingCall
 import org.openecard.addons.tr03124.BindingResponse
@@ -39,8 +40,8 @@ internal suspend fun BindingResponse.toKtorResponse(call: RoutingCall) {
 	when (this) {
 		is BindingResponse.RedirectResponse -> {
 			if (status in 300..<400) {
-				call.respondRedirect(this.redirectUrl)
-				call.response.status(httpStatus)
+				call.response.headers.append(HttpHeaders.Location, redirectUrl)
+				call.respond(httpStatus)
 			} else {
 				log.error { "Invalid redirect status code returned from application logic" }
 				call.respondText(

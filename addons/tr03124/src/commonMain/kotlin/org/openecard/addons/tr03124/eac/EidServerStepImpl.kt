@@ -95,6 +95,7 @@ internal class EidServerStepImpl(
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	private fun processApdus(req: TransmitRequest): TransmitResponse {
+		var resultObj = Result.ok()
 		val result = mutableListOf<ResponseApdu>()
 
 		for (next in req.inputAPDUInfo) {
@@ -104,13 +105,14 @@ internal class EidServerStepImpl(
 
 			// check result
 			if (!next.isValidResponse(resp)) {
+				resultObj = Result.error(ECardConstants.Minor.App.UNKNOWN_ERROR, "Failed to process all APDUs successfully")
 				break
 			}
 		}
 
 		// convert response
 		return TransmitResponse(
-			result = Result.ok(),
+			result = resultObj,
 			requestId = req.requestId,
 			outputAPDU =
 				result.map {

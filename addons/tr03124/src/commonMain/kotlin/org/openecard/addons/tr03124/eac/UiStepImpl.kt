@@ -204,10 +204,10 @@ internal class UiStepImpl(
 				val carsParam =
 					if (preliminaryChain == null) {
 						log.debug { "Preliminary CVC chain could not be built" }
-						listOf()
+						cars.map { it.joinToString() }
 					} else {
 						log.debug { "CVC chain successfully built" }
-						cars.map { it.joinToString() }
+						listOf()
 					}
 				val eac1Out =
 					Eac1Output(

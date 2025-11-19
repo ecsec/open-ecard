@@ -39,8 +39,11 @@ import org.openecard.sc.pace.cvc.CertificateDescription.Companion.toCertificateD
 import org.openecard.sc.pace.cvc.Chat.Companion.toChat
 import org.openecard.sc.pace.cvc.CvcChain.Companion.toChain
 import org.openecard.sc.pace.cvc.PublicKeyReference.Companion.toPublicKeyReference
+import org.openecard.sc.tlv.TlvException
 import org.openecard.sc.tlv.toTlvBer
 import org.openecard.utils.common.cast
+import org.openecard.utils.common.throwIf
+import org.openecard.utils.common.throwIfNull
 import org.openecard.utils.serialization.PrintableUByteArray
 import org.openecard.utils.serialization.toPrintable
 
@@ -284,56 +287,74 @@ internal class UiStepImpl(
 			eac1InputReq: DidAuthenticateRequest,
 		): UiStep {
 			log.info { "Creating EAC UI Step" }
-			val eac1Input: Eac1Input = eac1InputReq.data as Eac1Input
-			val certsRaw = eac1Input.certificates
-			val certs = certsRaw.map { it.v.toCardVerifiableCertificate() }
-			val certDescRaw = eac1Input.certificateDescription
-			val certDesc = certDescRaw.v.toCertificateDescription()
+			try {
+				val eac1Input: Eac1Input = eac1InputReq.data as Eac1Input
+				val certsRaw = eac1Input.certificates
+				val certs = certsRaw.map { it.v.toCardVerifiableCertificate() }
+				val certDescRaw = eac1Input.certificateDescription
+				val certDesc = certDescRaw.v.toCertificateDescription()
 
-			// update allowed certificates in eService connection, failing when we already see a problem
-			eserviceClient.certTracker.setCertDesc(certDesc)
+				// update allowed certificates in eService connection, failing when we already see a problem
+				eserviceClient.certTracker.setCertDesc(certDesc)
+				// check that cert desc contains subjectUrl (optional in data structure, but required here)
+				requireNotNull(certDesc.subjectUrl) {
+					"SubjectURL is missing in CertificateDescription"
+				}
 
-			// find chats
-			val terminalCert =
-				requireNotNull(certs.find { it.isTerminalCertificate }) { "No terminal certificate in received certificates" }
-			val terminalCertChat =
-				requireNotNull(
-					terminalCert.chat.cast<AuthenticationTerminalChat>(),
-				) { "CHAT in terminal certificate is of the wrong type" }
+				// find chats
+				val terminalCert =
+					requireNotNull(
+						certs.find {
+							it.isTerminalCertificate
+						},
+					) { "No terminal certificate in received certificates" }
+				val terminalCertChat =
+					requireNotNull(
+						terminalCert.chat.cast<AuthenticationTerminalChat>(),
+					) { "CHAT in terminal certificate is of the wrong type" }
 
-			val optChat =
-				eac1Input.optionalChat?.toAuthenticationTerminalChat()
-					?: terminalCertChat
-			// use optional chat as lower bound, when there is nothing specified
-			val reqChat =
-				eac1Input.requiredChat?.toAuthenticationTerminalChat()
-					?: optChat
+				val optChat =
+					eac1Input.optionalChat?.toAuthenticationTerminalChat()
+						?: terminalCertChat
+				// use optional chat as lower bound, when there is nothing specified
+				val reqChat =
+					eac1Input.requiredChat?.toAuthenticationTerminalChat()
+						?: optChat
 
-			val aad = eac1Input.authenticatedAuxiliaryData?.v?.toAuthenticatedAuxiliariyData()
+				val aad = eac1Input.authenticatedAuxiliaryData?.v?.toAuthenticatedAuxiliariyData()
 
-			val paceDid = eac1InputReq.didName.didNameToPinId()
+				val paceDid = eac1InputReq.didName.didNameToPinId()
 
-			val ctx =
-				UiStepCtx(
-					session,
-					null,
-					null,
-					token,
-					eserviceClient,
-					eidServer,
-					eac1InputReq,
-					eac1Input,
-					certs,
-					terminalCert,
-					certDesc,
-					terminalCertChat,
-					reqChat,
-					optChat,
-					aad,
-					paceDid,
-					terminalName,
-				)
-			return UiStepImpl(ctx)
+				val ctx =
+					UiStepCtx(
+						session,
+						null,
+						null,
+						token,
+						eserviceClient,
+						eidServer,
+						eac1InputReq,
+						eac1Input,
+						certs,
+						terminalCert,
+						certDesc,
+						terminalCertChat,
+						reqChat,
+						optChat,
+						aad,
+						paceDid,
+						terminalName,
+					)
+				return UiStepImpl(ctx)
+			} catch (ex: Exception) {
+				when (ex) {
+					is TlvException,
+					is NoSuchElementException,
+					is IllegalArgumentException,
+					-> throw InvalidServerData(eserviceClient, "Invalid data received in EAC1", cause = ex)
+					else -> throw ex
+				}
+			}
 		}
 
 		private fun String.didNameToPinId(): PacePinId =

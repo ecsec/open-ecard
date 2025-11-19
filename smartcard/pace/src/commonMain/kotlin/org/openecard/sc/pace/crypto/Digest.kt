@@ -10,7 +10,9 @@ interface Digest {
 
 	enum class Algorithms {
 		SHA1,
+		SHA224,
 		SHA256,
+		SHA512,
 	}
 }
 

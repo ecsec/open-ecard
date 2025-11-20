@@ -84,12 +84,6 @@ sealed class ServerError(
 	cause: Throwable? = null,
 ) : AbstractBindingException(eserviceClient, msg, cause, "serverError")
 
-class InvalidServerData(
-	eserviceClient: EserviceClient,
-	msg: String? = null,
-	cause: Throwable? = null,
-) : ServerError(eserviceClient, msg ?: "The eID-Server sent invalid data", cause)
-
 class UnkownServerError(
 	eserviceClient: EserviceClient,
 	msg: String? = null,
@@ -101,6 +95,12 @@ sealed class ClientError(
 	msg: String,
 	cause: Throwable? = null,
 ) : AbstractBindingException(eserviceClient, msg, cause, "clientError")
+
+class InvalidServerData(
+	eserviceClient: EserviceClient,
+	msg: String? = null,
+	cause: Throwable? = null,
+) : ClientError(eserviceClient, msg ?: "The eID-Server sent invalid data", cause)
 
 class UnkownCvcChainError(
 	eserviceClient: EserviceClient,

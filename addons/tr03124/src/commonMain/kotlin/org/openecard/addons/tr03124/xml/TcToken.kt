@@ -34,17 +34,19 @@ sealed interface TcToken {
 	) : TcTokenOk
 
 	data class TcTokenError(
-		override val communicationErrorAddress: String,
+		override val communicationErrorAddress: String?,
+		val refreshAddress: String?,
+		val invalidData: Boolean,
 	) : TcToken
 
 	companion object {
 		@Throws(IllegalArgumentException::class)
-		fun TcTokenXml.toTcToken(): TcToken =
-			if (serverAddress != null && serverAddress.isNotEmpty() && sessionIdentifier != null && refreshAddress != null &&
-				refreshAddress.isNotEmpty() &&
-				binding != null
-			) {
-				val binding = binding.toBindingType()
+		fun TcTokenXml.toTcToken(): TcToken {
+			val serverAddressOk = serverAddress != null && serverAddress.isNotEmpty()
+			val sessionOk = sessionIdentifier != null && sessionIdentifier.isNotEmpty()
+			val refreshOk = refreshAddress != null && refreshAddress.isNotEmpty()
+			val bindingType = runCatching { binding?.toBindingType() }.getOrNull()
+			return if (serverAddressOk && sessionOk && refreshOk && bindingType != null) {
 				val securityProtocol = securityProtocol?.toSecurityProtocolType()
 				val psk = securityParameters?.psk
 				if (securityProtocol == TcTokenXml.SecurityProtocolType.TLS_PSK && psk != null) {
@@ -53,7 +55,7 @@ sealed interface TcToken {
 						sessionIdentifier,
 						refreshAddress,
 						communicationErrorAddress,
-						binding,
+						bindingType,
 						psk,
 					)
 				} else {
@@ -62,13 +64,13 @@ sealed interface TcToken {
 						sessionIdentifier,
 						refreshAddress,
 						communicationErrorAddress,
-						binding,
+						bindingType,
 					)
 				}
-			} else if (communicationErrorAddress != null) {
-				TcTokenError(communicationErrorAddress)
 			} else {
-				throw IllegalArgumentException("Received TCToken which neither usable, nor represents an error")
+				val invalidData = serverAddressOk || sessionOk || refreshOk || binding != null
+				TcTokenError(communicationErrorAddress, refreshAddress.takeIf { invalidData }, invalidData)
 			}
+		}
 	}
 }

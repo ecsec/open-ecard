@@ -94,9 +94,18 @@ internal class EidServerPaos(
 					append("PAOS", paosHeaderValue)
 				}
 			}
-		throwIf(!resp.status.isSuccess()) {
-			InvalidServerData(serviceClient, "Server returned with status code ${resp.status.value}")
+
+		if (!resp.status.isSuccess()) {
+			// the testsuite says that an "unreachable" server returning 404 must abort with comm error (EID_CLIENT_A2_15)
+			// it remains unclear if that is also true, for successive calls,
+			// so we keep the client error saying the server responded unexpectedly
+			if (phase == ProcessPhase.START) {
+				throw UnknownTrustedChannelError(serviceClient, "Server returned with status code ${resp.status.value}")
+			} else {
+				throw InvalidServerData(serviceClient, "Server returned with status code ${resp.status.value}")
+			}
 		}
+
 		val respMsg: Envelope = resp.body()
 		log.info { "Received PAOS response message" }
 

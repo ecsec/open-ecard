@@ -12,6 +12,7 @@ import org.openecard.addons.tr03124.BindingException
 import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.addons.tr03124.InvalidServerData
 import org.openecard.addons.tr03124.NoTcToken
+import org.openecard.addons.tr03124.UnknownTrustedChannelError
 import org.openecard.addons.tr03124.UnkownServerError
 import org.openecard.addons.tr03124.runEacCatching
 import org.openecard.addons.tr03124.xml.StartPaos
@@ -75,17 +76,23 @@ internal class EserviceClientImpl(
 						!it.startsWith("https://")
 					}
 				if (nonHttpsUrl) {
-					throw InvalidServerData(this, "Insecure URL scheme used in TCToken")
+					throw UnknownTrustedChannelError(this, "Insecure URL scheme used in TCToken")
 				}
 				return token
 			}
 			is TcToken.TcTokenError -> {
-				if (!token.communicationErrorAddress.startsWith("https://")) {
-					// forbid to use this address by deleting the token
-					this.token = null
-					throw InvalidServerData(this, "Insecure URL scheme used in TCToken")
+				val nonHttpsUrl =
+					listOfNotNull(token.refreshAddress, token.communicationErrorAddress).any {
+						!it.startsWith("https://")
+					}
+				if (nonHttpsUrl) {
+					throw UnknownTrustedChannelError(this, "Insecure URL scheme used in TCToken")
 				}
-				throw UnkownServerError(this, "Server aborted by sending an error TCToken")
+				if (!token.invalidData) {
+					throw UnkownServerError(this, "Server aborted by sending an error TCToken")
+				} else {
+					throw UnknownTrustedChannelError(this, "Server sent an invalid TCToken")
+				}
 			}
 		}
 	}
@@ -127,15 +134,26 @@ internal class EserviceClientImpl(
 		log.info { "Determining refresh URL" }
 		return ignoreCertErrors {
 			val tokenUrl = checkedTokenUrl
-			val token = tokenOk
-			if (tokenUrl == null || token == null) {
+			val refreshAddress =
+				when (token) {
+					is TcToken.TcTokenOk -> (token as TcToken.TcTokenOk).refreshAddress
+					is TcToken.TcTokenError -> (token as TcToken.TcTokenError).refreshAddress
+					else -> null
+				}
+
+			if (tokenUrl == null || refreshAddress == null) {
 				// no refresh detection possible as there is no token
 				log.info { "No refresh URL determination possible as there is no non-error TCToken" }
 				return@ignoreCertErrors null
 			}
 
-			var nextAddr = token.refreshAddress
+			var nextAddr: String = refreshAddress
 			log.debug { "Checking URL '$nextAddr'" }
+
+			if (!nextAddr.startsWith("https://")) {
+				log.warn { "Token contains non https URL: $nextAddr" }
+				return@ignoreCertErrors null
+			}
 
 			// if SOP matches, we only need to check the certificate
 			if (certTracker.matchesSop(tokenUrl, nextAddr)) {
@@ -186,7 +204,12 @@ internal class EserviceClientImpl(
 
 	private fun reportCommunicationError() =
 		token?.communicationErrorAddress?.let {
-			BindingResponse.RedirectResponse(HttpStatusCode.SeeOther.value, it.addError("communicationError"))
+			if (!it.startsWith("https://")) {
+				log.warn { "Communication error address is not a https URL: $it" }
+				null
+			} else {
+				BindingResponse.RedirectResponse(HttpStatusCode.SeeOther.value, it.addError("communicationError"))
+			}
 		}
 
 	private fun returnCommunicationErrorPage() =

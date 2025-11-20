@@ -20,6 +20,10 @@ class RightsBitSet<T>(
 		bits[flag.bitNumber] = value
 	}
 
+	fun clear() {
+		entries.forEach { bits[it.bitNumber] = false }
+	}
+
 	fun toMap(): Map<T, Boolean> = entries.associateWith { bits[it.bitNumber] }
 
 	override fun toString(): String =

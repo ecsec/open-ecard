@@ -332,7 +332,11 @@ internal class UiStepImpl(
 				// use optional chat as lower bound, when there is nothing specified
 				val reqChat =
 					eac1Input.requiredChat?.toAuthenticationTerminalChat()
-						?: optChat
+						?: terminalCertChat.copy().apply {
+							readAccess.clear()
+							writeAccess.clear()
+							specialFunctions.clear()
+						}
 
 				val aad = eac1Input.authenticatedAuxiliaryData?.v?.toAuthenticatedAuxiliariyData()
 

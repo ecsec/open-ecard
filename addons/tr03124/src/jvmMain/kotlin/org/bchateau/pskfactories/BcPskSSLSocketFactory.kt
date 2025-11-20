@@ -61,6 +61,7 @@ import javax.net.ssl.SSLSessionBindingEvent
 import javax.net.ssl.SSLSessionBindingListener
 import javax.net.ssl.SSLSessionContext
 import javax.net.ssl.SSLSocketFactory
+import javax.net.ssl.X509ExtendedTrustManager
 import javax.net.ssl.X509TrustManager
 
 /**
@@ -71,7 +72,7 @@ import javax.net.ssl.X509TrustManager
  * allowed, but the security of matching pre-shared keys is still enforced.
  */
 open class BcPskSSLSocketFactory(
-	private val tm: X509TrustManager,
+	private val tm: X509ExtendedTrustManager,
 	private val params: BcPskTlsParams,
 	private val pskIdentity: TlsPSKIdentity?,
 ) : SSLSocketFactory() {
@@ -295,6 +296,7 @@ open class BcPskSSLSocketFactory(
 
 			@Throws(IOException::class)
 			override fun startHandshake() {
+				val socket = socket
 				tlsClientProtocol.connect(
 					object : PSKTlsClient(crypto, pskIdentity) {
 						override fun getSupportedVersions(): Array<ProtocolVersion> =
@@ -415,7 +417,7 @@ open class BcPskSSLSocketFactory(
 
 									// validate cert
 									peerCerts?.toTypedArray()?.let {
-										tm.checkServerTrusted(it, "UNKNOWN")
+										tm.checkServerTrusted(it, "UNKNOWN", socket)
 									}
 								}
 

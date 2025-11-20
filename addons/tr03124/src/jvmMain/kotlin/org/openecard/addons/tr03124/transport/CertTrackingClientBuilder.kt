@@ -28,6 +28,7 @@ import javax.net.ssl.SSLSession
 import javax.net.ssl.SSLSocket
 import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.TrustManager
+import javax.net.ssl.X509ExtendedTrustManager
 import javax.net.ssl.X509TrustManager
 
 private val log = KotlinLogging.logger { }
@@ -300,7 +301,7 @@ object SslSettings {
 		Security.addProvider(BouncyCastleJsseProvider())
 	}
 
-	fun getSslContext(tm: TrustManager): SSLContext {
+	internal fun getSslContext(tm: TrustManager): SSLContext {
 		val sslContext = SSLContext.getInstance("TLS", "BCJSSE")
 		val tms = listOf(tm)
 		sslContext.init(null, tms.toTypedArray(), null)
@@ -308,8 +309,8 @@ object SslSettings {
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
-	fun getPskSocketFactory(
-		tm: X509TrustManager,
+	internal fun getPskSocketFactory(
+		tm: X509ExtendedTrustManager,
 		session: String,
 		psk: ByteArray,
 	): SSLSocketFactory =
@@ -330,5 +331,6 @@ object SslSettings {
 		)
 
 	@OptIn(ExperimentalUnsignedTypes::class)
-	fun getTrustAllCertsManager(certTracker: EserviceCertTracker): X509TrustManager = Tr03124TrustManager(certTracker)
+	internal fun getTrustAllCertsManager(certTracker: EserviceCertTracker): X509ExtendedTrustManager =
+		Tr03124TrustManager(certTracker)
 }

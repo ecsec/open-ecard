@@ -1,6 +1,7 @@
 package org.openecard.addons.tr03124.transport
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.ktor.util.network.hostname
 import org.openecard.addons.tr03124.Tr03124Config
 import org.openecard.utils.common.throwIf
 import java.net.Socket
@@ -96,11 +97,7 @@ class Tr03124TrustManager(
 	override fun checkServerTrusted(
 		chain: Array<out X509Certificate>,
 		authType: String,
-	) {
-		val tm = getTrustManager(chain)
-		tm.checkServerTrusted(chain, authType)
-		checkEeCert(chain)
-	}
+	): Unit = throw UnsupportedOperationException("Connection information is required for trust validation")
 
 	override fun getAcceptedIssuers(): Array<out X509Certificate> = arrayOf()
 

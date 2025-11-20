@@ -300,7 +300,9 @@ internal class UiStepImpl(
 						"Subject URL is missing in CertificateDescription"
 					}
 				// check that tctoken and subjectUrl have matching sop
-				throwIf(!eserviceClient.certTracker.matchesSop(eserviceClient.tcTokenUrl, subjectUrl)) {
+				throwIf(
+					!eserviceClient.certTracker.matchesSop(eserviceClient.tcTokenUrl, subjectUrl, useCertDesc = false),
+				) {
 					UntrustedCertificateError("TCToken URL does not match Subject URL")
 				}
 

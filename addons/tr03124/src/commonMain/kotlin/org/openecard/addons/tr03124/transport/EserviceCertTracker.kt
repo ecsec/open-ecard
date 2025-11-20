@@ -27,9 +27,15 @@ class EserviceCertTracker {
 	fun matchesSop(
 		tokenUrl: String,
 		urlToCheck: String,
+		useCertDesc: Boolean = true,
 	): Boolean {
 		// fallback to TCToken URL
-		val referenceStr = certDesc?.subjectUrl ?: tokenUrl
+		val referenceStr =
+			if (useCertDesc) {
+				certDesc?.subjectUrl ?: tokenUrl
+			} else {
+				tokenUrl
+			}
 		val reference = Url(referenceStr)
 		val url = Url(urlToCheck)
 

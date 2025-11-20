@@ -35,7 +35,7 @@ class TcTokenTest {
 		assertEquals("https://service.example.de/ComError?7eb39f62", token.communicationErrorAddress)
 		assertEquals(TcTokenXml.BindingType.PAOS, token.binding?.toBindingType())
 		assertEquals(TcTokenXml.SecurityProtocolType.TLS_PSK, token.securityProtocol?.toSecurityProtocolType())
-		assertContentEquals(hex("4BC1A0B5"), assertInstanceOf<TcTokenXml.PskParams>(token.securityParameters).psk.v)
+		assertContentEquals(hex("4BC1A0B5"), assertInstanceOf<TcTokenXml.PskParams>(token.securityParameters).psk?.v)
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)

@@ -46,14 +46,15 @@ sealed interface TcToken {
 			) {
 				val binding = binding.toBindingType()
 				val securityProtocol = securityProtocol?.toSecurityProtocolType()
-				if (securityProtocol == TcTokenXml.SecurityProtocolType.TLS_PSK && securityParameters != null) {
+				val psk = securityParameters?.psk
+				if (securityProtocol == TcTokenXml.SecurityProtocolType.TLS_PSK && psk != null) {
 					TcTokenPsk(
 						serverAddress,
 						sessionIdentifier,
 						refreshAddress,
 						communicationErrorAddress,
 						binding,
-						securityParameters.psk,
+						psk,
 					)
 				} else {
 					TcTokenAttached(

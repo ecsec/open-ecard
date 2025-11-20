@@ -57,7 +57,7 @@ open class TcTokenXml(
 		constructor(
 			@SerialName("PSK")
 			@XmlElement
-			val psk: PrintableUByteArray,
+			val psk: PrintableUByteArray?,
 		) : SecurityParameters
 
 	companion object {

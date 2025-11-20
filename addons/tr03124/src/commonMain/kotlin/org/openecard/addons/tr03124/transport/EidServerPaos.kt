@@ -40,6 +40,7 @@ import org.openecard.addons.tr03124.xml.eacXml
 import org.openecard.addons.tr03124.xml.toBody
 import org.openecard.utils.common.generateSessionId
 import org.openecard.utils.common.throwIf
+import java.lang.IllegalStateException
 import kotlin.random.Random
 
 private val log = KotlinLogging.logger { }
@@ -135,7 +136,7 @@ internal class EidServerPaos(
 		val res = deliverMessage(req)
 
 		res.body.didAuthenticateRequest?.let {
-			phase = ProcessPhase.AUTH
+			phase = ProcessPhase.VALIDATING
 			return it
 		}
 
@@ -152,9 +153,17 @@ internal class EidServerPaos(
 		)
 	}
 
+	override fun setValidated() {
+		phase = ProcessPhase.AUTH
+	}
+
 	override suspend fun sendDidAuthResponse(
 		protocolData: AuthenticationResponseProtocolData,
 	): AuthenticationRequestProtocolData? {
+		if (phase != ProcessPhase.AUTH) {
+			throw IllegalStateException("Certificate validation is not complete, but trying to send a message")
+		}
+
 		val msg = DidAuthenticateResponse(data = protocolData, result = Result.ok())
 		val req = msg.toBody().wrapWithSoapEnv()
 		val res = deliverMessage(req)
@@ -275,6 +284,7 @@ internal class EidServerPaos(
 
 	private enum class ProcessPhase {
 		START,
+		VALIDATING,
 		AUTH,
 		TRANSMIT,
 		DONE,

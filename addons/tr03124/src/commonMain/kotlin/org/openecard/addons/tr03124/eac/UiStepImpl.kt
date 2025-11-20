@@ -310,6 +310,9 @@ internal class UiStepImpl(
 					) { "No terminal certificate in received certificates" }
 				terminalCert.checkDescriptionHash(certDesc)
 
+				// mark paos channel as validated, so further messages can be exchanged
+				eidServer.setValidated()
+
 				val terminalCertChat =
 					requireNotNull(
 						terminalCert.chat.cast<AuthenticationTerminalChat>(),

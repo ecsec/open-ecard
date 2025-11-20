@@ -14,6 +14,11 @@ interface EidServerInterface {
 	suspend fun start(): DidAuthenticateRequest
 
 	/**
+	 * Mark the PAOS connection as validated, to allow further messages to be exchanged.
+	 */
+	fun setValidated()
+
+	/**
 	 * Send DID Authenticate response and handle response from server.
 	 *
 	 * If the answer from the server contains

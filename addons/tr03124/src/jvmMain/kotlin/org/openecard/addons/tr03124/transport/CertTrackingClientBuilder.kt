@@ -15,21 +15,20 @@ import org.bchateau.pskfactories.BcPskTlsParams
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider
 import org.bouncycastle.tls.BasicTlsPSKIdentity
-import org.bouncycastle.tls.CipherSuite
-import org.bouncycastle.tls.ProtocolVersion
 import org.openecard.addons.tr03124.Tr03124Config
 import org.openecard.addons.tr03124.transport.EidServerPaos.Companion.registerPaosNegotiation
 import org.openecard.addons.tr03124.xml.TcToken
+import org.openecard.utils.common.cast
 import org.openecard.utils.common.doIf
 import java.security.Security
 import java.security.cert.Certificate
+import java.security.cert.X509Certificate
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSession
 import javax.net.ssl.SSLSocket
 import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509ExtendedTrustManager
-import javax.net.ssl.X509TrustManager
 
 private val log = KotlinLogging.logger { }
 
@@ -79,7 +78,18 @@ class CertTrackingClientBuilder(
 				addNetworkInterceptor { chain ->
 					chain.connection()!!.let { con ->
 						when (val sock = con.socket()) {
-							!is SSLSocket -> {
+							is SSLSocket -> {
+								sock.session.peerCertificates.firstOrNull()?.let { cert ->
+									val cert =
+										cert.cast<X509Certificate>()
+											?: throw UntrustedCertificateError("Received certificate is not an X509 certificate")
+									// record TLS cert
+									val hash = cert.contentSha256()
+									log.debug { "Recording certificate <${cert.subjectX500Principal}>" }
+									certTracker.addCertHash(hash.toUByteArray())
+								}
+							}
+							else -> {
 								throw IllegalStateException("Non TLS socket used in eID Process")
 							}
 						}

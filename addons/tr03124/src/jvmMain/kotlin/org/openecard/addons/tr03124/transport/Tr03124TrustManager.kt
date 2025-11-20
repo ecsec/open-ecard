@@ -1,7 +1,6 @@
 package org.openecard.addons.tr03124.transport
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.ktor.util.network.hostname
 import org.openecard.addons.tr03124.Tr03124Config
 import org.openecard.utils.common.throwIf
 import java.net.Socket
@@ -67,11 +66,6 @@ class Tr03124TrustManager(
 
 		// check date
 		ee.checkValidity()
-
-		// record TLS cert
-		val hash = ee.contentSha256()
-		log.debug { "Recording certificate <${ee.subjectX500Principal}>" }
-		certTracker.addCertHash(hash.toUByteArray())
 	}
 
 	override fun checkServerTrusted(

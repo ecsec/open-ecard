@@ -13,6 +13,7 @@ import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.addons.tr03124.InvalidServerData
 import org.openecard.addons.tr03124.NoTcToken
 import org.openecard.addons.tr03124.UnkownServerError
+import org.openecard.addons.tr03124.runEacCatching
 import org.openecard.addons.tr03124.xml.StartPaos
 import org.openecard.addons.tr03124.xml.TcToken
 import org.openecard.addons.tr03124.xml.TcToken.Companion.toTcToken
@@ -111,15 +112,26 @@ internal class EserviceClientImpl(
 		} ?: reportCommunicationError()
 			?: returnCommunicationErrorPage()
 
+	private suspend fun <T> ignoreCertErrors(block: suspend () -> T): T? =
+		try {
+			runEacCatching(this, null) {
+				block()
+			}
+		} catch (ex: BindingException) {
+			// ignore and return null
+			log.warn(ex) { "Failure during refresh determination" }
+			null
+		}
+
 	private suspend fun determineRefreshUrl(): String? {
 		log.info { "Determining refresh URL" }
-		try {
+		return ignoreCertErrors {
 			val tokenUrl = checkedTokenUrl
 			val token = tokenOk
 			if (tokenUrl == null || token == null) {
 				// no refresh detection possible as there is no token
 				log.info { "No refresh URL determination possible as there is no non-error TCToken" }
-				return null
+				return@ignoreCertErrors null
 			}
 
 			var nextAddr = token.refreshAddress
@@ -133,11 +145,12 @@ internal class EserviceClientImpl(
 				certClient.checkCert(nextAddr)
 
 				log.info { "Refresh URL is '$nextAddr'" }
-				return nextAddr
+				return@ignoreCertErrors nextAddr
 			}
 
 			val cl = serviceClient.redirectClient
 			// follow redirects
+			var finalUrl: String? = null
 			do {
 				val resp = cl.get(nextAddr)
 				if (resp.status !in
@@ -148,26 +161,26 @@ internal class EserviceClientImpl(
 					)
 				) {
 					// status code not allowed
-					return null
+					return@ignoreCertErrors null
 				}
 				val newUrl =
 					resp.headers["Location"] ?: // missing location
-						return null
+						return@ignoreCertErrors null
 
 				if (certTracker.matchesSop(tokenUrl, nextAddr)) {
 					log.info { "Refresh URL is '$nextAddr'" }
-					return newUrl
+					// set result, so loop terminates
+					finalUrl = newUrl
 				} else if (!newUrl.startsWith("https://")) {
 					log.warn { "Received non https URL in redirect: $newUrl" }
-					return null
+					return@ignoreCertErrors null
 				} else {
 					nextAddr = newUrl
 					log.debug { "Checking URL '$nextAddr'" }
 				}
-			} while (true)
-		} catch (ex: UntrustedCertificateError) {
-			// catch cert errors and return null
-			return null
+			} while (finalUrl == null)
+
+			finalUrl
 		}
 	}
 

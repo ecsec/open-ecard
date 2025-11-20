@@ -9,6 +9,7 @@ import org.openecard.addons.tr03124.UserCanceled
 import org.openecard.addons.tr03124.runEacCatching
 import org.openecard.addons.tr03124.transport.EidServerInterface
 import org.openecard.addons.tr03124.transport.EserviceClient
+import org.openecard.addons.tr03124.transport.UntrustedCertificateError
 import org.openecard.addons.tr03124.xml.DidAuthenticateRequest
 import org.openecard.addons.tr03124.xml.Eac1Input
 import org.openecard.addons.tr03124.xml.Eac1Output
@@ -40,6 +41,7 @@ import org.openecard.sc.pace.cvc.PublicKeyReference.Companion.toPublicKeyReferen
 import org.openecard.sc.tlv.TlvException
 import org.openecard.sc.tlv.toTlvBer
 import org.openecard.utils.common.cast
+import org.openecard.utils.common.throwIf
 import org.openecard.utils.serialization.PrintableUByteArray
 import org.openecard.utils.serialization.toPrintable
 
@@ -293,12 +295,13 @@ internal class UiStepImpl(
 				// update allowed certificates in eService connection, failing when we already see a problem
 				eserviceClient.certTracker.setCertDesc(certDesc)
 				// check that cert desc contains subjectUrl (optional in data structure, but required here)
-				requireNotNull(certDesc.subjectUrl) {
-					"Subject URL is missing in CertificateDescription"
-				}
+				val subjectUrl =
+					requireNotNull(certDesc.subjectUrl) {
+						"Subject URL is missing in CertificateDescription"
+					}
 				// check that tctoken and subjectUrl have matching sop
-				require(eserviceClient.certTracker.matchesSop(eserviceClient.tcTokenUrl, certDesc.subjectUrl!!)) {
-					"TCToken URL does not match Subject URL"
+				throwIf(!eserviceClient.certTracker.matchesSop(eserviceClient.tcTokenUrl, subjectUrl)) {
+					UntrustedCertificateError("TCToken URL does not match Subject URL")
 				}
 
 				// find chats

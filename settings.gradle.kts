@@ -38,8 +38,6 @@ include("bindings:ktor")
 include("addons:tr03124")
 
 include("i18n")
-include("gui:graphics")
-include("gui:swing")
 include("clients:richclient-res")
 include("clients:richclient")
 

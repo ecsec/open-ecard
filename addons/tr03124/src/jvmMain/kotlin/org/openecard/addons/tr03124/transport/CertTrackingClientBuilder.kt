@@ -45,6 +45,7 @@ class CertTrackingClientBuilder(
 		OkHttpClient
 			.Builder()
 			.apply {
+				sslSocketFactory(sslFac, tm)
 				// define TLS cipher suites and allowed protocols, overridden in PSK client
 				connectionSpecs(
 					listOf(
@@ -75,7 +76,7 @@ class CertTrackingClientBuilder(
 							).build(),
 					),
 				)
-				sslSocketFactory(sslFac, tm)
+
 				addNetworkInterceptor { chain ->
 					chain.connection()!!.let { con ->
 						when (val sock = con.socket()) {
@@ -276,7 +277,10 @@ object SslSettings {
 	}
 
 	internal fun getSslContext(tm: TrustManager): SSLContext {
-		val sslContext = SSLContext.getInstance("TLS", "BCJSSE")
+		val sslContext =
+			SSLContext.getInstance(
+				"TLS", // "BCJSSE"
+			)
 		val tms = listOf(tm)
 		sslContext.init(null, tms.toTypedArray(), null)
 		return sslContext

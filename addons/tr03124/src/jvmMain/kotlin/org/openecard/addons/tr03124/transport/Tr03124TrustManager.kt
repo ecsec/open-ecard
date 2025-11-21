@@ -93,6 +93,17 @@ class Tr03124TrustManager(
 		authType: String,
 	): Unit = throw UnsupportedOperationException("Connection information is required for trust validation")
 
+	// TODO: according to okhttp, this is needed for android, need to revise once we test on android
+
+// 	@Suppress("unused")
+// 	@Throws(CertificateException::class)
+// 	fun checkServerTrusted(
+// 		chain: Array<out X509Certificate>,
+// 		authType: String,
+// 		host: String?,
+// 	): MutableList<X509Certificate> =
+// 		throw UnsupportedOperationException("Connection information is required for trust validation")
+
 	override fun getAcceptedIssuers(): Array<out X509Certificate> = arrayOf()
 
 	@Throws(InvalidTlsParameter::class)

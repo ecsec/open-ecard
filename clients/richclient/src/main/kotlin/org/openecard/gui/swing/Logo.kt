@@ -21,7 +21,8 @@
  ***************************************************************************/
 package org.openecard.gui.swing
 
-import org.openecard.gui.graphics.oecImage
+import org.openecard.richclient.gui.graphics.OecIconType
+import org.openecard.richclient.gui.graphics.oecImage
 import java.awt.Dimension
 import javax.swing.BoxLayout
 import javax.swing.ImageIcon
@@ -41,7 +42,7 @@ import javax.swing.border.EmptyBorder
 
 fun loadLogoIcon(): ImageIcon =
 	ImageIcon().apply {
-		setImage(oecImage(60, 60))
+		setImage(oecImage(OecIconType.COLORED, 60, 60))
 	}
 
 class Logo : JPanel() {

@@ -23,7 +23,8 @@ package org.openecard.gui.swing.common
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.util.FileUtils.resolveResourceAsURL
-import org.openecard.gui.graphics.oecImage
+import org.openecard.richclient.gui.graphics.OecIconType
+import org.openecard.richclient.gui.graphics.oecImage
 import java.awt.Color
 import java.awt.Font
 import java.awt.Graphics
@@ -75,12 +76,12 @@ object GUIDefaults {
 	fun getOecImage(
 		width: Int,
 		height: Int,
-	): ImageIcon = ImageIcon(oecImage(width, height))
+	): ImageIcon = ImageIcon(oecImage(OecIconType.COLORED, width, height))
 
 	fun getOecImageStream(
 		width: Int,
 		height: Int,
-	): InputStream = getImageStream(ImageIcon(oecImage(width, height)))
+	): InputStream = getImageStream(ImageIcon(oecImage(OecIconType.COLORED, width, height)))
 
 	fun getImage(
 		identifier: String,

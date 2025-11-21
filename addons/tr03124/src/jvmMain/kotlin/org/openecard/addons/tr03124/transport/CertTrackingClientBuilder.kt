@@ -107,8 +107,8 @@ class CertTrackingClientBuilder(
 			}.build()
 
 	@OptIn(ExperimentalUnsignedTypes::class)
-	override val tokenClient: HttpClient by lazy {
-		HttpClient(OkHttp) {
+	override val tokenClient: HttpClient get() {
+		return HttpClient(OkHttp) {
 			engine {
 				preconfigured =
 					httpClientBase
@@ -125,17 +125,19 @@ class CertTrackingClientBuilder(
 		}
 	}
 
-	override val redirectClient: HttpClient by lazy {
-		HttpClient(OkHttp) {
-			engine {
-				preconfigured =
-					httpClientBase
-						.newBuilder()
-						.build()
-			}
+	override val redirectClient: HttpClient get() {
+		// enable new sessions for all new handshakes, because before it could have been restricted
+		sslFacAttached.allowResumption = false
 
+		return tokenClient.config {
+			// enable logs when defined
 			Tr03124Config.httpLog?.let {
 				install(Logging, it)
+			} ?: run {
+				// no logging defined, set level to none
+				Logging {
+					level = LogLevel.NONE
+				}
 			}
 
 			followRedirects = false

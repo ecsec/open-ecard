@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- Logging settings-->
+	<string name="addon_list_core_logging">Protokollierungs-Einstellungen</string>
+	<string name="addon_core_logging_group_name">Protokollierung</string>
+	<string name="addon_core_logging_root">Basis Level</string>
+	<string name="addon_core_logging_root_desc">Basis Level benutzt, wenn kein spezifischer Wert angegeben ist.</string>
+	<string name="addon_core_logging_eidchannel">eID-Kanal</string>
+	<string name="addon_core_logging_eidchannel_desc">Die Verbindung zwischen eCard-Client und eID-Server.</string>
+	<string name="addon_core_logging_eac">EAC</string>
+	<string name="addon_core_logging_eac_desc">Authentisierungsprotokoll zwischen Karte und eID-Server.</string>
+	<string name="addon_core_logging_pace">PACE</string>
+	<string name="addon_core_logging_pace_desc">Authentisierungsprotokoll zwischen Karte und eCard-Client.</string>
+	<string name="addon_core_logging_pcsc">PCSC</string>
+	<string name="addon_core_logging_pcsc_desc">Low level Kartenereignisse.</string>
+	<string name="addon_core_logging_httpbind">HTTP Binding</string>
+	<string name="addon_core_logging_httpbind_desc">HTTP-Schnittstelle unter http://localhost:24727.</string>
+</resources>

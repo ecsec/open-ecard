@@ -7,7 +7,6 @@ import org.openecard.utils.serialization.PrintableUByteArray
 import org.openecard.utils.serialization.toPrintable
 
 class EserviceCertTracker {
-	@OptIn(ExperimentalUnsignedTypes::class)
 	private var certsSeen = setOf<PrintableUByteArray>()
 	private var certDesc: CertificateDescription? = null
 	private var allowedCommCerts: Set<PrintableUByteArray>? = null
@@ -28,9 +27,15 @@ class EserviceCertTracker {
 	fun matchesSop(
 		tokenUrl: String,
 		urlToCheck: String,
+		useCertDesc: Boolean = true,
 	): Boolean {
 		// fallback to TCToken URL
-		val referenceStr = certDesc?.subjectUrl ?: tokenUrl
+		val referenceStr =
+			if (useCertDesc) {
+				certDesc?.subjectUrl ?: tokenUrl
+			} else {
+				tokenUrl
+			}
 		val reference = Url(referenceStr)
 		val url = Url(urlToCheck)
 
@@ -48,10 +53,11 @@ class EserviceCertTracker {
 	@Throws(UntrustedCertificateError::class)
 	@OptIn(ExperimentalUnsignedTypes::class)
 	fun addCertHash(certHash: UByteArray) {
-		val newCerts = certsSeen + certHash.toPrintable()
-		// validate if we know our hashes
-		allowedCommCerts?.checkCertHashes(newCerts)
-		certsSeen = newCerts
+		certsSeen = certsSeen + certHash.toPrintable()
+
+		// always validate hash against comm certs, even if it has been checked before
+		// this is needed as the check when returning to web session might be different when fetching token
+		allowedCommCerts?.checkCertHashes(setOf(certHash.toPrintable()))
 	}
 
 	companion object {
@@ -62,7 +68,7 @@ class EserviceCertTracker {
 
 			val allAllowed = certsSeen.all { toTest -> allowedCommCerts.any { it == toTest } }
 			if (!allAllowed) {
-				throw UntrustedCertificateError("")
+				throw UntrustedCertificateError("Certificate which is not hashed in the CertificateDescription found")
 			}
 		}
 	}

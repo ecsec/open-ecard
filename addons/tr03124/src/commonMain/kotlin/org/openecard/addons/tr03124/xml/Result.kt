@@ -17,4 +17,15 @@ data class Result(
 	@XmlSerialName("ResultMessage")
 	@XmlElement
 	val message: InternationalString? = null,
-)
+) {
+	companion object {
+		fun ok(): Result = Result(ECardConstants.Major.OK)
+
+		fun error(
+			minor: String,
+			message: String?,
+			lang: String = "en",
+			major: String = ECardConstants.Major.ERROR,
+		): Result = Result(major, minor, message?.let { InternationalString(it, lang) })
+	}
+}

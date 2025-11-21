@@ -23,12 +23,13 @@ kotlin {
 			implementation(libs.ktor.client.core)
 			implementation(libs.ktor.client.nego)
 			implementation(libs.ktor.serde.xml)
-			implementation(libs.ktor.client.logging)
+			api(libs.ktor.client.logging)
 		}
 
 		jvmMain.dependencies {
 			implementation(libs.ktor.client.okhttp)
 			implementation(libs.bc.tls)
+			implementation(libs.bc.prov)
 		}
 
 		commonTest.dependencies {

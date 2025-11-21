@@ -39,11 +39,11 @@ internal class EidServerStepImpl(
 	override suspend fun cancel(): BindingResponse =
 		try {
 			log.info { "EAC eID-Server Step cancelled" }
-			runEacCatching(eserviceClient) {
+			runEacCatching(eserviceClient, eidServer) {
 				processingJob?.cancelAndJoin()
 				processingJob = null
 				uiStep.disconnectCard()
-				UserCanceled(eserviceClient).toResponse()
+				throw UserCanceled(eserviceClient)
 			}
 		} catch (ex: BindingException) {
 			ex.toResponse()
@@ -51,7 +51,7 @@ internal class EidServerStepImpl(
 
 	override suspend fun processEidServerLogic(): BindingResponse =
 		try {
-			runEacCatching(eserviceClient) {
+			runEacCatching(eserviceClient, eidServer) {
 				log.info { "Processing eID-Server logic" }
 				coroutineScope {
 					val res =
@@ -95,6 +95,7 @@ internal class EidServerStepImpl(
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	private fun processApdus(req: TransmitRequest): TransmitResponse {
+		var resultObj = Result.ok()
 		val result = mutableListOf<ResponseApdu>()
 
 		for (next in req.inputAPDUInfo) {
@@ -104,18 +105,14 @@ internal class EidServerStepImpl(
 
 			// check result
 			if (!next.isValidResponse(resp)) {
+				resultObj = Result.error(ECardConstants.Minor.App.UNKNOWN_ERROR, "Failed to process all APDUs successfully")
 				break
 			}
 		}
 
 		// convert response
 		return TransmitResponse(
-			result =
-				Result(
-					ECardConstants.Major.OK,
-					null,
-					null,
-				),
+			result = resultObj,
 			requestId = req.requestId,
 			outputAPDU =
 				result.map {

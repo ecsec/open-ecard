@@ -8,6 +8,7 @@ val eacXml =
 		defaultPolicy {
 			indentString = "  "
 			ignoreUnknownChildren()
+			throwOnRepeatedElement = true
 		}
 	}
 

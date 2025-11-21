@@ -33,6 +33,7 @@ import org.openecard.richclient.gui.graphics.oecImage
 import org.openecard.richclient.gui.manage.core.AddonPanelBuilder.createConnectionSettingsAddon
 import org.openecard.richclient.gui.manage.core.AddonPanelBuilder.createGeneralSettingsAddon
 import org.openecard.richclient.gui.manage.core.AddonPanelBuilder.createLogSettingsAddon
+import org.openecard.richclient.res.MR
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.Font
@@ -40,8 +41,6 @@ import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.Image
 import java.awt.Insets
-import java.awt.event.WindowEvent
-import java.awt.event.WindowListener
 import java.io.IOException
 import java.io.InputStream
 import javax.swing.Box
@@ -186,7 +185,7 @@ class ManagementDialog : JFrame() {
 			createConnectionSettingsAddon(),
 		)
 		model.addElement(
-			I18N.strings.addon_list_core_logging.localized(),
+			MR.strings.addon_list_core_logging.localized(),
 			createLogSettingsAddon(),
 		)
 // 		model.addElement(
@@ -421,46 +420,12 @@ class ManagementDialog : JFrame() {
 		private const val serialVersionUID: Long = 1L
 		private val LANGUAGE_CODE: String = System.getProperty("user.language")
 
-		private var runningDialog: ManagementDialog? = null
-
 		/**
 		 * Creates a new instance of the dialog and displays it.
 		 * This method only permits a single instance, so this is the preferred way to open the dialog.
 		 */
 		@Synchronized
-		fun showDialog() {
-			val rd = runningDialog
-			if (rd == null) {
-				LOG.debug { "Creating ManagementDialog." }
-				val dialog = ManagementDialog()
-				dialog.addWindowListener(
-					object : WindowListener {
-						override fun windowOpened(e: WindowEvent) {}
-
-						override fun windowClosing(e: WindowEvent) {}
-
-						override fun windowClosed(e: WindowEvent) {
-							runningDialog = null
-						}
-
-						override fun windowIconified(e: WindowEvent) {}
-
-						override fun windowDeiconified(e: WindowEvent) {}
-
-						override fun windowActivated(e: WindowEvent) {}
-
-						override fun windowDeactivated(e: WindowEvent) {}
-					},
-				)
-				LOG.debug { "Displaying ManagementDialog." }
-				dialog.isVisible = true
-				runningDialog = dialog
-			} else {
-				LOG.debug { "Not displaying ManagementDialog." }
-				// dialog already shown, bring to front
-				rd.toFront()
-			}
-		}
+		fun createDialog(): ManagementDialog = ManagementDialog()
 
 		/**
 		 * Load the logo from the given path as [Image].

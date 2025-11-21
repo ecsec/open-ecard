@@ -110,12 +110,12 @@ class CHATStep(
 		// iterate over all 8 special functions
 		for (specialFunction in requiredSpecialFunctions.keys) {
 			// determine if extra data is necessary
-			var textData = arrayOf<Any>()
+			var textData = listOf<Any>()
 			if (SpecialFunction.AGE_VERIFICATION == specialFunction) {
 				val c = eacData.aad?.ageVerification
 				if (c != null) {
 					val yearDiff: Int = getYearDifference(c)
-					textData = arrayOf(yearDiff)
+					textData = listOf(yearDiff)
 				} else {
 					logger.warn { "Removing age verification because of missing or invalid AAD." }
 					// disable this function as no working reference value is given
@@ -174,10 +174,10 @@ class CHATStep(
 			if (TR03119RightsFilter.isTr03119ConformWriteRight(dataGroup)) {
 				if (requiredWriteAccess[dataGroup] == true) {
 					displayWriteAccessCheckBox = true
-					writeAccessCheckBox.boxItems.add(makeBoxItem(dataGroup, true, true))
+					writeAccessCheckBox.boxItems.add(makeBoxItem(dataGroup, checked = true, disabled = true))
 				} else if (optionalWriteAccess[dataGroup] == true) {
 					displayWriteAccessCheckBox = true
-					writeAccessCheckBox.boxItems.add(makeBoxItem(dataGroup, true, false))
+					writeAccessCheckBox.boxItems.add(makeBoxItem(dataGroup, checked = true, disabled = false))
 				}
 			} else {
 				selectedChat.writeAccess[dataGroup] = false
@@ -202,7 +202,7 @@ class CHATStep(
 		value: StringResource,
 		checked: Boolean,
 		disabled: Boolean,
-		vararg textData: Any?,
+		textData: List<Any> = emptyList(),
 	): BoxItem =
 		BoxItem(
 			name = name,
@@ -215,22 +215,22 @@ class CHATStep(
 		value: SpecialFunction,
 		checked: Boolean,
 		disabled: Boolean,
-		vararg textData: Any?,
-	) = makeBoxItem(value.name, value.stringResource(), checked, disabled, textData)
+		textData: List<Any> = emptyList(),
+	) = makeBoxItem(value.name, value.stringResource(), checked, disabled, textData = textData)
 
 	private fun makeBoxItem(
 		value: ReadAccess,
 		checked: Boolean,
 		disabled: Boolean,
-		vararg textData: Any?,
-	) = makeBoxItem(value.name, value.stringResource(), checked, disabled, textData)
+		textData: List<Any> = emptyList(),
+	) = makeBoxItem(value.name, value.stringResource(), checked, disabled, textData = textData)
 
 	private fun makeBoxItem(
 		value: WriteAccess,
 		checked: Boolean,
 		disabled: Boolean,
-		vararg textData: Any?,
-	) = makeBoxItem(value.name, value.stringResource(), checked, disabled, textData)
+		textData: List<Any> = emptyList(),
+	) = makeBoxItem(value.name, value.stringResource(), checked, disabled, textData = textData)
 
 	companion object {
 		// step id

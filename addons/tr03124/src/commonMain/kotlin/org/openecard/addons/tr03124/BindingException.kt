@@ -84,25 +84,36 @@ sealed class ServerError(
 	cause: Throwable? = null,
 ) : AbstractBindingException(eserviceClient, msg, cause, "serverError")
 
-class InvalidServerData(
-	eserviceClient: EserviceClient,
-	msg: String? = null,
-	cause: Throwable? = null,
-) : ServerError(eserviceClient, msg ?: "The eID-Server sent invalid data", cause)
-
 class UnkownServerError(
 	eserviceClient: EserviceClient,
 	msg: String? = null,
 	cause: Throwable? = null,
 ) : ServerError(eserviceClient, msg ?: "The eID-Server encountered an error", cause)
 
-class ClientError(
+sealed class ClientError(
+	eserviceClient: EserviceClient,
+	msg: String,
+	cause: Throwable? = null,
+) : AbstractBindingException(eserviceClient, msg, cause, "clientError")
+
+class InvalidServerData(
 	eserviceClient: EserviceClient,
 	msg: String? = null,
 	cause: Throwable? = null,
-) : AbstractBindingException(
+) : ClientError(eserviceClient, msg ?: "The eID-Server sent invalid data", cause)
+
+class UnkownCvcChainError(
+	eserviceClient: EserviceClient,
+	msg: String? = null,
+	cause: Throwable? = null,
+) : ClientError(eserviceClient, msg ?: "The eID-Card does not match the trust chain returned by the eID-Server", cause)
+
+class UnknownClientError(
+	eserviceClient: EserviceClient,
+	msg: String? = null,
+	cause: Throwable? = null,
+) : ClientError(
 		eserviceClient,
 		msg ?: "Any error not covered by the other error codes occurred",
 		cause,
-		"clientError",
 	)

@@ -22,7 +22,6 @@
 
 package org.openecard.richclient.gui.manage.core
 
-import org.openecard.richclient.gui.manage.SettingsGroup
 import org.openecard.richclient.gui.manage.SettingsPanel
 
 /**
@@ -30,16 +29,14 @@ import org.openecard.richclient.gui.manage.SettingsPanel
  * This panel hosts the following settings groups:
  *
  *  * Proxy
- *
+ *  * TLS
  *
  * @author Tobias Wich
  */
 class ConnectionsSettingsPanel : SettingsPanel() {
-	private val proxy: SettingsGroup
-
 	init {
-		proxy = ConnectionSettingsGroup()
-		addSettingsGroup(proxy)
+		addSettingsGroup(ConnectionSettingsGroup())
+		addSettingsGroup(ConnectionSettingsTlsGroup())
 	}
 
 	companion object {

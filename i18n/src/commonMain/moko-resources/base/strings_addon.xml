@@ -44,35 +44,12 @@
 		used. * can be used as wildcard.
 	</string>
 
-	<!-- Logging settings-->
-	<string name="addon_list_core_logging">Logging Settings</string>
-	<string name="addon_core_logging_group_name">Logging</string>
-	<string name="addon_core_logging_root">Base level</string>
-	<string name="addon_core_logging_root_desc">Base level used when no more specific value is given.</string>
-	<string name="addon_core_logging_paos">PAOS</string>
-	<string name="addon_core_logging_paos_desc">Connection between eCard-Client and eID-Server.</string>
-	<string name="addon_core_logging_eac">EAC</string>
-	<string name="addon_core_logging_eac_desc">Authentication protocol between card and eID-Server.</string>
-	<string name="addon_core_logging_pace">PACE</string>
-	<string name="addon_core_logging_pace_desc">Authentication protocol between card and eCard-Client.</string>
-	<string name="addon_core_logging_trchecks">TR-03112 checks</string>
-	<string name="addon_core_logging_trchecks_desc">Checks of the certificates and server addresses.</string>
-	<string name="addon_core_logging_tctoken">TCToken</string>
-	<string name="addon_core_logging_tctoken_desc">TCToken related operations.</string>
-	<string name="addon_core_logging_event">Event Manager</string>
-	<string name="addon_core_logging_event_desc">Low level events with cards.</string>
-	<string name="addon_core_logging_httpbind">HTTP Binding</string>
-	<string name="addon_core_logging_httpbind_desc">HTTP interface on http://localhost:24727.</string>
-	<string name="addon_core_logging_addon">Add-on Manager</string>
-	<string name="addon_core_logging_addon_desc">Add-on Manager related operations.</string>
-	<string name="addon_core_logging_salstate">SAL state</string>
-	<string name="addon_core_logging_salstate_desc">Events which affect the behaviour of the SAL's state.</string>
-	<string name="addon_core_logging_middleware">PKCS#11 Middleware</string>
-	<string name="addon_core_logging_middleware_desc">Middleware related operations.</string>
-	<string name="addon_core_logging_middleware-event">Middleware Event Manager</string>
-	<string name="addon_core_logging_middleware-event_desc">Low level events with cards.</string>
-	<string name="addon_core_logging_chipgateway">ChipGateway protocol</string>
-	<string name="addon_core_logging_chipgateway_desc">ChipGateway protocol related operations.</string>
+	<!-- TLS settings-->
+	<string name="addon_list_core_connection_tls_group_name">TLS</string>
+	<string name="addon_list_core_connection_tls_non_bsi_ciphers">Modern Ciphers</string>
+	<string name="addon_list_core_connection_tls_non_bsi_ciphers_desc">Use modern cipher suites not approved by the BSI.</string>
+	<string name="addon_list_core_connection_tls_disable_keysize_check">Standard key size check</string>
+	<string name="addon_list_core_connection_tls_disable_keysize_check_desc">Use the standard certificate validation instead of the custom BSI compliant key size check.</string>
 
 	<!-- Middleware settings-->
 	<string name="addon_list_core_middleware">PKCS#11</string>

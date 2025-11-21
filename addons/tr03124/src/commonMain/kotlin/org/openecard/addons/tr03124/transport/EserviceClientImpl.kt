@@ -12,7 +12,9 @@ import org.openecard.addons.tr03124.BindingException
 import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.addons.tr03124.InvalidServerData
 import org.openecard.addons.tr03124.NoTcToken
+import org.openecard.addons.tr03124.UnknownTrustedChannelError
 import org.openecard.addons.tr03124.UnkownServerError
+import org.openecard.addons.tr03124.runEacCatching
 import org.openecard.addons.tr03124.xml.StartPaos
 import org.openecard.addons.tr03124.xml.TcToken
 import org.openecard.addons.tr03124.xml.TcToken.Companion.toTcToken
@@ -22,22 +24,26 @@ import kotlin.random.Random
 private val log = KotlinLogging.logger { }
 
 internal class EserviceClientImpl(
+	override val tcTokenUrl: String,
 	override val certTracker: EserviceCertTracker,
 	private val serviceClient: KtorClientBuilder,
 	private val random: Random = Random.Default,
 ) : EserviceClient {
-	private var tokenUrl: String? = null
+	private var checkedTokenUrl: String? = null
 	private var token: TcToken? = null
 	private var tokenOk: TcToken.TcTokenOk? = null
 
-	override suspend fun fetchToken(tokenUrl: String): TcToken.TcTokenOk {
-		log.info { "Fetching TCToken from '$tokenUrl'" }
+	override suspend fun fetchToken(): TcToken.TcTokenOk {
+		log.info { "Fetching TCToken from '$tcTokenUrl'" }
+		if (!tcTokenUrl.startsWith("https://")) {
+			throw InvalidServerData(this, "Insecure TCToken URL used: $tcTokenUrl")
+		}
 		check(token == null) { "Fetching multiple TCTokens with the same client" }
-		this.tokenUrl = tokenUrl
+		this.checkedTokenUrl = tcTokenUrl
 		val tokenClient = serviceClient.tokenClient
 		val tokenRes =
 			tokenClient
-				.get(tokenUrl) {
+				.get(tcTokenUrl) {
 					headers {
 						append(HttpHeaders.Accept, "text/xml, */*;q=0.8")
 					}
@@ -70,17 +76,23 @@ internal class EserviceClientImpl(
 						!it.startsWith("https://")
 					}
 				if (nonHttpsUrl) {
-					throw InvalidServerData(this, "Insecure URL scheme used in TCToken")
+					throw UnknownTrustedChannelError(this, "Insecure URL scheme used in TCToken")
 				}
 				return token
 			}
 			is TcToken.TcTokenError -> {
-				if (!token.communicationErrorAddress.startsWith("https://")) {
-					// forbid to use this address by deleting the token
-					this.token = null
-					throw InvalidServerData(this, "Insecure URL scheme used in TCToken")
+				val nonHttpsUrl =
+					listOfNotNull(token.refreshAddress, token.communicationErrorAddress).any {
+						!it.startsWith("https://")
+					}
+				if (nonHttpsUrl) {
+					throw UnknownTrustedChannelError(this, "Insecure URL scheme used in TCToken")
 				}
-				throw UnkownServerError(this, "Server aborted by sending an error TCToken")
+				if (!token.invalidData) {
+					throw UnkownServerError(this, "Server aborted by sending an error TCToken")
+				} else {
+					throw UnknownTrustedChannelError(this, "Server sent an invalid TCToken")
+				}
 			}
 		}
 	}
@@ -107,19 +119,41 @@ internal class EserviceClientImpl(
 		} ?: reportCommunicationError()
 			?: returnCommunicationErrorPage()
 
+	private suspend fun <T> ignoreCertErrors(block: suspend () -> T): T? =
+		try {
+			runEacCatching(this, null) {
+				block()
+			}
+		} catch (ex: BindingException) {
+			// ignore and return null
+			log.warn(ex) { "Failure during refresh determination" }
+			null
+		}
+
 	private suspend fun determineRefreshUrl(): String? {
 		log.info { "Determining refresh URL" }
-		try {
-			val tokenUrl = tokenUrl
-			val token = tokenOk
-			if (tokenUrl == null || token == null) {
+		return ignoreCertErrors {
+			val tokenUrl = checkedTokenUrl
+			val refreshAddress =
+				when (token) {
+					is TcToken.TcTokenOk -> (token as TcToken.TcTokenOk).refreshAddress
+					is TcToken.TcTokenError -> (token as TcToken.TcTokenError).refreshAddress
+					else -> null
+				}
+
+			if (tokenUrl == null || refreshAddress == null) {
 				// no refresh detection possible as there is no token
 				log.info { "No refresh URL determination possible as there is no non-error TCToken" }
-				return null
+				return@ignoreCertErrors null
 			}
 
-			var nextAddr = token.refreshAddress
+			var nextAddr: String = refreshAddress
 			log.debug { "Checking URL '$nextAddr'" }
+
+			if (!nextAddr.startsWith("https://")) {
+				log.warn { "Token contains non https URL: $nextAddr" }
+				return@ignoreCertErrors null
+			}
 
 			// if SOP matches, we only need to check the certificate
 			if (certTracker.matchesSop(tokenUrl, nextAddr)) {
@@ -129,11 +163,12 @@ internal class EserviceClientImpl(
 				certClient.checkCert(nextAddr)
 
 				log.info { "Refresh URL is '$nextAddr'" }
-				return nextAddr
+				return@ignoreCertErrors nextAddr
 			}
 
 			val cl = serviceClient.redirectClient
 			// follow redirects
+			var finalUrl: String? = null
 			do {
 				val resp = cl.get(nextAddr)
 				if (resp.status !in
@@ -144,29 +179,37 @@ internal class EserviceClientImpl(
 					)
 				) {
 					// status code not allowed
-					return null
+					return@ignoreCertErrors null
 				}
 				val newUrl =
 					resp.headers["Location"] ?: // missing location
-						return null
+						return@ignoreCertErrors null
 
 				if (certTracker.matchesSop(tokenUrl, nextAddr)) {
 					log.info { "Refresh URL is '$nextAddr'" }
-					return newUrl
+					// set result, so loop terminates
+					finalUrl = newUrl
+				} else if (!newUrl.startsWith("https://")) {
+					log.warn { "Received non https URL in redirect: $newUrl" }
+					return@ignoreCertErrors null
 				} else {
 					nextAddr = newUrl
 					log.debug { "Checking URL '$nextAddr'" }
 				}
-			} while (true)
-		} catch (ex: UntrustedCertificateError) {
-			// catch cert errors and return null
-			return null
+			} while (finalUrl == null)
+
+			finalUrl
 		}
 	}
 
 	private fun reportCommunicationError() =
 		token?.communicationErrorAddress?.let {
-			BindingResponse.RedirectResponse(HttpStatusCode.SeeOther.value, it.addError("communicationError"))
+			if (!it.startsWith("https://")) {
+				log.warn { "Communication error address is not a https URL: $it" }
+				null
+			} else {
+				BindingResponse.RedirectResponse(HttpStatusCode.SeeOther.value, it.addError("communicationError"))
+			}
 		}
 
 	private fun returnCommunicationErrorPage() =

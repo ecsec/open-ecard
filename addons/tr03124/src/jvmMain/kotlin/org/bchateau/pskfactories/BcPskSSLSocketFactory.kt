@@ -15,21 +15,31 @@
  */
 package org.bchateau.pskfactories
 
+import org.bouncycastle.tls.AlertDescription
 import org.bouncycastle.tls.BasicTlsPSKExternal
 import org.bouncycastle.tls.CertificateRequest
+import org.bouncycastle.tls.HashAlgorithm
 import org.bouncycastle.tls.NameType
+import org.bouncycastle.tls.NamedGroup
 import org.bouncycastle.tls.PSKTlsClient
 import org.bouncycastle.tls.ProtocolVersion
 import org.bouncycastle.tls.SecurityParameters
 import org.bouncycastle.tls.ServerName
+import org.bouncycastle.tls.SignatureAlgorithm
+import org.bouncycastle.tls.SignatureAndHashAlgorithm
 import org.bouncycastle.tls.TlsAuthentication
 import org.bouncycastle.tls.TlsClientProtocol
 import org.bouncycastle.tls.TlsCredentials
+import org.bouncycastle.tls.TlsFatalAlert
+import org.bouncycastle.tls.TlsPSK
 import org.bouncycastle.tls.TlsPSKExternal
 import org.bouncycastle.tls.TlsPSKIdentity
 import org.bouncycastle.tls.TlsServerCertificate
+import org.bouncycastle.tls.TlsUtils
 import org.bouncycastle.tls.crypto.TlsCrypto
 import org.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto
+import org.openecard.addons.tr03124.Tr03124Config
+import org.openecard.utils.common.throwIfNull
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -42,6 +52,7 @@ import java.security.Principal
 import java.security.SecureRandom
 import java.security.cert.Certificate
 import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
 import java.util.Collections
 import java.util.Vector
 import javax.net.ssl.SSLPeerUnverifiedException
@@ -50,17 +61,18 @@ import javax.net.ssl.SSLSessionBindingEvent
 import javax.net.ssl.SSLSessionBindingListener
 import javax.net.ssl.SSLSessionContext
 import javax.net.ssl.SSLSocketFactory
+import javax.net.ssl.X509ExtendedTrustManager
 import javax.net.ssl.X509TrustManager
 
 /**
  * This SSLSocketFactory provides TLS pre-shared key (PSK) cipher suites via Bouncy Castle.
- *
  *
  * When using an instance of this class with OkHttpClient (and possibly other HTTP clients) you
  * must provide an instance of [X509TrustManager] because a null TrustManager is not
  * allowed, but the security of matching pre-shared keys is still enforced.
  */
 open class BcPskSSLSocketFactory(
+	private val tm: X509ExtendedTrustManager,
 	private val params: BcPskTlsParams,
 	private val pskIdentity: TlsPSKIdentity?,
 ) : SSLSocketFactory() {
@@ -284,6 +296,7 @@ open class BcPskSSLSocketFactory(
 
 			@Throws(IOException::class)
 			override fun startHandshake() {
+				val socket = socket
 				tlsClientProtocol.connect(
 					object : PSKTlsClient(crypto, pskIdentity) {
 						override fun getSupportedVersions(): Array<ProtocolVersion> =
@@ -292,6 +305,94 @@ open class BcPskSSLSocketFactory(
 						override fun getSupportedCipherSuites(): IntArray =
 							BcPskTlsParams.fromSupportedCipherSuiteCodes(getEnabledCipherSuites())
 
+						override fun getSupportedGroups(namedGroupRoles: Vector<*>?): Vector<*> {
+							val crypto = getCrypto()
+							val supportedGroups: Vector<*> = Vector<Any?>()
+
+							if (Tr03124Config.nonBsiApprovedCiphers) {
+								TlsUtils.addIfSupported(
+									supportedGroups,
+									crypto,
+									intArrayOf(NamedGroup.x25519, NamedGroup.x448),
+								)
+							}
+
+							TlsUtils.addIfSupported(
+								supportedGroups,
+								crypto,
+								intArrayOf(NamedGroup.secp256r1, NamedGroup.secp384r1, NamedGroup.secp521r1),
+							)
+
+							return supportedGroups
+						}
+
+						override fun getSupportedSignatureAlgorithms(): Vector<*> {
+							val crypto = getCrypto()
+							val supportedAlgs: Vector<*> = Vector<Any?>()
+
+							if (Tr03124Config.nonBsiApprovedCiphers) {
+								TlsUtils.addIfSupported(supportedAlgs, crypto, SignatureAndHashAlgorithm.ed25519)
+								TlsUtils.addIfSupported(supportedAlgs, crypto, SignatureAndHashAlgorithm.ed448)
+							}
+
+							TlsUtils.addIfSupported(
+								supportedAlgs,
+								crypto,
+								SignatureAndHashAlgorithm.getInstance(
+									HashAlgorithm.sha256,
+									SignatureAlgorithm.ecdsa,
+								),
+							)
+							TlsUtils.addIfSupported(
+								supportedAlgs,
+								crypto,
+								SignatureAndHashAlgorithm.getInstance(
+									HashAlgorithm.sha384,
+									SignatureAlgorithm.ecdsa,
+								),
+							)
+							TlsUtils.addIfSupported(
+								supportedAlgs,
+								crypto,
+								SignatureAndHashAlgorithm.getInstance(
+									HashAlgorithm.sha512,
+									SignatureAlgorithm.ecdsa,
+								),
+							)
+							TlsUtils.addIfSupported(supportedAlgs, crypto, SignatureAndHashAlgorithm.rsa_pss_pss_sha256)
+							TlsUtils.addIfSupported(supportedAlgs, crypto, SignatureAndHashAlgorithm.rsa_pss_pss_sha384)
+							TlsUtils.addIfSupported(supportedAlgs, crypto, SignatureAndHashAlgorithm.rsa_pss_pss_sha512)
+							TlsUtils.addIfSupported(supportedAlgs, crypto, SignatureAndHashAlgorithm.rsa_pss_rsae_sha256)
+							TlsUtils.addIfSupported(supportedAlgs, crypto, SignatureAndHashAlgorithm.rsa_pss_rsae_sha384)
+							TlsUtils.addIfSupported(supportedAlgs, crypto, SignatureAndHashAlgorithm.rsa_pss_rsae_sha512)
+							TlsUtils.addIfSupported(
+								supportedAlgs,
+								crypto,
+								SignatureAndHashAlgorithm.getInstance(
+									HashAlgorithm.sha256,
+									SignatureAlgorithm.rsa,
+								),
+							)
+							TlsUtils.addIfSupported(
+								supportedAlgs,
+								crypto,
+								SignatureAndHashAlgorithm.getInstance(
+									HashAlgorithm.sha384,
+									SignatureAlgorithm.rsa,
+								),
+							)
+							TlsUtils.addIfSupported(
+								supportedAlgs,
+								crypto,
+								SignatureAndHashAlgorithm.getInstance(
+									HashAlgorithm.sha512,
+									SignatureAlgorithm.rsa,
+								),
+							)
+
+							return supportedAlgs
+						}
+
 						override fun getExternalPSKs(): Vector<*> {
 							val externals = Vector<TlsPSKExternal>()
 							val secret = crypto.createSecret(pskIdentity.psk)
@@ -299,16 +400,25 @@ open class BcPskSSLSocketFactory(
 							return externals
 						}
 
+						override fun notifySelectedPSK(selectedPSK: TlsPSK?) {
+							throwIfNull(selectedPSK) { TlsFatalAlert(AlertDescription.handshake_failure) }
+						}
+
 						override fun getSNIServerNames(): Vector<ServerName> = Vector(listOf(host.hostNameToServerName()))
 
-						override fun getAuthentication(): TlsAuthentication? =
+						override fun getAuthentication(): TlsAuthentication =
 							object : TlsAuthentication {
 								override fun notifyServerCertificate(serverCert: TlsServerCertificate?) {
 									val certFac = CertificateFactory.getInstance("X.509")
 									peerCerts =
 										serverCert?.certificate?.certificateList?.map {
-											certFac.generateCertificate(it.encoded.inputStream())
+											certFac.generateCertificate(it.encoded.inputStream()) as X509Certificate
 										}
+
+									// validate cert
+									peerCerts?.toTypedArray()?.let {
+										tm.checkServerTrusted(it, "UNKNOWN", socket)
+									}
 								}
 
 								override fun getClientCredentials(certificateRequest: CertificateRequest?): TlsCredentials? = null
@@ -317,7 +427,7 @@ open class BcPskSSLSocketFactory(
 				)
 			}
 
-			private var peerCerts: List<Certificate>? = null
+			private var peerCerts: List<X509Certificate>? = null
 
 			private fun String.hostNameToServerName(): ServerName {
 				var name = this
@@ -377,7 +487,9 @@ open class BcPskSSLSocketFactory(
 					override fun getPacketBufferSize(): Int = MAX_SSL_PACKET_SIZE
 
 					@Throws(SSLPeerUnverifiedException::class)
-					override fun getPeerCertificates(): Array<Certificate>? = peerCerts?.toTypedArray()
+					override fun getPeerCertificates(): Array<Certificate> =
+						peerCerts?.toTypedArray()
+							?: throw SSLPeerUnverifiedException("No certificate received from server")
 
 					override fun getPeerHost(): String = host
 

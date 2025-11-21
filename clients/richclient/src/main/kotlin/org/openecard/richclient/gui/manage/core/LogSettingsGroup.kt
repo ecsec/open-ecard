@@ -25,11 +25,11 @@ package org.openecard.richclient.gui.manage.core
 import ch.qos.logback.core.joran.spi.JoranException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.util.FileUtils.resolveResourceAsStream
-import org.openecard.i18n.I18N
 import org.openecard.richclient.AddonPropertiesException
 import org.openecard.richclient.LogbackConfig
 import org.openecard.richclient.gui.manage.SettingsFactory
 import org.openecard.richclient.gui.manage.SettingsGroup
+import org.openecard.richclient.res.MR
 import org.openecard.utils.serialization.XmlUtils
 import org.openecard.utils.serialization.XmlUtils.Companion.doc2str
 import org.openecard.utils.serialization.XmlUtils.Companion.str2doc
@@ -39,7 +39,6 @@ import org.w3c.dom.Element
 import org.xml.sax.SAXException
 import java.awt.Desktop
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.FileWriter
 import java.io.IOException
@@ -67,15 +66,15 @@ private val LOG = KotlinLogging.logger { }
 class LogSettingsGroup(
 	private val xmlUtils: XmlUtils = XmlUtils(),
 ) : SettingsGroup(
-		I18N.strings.addon_core_logging_group_name.localized(),
+		MR.strings.addon_core_logging_group_name.localized(),
 		SettingsFactory.getInstance(
 			loadProperties(xmlUtils),
 		),
 	) {
 	init {
 		addSelectionItem(
-			I18N.strings.addon_core_logging_root.localized(),
-			I18N.strings.addon_core_logging_root_desc.localized(),
+			MR.strings.addon_core_logging_root.localized(),
+			MR.strings.addon_core_logging_root_desc.localized(),
 			ROOT_KEY,
 			"ERROR",
 			"WARN",
@@ -83,64 +82,29 @@ class LogSettingsGroup(
 			"DEBUG",
 		)
 		addLogLevelBox(
-			I18N.strings.addon_core_logging_paos.localized(),
-			I18N.strings.addon_core_logging_paos_desc.localized(),
-			PAOS_KEY,
+			MR.strings.addon_core_logging_eidchannel.localized(),
+			MR.strings.addon_core_logging_eidchannel_desc.localized(),
+			EID_HTTP_KEY,
 		)
 		addLogLevelBox(
-			I18N.strings.addon_core_logging_eac.localized(),
-			I18N.strings.addon_core_logging_eac_desc.localized(),
+			MR.strings.addon_core_logging_eac.localized(),
+			MR.strings.addon_core_logging_eac_desc.localized(),
 			EAC_KEY,
 		)
 		addLogLevelBox(
-			I18N.strings.addon_core_logging_pace.localized(),
-			I18N.strings.addon_core_logging_pace_desc.localized(),
+			MR.strings.addon_core_logging_pace.localized(),
+			MR.strings.addon_core_logging_pace_desc.localized(),
 			PACE_KEY,
 		)
 		addLogLevelBox(
-			I18N.strings.addon_core_logging_trchecks.localized(),
-			I18N.strings.addon_core_logging_trchecks_desc.localized(),
-			TRCHECKS_KEY,
+			MR.strings.addon_core_logging_pcsc.localized(),
+			MR.strings.addon_core_logging_pcsc_desc.localized(),
+			PCSC_KEY,
 		)
 		addLogLevelBox(
-			I18N.strings.addon_core_logging_tctoken.localized(),
-			I18N.strings.addon_core_logging_tctoken_desc.localized(),
-			TCTOKEN_KEY,
-		)
-		addLogLevelBox(
-			I18N.strings.addon_core_logging_event.localized(),
-			I18N.strings.addon_core_logging_event_desc.localized(),
-			EVENT_KEY,
-		)
-		addLogLevelBox(
-			I18N.strings.addon_core_logging_httpbind.localized(),
-			I18N.strings.addon_core_logging_httpbind_desc.localized(),
+			MR.strings.addon_core_logging_httpbind.localized(),
+			MR.strings.addon_core_logging_httpbind_desc.localized(),
 			HTTPBIND_KEY,
-		)
-		addLogLevelBox(
-			I18N.strings.addon_core_logging_addon.localized(),
-			I18N.strings.addon_core_logging_addon_desc.localized(),
-			ADDON_KEY,
-		)
-		addLogLevelBox(
-			I18N.strings.addon_core_logging_salstate.localized(),
-			I18N.strings.addon_core_logging_salstate_desc.localized(),
-			SALSTATE_KEY,
-		)
-		addLogLevelBox(
-			I18N.strings.addon_core_logging_middleware.localized(),
-			I18N.strings.addon_core_logging_middleware_desc.localized(),
-			MDLW_KEY,
-		)
-		addLogLevelBox(
-			I18N.strings.addon_core_logging_middleware.localized(),
-			I18N.strings.addon_core_logging_middleware.localized(),
-			MDLW_EVENT_KEY,
-		)
-		addLogLevelBox(
-			I18N.strings.addon_core_logging_chipgateway.localized(),
-			I18N.strings.addon_core_logging_chipgateway_desc.localized(),
-			CG_KEY,
 		)
 
 		// add support text
@@ -201,42 +165,21 @@ class LogSettingsGroup(
 			value = value ?: "ERROR"
 			setRootlevel(conf, value)
 			// process every value
-			value = properties.getProperty(PAOS_KEY)
+			value = properties.getProperty(EID_HTTP_KEY)
 			value = value ?: ""
-			setLoglevel(conf, PAOS_KEY, value)
+			setLoglevel(conf, EID_HTTP_KEY, value)
 			value = properties.getProperty(EAC_KEY)
 			value = value ?: ""
 			setLoglevel(conf, EAC_KEY, value)
 			value = properties.getProperty(PACE_KEY)
 			value = value ?: ""
 			setLoglevel(conf, PACE_KEY, value)
-			value = properties.getProperty(TRCHECKS_KEY)
+			value = properties.getProperty(PCSC_KEY)
 			value = value ?: ""
-			setLoglevel(conf, TRCHECKS_KEY, value)
-			value = properties.getProperty(TCTOKEN_KEY)
-			value = value ?: ""
-			setLoglevel(conf, TCTOKEN_KEY, value)
-			value = properties.getProperty(EVENT_KEY)
-			value = value ?: ""
-			setLoglevel(conf, EVENT_KEY, value)
+			setLoglevel(conf, PCSC_KEY, value)
 			value = properties.getProperty(HTTPBIND_KEY)
 			value = value ?: ""
 			setLoglevel(conf, HTTPBIND_KEY, value)
-			value = properties.getProperty(ADDON_KEY)
-			value = value ?: ""
-			setLoglevel(conf, ADDON_KEY, value)
-			value = properties.getProperty(SALSTATE_KEY)
-			value = value ?: ""
-			setLoglevel(conf, SALSTATE_KEY, value)
-			value = properties.getProperty(MDLW_KEY)
-			value = value ?: ""
-			setLoglevel(conf, MDLW_KEY, value)
-			value = properties.getProperty(MDLW_EVENT_KEY)
-			value = value ?: ""
-			setLoglevel(conf, MDLW_EVENT_KEY, value)
-			value = properties.getProperty(CG_KEY)
-			value = value ?: ""
-			setLoglevel(conf, CG_KEY, value)
 			FileWriter(confFile).use { w ->
 				val confStr: String = xmlUtils.transformer().doc2str(conf)
 				w.write(confStr)
@@ -303,18 +246,11 @@ class LogSettingsGroup(
 
 	companion object {
 		private const val ROOT_KEY: String = "logging.root"
-		private const val PAOS_KEY: String = "org.openecard.transport.paos"
-		private const val EAC_KEY: String = "org.openecard.sal.protocol.eac"
-		private const val PACE_KEY: String = "org.openecard.ifd.protocol.pace"
-		private const val TRCHECKS_KEY: String = "org.openecard.common.util.TR03112Utils"
-		private const val TCTOKEN_KEY: String = "org.openecard.binding.tctoken"
-		private const val EVENT_KEY: String = "org.openecard.event"
-		private const val HTTPBIND_KEY: String = "org.openecard.control.binding.http"
-		private const val ADDON_KEY: String = "org.openecard.addon"
-		private const val SALSTATE_KEY: String = "org.openecard.common.sal.state"
-		private const val MDLW_KEY: String = "org.openecard.mdlw.sal"
-		private const val MDLW_EVENT_KEY: String = "org.openecard.mdlw.event"
-		private const val CG_KEY: String = "org.openecard.addons.cg"
+		private const val EID_HTTP_KEY: String = "org.openecard.addons.tr03124.transport"
+		private const val EAC_KEY: String = "org.openecard.addons.tr03124.eac"
+		private const val PACE_KEY: String = "org.openecard.sc.pace"
+		private const val PCSC_KEY: String = "org.openecard.sc.pcsc"
+		private const val HTTPBIND_KEY: String = "org.openecard.control.binding.ktor"
 
 		private fun loadProperties(xmlUtils: XmlUtils): Properties {
 			try {
@@ -328,18 +264,11 @@ class LogSettingsGroup(
 					// fill the properties
 					val p = Properties()
 					p.setProperty(ROOT_KEY, getRootlevel(conf))
-					p.setProperty(PAOS_KEY, getLoglevel(conf, PAOS_KEY))
+					p.setProperty(EID_HTTP_KEY, getLoglevel(conf, EID_HTTP_KEY))
 					p.setProperty(EAC_KEY, getLoglevel(conf, EAC_KEY))
 					p.setProperty(PACE_KEY, getLoglevel(conf, PACE_KEY))
-					p.setProperty(TRCHECKS_KEY, getLoglevel(conf, TRCHECKS_KEY))
-					p.setProperty(TCTOKEN_KEY, getLoglevel(conf, TCTOKEN_KEY))
-					p.setProperty(EVENT_KEY, getLoglevel(conf, EVENT_KEY))
+					p.setProperty(PCSC_KEY, getLoglevel(conf, PCSC_KEY))
 					p.setProperty(HTTPBIND_KEY, getLoglevel(conf, HTTPBIND_KEY))
-					p.setProperty(ADDON_KEY, getLoglevel(conf, ADDON_KEY))
-					p.setProperty(SALSTATE_KEY, getLoglevel(conf, SALSTATE_KEY))
-					p.setProperty(MDLW_KEY, getLoglevel(conf, MDLW_KEY))
-					p.setProperty(MDLW_EVENT_KEY, getLoglevel(conf, MDLW_EVENT_KEY))
-					p.setProperty(CG_KEY, getLoglevel(conf, CG_KEY))
 					return p
 				}
 			} catch (ex: IOException) {

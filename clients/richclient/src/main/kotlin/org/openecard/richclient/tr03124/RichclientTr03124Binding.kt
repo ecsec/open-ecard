@@ -23,11 +23,13 @@
 package org.openecard.richclient.tr03124
 
 import io.ktor.http.ContentType
+import io.ktor.http.HeaderValue
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.withCharset
 import io.ktor.server.request.acceptItems
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
+import javafx.application.Platform
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -45,6 +47,7 @@ import org.openecard.addons.tr03124.EcardStatus
 import org.openecard.addons.tr03124.Tr03124Binding
 import org.openecard.addons.tr03124.Tr03124Binding.Parameter.ShowUi.ShowUiModules.Companion.toUiModule
 import org.openecard.gui.UserConsent
+import org.openecard.richclient.gui.UiManager
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.sal.sc.recognition.CardRecognition
 import org.openecard.sc.iface.TerminalFactory
@@ -58,6 +61,7 @@ class RichclientTr03124Binding(
 	val cardWatcher: CardWatcher,
 	val gui: UserConsent,
 	val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+	val uiManager: UiManager,
 ) : Tr03124Binding {
 	private val paceFactory = PaceFeatureSoftwareFactory()
 
@@ -110,12 +114,34 @@ class RichclientTr03124Binding(
 				),
 			specs =
 				listOf(
-					EcardStatus.ProductEntry(name = "TR-03124-1", vendor = "Federal Office for Information Security", version = "1.4"),
+					EcardStatus.ProductEntry(
+						name = "TR-03124-1",
+						vendor = "Federal Office for Information Security",
+						version = "1.4",
+					),
 				),
 		)
 
 	override suspend fun showUi(module: Tr03124Binding.Parameter.ShowUi.ShowUiModules) {
-		// TODO: Not yet implemented
+		when (module) {
+			Tr03124Binding.Parameter.ShowUi.ShowUiModules.PIN_MANAGEMENT -> {
+				Platform.runLater {
+					uiManager.showPinManager()
+				}
+			}
+
+			Tr03124Binding.Parameter.ShowUi.ShowUiModules.SETTINGS -> {
+				Platform.runLater {
+					uiManager.showSettingsDialog()
+				}
+			}
+
+			Tr03124Binding.Parameter.ShowUi.ShowUiModules.UNKNOWN -> {
+				Platform.runLater {
+					uiManager.showAboutDialog()
+				}
+			}
+		}
 	}
 }
 
@@ -132,6 +158,7 @@ fun Routing.registerTr03124Binding(trBinding: Tr03124Binding) {
 				val status = trBinding.status()
 				call.request
 					.acceptItems()
+					.ifEmpty { listOf(HeaderValue("text/plain")) }
 					.asSequence()
 					.mapNotNull {
 						if (ContentType.Application.Json.match(it.value)) {
@@ -147,6 +174,8 @@ fun Routing.registerTr03124Binding(trBinding: Tr03124Binding) {
 				)
 			} else if (gui != null) {
 				trBinding.showUi(gui.toUiModule())
+				// the eID-testsuite (module A1) wants status code 200, however 204 is the right choice
+				// the spec does not demand to see 200, so this is fine
 				BindingResponse.NoContent()
 			} else {
 				BindingResponse.ReferencedContentResponse(

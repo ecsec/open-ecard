@@ -78,7 +78,7 @@ class EacProcess(
 	}
 
 	private val isShowRemoveCard: Boolean by lazy {
-		val str = OpenecardProperties.getProperty("notification.omit_show_remove_card")
+		val str = OpenecardProperties.getProperty(Tr03124SettingsLoader.REMOVE_CARD_DIALOG)
 		!str.toBoolean()
 	}
 

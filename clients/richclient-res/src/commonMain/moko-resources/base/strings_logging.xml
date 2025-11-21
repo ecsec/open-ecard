@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- Logging settings-->
+	<string name="addon_list_core_logging">Logging Settings</string>
+	<string name="addon_core_logging_group_name">Logging</string>
+	<string name="addon_core_logging_root">Base level</string>
+	<string name="addon_core_logging_root_desc">Base level used when no more specific value is given.</string>
+	<string name="addon_core_logging_eidchannel">eID-Channel</string>
+	<string name="addon_core_logging_eidchannel_desc">Connection between eCard-Client and eID-Server.</string>
+	<string name="addon_core_logging_eac">EAC</string>
+	<string name="addon_core_logging_eac_desc">Authentication protocol between card and eID-Server.</string>
+	<string name="addon_core_logging_pace">PACE</string>
+	<string name="addon_core_logging_pace_desc">Authentication protocol between card and eCard-Client.</string>
+	<string name="addon_core_logging_pcsc">PCSC</string>
+	<string name="addon_core_logging_pcsc_desc">Low level events with cards.</string>
+	<string name="addon_core_logging_httpbind">HTTP Binding</string>
+	<string name="addon_core_logging_httpbind_desc">HTTP interface on http://localhost:24727.</string>
+</resources>

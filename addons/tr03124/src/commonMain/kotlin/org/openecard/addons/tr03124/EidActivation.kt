@@ -9,7 +9,6 @@ import org.openecard.addons.tr03124.xml.ConnectionHandleType
 import org.openecard.addons.tr03124.xml.ECardConstants
 import org.openecard.addons.tr03124.xml.StartPaos
 import org.openecard.sal.sc.SmartcardSalSession
-import org.openecard.utils.common.generateSessionId
 import org.openecard.utils.serialization.toPrintable
 import kotlin.random.Random
 
@@ -46,14 +45,21 @@ object EidActivation {
 	): UiStep {
 		val certTracker = EserviceCertTracker()
 		val clientFactory = newKtorClientBuilder(certTracker)
-		val eserviceClient = EserviceClientImpl(certTracker, clientFactory, random)
+		val eserviceClient = EserviceClientImpl(tokenUrl, certTracker, clientFactory, random)
 
-		val token = eserviceClient.fetchToken(tokenUrl)
-		val startPaos = startPaosBuilder.build(token.sessionIdentifier)
-		val eidServer = eserviceClient.buildEidServerInterface(startPaos)
-		val eac1Input = eidServer.start()
-		val uiStep: UiStep = UiStepImpl.createStep(session, terminalName, token, eserviceClient, eidServer, eac1Input)
-		return uiStep
+		return runEacCatching(eserviceClient, null) {
+			val token = eserviceClient.fetchToken()
+			val startPaos = startPaosBuilder.build(token.sessionIdentifier)
+			val eidServer = eserviceClient.buildEidServerInterface(startPaos)
+			val eac1Input = eidServer.start()
+
+			// starting the step can fail, and we want to guard it to perform cleanup
+			runEacCatching(eserviceClient, eidServer) {
+				val uiStep: UiStep =
+					UiStepImpl.createStep(session, terminalName, token, eserviceClient, eidServer, eac1Input)
+				uiStep
+			}
+		}
 	}
 }
 

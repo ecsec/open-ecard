@@ -4,6 +4,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import nl.adaptivity.xmlutil.serialization.XML
 import org.junit.jupiter.api.assertInstanceOf
+import org.openecard.addons.tr03124.testutils.SchemaValidator
 import org.openecard.utils.common.hex
 import org.w3c.dom.Document
 import org.w3c.dom.Node
@@ -20,14 +21,16 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalUnsignedTypes::class)
 class SerializationTest {
 	val xml = eacXml
+	val validator = SchemaValidator.load()
 
 	@Test
 	fun `process Result`() {
 		val obj = Result("major", "minor", InternationalString("message", "en"))
 		val str = XML.encodeToString(obj)
+		validator.validate(str)
 		assertEquals(
 			"""
-			<Result xmlns="urn:oasis:names:tc:dss:1.0:core:schema"><ResultMajor>major</ResultMajor><ResultMinor>minor</ResultMinor><ResultMessage xml:lang="en">message</ResultMessage></Result>
+			<dss:Result xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"><dss:ResultMajor>major</dss:ResultMajor><dss:ResultMinor>minor</dss:ResultMinor><dss:ResultMessage xml:lang="en">message</dss:ResultMessage></dss:Result>
 			""".trim(),
 			str,
 		)
@@ -301,6 +304,7 @@ class SerializationTest {
 		val obj = xml.decodeFromString<DidAuthenticateRequest>(original)
 		assertEac1InputData(assertInstanceOf<Eac1Input>(obj.data))
 		val ser = xml.encodeToString(obj)
+		validator.validate(ser)
 		assertEac1InputXml(ser, "/iso:DIDAuthenticate/iso:AuthenticationProtocolData")
 	}
 
@@ -310,6 +314,7 @@ class SerializationTest {
 		val obj = xml.decodeFromString<DidAuthenticateResponse>(original)
 		assertEac1OutputData(assertInstanceOf<Eac1Output>(obj.data))
 		val ser = xml.encodeToString(obj)
+		validator.validate(ser)
 		assertEac1OutputXml(ser, "/iso:DIDAuthenticateResponse/iso:AuthenticationProtocolData")
 	}
 
@@ -319,6 +324,7 @@ class SerializationTest {
 		val obj = xml.decodeFromString<DidAuthenticateRequest>(original)
 		assertEac2InputData(assertInstanceOf<Eac2Input>(obj.data))
 		val ser = xml.encodeToString(obj)
+		validator.validate(ser)
 		assertEac2InputXml(ser, "/iso:DIDAuthenticate/iso:AuthenticationProtocolData")
 	}
 
@@ -328,6 +334,7 @@ class SerializationTest {
 		val obj = xml.decodeFromString<DidAuthenticateResponse>(original)
 		assertEac2OutputData(assertInstanceOf<Eac2Output>(obj.data))
 		val ser = xml.encodeToString(obj)
+		validator.validate(ser)
 		assertEac2OutputXml(ser, "/iso:DIDAuthenticateResponse/iso:AuthenticationProtocolData")
 	}
 
@@ -337,11 +344,12 @@ class SerializationTest {
 		val obj = xml.decodeFromString<StartPaos>(original)
 		assertStartPaosData(obj)
 		val ser = xml.encodeToString(obj)
+		validator.validate(ser)
 		assertStartPaosXml(ser, "/iso:StartPAOS")
 	}
 
 	fun assertStartPaosData(obj: StartPaos) {
-		assertTrue(obj.requestId.isNullOrEmpty())
+		assertEquals("req-id-1", obj.requestId)
 		assertEquals(
 			"15311BF20D4F646874F2B4724EF8CE310E8535DF6ED72FFBBD8BF3B35BCBEA65",
 			obj.sessionIdentifier.trim(),
@@ -439,6 +447,7 @@ class SerializationTest {
 		val obj = xml.decodeFromString<StartPaosResponse>(original)
 		assertStartPaosResponseData(obj)
 		val ser = xml.encodeToString(obj)
+		validator.validate(ser)
 		assertStartPaosResponseXml(ser, "/iso:StartPAOSResponse")
 	}
 
@@ -469,6 +478,7 @@ class SerializationTest {
 		val obj = xml.decodeFromString<TransmitRequest>(original)
 		assertTransmitRequestData(obj)
 		val ser = xml.encodeToString(obj)
+		validator.validate(ser)
 		assertTransmitRequestXml(ser, "/iso:Transmit")
 	}
 
@@ -511,6 +521,7 @@ class SerializationTest {
 		val obj = xml.decodeFromString<TransmitResponse>(original)
 		assertTransmitResponseData(obj)
 		val ser = xml.encodeToString(obj)
+		validator.validate(ser)
 		assertTransmitResponseXml(ser, "/iso:TransmitResponse")
 	}
 
@@ -601,6 +612,15 @@ class SerializationTest {
 	@Test
 	fun `process StartPaosResponse SOAP`() {
 		val original = readSoap("StartPaosResponse")
+		val obj = xml.decodeFromString<Envelope>(original)
+		assertStartPaosResponseData(assertInstanceOf(assertInstanceOf<StartPaosResponse>(obj.body.content)))
+		val ser = xml.encodeToString(obj)
+		assertStartPaosResponseXml(ser, "/soap:Envelope/soap:Body/iso:StartPAOSResponse")
+	}
+
+	@Test
+	fun `process StartPaosResponse Testsuite SOAP`() {
+		val original = readSoap("StartPaosResponseTestsuite")
 		val obj = xml.decodeFromString<Envelope>(original)
 		assertStartPaosResponseData(assertInstanceOf(assertInstanceOf<StartPaosResponse>(obj.body.content)))
 		val ser = xml.encodeToString(obj)

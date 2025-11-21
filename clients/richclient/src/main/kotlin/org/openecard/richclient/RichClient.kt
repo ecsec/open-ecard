@@ -53,12 +53,14 @@ import org.openecard.gui.swing.SwingUserConsent
 import org.openecard.gui.swing.common.GUIDefaults
 import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.AppTray
-import org.openecard.richclient.gui.SettingsAndDefaultViewWrapper
+import org.openecard.richclient.gui.UiManager
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.sc.CardWatcherCallback.Companion.registerWith
 import org.openecard.richclient.sc.CifDb
 import org.openecard.richclient.sc.EventCardRecognition
 import org.openecard.richclient.tr03124.RichclientTr03124Binding
+import org.openecard.richclient.tr03124.Tr03124SettingsLoader
+import org.openecard.richclient.tr03124.TransportLogging
 import org.openecard.richclient.tr03124.registerTr03124Binding
 import org.openecard.richclient.updater.VersionUpdateChecker
 import org.openecard.sc.iface.TerminalFactory
@@ -92,6 +94,8 @@ class RichClient : Application() {
 	private var terminalFactory: TerminalFactory? = null
 	private var cardWatcher: CardWatcher? = null
 
+	private var uiManager: UiManager? = null
+
 	override fun start(primaryStage: Stage) {
 		javafx.application.Platform.setImplicitExit(false)
 
@@ -116,10 +120,6 @@ class RichClient : Application() {
 		val gui = SwingUserConsent(SwingDialogWrapper())
 
 		try {
-			val tray = AppTray(this)
-			this.tray = tray
-			tray.beginSetup()
-
 			// Set up the IFD and card watcher
 			val terminalFactory = PcscTerminalFactory.instance
 			this.terminalFactory = terminalFactory
@@ -128,6 +128,13 @@ class RichClient : Application() {
 			val cardWatcher = CardWatcher(CoroutineScope(Dispatchers.IO), cifDb.getCardRecognition(), terminalFactory)
 			this.cardWatcher = cardWatcher
 			cardWatcher.start()
+
+			val uiManager = UiManager(cardWatcher)
+			this.uiManager = uiManager
+
+			val tray = AppTray(this, uiManager)
+			this.tray = tray
+			tray.beginSetup()
 
 			// Set up Middleware SAL
 // 	    for (MiddlewareSALConfig mwSALConfig : mwSALConfigs) {
@@ -142,7 +149,6 @@ class RichClient : Application() {
 			eventCardRecognition.registerWith(cardWatcher)
 
 			// Start up control interface
-			val guiWrapper = SettingsAndDefaultViewWrapper()
 			try {
 				// initialize http binding
 				var port = 24727
@@ -171,6 +177,8 @@ class RichClient : Application() {
 				}
 
 				// configure TR-03124 addon
+				TransportLogging.loadEidLogger()
+				Tr03124SettingsLoader.loadFromProperties()
 				val uaVersion =
 					BuildInfo.version.let { v ->
 						UserAgent.Version(v.major, v.minor, v.patch)
@@ -183,6 +191,7 @@ class RichClient : Application() {
 						cardRecognition = eventCardRecognition,
 						cardWatcher = cardWatcher,
 						gui = gui,
+						uiManager = uiManager,
 					)
 
 				// start HTTP server
@@ -199,7 +208,10 @@ class RichClient : Application() {
 					val realPort = httpBinding!!.port
 					val regUrl = URI("http://127.0.0.1:24727/dp/register").toURL()
 					val ft: FutureTask<*> =
-						FutureTask(DispatcherRegistrator(regUrl, realPort, waitTime.milliseconds, timeout.milliseconds), 1)
+						FutureTask(
+							DispatcherRegistrator(regUrl, realPort, waitTime.milliseconds, timeout.milliseconds),
+							1,
+						)
 					val registerThread = Thread(ft, "Register-Dispatcher-Service")
 					registerThread.isDaemon = true
 					registerThread.start()
@@ -283,6 +295,7 @@ class RichClient : Application() {
 	override fun stop() {
 		try {
 			tray?.shutdownUi()
+			uiManager?.shutdown()
 
 			cardWatcher?.stop()
 
@@ -349,7 +362,7 @@ class RichClient : Application() {
 						LOG.error(ex) { "Dispatcher registration interrupted" }
 						return@runBlocking
 					} catch (ex: Exception) {
-						LOG.error(ex) { "Failed to send dispatcher registration reguest" }
+						LOG.error(ex) { "Failed to send dispatcher registration request" }
 					}
 
 					// terminate in case there is no time left

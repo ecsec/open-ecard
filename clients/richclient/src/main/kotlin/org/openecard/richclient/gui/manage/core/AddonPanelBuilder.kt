@@ -25,6 +25,7 @@ package org.openecard.richclient.gui.manage.core
 import org.openecard.common.util.FileUtils.resolveResourceAsStream
 import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.manage.AddonPanel
+import org.openecard.richclient.res.MR
 import java.awt.Image
 import java.io.IOException
 import javax.swing.ImageIcon
@@ -49,7 +50,7 @@ object AddonPanelBuilder {
 	fun createLogSettingsAddon() =
 		AddonPanel(
 			LogSettingsPanel(),
-			I18N.strings.addon_list_core_logging.localized(),
+			MR.strings.addon_list_core_logging.localized(),
 			null,
 			loadImage("images/logging.png"),
 		)

@@ -1,12 +1,15 @@
 package org.openecard.addons.tr03124.eac
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.openecard.addons.tr03124.BindingException
 import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.addons.tr03124.InvalidServerData
+import org.openecard.addons.tr03124.UnkownCvcChainError
 import org.openecard.addons.tr03124.UserCanceled
 import org.openecard.addons.tr03124.runEacCatching
 import org.openecard.addons.tr03124.transport.EidServerInterface
 import org.openecard.addons.tr03124.transport.EserviceClient
+import org.openecard.addons.tr03124.transport.UntrustedCertificateError
 import org.openecard.addons.tr03124.xml.DidAuthenticateRequest
 import org.openecard.addons.tr03124.xml.Eac1Input
 import org.openecard.addons.tr03124.xml.Eac1Output
@@ -35,8 +38,10 @@ import org.openecard.sc.pace.cvc.CertificateDescription.Companion.toCertificateD
 import org.openecard.sc.pace.cvc.Chat.Companion.toChat
 import org.openecard.sc.pace.cvc.CvcChain.Companion.toChain
 import org.openecard.sc.pace.cvc.PublicKeyReference.Companion.toPublicKeyReference
+import org.openecard.sc.tlv.TlvException
 import org.openecard.sc.tlv.toTlvBer
 import org.openecard.utils.common.cast
+import org.openecard.utils.common.throwIf
 import org.openecard.utils.serialization.PrintableUByteArray
 import org.openecard.utils.serialization.toPrintable
 
@@ -74,12 +79,18 @@ internal class UiStepImpl(
 			}
 
 		fun disconnectCard() {
-			runCatching {
-				pace?.closeChannel()
+			pace?.let {
+				runCatching {
+					log.debug { "Closing PACE channel" }
+					pace?.closeChannel()
+				}
 				pace = null
 			}
 			card?.let {
-				runCatching { it.close(CardDisposition.RESET) }
+				runCatching {
+					log.debug { "Disconnect eID-Card" }
+					it.close(CardDisposition.RESET)
+				}
 				card = null
 			}
 		}
@@ -99,9 +110,13 @@ internal class UiStepImpl(
 		)
 
 	override suspend fun cancel(): BindingResponse {
-		log.info { "EAC UI Step cancelled" }
-		disconnectCard()
-		return UserCanceled(ctx.eserviceClient).toResponse()
+		try {
+			log.info { "EAC UI Step cancelled" }
+			disconnectCard()
+			ctx.eidServer.sendError(UserCanceled(ctx.eserviceClient))
+		} catch (ex: BindingException) {
+			return ex.toResponse()
+		}
 	}
 
 	override fun getPaceDid(terminalName: String?): SmartcardPaceDid {
@@ -156,7 +171,7 @@ internal class UiStepImpl(
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override suspend fun processAuthentication(paceResponse: PaceEstablishChannelResponse): EidServerStep =
 		runCatching {
-			runEacCatching(ctx.eserviceClient) {
+			runEacCatching(ctx.eserviceClient, ctx.eidServer) {
 				log.info { "Processing PACE response" }
 				val pace = getPaceDid()
 				check(pace.missingAuthAuthentications.isSolved)
@@ -183,21 +198,23 @@ internal class UiStepImpl(
 					listOfNotNull(paceResponse.carCurr, paceResponse.carPrev).map {
 						it.v.toPublicKeyReference()
 					}
-				val chains =
-					cars
-						.asSequence()
-						.map { ctx.cvcs.toChain(it) }
-						.filterNotNull()
-				val chain =
-					chains
-						.firstOrNull()
-						?: throw IllegalArgumentException("Unknown trust chain referenced by CAR")
+				val preliminaryChains = cars.mapNotNull { ctx.cvcs.toChain(it) }
+				val preliminaryChain = preliminaryChains.firstOrNull()
 
+				// send cars when we don't have a chain
+				val carsParam =
+					if (preliminaryChain == null) {
+						log.debug { "Preliminary CVC chain could not be built" }
+						cars.map { it.joinToString() }
+					} else {
+						log.debug { "CVC chain successfully built" }
+						listOf()
+					}
 				val eac1Out =
 					Eac1Output(
 						protocol = ctx.eac1InputReq.data.protocol,
 						certificateHolderAuthorizationTemplate = chat,
-						certificationAuthorityReference = cars.map { it.joinToString() },
+						certificationAuthorityReference = carsParam,
 						efCardAccess = paceResponse.efCardAccess,
 						idPICC = idPicc.toPrintable(),
 						challenge = challenge.toPrintable(),
@@ -205,7 +222,10 @@ internal class UiStepImpl(
 				val eac2In =
 					when (val msg = ctx.eidServer.sendDidAuthResponse(eac1Out)) {
 						is Eac2Input -> msg
-						else -> throw InvalidServerData(ctx.eserviceClient, "")
+						else -> throw InvalidServerData(
+							ctx.eserviceClient,
+							"EAC2Input message expected, but server sent something else",
+						)
 					}
 
 				val aad =
@@ -213,6 +233,28 @@ internal class UiStepImpl(
 						?.v
 						?.toTlvBer()
 						?.tlv
+
+				val chain =
+					preliminaryChain ?: run {
+						log.debug { "Building CVC chain with additional certificates from the eID-Server" }
+						// build chain with the data we have and the additional certificates
+						val additionalCvcs =
+							eac2In.certificates.map {
+								runCatching {
+									it.v.toCardVerifiableCertificate()
+								}.getOrElse { ex -> throw InvalidServerData(ctx.eserviceClient, "Invalid CVC received in EAC2Input", ex) }
+							}
+						val cvcs = ctx.cvcs + additionalCvcs
+						val chains =
+							cars.mapNotNull { cvcs.toChain(it) }
+
+						chains.firstOrNull()
+							?: run {
+								ctx.eidServer.sendError(
+									UnkownCvcChainError(ctx.eserviceClient, "Unknown trust chain referenced by CAR"),
+								)
+							}
+					}
 
 				val eacAuth: EacAuthentication = EacAuthenticationImpl(ta, ca, eac2In, chain, aad)
 
@@ -246,56 +288,90 @@ internal class UiStepImpl(
 			eac1InputReq: DidAuthenticateRequest,
 		): UiStep {
 			log.info { "Creating EAC UI Step" }
-			val eac1Input: Eac1Input = eac1InputReq.data as Eac1Input
-			val certsRaw = eac1Input.certificates
-			val certs = certsRaw.map { it.v.toCardVerifiableCertificate() }
-			val certDescRaw = eac1Input.certificateDescription
-			val certDesc = certDescRaw.v.toCertificateDescription()
+			try {
+				val eac1Input: Eac1Input = eac1InputReq.data as Eac1Input
+				val certsRaw = eac1Input.certificates
+				val certs = certsRaw.map { it.v.toCardVerifiableCertificate() }
+				val certDescRaw = eac1Input.certificateDescription
+				val certDesc = certDescRaw.v.toCertificateDescription()
 
-			// update allowed certificates in eService connection, failing when we already see a problem
-			eserviceClient.certTracker.setCertDesc(certDesc)
+				// update allowed certificates in eService connection, failing when we already see a problem
+				eserviceClient.certTracker.setCertDesc(certDesc)
+				// check that cert desc contains subjectUrl (optional in data structure, but required here)
+				val subjectUrl =
+					requireNotNull(certDesc.subjectUrl) {
+						"Subject URL is missing in CertificateDescription"
+					}
+				// check that tctoken and subjectUrl have matching sop
+				throwIf(
+					!eserviceClient.certTracker.matchesSop(eserviceClient.tcTokenUrl, subjectUrl, useCertDesc = false),
+				) {
+					UntrustedCertificateError("TCToken URL does not match Subject URL")
+				}
 
-			// find chats
-			val terminalCert =
-				requireNotNull(certs.find { it.isTerminalCertificate }) { "No terminal certificate in received certificates" }
-			val terminalCertChat =
-				requireNotNull(
-					terminalCert.chat.cast<AuthenticationTerminalChat>(),
-				) { "CHAT in terminal certificate is of the wrong type" }
+				// find chats
+				val terminalCert =
+					requireNotNull(
+						certs.find {
+							it.isTerminalCertificate
+						},
+					) { "No terminal certificate in received certificates" }
+				terminalCert.checkDescriptionHash(certDesc)
 
-			val optChat =
-				eac1Input.optionalChat?.toAuthenticationTerminalChat()
-					?: terminalCertChat
-			// use optional chat as lower bound, when there is nothing specified
-			val reqChat =
-				eac1Input.requiredChat?.toAuthenticationTerminalChat()
-					?: optChat
+				// mark paos channel as validated, so further messages can be exchanged
+				eidServer.setValidated()
 
-			val aad = eac1Input.authenticatedAuxiliaryData?.v?.toAuthenticatedAuxiliariyData()
+				val terminalCertChat =
+					requireNotNull(
+						terminalCert.chat.cast<AuthenticationTerminalChat>(),
+					) { "CHAT in terminal certificate is of the wrong type" }
 
-			val paceDid = eac1InputReq.didName.didNameToPinId()
+				val optChat =
+					eac1Input.optionalChat?.toAuthenticationTerminalChat()
+						?: terminalCertChat
+				// use optional chat as lower bound, when there is nothing specified
+				val reqChat =
+					eac1Input.requiredChat?.toAuthenticationTerminalChat()
+						?: terminalCertChat.copy().apply {
+							readAccess.clear()
+							writeAccess.clear()
+							specialFunctions.clear()
+						}
 
-			val ctx =
-				UiStepCtx(
-					session,
-					null,
-					null,
-					token,
-					eserviceClient,
-					eidServer,
-					eac1InputReq,
-					eac1Input,
-					certs,
-					terminalCert,
-					certDesc,
-					terminalCertChat,
-					reqChat,
-					optChat,
-					aad,
-					paceDid,
-					terminalName,
-				)
-			return UiStepImpl(ctx)
+				val aad = eac1Input.authenticatedAuxiliaryData?.v?.toAuthenticatedAuxiliariyData()
+
+				val paceDid = eac1InputReq.didName.didNameToPinId()
+
+				val ctx =
+					UiStepCtx(
+						session,
+						null,
+						null,
+						token,
+						eserviceClient,
+						eidServer,
+						eac1InputReq,
+						eac1Input,
+						certs,
+						terminalCert,
+						certDesc,
+						terminalCertChat,
+						reqChat,
+						optChat,
+						aad,
+						paceDid,
+						terminalName,
+					)
+				return UiStepImpl(ctx)
+			} catch (ex: Exception) {
+				when (ex) {
+					is TlvException,
+					is NoSuchElementException,
+					is IllegalArgumentException,
+					-> throw InvalidServerData(eserviceClient, "Invalid data received in EAC1", cause = ex)
+					else -> throw ex
+				}
+			}
 		}
 
 		private fun String.didNameToPinId(): PacePinId =

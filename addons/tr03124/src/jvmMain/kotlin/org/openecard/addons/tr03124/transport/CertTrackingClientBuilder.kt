@@ -3,6 +3,7 @@ package org.openecard.addons.tr03124.transport
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import kotlinx.io.IOException
 import okhttp3.ConnectionSpec
@@ -24,7 +25,6 @@ import java.security.Security
 import java.security.cert.Certificate
 import java.security.cert.X509Certificate
 import javax.net.ssl.SSLContext
-import javax.net.ssl.SSLSession
 import javax.net.ssl.SSLSocket
 import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.TrustManager
@@ -35,9 +35,10 @@ private val log = KotlinLogging.logger { }
 class CertTrackingClientBuilder(
 	certTracker: EserviceCertTracker,
 ) : KtorClientBuilder {
-	private val tm = SslSettings.getTrustAllCertsManager(certTracker)
-	private val sslCtx = SslSettings.getSslContext(tm)
-	private val sslSessions = mutableSetOf<SSLSession>()
+	private val tm by lazy { SslSettings.getTrustAllCertsManager(certTracker) }
+	private val sslCtx by lazy { SslSettings.getSslContext(tm) }
+	private val sslFac by lazy { sslCtx.socketFactory }
+	private val sslFacAttached by lazy { AttachedSslSocketFactory(sslFac) }
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	private val httpClientBase =
@@ -74,7 +75,7 @@ class CertTrackingClientBuilder(
 							).build(),
 					),
 				)
-				sslSocketFactory(sslCtx.socketFactory, tm)
+				sslSocketFactory(sslFac, tm)
 				addNetworkInterceptor { chain ->
 					chain.connection()!!.let { con ->
 						when (val sock = con.socket()) {
@@ -111,28 +112,8 @@ class CertTrackingClientBuilder(
 				preconfigured =
 					httpClientBase
 						.newBuilder()
-						.addNetworkInterceptor { chain ->
-							// record session for use in attached eID-Server case
-							// connection is required in network interceptor
-							chain.connection()!!.let { con ->
-								when (val sock = con.socket()) {
-									is SSLSocket -> {
-										val sess = sock.session
-										if (!sslSessions.any { it.id.contentEquals(sess.id) }) {
-											sslSessions.add(sess)
-										}
-									}
-
-									else -> {
-										throw IllegalStateException("Non TLS socket used in eID Process")
-									}
-								}
-							}
-
-							val req = chain.request()
-							val resp = chain.proceed(req)
-							resp
-						}.build()
+						.sslSocketFactory(sslFacAttached, tm)
+						.build()
 			}
 
 			Tr03124Config.httpLog?.let {
@@ -198,42 +179,25 @@ class CertTrackingClientBuilder(
 			}
 		}
 
-	private fun buildAttachedClient(): HttpClient =
-		HttpClient(OkHttp) {
-			engine {
-				preconfigured =
-					httpClientBase
-						.newBuilder()
-						.addNetworkInterceptor { chain ->
-							// check that session is not new
-							// connection is required in network interceptor
-							chain.connection()!!.let { con ->
-								when (val sock = con.socket()) {
-									is SSLSocket -> {
-										val sess = sock.session
-										if (!sslSessions.any { it.id.contentEquals(sess.id) }) {
-											throw UntrustedCertificateError("Attached eID Server created a new SSL session, which is not permitted")
-										}
-									}
-									else -> {
-										throw IllegalStateException("Non TLS socket used in eID Process")
-									}
-								}
-							}
+	internal fun buildAttachedClient(): HttpClient {
+		// disable new sessions for all new handshakes
+		// this is fine as the token client is not used anymore after opening the eID server channel
+		sslFacAttached.allowResumption = false
 
-							val req = chain.request()
-							val resp = chain.proceed(req)
-							resp
-						}.build()
-			}
-
+		return tokenClient.config {
+			// enable logs when defined
 			Tr03124Config.paosLog?.let {
 				install(Logging, it)
+			} ?: run {
+				// no logging defined, set level to none
+				Logging {
+					level = LogLevel.NONE
+				}
 			}
 
 			registerPaosNegotiation()
-			followRedirects = false
 		}
+	}
 
 	private fun buildPskClient(
 		session: String,
@@ -244,6 +208,7 @@ class CertTrackingClientBuilder(
 				preconfigured =
 					httpClientBase
 						.newBuilder()
+						.sslSocketFactory(SslSettings.getPskSocketFactory(tm, session, psk), tm)
 						.connectionSpecs(
 							listOf(
 								ConnectionSpec
@@ -278,8 +243,7 @@ class CertTrackingClientBuilder(
 										)
 									}.build(),
 							),
-						).sslSocketFactory(SslSettings.getPskSocketFactory(tm, session, psk), tm)
-						.build()
+						).build()
 			}
 
 			Tr03124Config.paosLog?.let {

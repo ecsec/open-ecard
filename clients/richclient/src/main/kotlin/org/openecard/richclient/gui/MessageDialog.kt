@@ -22,7 +22,7 @@
 
 package org.openecard.richclient.gui
 
-import org.openecard.gui.swing.Logo
+import org.openecard.richclient.processui.swing.Logo
 import java.awt.Dimension
 import java.awt.Font
 import java.awt.Insets

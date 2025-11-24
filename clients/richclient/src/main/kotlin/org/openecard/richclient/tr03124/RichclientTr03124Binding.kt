@@ -46,8 +46,8 @@ import org.openecard.addons.tr03124.ClientInformation
 import org.openecard.addons.tr03124.EcardStatus
 import org.openecard.addons.tr03124.Tr03124Binding
 import org.openecard.addons.tr03124.Tr03124Binding.Parameter.ShowUi.ShowUiModules.Companion.toUiModule
-import org.openecard.gui.UserConsent
 import org.openecard.richclient.gui.UiManager
+import org.openecard.richclient.processui.UserConsent
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.sal.sc.recognition.CardRecognition
 import org.openecard.sc.iface.TerminalFactory

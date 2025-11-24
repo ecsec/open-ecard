@@ -27,11 +27,11 @@ import kotlinx.datetime.format
 import kotlinx.datetime.format.FormatStringsInDatetimeFormats
 import kotlinx.datetime.format.byUnicodePattern
 import org.openecard.addons.tr03124.eac.EacUiData
-import org.openecard.gui.definition.Document
-import org.openecard.gui.definition.Step
-import org.openecard.gui.definition.Text
-import org.openecard.gui.definition.ToggleText
 import org.openecard.i18n.I18N
+import org.openecard.richclient.processui.definition.Document
+import org.openecard.richclient.processui.definition.Step
+import org.openecard.richclient.processui.definition.Text
+import org.openecard.richclient.processui.definition.ToggleText
 import org.openecard.sc.pace.cvc.CvcDate.Companion.toLocalDate
 import org.openecard.sc.pace.cvc.TermsOfUse
 

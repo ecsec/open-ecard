@@ -1,0 +1,122 @@
+/****************************************************************************
+ * Copyright (C) 2016 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+package org.openecard.richclient.processui.swing.steplayout
+
+import org.openecard.richclient.processui.definition.Checkbox
+import org.openecard.richclient.processui.definition.Hyperlink
+import org.openecard.richclient.processui.definition.ImageBox
+import org.openecard.richclient.processui.definition.InfoUnitElementType
+import org.openecard.richclient.processui.definition.InputInfoUnit
+import org.openecard.richclient.processui.definition.PasswordField
+import org.openecard.richclient.processui.definition.Radiobox
+import org.openecard.richclient.processui.definition.Text
+import org.openecard.richclient.processui.definition.TextField
+import org.openecard.richclient.processui.definition.ToggleText
+import org.openecard.richclient.processui.swing.ScrollPanel
+import org.openecard.richclient.processui.swing.components.AbstractInput
+import org.openecard.richclient.processui.swing.components.Radiobutton
+import org.openecard.richclient.processui.swing.components.StepComponent
+import org.openecard.richclient.processui.swing.loadLogoIcon
+import java.awt.BorderLayout
+import java.awt.Dimension
+import javax.swing.BorderFactory
+import javax.swing.Box
+import javax.swing.BoxLayout
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JScrollPane
+import javax.swing.JSeparator
+import javax.swing.SwingConstants
+import javax.swing.border.EmptyBorder
+
+/**
+ * Pin entry layouter for the Swing GUI.
+ * This layouter provides a decent look and feel for pin entry dialogs.
+ *
+ * @author Tobias Wich
+ * @author Florian Feldmann
+ */
+class PinEntryStepLayouter(
+	infoUnits: MutableList<InputInfoUnit>,
+	stepName: String,
+) : StepLayouter() {
+	override val components: MutableList<StepComponent> = mutableListOf()
+	override val panel: JPanel = JPanel(BorderLayout())
+
+	init {
+
+		// Add a panel containing step title and separator
+		val pageStart = JPanel(BorderLayout())
+		val logo = loadLogoIcon()
+		val title = JLabel("<html><h3>$stepName</h3></html>")
+		title.setIcon(logo)
+		title.setIconTextGap(20)
+		// add a space of 3 below to match with the logo separator
+		title.setBorder(EmptyBorder(0, 0, 6, 0))
+		pageStart.add(title, BorderLayout.PAGE_START)
+		val sep = JSeparator(SwingConstants.HORIZONTAL)
+		pageStart.add(sep, BorderLayout.CENTER)
+		// add a space of 15 before the actual step content
+		pageStart.setBorder(EmptyBorder(0, 0, 15, 0))
+		panel.add(pageStart, BorderLayout.PAGE_START)
+
+		val contentPanel = ScrollPanel()
+		contentPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 20))
+		contentPanel.setLayout(BoxLayout(contentPanel, BoxLayout.Y_AXIS))
+
+		// Create content
+		for (next in infoUnits) {
+			val nextComponent: StepComponent =
+				when (next.type()) {
+					InfoUnitElementType.CHECK_BOX ->
+						org.openecard.richclient.processui.swing.components
+							.Checkbox(next as Checkbox)
+					InfoUnitElementType.HYPERLINK ->
+						org.openecard.richclient.processui.swing.components
+							.Hyperlink(next as Hyperlink)
+					InfoUnitElementType.IMAGE_BOX ->
+						org.openecard.richclient.processui.swing.components
+							.ImageBox(next as ImageBox)
+					InfoUnitElementType.PASSWORD_FIELD -> AbstractInput(next as PasswordField)
+					InfoUnitElementType.RADIO_BOX -> Radiobutton(next as Radiobox)
+					InfoUnitElementType.SIGNAUTRE_FIELD -> throw UnsupportedOperationException("Not implemented yet.")
+					InfoUnitElementType.TEXT ->
+						org.openecard.richclient.processui.swing.components
+							.Text(next as Text)
+					InfoUnitElementType.TEXT_FIELD -> AbstractInput(next as TextField)
+					InfoUnitElementType.TOGGLE_TEXT ->
+						org.openecard.richclient.processui.swing.components
+							.ToggleText(next as ToggleText)
+				}
+
+			components.add(nextComponent)
+			contentPanel.add(nextComponent.component)
+			contentPanel.add(Box.createRigidArea(Dimension(0, 6)))
+		}
+
+		val scrollPane = JScrollPane(contentPanel)
+		scrollPane.setBorder(BorderFactory.createEmptyBorder())
+		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER)
+
+		panel.add(scrollPane, BorderLayout.CENTER)
+	}
+}

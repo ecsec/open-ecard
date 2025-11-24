@@ -25,12 +25,12 @@ package org.openecard.richclient.tr03124.ui
 import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.cif.bundled.NpaDefinitions
-import org.openecard.gui.definition.PasswordField
-import org.openecard.gui.executor.ExecutionResults
-import org.openecard.gui.executor.StepAction
-import org.openecard.gui.executor.StepActionResult
-import org.openecard.gui.executor.StepActionResultStatus
 import org.openecard.i18n.I18N
+import org.openecard.richclient.processui.definition.PasswordField
+import org.openecard.richclient.processui.executor.ExecutionResults
+import org.openecard.richclient.processui.executor.StepAction
+import org.openecard.richclient.processui.executor.StepActionResult
+import org.openecard.richclient.processui.executor.StepActionResultStatus
 import org.openecard.richclient.tr03124.EacProcessState
 import org.openecard.richclient.tr03124.TerminalSelection.waitForNpa
 import org.openecard.sal.iface.DeviceUnavailable

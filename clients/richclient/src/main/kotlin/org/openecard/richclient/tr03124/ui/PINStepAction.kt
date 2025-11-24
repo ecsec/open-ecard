@@ -24,11 +24,11 @@ package org.openecard.richclient.tr03124.ui
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.runBlocking
-import org.openecard.gui.StepResult
-import org.openecard.gui.executor.ExecutionResults
-import org.openecard.gui.executor.StepActionResult
-import org.openecard.gui.executor.StepActionResultStatus
 import org.openecard.i18n.I18N
+import org.openecard.richclient.processui.StepResult
+import org.openecard.richclient.processui.executor.ExecutionResults
+import org.openecard.richclient.processui.executor.StepActionResult
+import org.openecard.richclient.processui.executor.StepActionResultStatus
 import org.openecard.richclient.tr03124.EacProcessState
 import org.openecard.sc.apdu.command.SecurityCommandFailure
 import org.openecard.utils.common.cast

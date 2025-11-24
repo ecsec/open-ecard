@@ -21,7 +21,6 @@
  ***************************************************************************/
 package org.openecard.richclient.processui.swing.components
 
-import org.openecard.common.util.FileUtils.resolveResourceAsURL
 import org.openecard.richclient.processui.definition.PasswordField
 import java.awt.BorderLayout
 import java.awt.GridLayout
@@ -95,7 +94,7 @@ class VirtualPinPadDialog(
 		val button = JButton()
 		// setButtonFont(button);
 		button.addActionListener(RemoveSingleElementListener())
-		val ico = ImageIcon(resolveResourceAsURL(VirtualPinPadDialog::class.java, "arrow.png"))
+		val ico = ImageIcon(VirtualPinPadDialog::class.java.getResource("/processui/arrow.png"))
 		button.setIcon(ico)
 		val marginInset = button.margin
 		button.setMargin(Insets(marginInset.top, 5, marginInset.bottom, 5))

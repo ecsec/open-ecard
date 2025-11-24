@@ -22,7 +22,6 @@
 package org.openecard.richclient.processui.swing
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.common.util.FileUtils.resolveResourceAsURL
 import org.openecard.richclient.processui.definition.Step
 import java.awt.Color
 import java.awt.Font
@@ -148,7 +147,7 @@ class StepBar(
 		private val LOADER: ImageIcon
 
 		init {
-			val loaderUrl = resolveResourceAsURL(StepBar::class.java, "loader.gif")
+			val loaderUrl = StepBar::class.java.getResource("/processui/loader.gif")
 			LOADER = ImageIcon(loaderUrl)
 		}
 	}

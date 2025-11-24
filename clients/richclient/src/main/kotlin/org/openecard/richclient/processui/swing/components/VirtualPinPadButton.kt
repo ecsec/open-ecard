@@ -21,7 +21,6 @@
  ***************************************************************************/
 package org.openecard.richclient.processui.swing.components
 
-import org.openecard.common.util.FileUtils.resolveResourceAsURL
 import org.openecard.richclient.processui.definition.PasswordField
 import java.awt.event.MouseEvent
 import java.awt.event.MouseListener
@@ -95,11 +94,7 @@ class VirtualPinPadButton(
 
 private val pinPadIcon: ImageIcon
 	get() {
-		val imgUrl =
-			resolveResourceAsURL(
-				VirtualPinPadButton::class.java,
-				"virtual-pinpad-button.png",
-			)
+		val imgUrl = VirtualPinPadButton::class.java.getResource("/processui/virtual-pinpad-button.png")
 		val img = ImageIcon(imgUrl)
 		return img
 	}

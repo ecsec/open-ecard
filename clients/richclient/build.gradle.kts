@@ -116,15 +116,18 @@ dependencies {
 	implementation(libs.logback.classic)
 
 	implementation(project(":bindings:ktor"))
-	implementation(project(":gui:swing"))
-	implementation(project(":gui:graphics"))
+
+	// gui
+	api(libs.pdfbox)
+	api(libs.apache.batik.transcoder)
+	implementation(libs.ktor.client.core)
 
 	// addons
 	implementation(project(":addons:tr03124"))
-	implementation(project(":i18n"))
 
 	// basic runtime deps
 	implementation(project(":clients:richclient-res"))
+	implementation(project(":i18n"))
 	// implementation(libs.apache.batik)
 	implementation(libs.systray)
 

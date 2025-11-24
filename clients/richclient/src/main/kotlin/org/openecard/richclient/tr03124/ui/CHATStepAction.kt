@@ -23,13 +23,13 @@
 package org.openecard.richclient.tr03124.ui
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.gui.StepResult
-import org.openecard.gui.definition.Checkbox
-import org.openecard.gui.definition.Step
-import org.openecard.gui.executor.ExecutionResults
-import org.openecard.gui.executor.StepAction
-import org.openecard.gui.executor.StepActionResult
-import org.openecard.gui.executor.StepActionResultStatus
+import org.openecard.richclient.processui.StepResult
+import org.openecard.richclient.processui.definition.Checkbox
+import org.openecard.richclient.processui.definition.Step
+import org.openecard.richclient.processui.executor.ExecutionResults
+import org.openecard.richclient.processui.executor.StepAction
+import org.openecard.richclient.processui.executor.StepActionResult
+import org.openecard.richclient.processui.executor.StepActionResultStatus
 import org.openecard.richclient.tr03124.EacProcessState
 import org.openecard.sc.pace.cvc.ReadAccess
 import org.openecard.sc.pace.cvc.SpecialFunction

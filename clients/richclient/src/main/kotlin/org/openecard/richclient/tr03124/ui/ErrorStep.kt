@@ -22,13 +22,13 @@
 
 package org.openecard.richclient.tr03124.ui
 
-import org.openecard.gui.StepResult
-import org.openecard.gui.definition.Step
-import org.openecard.gui.definition.Text
-import org.openecard.gui.executor.ExecutionResults
-import org.openecard.gui.executor.StepAction
-import org.openecard.gui.executor.StepActionResult
-import org.openecard.gui.executor.StepActionResultStatus
+import org.openecard.richclient.processui.StepResult
+import org.openecard.richclient.processui.definition.Step
+import org.openecard.richclient.processui.definition.Text
+import org.openecard.richclient.processui.executor.ExecutionResults
+import org.openecard.richclient.processui.executor.StepAction
+import org.openecard.richclient.processui.executor.StepActionResult
+import org.openecard.richclient.processui.executor.StepActionResultStatus
 
 /**
  * Implements a Step which displays an error message.

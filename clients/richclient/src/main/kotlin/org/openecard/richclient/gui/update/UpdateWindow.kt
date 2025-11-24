@@ -45,10 +45,10 @@ import javafx.stage.Stage
 import javafx.util.Callback
 import org.openecard.build.BuildInfo
 import org.openecard.common.OpenecardProperties
-import org.openecard.gui.swing.common.GUIDefaults
-import org.openecard.gui.swing.common.SwingUtils
 import org.openecard.i18n.I18N
 import org.openecard.releases.UpdateAdvice
+import org.openecard.richclient.processui.swing.common.GUIDefaults
+import org.openecard.richclient.processui.swing.common.SwingUtils
 import org.openecard.richclient.updater.VersionUpdateChecker
 import java.net.URI
 import java.util.function.Consumer

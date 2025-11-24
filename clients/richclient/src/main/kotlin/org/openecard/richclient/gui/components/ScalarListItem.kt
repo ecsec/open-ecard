@@ -21,8 +21,8 @@
  ***************************************************************************/
 package org.openecard.richclient.gui.components
 
-import org.openecard.gui.swing.common.GUIDefaults
 import org.openecard.richclient.gui.manage.Settings
+import org.openecard.richclient.processui.swing.common.GUIDefaults
 import java.awt.Dimension
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout

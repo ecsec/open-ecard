@@ -47,13 +47,13 @@ import org.openecard.addons.tr03124.UserAgent
 import org.openecard.build.BuildInfo
 import org.openecard.common.OpenecardProperties
 import org.openecard.control.binding.ktor.HttpService
-import org.openecard.gui.message.DialogType
-import org.openecard.gui.swing.SwingDialogWrapper
-import org.openecard.gui.swing.SwingUserConsent
-import org.openecard.gui.swing.common.GUIDefaults
 import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.AppTray
 import org.openecard.richclient.gui.UiManager
+import org.openecard.richclient.processui.message.DialogType
+import org.openecard.richclient.processui.swing.SwingDialogWrapper
+import org.openecard.richclient.processui.swing.SwingUserConsent
+import org.openecard.richclient.processui.swing.common.GUIDefaults
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.sc.CardWatcherCallback.Companion.registerWith
 import org.openecard.richclient.sc.CifDb

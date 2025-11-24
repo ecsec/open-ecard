@@ -23,8 +23,8 @@
 package org.openecard.richclient.gui.graphics
 
 import org.openecard.common.util.FileUtils.resolveResourceAsStream
-import org.openecard.gui.graphics.SvgTranscoder
-import org.openecard.gui.graphics.toBufferedImage
+import org.openecard.richclient.processui.graphics.SvgTranscoder
+import org.openecard.richclient.processui.graphics.toBufferedImage
 import java.awt.Image
 import java.awt.Toolkit
 import java.awt.image.BufferedImage

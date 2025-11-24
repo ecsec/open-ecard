@@ -34,11 +34,11 @@ import org.openecard.addons.tr03124.EidActivation
 import org.openecard.addons.tr03124.eac.UiStep
 import org.openecard.cif.bundled.NpaCif
 import org.openecard.common.OpenecardProperties
-import org.openecard.gui.UserConsent
-import org.openecard.gui.definition.UserConsentDescription
-import org.openecard.gui.executor.ExecutionEngine
-import org.openecard.gui.message.DialogType
 import org.openecard.i18n.I18N
+import org.openecard.richclient.processui.UserConsent
+import org.openecard.richclient.processui.definition.UserConsentDescription
+import org.openecard.richclient.processui.executor.ExecutionEngine
+import org.openecard.richclient.processui.message.DialogType
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.tr03124.TerminalSelection.trySelectPinPadTerminal
 import org.openecard.richclient.tr03124.ui.CHATStep

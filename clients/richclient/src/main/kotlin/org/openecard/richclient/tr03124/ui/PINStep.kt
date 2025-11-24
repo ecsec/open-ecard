@@ -23,10 +23,10 @@
 package org.openecard.richclient.tr03124.ui
 
 import dev.icerock.moko.resources.format
-import org.openecard.gui.definition.PasswordField
-import org.openecard.gui.definition.Step
-import org.openecard.gui.definition.Text
 import org.openecard.i18n.I18N
+import org.openecard.richclient.processui.definition.PasswordField
+import org.openecard.richclient.processui.definition.Step
+import org.openecard.richclient.processui.definition.Text
 import org.openecard.richclient.tr03124.EacProcessState
 import org.openecard.sc.apdu.command.SecurityCommandFailure
 import org.openecard.sc.apdu.command.SecurityCommandSuccess

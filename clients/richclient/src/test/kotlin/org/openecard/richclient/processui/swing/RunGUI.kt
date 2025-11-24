@@ -125,14 +125,14 @@ class RunGUI {
 
 		val termsofUsageHtml = ToggleText()
 		termsofUsageHtml.title = "Nutzungsbestimmungen (HTML)"
-		val usageTextHtml = RunGUI::class.java.getResourceAsStream("/description.html")!!.readAllBytes()
+		val usageTextHtml = RunGUI::class.java.getResourceAsStream("/processui/description.html")!!.readAllBytes()
 		termsofUsageHtml.document = Document("text/html", usageTextHtml)
 		termsofUsageHtml.isCollapsed = true
 		step.inputInfoUnits.add(termsofUsageHtml)
 
 		val termsofUsagePdf = ToggleText()
 		termsofUsagePdf.title = "Nutzungsbestimmungen (PDF)"
-		val usageTextPdf = RunGUI::class.java.getResourceAsStream("/description.pdf")!!.readAllBytes()
+		val usageTextPdf = RunGUI::class.java.getResourceAsStream("/processui/description.pdf")!!.readAllBytes()
 		termsofUsagePdf.document = Document("application/pdf", usageTextPdf)
 		termsofUsagePdf.isCollapsed = true
 		step.inputInfoUnits.add(termsofUsagePdf)

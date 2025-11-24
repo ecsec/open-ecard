@@ -22,6 +22,9 @@
 package org.openecard.richclient.gui
 
 import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.desc.Raw
+import dev.icerock.moko.resources.desc.StringDesc
+import dev.icerock.moko.resources.desc.desc
 import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.build.BuildInfo
@@ -29,6 +32,7 @@ import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.graphics.OecIconType
 import org.openecard.richclient.gui.graphics.oecImage
 import org.openecard.richclient.processui.swing.common.SwingUtils
+import org.openecard.richclient.res.MR
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Font
@@ -111,10 +115,10 @@ class AboutDialog private constructor() : JFrame() {
 		tabbedPane.background = Color.white
 
 		listOf(
-			Triple(AboutTabs.ABOUT, I18N.strings.about_tab_about, I18N.strings.about_html),
-			Triple(AboutTabs.FEEDBACK, I18N.strings.about_tab_feedback, I18N.strings.about_feedback_html),
-			Triple(AboutTabs.LICENSE, I18N.strings.about_tab_support, I18N.strings.about_support_html),
-			Triple(AboutTabs.SUPPORT, I18N.strings.about_tab_license, I18N.strings.about_license_html),
+			Triple(AboutTabs.ABOUT, I18N.strings.about_tab_about, I18N.strings.about_html.localized()),
+			Triple(AboutTabs.FEEDBACK, I18N.strings.about_tab_feedback, I18N.strings.about_feedback_html.localized()),
+			Triple(AboutTabs.LICENSE, I18N.strings.about_tab_support, I18N.strings.about_support_html.localized()),
+			Triple(AboutTabs.SUPPORT, I18N.strings.about_tab_license, MR.files.gpl_license_html.readText()),
 		).forEachIndexed { idx, it ->
 			tabbedPane.addTab(it.second.localized(), createTabContent(it.third))
 			tabIndices[it.first] = idx
@@ -146,12 +150,12 @@ class AboutDialog private constructor() : JFrame() {
 		setLocationRelativeTo(null)
 	}
 
-	private fun createTabContent(textResource: StringResource): JPanel {
+	private fun createTabContent(textResource: String): JPanel {
 		val editorPane =
 			JEditorPane().apply {
 				isEditable = false
 				contentType = "text/html"
-				text = textResource.localized()
+				text = textResource
 				addHyperlinkListener { e ->
 					openUrl(e)
 				}

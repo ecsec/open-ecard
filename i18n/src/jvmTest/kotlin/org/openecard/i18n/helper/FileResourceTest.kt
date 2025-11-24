@@ -42,20 +42,4 @@ class FileResourceTest {
 			"<title>Über</title>",
 		)
 	}
-
-	@Test
-	fun html_in_xml_license() {
-		assertContains(
-			I18N.strings.about_license_html.localized(),
-			"<title>GNU General Public License v3.0 - GNU Project - Free Software Foundation (FSF)</title>",
-		)
-	}
-
-	@Test
-	fun html_in_xml_license_de_fallback_en() {
-		assertContains(
-			I18N.strings.about_license_html.localized(Locale.GERMAN),
-			"<title>GNU General Public License v3.0 - GNU Project - Free Software Foundation (FSF)</title>",
-		)
-	}
 }

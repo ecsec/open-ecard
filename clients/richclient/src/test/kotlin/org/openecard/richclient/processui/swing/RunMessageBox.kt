@@ -21,8 +21,9 @@
  ***************************************************************************/
 package org.openecard.richclient.processui.swing
 
+import org.openecard.richclient.gui.graphics.OecIconType
+import org.openecard.richclient.gui.graphics.oecImage
 import org.openecard.richclient.processui.UserConsent
-import org.openecard.richclient.processui.graphics.oecImage
 import org.openecard.richclient.processui.message.DialogType
 import org.openecard.richclient.processui.message.MessageDialogResult
 import org.openecard.richclient.processui.message.OptionType
@@ -59,7 +60,7 @@ class RunMessageBox {
 		get() {
 
 			val baos = ByteArrayOutputStream()
-			ImageIO.write(oecImage(60, 60), "png", baos)
+			ImageIO.write(oecImage(OecIconType.COLORED, 60, 60), "png", baos)
 			val imageInByte = baos.toByteArray()
 			return imageInByte
 		}

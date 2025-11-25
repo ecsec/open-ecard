@@ -13,7 +13,7 @@ kx-datetime = "0.7.1"
 gradle-versions = "0.53.0"
 gradle-jfx = "0.1.0"
 android-sdkloader = "3.1.0"
-moko = "0.25.1"
+moko = "0.25.2"
 
 # common
 ktor = "3.3.+"
@@ -54,7 +54,7 @@ kotlinPoet = "2.2.0"
 # Testing
 junit = "6.0.+"
 wiremock = "3.13.+"
-mokkery = "2.10.2"
+mokkery = "3.0.0"
 kover = "0.9.2"
 
 

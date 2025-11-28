@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 package org.openecard.richclient.processui.swing
 
 import org.openecard.i18n.I18N
@@ -39,6 +39,8 @@ import javax.swing.JRootPane
  *  * Finish
  *  * Cancel
  *
+ * @param numSteps Number of steps in this user consent.
+ * The step number is important, because the panel needs to know when it is finished.
  *
  * @author Tobias Wich
  * @author Moritz Horsch
@@ -60,12 +62,6 @@ class NavigationBar(
 			I18N.strings.gui_button_cancel.localized(),
 		)
 
-	/**
-	 * Create and initialize the navigation panel for the given number of steps.
-	 * The step number is important, because the panel needs to know when it is finished.
-	 *
-	 * @param numSteps Number of steps in this user consent.
-	 */
 	init {
 		initializeComponents()
 		initializeLayout()
@@ -179,13 +175,13 @@ class NavigationBar(
 		backButton.setEnabled(reversible)
 	}
 
+	/**
+	 * Indicates whether there is a visible next button which may be controlled by the enter key.
+	 *
+	 * @return `TRUE` if there is a visible next button on the gui which does not have the focus. In all other
+	 * cases `FALSE` is returned.
+	 */
 	val isNextButtonAccessible: Boolean
-		/**
-		 * Indicates whether there is a visible next button which may be controlled by the enter key.
-		 *
-		 * @return `TRUE` if there is a visible next button on the gui which does not have the focus. In all other
-		 * cases `FALSE` is returned.
-		 */
 		get() = nextButton.isEnabled && !nextButton.hasFocus()
 
 	companion object {

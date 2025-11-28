@@ -81,66 +81,245 @@ internal inline fun <R> mapScioError(block: () -> R): R {
 internal fun PCSCError.toScException(): SmartcardException {
 	val msg = message
 	return when (this.error) {
-		PCSCErrorCode.F_INTERNAL_ERROR -> InternalSystemError(msg, cause)
-		PCSCErrorCode.E_CANCELLED -> Cancelled(msg, cause)
-		PCSCErrorCode.E_INVALID_HANDLE -> InvalidHandle(msg, cause)
-		PCSCErrorCode.E_INVALID_PARAMETER -> InvalidParameter(msg, cause)
-		PCSCErrorCode.E_INVALID_TARGET -> InvalidTarget(msg, cause)
-		PCSCErrorCode.E_NO_MEMORY -> NoMemory(msg, cause)
-		PCSCErrorCode.F_WAITED_TOO_LONG -> WaitedTooLong(msg, cause)
-		PCSCErrorCode.E_INSUFFICIENT_BUFFER -> InsufficientBuffer(msg, cause)
-		PCSCErrorCode.E_UNKNOWN_READER -> UnknownReader(msg, cause)
-		PCSCErrorCode.E_TIMEOUT -> Timeout(msg, cause)
-		PCSCErrorCode.E_SHARING_VIOLATION -> SharingViolation(msg, cause)
-		PCSCErrorCode.E_NO_SMARTCARD -> NoSmartcard(msg, cause)
-		PCSCErrorCode.E_UNKNOWN_CARD -> UnknownCard(msg, cause)
-		PCSCErrorCode.E_CANT_DISPOSE -> CantDispose(msg, cause)
-		PCSCErrorCode.E_PROTO_MISMATCH -> ProtoMismatch(msg, cause)
-		PCSCErrorCode.E_NOT_READY -> DeviceNotReady(msg, cause)
-		PCSCErrorCode.E_INVALID_VALUE -> InvalidValue(msg, cause)
-		PCSCErrorCode.E_SYSTEM_CANCELLED -> SystemCancelled(msg, cause)
-		PCSCErrorCode.F_COMM_ERROR -> CommError(msg, cause)
-		PCSCErrorCode.F_UNKNOWN_ERROR -> UnknownError(msg, cause)
-		PCSCErrorCode.E_INVALID_ATR -> InvalidAtr(msg, cause)
-		PCSCErrorCode.E_NOT_TRANSACTED -> NotTransacted(msg, cause)
-		PCSCErrorCode.E_READER_UNAVAILABLE -> ReaderUnavailable(msg, cause)
-		PCSCErrorCode.P_SHUTDOWN -> Shutdown(msg, cause)
-		PCSCErrorCode.E_PCI_TOO_SMALL -> PciTooSmall(msg, cause)
-		PCSCErrorCode.E_READER_UNSUPPORTED -> ReaderUnsupported(msg, cause)
-		PCSCErrorCode.E_DUPLICATE_READER -> DuplicateReader(msg, cause)
-		PCSCErrorCode.E_CARD_UNSUPPORTED -> CardUnsupported(msg, cause)
-		PCSCErrorCode.E_NO_SERVICE -> NoService(msg, cause)
-		PCSCErrorCode.E_SERVICE_STOPPED -> ServiceStopped(msg, cause)
-		PCSCErrorCode.E_UNEXPECTED -> UnexpectedCardError(msg, cause)
-		PCSCErrorCode.E_UNSUPPORTED_FEATURE -> IccInstallation(msg, cause)
-		PCSCErrorCode.E_ICC_INSTALLATION -> IccCreateorder(msg, cause)
-		PCSCErrorCode.E_ICC_CREATEORDER -> UnsupportedFeature(msg, cause)
-		PCSCErrorCode.E_DIR_NOT_FOUND -> DirNotFound(msg, cause)
-		PCSCErrorCode.E_FILE_NOT_FOUND -> FileNotFound(msg, cause)
-		PCSCErrorCode.E_NO_DIR -> NoDir(msg, cause)
-		PCSCErrorCode.E_NO_FILE -> NoFile(msg, cause)
-		PCSCErrorCode.E_NO_ACCESS -> NoAccess(msg, cause)
-		PCSCErrorCode.E_WRITE_TOO_MANY -> WriteTooMany(msg, cause)
-		PCSCErrorCode.E_BAD_SEEK -> BadSeek(msg, cause)
-		PCSCErrorCode.E_INVALID_CHV -> InvalidChv(msg, cause)
-		PCSCErrorCode.E_UNKNOWN_RES_MNG -> UnknownResMsg(msg, cause)
-		PCSCErrorCode.E_NO_SUCH_CERTIFICATE -> NoSuchCertificate(msg, cause)
-		PCSCErrorCode.E_CERTIFICATE_UNAVAILABLE -> CertificateUnavailable(msg, cause)
-		PCSCErrorCode.E_NO_READERS_AVAILABLE -> NoReadersAvailable(msg, cause)
-		PCSCErrorCode.E_COMM_DATA_LOST -> CommDataLost(msg, cause)
-		PCSCErrorCode.E_NO_KEY_CONTAINER -> NoKeyContainer(msg, cause)
-		PCSCErrorCode.E_SERVER_TOO_BUSY -> ServerTooBusy(msg, cause)
-		PCSCErrorCode.W_UNSUPPORTED_CARD -> UnsupportedCard(msg, cause)
-		PCSCErrorCode.W_UNRESPONSIVE_CARD -> UnresponsiveCard(msg, cause)
-		PCSCErrorCode.W_UNPOWERED_CARD -> UnpoweredCard(msg, cause)
-		PCSCErrorCode.W_RESET_CARD -> ResetCard(msg, cause)
-		PCSCErrorCode.W_REMOVED_CARD -> RemovedCard(msg, cause)
-		PCSCErrorCode.W_SECURITY_VIOLATION -> SecurityViolation(msg, cause)
-		PCSCErrorCode.W_WRONG_CHV -> WrongChv(msg, cause)
-		PCSCErrorCode.W_CHV_BLOCKED -> ChvBlocked(msg, cause)
-		PCSCErrorCode.W_EOF -> Eof(msg, cause)
-		PCSCErrorCode.W_CANCELLED_BY_USER -> CancelledByUser(msg, cause)
-		PCSCErrorCode.W_CARD_NOT_AUTHENTICATED -> CardNotAuthenticated(msg, cause)
+		PCSCErrorCode.F_INTERNAL_ERROR -> {
+			InternalSystemError(msg, cause)
+		}
+
+		PCSCErrorCode.E_CANCELLED -> {
+			Cancelled(msg, cause)
+		}
+
+		PCSCErrorCode.E_INVALID_HANDLE -> {
+			InvalidHandle(msg, cause)
+		}
+
+		PCSCErrorCode.E_INVALID_PARAMETER -> {
+			InvalidParameter(msg, cause)
+		}
+
+		PCSCErrorCode.E_INVALID_TARGET -> {
+			InvalidTarget(msg, cause)
+		}
+
+		PCSCErrorCode.E_NO_MEMORY -> {
+			NoMemory(msg, cause)
+		}
+
+		PCSCErrorCode.F_WAITED_TOO_LONG -> {
+			WaitedTooLong(msg, cause)
+		}
+
+		PCSCErrorCode.E_INSUFFICIENT_BUFFER -> {
+			InsufficientBuffer(msg, cause)
+		}
+
+		PCSCErrorCode.E_UNKNOWN_READER -> {
+			UnknownReader(msg, cause)
+		}
+
+		PCSCErrorCode.E_TIMEOUT -> {
+			Timeout(msg, cause)
+		}
+
+		PCSCErrorCode.E_SHARING_VIOLATION -> {
+			SharingViolation(msg, cause)
+		}
+
+		PCSCErrorCode.E_NO_SMARTCARD -> {
+			NoSmartcard(msg, cause)
+		}
+
+		PCSCErrorCode.E_UNKNOWN_CARD -> {
+			UnknownCard(msg, cause)
+		}
+
+		PCSCErrorCode.E_CANT_DISPOSE -> {
+			CantDispose(msg, cause)
+		}
+
+		PCSCErrorCode.E_PROTO_MISMATCH -> {
+			ProtoMismatch(msg, cause)
+		}
+
+		PCSCErrorCode.E_NOT_READY -> {
+			DeviceNotReady(msg, cause)
+		}
+
+		PCSCErrorCode.E_INVALID_VALUE -> {
+			InvalidValue(msg, cause)
+		}
+
+		PCSCErrorCode.E_SYSTEM_CANCELLED -> {
+			SystemCancelled(msg, cause)
+		}
+
+		PCSCErrorCode.F_COMM_ERROR -> {
+			CommError(msg, cause)
+		}
+
+		PCSCErrorCode.F_UNKNOWN_ERROR -> {
+			UnknownError(msg, cause)
+		}
+
+		PCSCErrorCode.E_INVALID_ATR -> {
+			InvalidAtr(msg, cause)
+		}
+
+		PCSCErrorCode.E_NOT_TRANSACTED -> {
+			NotTransacted(msg, cause)
+		}
+
+		PCSCErrorCode.E_READER_UNAVAILABLE -> {
+			ReaderUnavailable(msg, cause)
+		}
+
+		PCSCErrorCode.P_SHUTDOWN -> {
+			Shutdown(msg, cause)
+		}
+
+		PCSCErrorCode.E_PCI_TOO_SMALL -> {
+			PciTooSmall(msg, cause)
+		}
+
+		PCSCErrorCode.E_READER_UNSUPPORTED -> {
+			ReaderUnsupported(msg, cause)
+		}
+
+		PCSCErrorCode.E_DUPLICATE_READER -> {
+			DuplicateReader(msg, cause)
+		}
+
+		PCSCErrorCode.E_CARD_UNSUPPORTED -> {
+			CardUnsupported(msg, cause)
+		}
+
+		PCSCErrorCode.E_NO_SERVICE -> {
+			NoService(msg, cause)
+		}
+
+		PCSCErrorCode.E_SERVICE_STOPPED -> {
+			ServiceStopped(msg, cause)
+		}
+
+		PCSCErrorCode.E_UNEXPECTED -> {
+			UnexpectedCardError(msg, cause)
+		}
+
+		PCSCErrorCode.E_UNSUPPORTED_FEATURE -> {
+			IccInstallation(msg, cause)
+		}
+
+		PCSCErrorCode.E_ICC_INSTALLATION -> {
+			IccCreateorder(msg, cause)
+		}
+
+		PCSCErrorCode.E_ICC_CREATEORDER -> {
+			UnsupportedFeature(msg, cause)
+		}
+
+		PCSCErrorCode.E_DIR_NOT_FOUND -> {
+			DirNotFound(msg, cause)
+		}
+
+		PCSCErrorCode.E_FILE_NOT_FOUND -> {
+			FileNotFound(msg, cause)
+		}
+
+		PCSCErrorCode.E_NO_DIR -> {
+			NoDir(msg, cause)
+		}
+
+		PCSCErrorCode.E_NO_FILE -> {
+			NoFile(msg, cause)
+		}
+
+		PCSCErrorCode.E_NO_ACCESS -> {
+			NoAccess(msg, cause)
+		}
+
+		PCSCErrorCode.E_WRITE_TOO_MANY -> {
+			WriteTooMany(msg, cause)
+		}
+
+		PCSCErrorCode.E_BAD_SEEK -> {
+			BadSeek(msg, cause)
+		}
+
+		PCSCErrorCode.E_INVALID_CHV -> {
+			InvalidChv(msg, cause)
+		}
+
+		PCSCErrorCode.E_UNKNOWN_RES_MNG -> {
+			UnknownResMsg(msg, cause)
+		}
+
+		PCSCErrorCode.E_NO_SUCH_CERTIFICATE -> {
+			NoSuchCertificate(msg, cause)
+		}
+
+		PCSCErrorCode.E_CERTIFICATE_UNAVAILABLE -> {
+			CertificateUnavailable(msg, cause)
+		}
+
+		PCSCErrorCode.E_NO_READERS_AVAILABLE -> {
+			NoReadersAvailable(msg, cause)
+		}
+
+		PCSCErrorCode.E_COMM_DATA_LOST -> {
+			CommDataLost(msg, cause)
+		}
+
+		PCSCErrorCode.E_NO_KEY_CONTAINER -> {
+			NoKeyContainer(msg, cause)
+		}
+
+		PCSCErrorCode.E_SERVER_TOO_BUSY -> {
+			ServerTooBusy(msg, cause)
+		}
+
+		PCSCErrorCode.W_UNSUPPORTED_CARD -> {
+			UnsupportedCard(msg, cause)
+		}
+
+		PCSCErrorCode.W_UNRESPONSIVE_CARD -> {
+			UnresponsiveCard(msg, cause)
+		}
+
+		PCSCErrorCode.W_UNPOWERED_CARD -> {
+			UnpoweredCard(msg, cause)
+		}
+
+		PCSCErrorCode.W_RESET_CARD -> {
+			ResetCard(msg, cause)
+		}
+
+		PCSCErrorCode.W_REMOVED_CARD -> {
+			RemovedCard(msg, cause)
+		}
+
+		PCSCErrorCode.W_SECURITY_VIOLATION -> {
+			SecurityViolation(msg, cause)
+		}
+
+		PCSCErrorCode.W_WRONG_CHV -> {
+			WrongChv(msg, cause)
+		}
+
+		PCSCErrorCode.W_CHV_BLOCKED -> {
+			ChvBlocked(msg, cause)
+		}
+
+		PCSCErrorCode.W_EOF -> {
+			Eof(msg, cause)
+		}
+
+		PCSCErrorCode.W_CANCELLED_BY_USER -> {
+			CancelledByUser(msg, cause)
+		}
+
+		PCSCErrorCode.W_CARD_NOT_AUTHENTICATED -> {
+			CardNotAuthenticated(msg, cause)
+		}
 
 		else -> {
 			// handle some extra codes

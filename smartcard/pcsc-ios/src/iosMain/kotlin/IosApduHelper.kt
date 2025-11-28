@@ -38,19 +38,25 @@ fun CommandApdu.toIosApdu(): NFCISO7816APDU =
 		p1Parameter = p1,
 		expectedResponseLength =
 			when (val v = le?.toLong()) {
-				0L ->
+				0L -> {
 					if (this.forceExtendedLength) {
 						65536L
 					} else {
 						256L
 					}
+				}
+
 				null,
-				->
+				-> {
 					if (this.forceExtendedLength) {
 						65536L
 					} else {
 						-1L
 					}
-				else -> v
+				}
+
+				else -> {
+					v
+				}
 			},
 	)

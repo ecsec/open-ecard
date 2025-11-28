@@ -65,7 +65,9 @@ class CanEntryViewController {
 				false
 			}
 
-			else -> true
+			else -> {
+				true
+			}
 		}
 	}
 

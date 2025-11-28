@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 
 package org.openecard.sc.tlv
 
@@ -40,10 +40,22 @@ enum class TagClass(
 		fun getTagClass(octet: UByte): TagClass {
 			val classByte = ((octet.toInt() shr 6) and 0x03)
 			return when (classByte) {
-				0 -> UNIVERSAL
-				1 -> APPLICATION
-				2 -> CONTEXT
-				3 -> PRIVATE
+				0 -> {
+					UNIVERSAL
+				}
+
+				1 -> {
+					APPLICATION
+				}
+
+				2 -> {
+					CONTEXT
+				}
+
+				3 -> {
+					PRIVATE
+				}
+
 				else -> {
 					throw IllegalStateException("Logic error when processing tag class byte: ${octet.toHexString()}")
 				}

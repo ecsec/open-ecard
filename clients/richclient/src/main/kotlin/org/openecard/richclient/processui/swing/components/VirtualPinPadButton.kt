@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2014-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 package org.openecard.richclient.processui.swing.components
 
 import org.openecard.richclient.processui.definition.PasswordField
@@ -41,12 +41,6 @@ class VirtualPinPadButton(
 ) : JLabel(
 		pinPadIcon,
 	) {
-	/**
-	 * Creates an instance of the button.
-	 *
-	 * @param inputField The component capturing the PIN.
-	 * @param passDef The definition of the password field.
-	 */
 	init {
 		setBorder(BorderFactory.createEmptyBorder())
 		addMouseListener(ButtonStyleHandler())

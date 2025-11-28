@@ -80,6 +80,7 @@ internal class EidServerStepImpl(
 						val nextResponse = processApdus(nextRequest)
 						eidServer.sendDataResponse(nextResponse)
 					}
+
 					else -> {
 						// wrong type
 						return InvalidServerData(

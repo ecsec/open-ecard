@@ -16,7 +16,10 @@ fun <R> mapScioError(block: () -> R): R {
 			-> {
 				throw RemovedCard(cause = ex)
 			}
-			else -> throw InternalSystemError(cause = ex)
+
+			else -> {
+				throw InternalSystemError(cause = ex)
+			}
 		}
 	}
 }

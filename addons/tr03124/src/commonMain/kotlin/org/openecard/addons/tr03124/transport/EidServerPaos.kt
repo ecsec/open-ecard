@@ -232,10 +232,14 @@ internal class EidServerPaos(
 						val msg = DidAuthenticateResponse(data = protocolData, result = result)
 						msg.toBody().wrapWithSoapEnv()
 					}
+
 					ProcessPhase.TRANSMIT -> {
 						TransmitResponse(result, outputAPDU = listOf()).toBody().wrapWithSoapEnv()
 					}
-					else -> null
+
+					else -> {
+						null
+					}
 				}
 
 			// update phase so we only send an error once

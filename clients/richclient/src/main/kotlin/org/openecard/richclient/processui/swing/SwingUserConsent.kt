@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 package org.openecard.richclient.processui.swing
 
 import org.openecard.richclient.processui.FileDialog
@@ -81,7 +81,7 @@ class SwingUserConsent(
 		val stepBar = StepBar(steps)
 		val navBar = NavigationBar(steps.size)
 
-		val l = Logo()
+		val l = loadLogoIcon().asPanel()
 		initializeSidePanel(sideBar, l, stepBar)
 
 		val navigator = SwingNavigator(dialogWrapper, dialogType, steps, stepPanel, navBar, stepBar)

@@ -71,22 +71,27 @@ class NpaPinController(
 					}
 				} else {
 					when (model.getPinStatus()) {
-						PinStatus.OK ->
+						PinStatus.OK -> {
 							msgController.showMessage(MR.strings.pinmanage_message_pin_incorrect.localized()) {
 								stage.showChangeFlow { _, old, new -> changePin(old, new) }
 							}
+						}
 
-						PinStatus.Suspended ->
+						PinStatus.Suspended -> {
 							msgController.showMessage(MR.strings.pinmanage_message_pin_suspended.localized()) {
 								stage.showCanPinFlow { view, can, pin -> suspendRecovery(view, can, pin) }
 							}
+						}
 
-						PinStatus.Blocked ->
+						PinStatus.Blocked -> {
 							msgController.showMessage(MR.strings.pinmanage_message_pin_blocked.localized()) {
 								stage.showPukFlow { _, puk -> unblockPin(puk) }
 							}
+						}
 
-						else -> msgController.showMessage(MR.strings.pinmanage_message_pin_change_failed.localized()) {}
+						else -> {
+							msgController.showMessage(MR.strings.pinmanage_message_pin_change_failed.localized()) {}
+						}
 					}
 				}
 			} catch (e: Exception) {
@@ -114,12 +119,13 @@ class NpaPinController(
 						}
 					} else {
 						when (model.getPinStatus()) {
-							PinStatus.Blocked ->
+							PinStatus.Blocked -> {
 								msgController.showMessage(MR.strings.pinmanage_message_pin_blocked.localized()) {
 									stage.showPukFlow { _, puk -> unblockPin(puk) }
 								}
+							}
 
-							else ->
+							else -> {
 								msgController.showMessage(MR.strings.pinmanage_message_pin_recovery_failed.localized()) {
 									stage.showCanPinFlow { view, retryCan, retryPin ->
 										suspendRecovery(
@@ -129,6 +135,7 @@ class NpaPinController(
 										)
 									}
 								}
+							}
 						}
 					}
 				}

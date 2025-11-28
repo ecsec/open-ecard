@@ -92,25 +92,36 @@ internal fun SmartcardException.toSalException(): SalException =
 	when (this) {
 		is CancelledByUser,
 		is Cancelled,
-		->
+		-> {
 			org.openecard.sal.iface
 				.Cancelled(cause = this)
-		is CardNotAuthenticated -> MissingAuthentication(cause = this)
+		}
+
+		is CardNotAuthenticated -> {
+			MissingAuthentication(cause = this)
+		}
+
 		is NoService,
 		is ServiceStopped,
-		->
+		-> {
 			org.openecard.sal.iface
 				.NoService(cause = this)
+		}
+
 		is NotTransacted,
 		is SharingViolation,
-		->
+		-> {
 			org.openecard.sal.iface
 				.SharingViolation(cause = this)
+		}
+
 		is WaitedTooLong,
 		is Timeout,
-		->
+		-> {
 			org.openecard.sal.iface
 				.Timeout(cause = this)
+		}
+
 		is DeviceNotReady,
 		is RemovedCard,
 		is ResetCard,
@@ -121,15 +132,23 @@ internal fun SmartcardException.toSalException(): SalException =
 		is UnknownReader,
 		is UnpoweredCard,
 		is UnresponsiveCard,
-		-> DeviceUnavailable(cause = this)
+		-> {
+			DeviceUnavailable(cause = this)
+		}
+
 		is ReaderUnsupported,
 		is CardUnsupported,
 		is UnknownCard,
 		is UnsupportedCard,
-		-> DeviceUnsupported(cause = this)
-		is UnsupportedFeature ->
+		-> {
+			DeviceUnsupported(cause = this)
+		}
+
+		is UnsupportedFeature -> {
 			org.openecard.sal.iface
 				.UnsupportedFeature(cause = this)
+		}
+
 		is BadSeek,
 		is ChvBlocked,
 		is CommDataLost,
@@ -172,7 +191,8 @@ internal fun SmartcardException.toSalException(): SalException =
 		is UnknownResMsg,
 		is WriteTooMany,
 		is WrongChv,
-		->
+		-> {
 			org.openecard.sal.iface
 				.InternalSystemError(cause = this)
+		}
 	}

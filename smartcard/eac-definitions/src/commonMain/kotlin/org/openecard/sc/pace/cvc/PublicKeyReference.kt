@@ -47,7 +47,10 @@ data class PublicKeyReference(
 					val sequence = data.sliceArray(data.size - 5 until data.size).decodeIso88591()
 					PublicKeyReference(country, holder, sequence)
 				}
-				else -> throw IllegalArgumentException("PublicKeyReference TLV is not primitive")
+
+				else -> {
+					throw IllegalArgumentException("PublicKeyReference TLV is not primitive")
+				}
 			}
 		}
 

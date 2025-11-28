@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2013-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 
 package org.openecard.richclient.gui.manage
 
@@ -72,11 +72,6 @@ class ManagementDialog : JFrame() {
 	private val addonPanel: JPanel
 	private var lastImage: JLabel? = null
 
-	/**
-	 * Create a ManagementDialog instance.
-	 * The preferred way of opening this dialog is the [.showDialog] function which also makes the
-	 * dialog visible and only permits one open instance at a time.
-	 */
 	init {
 		LOG.debug { "Creating ManagementDialog." }
 

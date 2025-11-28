@@ -136,7 +136,10 @@ internal class IosNfcTagReaderSession(
 				is SmartcardException -> {
 					throw c
 				}
-				else -> throw InternalSystemError(cause = e.cause)
+
+				else -> {
+					throw InternalSystemError(cause = e.cause)
+				}
 			}
 		}
 	}
@@ -156,7 +159,10 @@ internal class IosNfcTagReaderSession(
 				is SmartcardException -> {
 					throw c
 				}
-				else -> throw InternalSystemError(cause = e.cause)
+
+				else -> {
+					throw InternalSystemError(cause = e.cause)
+				}
 			}
 		}
 	}

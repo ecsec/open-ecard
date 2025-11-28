@@ -52,7 +52,9 @@ class PinChangeViewController {
 				false
 			}
 
-			else -> true
+			else -> {
+				true
+			}
 		}
 	}
 

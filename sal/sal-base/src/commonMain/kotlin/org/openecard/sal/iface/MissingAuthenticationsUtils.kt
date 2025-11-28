@@ -28,7 +28,10 @@ fun CifAclOr.missingAuthentications(
 						val andBranch =
 							ands.and.mapNotNull { term ->
 								when (term) {
-									BoolTreeLeaf.True -> null
+									BoolTreeLeaf.True -> {
+										null
+									}
+
 									is DidStateReference -> {
 										val did =
 											allDids.findAuthDid(term.name)

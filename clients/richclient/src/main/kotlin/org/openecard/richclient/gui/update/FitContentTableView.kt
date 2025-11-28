@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 
 package org.openecard.richclient.gui.update
 
@@ -63,6 +63,7 @@ class FitContentTableView<T> : TableView<T>() {
 				// resize columns to fit content and prevent further resizing by the user
 				super.setColumnResizePolicy(Callback { p: ResizeFeatures<*>? -> true })
 			}
+
 			else -> {
 				// no-op
 			}

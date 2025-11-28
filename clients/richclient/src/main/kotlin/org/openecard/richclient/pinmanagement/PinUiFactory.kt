@@ -54,7 +54,10 @@ class PinUiFactory(
 
 		val controller: PinManagementUI =
 			when (terminal.cardType) {
-				NpaDefinitions.cardType -> NpaPinController(terminal, pmStage, bgTaskScope)
+				NpaDefinitions.cardType -> {
+					NpaPinController(terminal, pmStage, bgTaskScope)
+				}
+
 				else -> {
 					// make sure the dialog is closed and cleanup runs
 					MessageController(pmStage, bgTaskScope).showErrorDialog(

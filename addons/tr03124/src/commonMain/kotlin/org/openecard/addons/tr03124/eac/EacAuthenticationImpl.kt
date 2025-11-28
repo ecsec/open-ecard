@@ -30,6 +30,7 @@ class EacAuthenticationImpl(
 			is UByteArray -> {
 				processSignature(sig)
 			}
+
 			else -> {
 				// return challenge again
 				Eac2Output(

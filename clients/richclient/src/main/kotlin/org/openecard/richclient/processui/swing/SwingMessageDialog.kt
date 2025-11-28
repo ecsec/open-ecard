@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2013-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 package org.openecard.richclient.processui.swing
 
 import org.openecard.richclient.processui.MessageDialog

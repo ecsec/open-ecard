@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 package org.openecard.richclient.gui.components
 
 import java.io.Serializable
@@ -64,7 +64,7 @@ class SpinnerMathNumberModel :
 	private fun incrementValue(dir: Int): Number? {
 		var newValue: Number? = null
 		when (dir) {
-			-1 ->
+			-1 -> {
 				if (value is BigInteger) {
 					val oldValue: BigInteger = value as BigInteger
 					newValue = oldValue.subtract(stepSize as BigInteger?)
@@ -72,8 +72,9 @@ class SpinnerMathNumberModel :
 					val oldValue: BigDecimal? = value as BigDecimal?
 					newValue = oldValue!!.subtract(stepSize as BigDecimal?)
 				}
+			}
 
-			1 ->
+			1 -> {
 				if (value is BigInteger) {
 					val oldValue: BigInteger = value as BigInteger
 					newValue = oldValue.add(stepSize as BigInteger?)
@@ -81,6 +82,7 @@ class SpinnerMathNumberModel :
 					val oldValue: BigDecimal? = value as BigDecimal?
 					newValue = oldValue!!.add(stepSize as BigDecimal?)
 				}
+			}
 		}
 
 		return newValue

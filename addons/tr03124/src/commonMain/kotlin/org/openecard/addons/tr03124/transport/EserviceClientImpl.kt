@@ -80,6 +80,7 @@ internal class EserviceClientImpl(
 				}
 				return token
 			}
+
 			is TcToken.TcTokenError -> {
 				val nonHttpsUrl =
 					listOfNotNull(token.refreshAddress, token.communicationErrorAddress).any {

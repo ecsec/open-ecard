@@ -40,7 +40,10 @@ sealed interface PublicKey {
 						throw IllegalArgumentException("Unsupported PublicKey type with id=$id")
 					}
 				}
-				else -> throw IllegalArgumentException("PublicKey TLV is not primitive")
+
+				else -> {
+					throw IllegalArgumentException("PublicKey TLV is not primitive")
+				}
 			}
 		}
 	}

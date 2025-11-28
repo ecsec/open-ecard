@@ -86,6 +86,7 @@ class PaceProcess
 				is SecurityCommandSuccess -> {
 					secResp.status
 				}
+
 				is SecurityCommandFailure -> {
 					val retries = secResp.retries
 					if (retries != null && retries > 0) {

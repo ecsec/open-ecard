@@ -31,14 +31,19 @@ sealed interface TermsOfUse {
 				CvCertificatesObjectIdentifier.id_plainFormat -> {
 					PlainText(descType, this.toString(Tag.STRING_UTF8_TAG))
 				}
+
 				CvCertificatesObjectIdentifier.id_htmlFormat -> {
 					Html(descType, this.toString(Tag.STRING_IA5_TAG))
 				}
+
 				CvCertificatesObjectIdentifier.id_pdfFormat -> {
 					require(this.tag == Tag.OCTETSTRING_TAG)
 					Pdf(descType, this.contentAsBytesBer.toByteArray())
 				}
-				else -> throw IllegalArgumentException("Unspecified type identifier for TermsOfUse")
+
+				else -> {
+					throw IllegalArgumentException("Unspecified type identifier for TermsOfUse")
+				}
 			}
 	}
 }

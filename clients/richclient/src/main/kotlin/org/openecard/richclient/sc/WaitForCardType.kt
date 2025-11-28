@@ -16,17 +16,23 @@ object WaitForCardType {
 				events
 					.mapNotNull { evt ->
 						when (evt) {
-							is CardStateEvent.InitialCardState ->
+							is CardStateEvent.InitialCardState -> {
 								evt.cardState.recognizedCards
 									.filter { it.cardType in cardTypes }
 									.map { CardState.RecognizedCard(it.terminal, it.cardType) }
 									.takeIf { it.isNotEmpty() }
-							is CardStateEvent.CardRecognized ->
+							}
+
+							is CardStateEvent.CardRecognized -> {
 								evt
 									.takeIf {
 										it.cardType in cardTypes
 									}?.let { listOf(CardState.RecognizedCard(it.terminalName, it.cardType)) }
-							else -> null
+							}
+
+							else -> {
+								null
+							}
 						}
 					}.first()
 			return cards.map { it.terminal }

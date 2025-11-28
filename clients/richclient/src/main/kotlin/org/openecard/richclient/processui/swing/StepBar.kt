@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 package org.openecard.richclient.processui.swing
 
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -35,6 +35,11 @@ import javax.swing.UIManager
 private val LOG = KotlinLogging.logger { }
 
 /**
+ * Initialize StepBar for the given steps.
+ * The index is initialized to -1.
+ *
+ * @param steps Steps of the GUI.
+ *
  * @author Moritz Horsch
  * @author Tobias Wich
  * @author Florian Feldmann
@@ -46,12 +51,6 @@ class StepBar(
 	private var labels: MutableList<JLabel>
 	private var curIdx: Int
 
-	/**
-	 * Initialize StepBar for the given steps.
-	 * The index is initialized to -1.
-	 *
-	 * @param steps Steps of the GUI.
-	 */
 	init {
 		this.curIdx = -1
 		this.steps = steps
@@ -62,7 +61,7 @@ class StepBar(
 
 	/**
 	 * Update the StepBar to a new set of steps.
-	 * The index is kept in tact. Usually the list of the steps should only be extended.
+	 * The index is kept intact. Usually the list of the steps should only be extended.
 	 *
 	 * @param steps New set of steps.
 	 */
@@ -83,11 +82,11 @@ class StepBar(
 		curIdx = nextIdx
 		LOG.debug { "Selecting index $nextIdx, previous was $oldIdx." }
 
-		if (oldIdx >= 0 && oldIdx < componentCount) {
+		if (oldIdx in 0..<componentCount) {
 			// reset last displayed element
 			getComponent(oldIdx).setForeground(Color.GRAY)
 		}
-		if (nextIdx >= 0 && nextIdx < componentCount) {
+		if (nextIdx in 0..<componentCount) {
 			// Highlight current element
 			getComponent(nextIdx).setForeground(Color.BLACK)
 		}

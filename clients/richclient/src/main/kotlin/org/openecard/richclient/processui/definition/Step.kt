@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -71,14 +71,15 @@ open class Step(
 	 * removed.
 	 */
 	private var _action: StepAction? = null
+
+	/**
+	 * The action associated with this step.
+	 * Actions are a way to bind code to the step which is executed after the step is finished. The
+	 * [org.openecard.richclient.processui.executor.ExecutionEngine] takes care of the action execution.
+	 *
+	 * @return The action associated with this step, or a [DummyAction] if none is set.
+	 */
 	var action: StepAction
-		/**
-		 * Gets the action associated with this step.
-		 * Actions are a way to bind code to the step which is executed after the step is finished. The
-		 * [org.openecard.richclient.processui.executor.ExecutionEngine] takes care of the action execution.
-		 *
-		 * @return The action associated with this step, or a [DummyAction] if none is set.
-		 */
 		get() {
 			return _action ?: DummyAction(this)
 		}
@@ -109,7 +110,7 @@ open class Step(
 
 	 * Sets whether the step allows to go back to the previous step.
 	 *
-	 * @param reversible `true` if this step allows to go back, `false` otherwise.
+	 * @param isReversible `true` if this step allows to go back, `false` otherwise.
 	 */
 	var isReversible: Boolean = true
 
@@ -128,7 +129,7 @@ open class Step(
 	 * to tell the dialog to proceed, because there is no user interaction necessary.
 	 *
 	 * @see .getAction
-	 * @param instantReturn `true` if this step is configured to return instantly, `false` otherwise.
+	 * @param isInstantReturn `true` if this step is configured to return instantly, `false` otherwise.
 	 */
 	var isInstantReturn: Boolean = false
 
@@ -139,7 +140,7 @@ open class Step(
 
 	 * Sets whether the elements' values on this step reset to their default values, when the step is shown again.
 	 *
-	 * @param resetOnLoad `true` if this step resets its values, `false` otherwise.
+	 * @param isResetOnLoad `true` if this step resets its values, `false` otherwise.
 	 */
 	var isResetOnLoad: Boolean = false
 

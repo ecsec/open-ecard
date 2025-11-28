@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2013-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 
 package org.openecard.richclient.gui.manage
 
@@ -44,13 +44,6 @@ private val LOG = KotlinLogging.logger { }
 class ActionEntryPanel : JPanel() {
 	protected val actionBtn: JButton
 
-	/**
-	 * Creates an entry without the actual action added.
-	 *
-	 * @param addonSpec Id of the addon this action belongs to.
-	 * @param actionSpec ActionDescription for which this ActionEntryPanel is constructed.
-	 * @param manager
-	 */
 	init {
 		setLayout(BoxLayout(this, BoxLayout.X_AXIS))
 

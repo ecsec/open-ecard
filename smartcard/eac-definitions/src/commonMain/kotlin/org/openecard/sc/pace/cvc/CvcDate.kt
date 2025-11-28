@@ -45,7 +45,10 @@ data class CvcDate(
 					val day = (date[4] * 10u) + date[5]
 					CvcDate(year.toInt(), month.toInt(), day.toInt())
 				}
-				else -> throw IllegalArgumentException("CVC Date TLV is not primitive")
+
+				else -> {
+					throw IllegalArgumentException("CVC Date TLV is not primitive")
+				}
 			}
 		}
 

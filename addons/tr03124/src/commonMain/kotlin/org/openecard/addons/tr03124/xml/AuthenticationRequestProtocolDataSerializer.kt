@@ -96,6 +96,7 @@ private data class AuthenticationRequestProtocolDataInternal(
 					acceptedEidType = acceptedEidType,
 				)
 			}
+
 			"EAC2InputType" -> {
 				Eac2Input(
 					protocol = protocol,
@@ -104,20 +105,24 @@ private data class AuthenticationRequestProtocolDataInternal(
 					signature = signature,
 				)
 			}
+
 			"EACAdditionalInputType" -> {
 				EacAdditionalInput(
 					protocol = protocol,
 					signature = signature.require("Signature"),
 				)
 			}
-			else -> throw SerializationException("Unknown protocol data type ${type.localPart}")
+
+			else -> {
+				throw SerializationException("Unknown protocol data type ${type.localPart}")
+			}
 		}
 	}
 
 	companion object {
 		fun fromPublicType(public: AuthenticationRequestProtocolData): AuthenticationRequestProtocolDataInternal =
 			when (public) {
-				is Eac1Input ->
+				is Eac1Input -> {
 					AuthenticationRequestProtocolDataInternal(
 						type = QName(Namespaces.ISO.NS, "EAC1InputType"),
 						protocol = public.protocol,
@@ -129,7 +134,9 @@ private data class AuthenticationRequestProtocolDataInternal(
 						transactionInfo = public.transactionInfo,
 						acceptedEidType = public.acceptedEidType,
 					)
-				is Eac2Input ->
+				}
+
+				is Eac2Input -> {
 					AuthenticationRequestProtocolDataInternal(
 						type = QName(Namespaces.ISO.NS, "EAC2InputType"),
 						protocol = public.protocol,
@@ -137,12 +144,15 @@ private data class AuthenticationRequestProtocolDataInternal(
 						ephemeralPublicKey = public.ephemeralPublicKey,
 						signature = public.signature,
 					)
-				is EacAdditionalInput ->
+				}
+
+				is EacAdditionalInput -> {
 					AuthenticationRequestProtocolDataInternal(
 						type = QName(Namespaces.ISO.NS, "EACAdditionalInputType"),
 						protocol = public.protocol,
 						signature = public.signature,
 					)
+				}
 			}
 	}
 }

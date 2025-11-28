@@ -1,6 +1,4 @@
-package org.openecard.richclient.processui.graphics
-
-/****************************************************************************
+/*
  * Copyright (C) 2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -20,7 +18,9 @@ package org.openecard.richclient.processui.graphics
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+
+package org.openecard.richclient.processui.graphics
 
 import org.apache.batik.transcoder.TranscoderInput
 import org.apache.batik.transcoder.TranscoderOutput
@@ -31,7 +31,10 @@ import java.io.InputStream
 
 fun Image.toBufferedImage() =
 	when (val it = this) {
-		is BufferedImage -> it
+		is BufferedImage -> {
+			it
+		}
+
 		else -> {
 			BufferedImage(
 				this.getWidth(null),

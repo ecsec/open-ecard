@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,8 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+
 package org.openecard.richclient.proxy
 
 import com.github.markusbernhardt.proxy.ProxySearch
@@ -99,7 +100,8 @@ object ProxySettingsLoader {
 			}
 
 			when (scheme) {
-				"SOCKS" -> // try to load SOCKS proxy
+				"SOCKS" -> {
+					// try to load SOCKS proxy
 					if (host != null && portInt != null) {
 						setSystemProperty("socksProxyHost", host)
 						setSystemProperty("socksProxyPort", port)
@@ -119,8 +121,10 @@ object ProxySettingsLoader {
 						val exclusions = parseExclusionHosts(excl)
 						selector = RegexProxySelector(selector, exclusions)
 					}
+				}
 
-				"HTTP", "HTTPS" -> // try to load HTTP proxy
+				"HTTP", "HTTPS" -> {
+					// try to load HTTP proxy
 					if (host != null && portInt != null) {
 						if ("HTTP" == scheme) {
 							setSystemProperty("http.proxyHost", host)
@@ -155,8 +159,12 @@ object ProxySettingsLoader {
 						val exclusions = parseExclusionHosts(excl)
 						selector = RegexProxySelector(selector, exclusions)
 					}
+				}
 
-				"NO PROXY" -> selector = NoProxySelector()
+				"NO PROXY" -> {
+					selector = NoProxySelector()
+				}
+
 				else -> {
 					if ("SYSTEM PROXY" != scheme) {
 						LOG.warn { "Unsupported proxy scheme $scheme used." }

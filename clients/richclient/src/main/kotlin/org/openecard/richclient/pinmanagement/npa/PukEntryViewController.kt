@@ -39,7 +39,9 @@ class PukEntryViewController {
 				false
 			}
 
-			else -> true
+			else -> {
+				true
+			}
 		}
 	}
 

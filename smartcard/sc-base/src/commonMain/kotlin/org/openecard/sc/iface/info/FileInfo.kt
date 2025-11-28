@@ -36,9 +36,11 @@ sealed interface FileInfo {
 					StandardTags.fcp -> {
 						Fcp.fromTlv(tlv)
 					}
+
 					StandardTags.fmd -> {
 						Fmd.fromTlv(tlv)
 					}
+
 					else -> {
 						Fci.fromTlv(tlv)
 					}

@@ -88,6 +88,7 @@ private data class AuthenticationResponseProtocolDataInternal(
 					challenge = challenge.require("Challenge"),
 				)
 			}
+
 			"EAC2OutputType" -> {
 				Eac2Output(
 					protocol = protocol,
@@ -97,19 +98,23 @@ private data class AuthenticationResponseProtocolDataInternal(
 					challenge = challenge,
 				)
 			}
+
 			"EmptyResponseDataType" -> {
 				EmptyResponseDataType(
 					protocol = protocol,
 				)
 			}
-			else -> throw SerializationException("Unknown protocol data type ${type.localPart}")
+
+			else -> {
+				throw SerializationException("Unknown protocol data type ${type.localPart}")
+			}
 		}
 	}
 
 	companion object {
 		fun fromPublicType(public: AuthenticationResponseProtocolData): AuthenticationResponseProtocolDataInternal =
 			when (public) {
-				is Eac1Output ->
+				is Eac1Output -> {
 					AuthenticationResponseProtocolDataInternal(
 						type = QName(Namespaces.ISO.NS, "EAC1OutputType"),
 						protocol = public.protocol,
@@ -119,7 +124,9 @@ private data class AuthenticationResponseProtocolDataInternal(
 						idPICC = public.idPICC,
 						challenge = public.challenge,
 					)
-				is Eac2Output ->
+				}
+
+				is Eac2Output -> {
 					AuthenticationResponseProtocolDataInternal(
 						type = QName(Namespaces.ISO.NS, "EAC2OutputType"),
 						protocol = public.protocol,
@@ -128,11 +135,14 @@ private data class AuthenticationResponseProtocolDataInternal(
 						nonce = public.nonce,
 						challenge = public.challenge,
 					)
-				is EmptyResponseDataType ->
+				}
+
+				is EmptyResponseDataType -> {
 					AuthenticationResponseProtocolDataInternal(
 						type = QName(Namespaces.ISO.NS, "EmptyResponseDataType"),
 						protocol = public.protocol,
 					)
+				}
 			}
 	}
 }

@@ -46,7 +46,10 @@ class CvcExtensions(
 
 					CvcExtensions(this.childList(), extensions)
 				}
-				else -> throw IllegalArgumentException("CVC Extensions TLV is not constructed")
+
+				else -> {
+					throw IllegalArgumentException("CVC Extensions TLV is not constructed")
+				}
 			}
 		}
 	}

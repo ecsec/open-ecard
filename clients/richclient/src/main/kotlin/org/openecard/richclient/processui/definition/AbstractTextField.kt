@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -31,8 +31,7 @@ private val logger = KotlinLogging.logger { }
  * Base definition for text fields.
  * A field can be identified by an ID.
  *
- * @see TextField
- *
+ * @see TextField*
  * @see PasswordField
  *
  * @author Tobias Wich
@@ -55,19 +54,12 @@ abstract class AbstractTextField(
 	 * @param description String describing the text field.
 	 */
 	var description: String? = null
-	var value: CharArray = CharArray(0)
-		/**
-		 * Gets the value of the text field.
-		 *
-		 * @return The value of the text field.
-		 */
-		get(): CharArray = field.clone()
 
-		/**
-		 * Sets the value of the text field.
-		 *
-		 * @param value The value of the text field.
-		 */
+	/**
+	 * The value of the text field.
+	 */
+	var value: CharArray = CharArray(0)
+		get(): CharArray = field.clone()
 		set(value) {
 			Arrays.fill(field, ' ')
 			field = value.clone()
@@ -88,7 +80,7 @@ abstract class AbstractTextField(
 	 * @see .setMaxLength
 	 * @param minLength The minimum length of the text value.
 	 */
-	var minLength: Int
+	var minLength: Int = 0
 
 	/**
 	 * Gets the maximum length of the text field value.
@@ -105,17 +97,7 @@ abstract class AbstractTextField(
 	 * @see .setMinLength
 	 * @param maxLength The maximum length of the text value.
 	 */
-	var maxLength: Int
-
-	/**
-	 * Creates an instance initialized with a given ID.
-	 *
-	 * @param id The id to initialize the instance with.
-	 */
-	init {
-		this.minLength = 0
-		this.maxLength = Int.MAX_VALUE
-	}
+	var maxLength: Int = Int.MAX_VALUE
 
 	/**
 	 * {@inheritDoc}

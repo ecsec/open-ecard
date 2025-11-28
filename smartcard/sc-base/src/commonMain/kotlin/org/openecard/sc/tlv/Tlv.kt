@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 
 package org.openecard.sc.tlv
 
@@ -69,6 +69,7 @@ sealed interface Tlv {
 				is TlvPrimitive -> {
 					addAll(tagLengthValue.toBer())
 				}
+
 				is TlvConstructed -> {
 					val childData = child?.toBer(true) ?: ubyteArrayOf()
 					val tlvIntermediate = TagLengthValue(tag, childData.toPrintable())
@@ -88,9 +89,12 @@ sealed interface Tlv {
 				is TlvPrimitive -> {
 					addAll(tagLengthValue.toCompact())
 				}
-				else -> throw IllegalArgumentException(
-					"The given TLV structure contains constructed objects which can not be serialized as compact TLV.",
-				)
+
+				else -> {
+					throw IllegalArgumentException(
+						"The given TLV structure contains constructed objects which can not be serialized as compact TLV.",
+					)
+				}
 			}
 
 			if (withSuccessors) {
@@ -105,9 +109,12 @@ sealed interface Tlv {
 				is TlvPrimitive -> {
 					addAll(tagLengthValue.toSimple())
 				}
-				else -> throw IllegalArgumentException(
-					"The given TLV structure contains constructed objects which can not be serialized as simple TLV.",
-				)
+
+				else -> {
+					throw IllegalArgumentException(
+						"The given TLV structure contains constructed objects which can not be serialized as simple TLV.",
+					)
+				}
 			}
 
 			if (withSuccessors) {

@@ -45,6 +45,7 @@ class DirectCardRecognition(
 					is ConclusionDefinition.Call -> {
 						processApdu(conclusion.call)
 					}
+
 					is ConclusionDefinition.RecognizedCardType -> {
 						conclusion.name
 					}
@@ -65,6 +66,7 @@ class DirectCardRecognition(
 				is DataMaskDefinition.MatchingData -> {
 					body.contentMatch(data)
 				}
+
 				is DataMaskDefinition.DataObject -> {
 					body.contentMatch(data)
 				}

@@ -83,20 +83,33 @@ class SmartcardEf
 					efStructure = struct
 					when (struct) {
 						EfStructure.TRANSPARENT,
-						-> type = DatasetType.TRANSPARENT
+						-> {
+							type = DatasetType.TRANSPARENT
+						}
+
 						EfStructure.LINEAR_FIXED_ANY,
 						EfStructure.LINEAR_FIXED_TLV,
 						EfStructure.LINEAR_VARIABLE_ANY,
 						EfStructure.LINEAR_VARIABLE_TLV,
-						-> type = DatasetType.RECORD
+						-> {
+							type = DatasetType.RECORD
+						}
+
 						EfStructure.CYCLIC_FIXED_ANY,
 						EfStructure.CYCLIC_FIXED_TLV,
-						-> type = DatasetType.RING
+						-> {
+							type = DatasetType.RING
+						}
+
 						EfStructure.TLV_BER, EfStructure.TLV_SIMPLE,
-						-> type = DatasetType.DATA_OBJECT
+						-> {
+							type = DatasetType.DATA_OBJECT
+						}
+
 						else -> {}
 					}
 				}
+
 				else -> {}
 			}
 		}

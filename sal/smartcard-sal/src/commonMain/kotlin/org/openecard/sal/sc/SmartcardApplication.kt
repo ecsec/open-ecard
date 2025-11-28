@@ -70,6 +70,7 @@ class SmartcardApplication(
 						null
 					}
 				}
+
 				is GenericCryptoDidDefinition<*> -> {
 					when (did) {
 						is GenericCryptoDidDefinition.EncryptionDidDefinition -> {
@@ -81,6 +82,7 @@ class SmartcardApplication(
 								null
 							}
 						}
+
 						is GenericCryptoDidDefinition.SignatureDidDefinition -> {
 							val signAcl = did.signAcl.selectForProtocol(device.channel.card.protocol)
 							if (signAcl.hasSolution()) {

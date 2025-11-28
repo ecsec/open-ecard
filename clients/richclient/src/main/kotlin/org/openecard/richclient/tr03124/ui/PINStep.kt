@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 
 package org.openecard.richclient.tr03124.ui
 
@@ -206,7 +206,10 @@ class PINStep(
 				// no status available or card status is good
 				null,
 				is SecurityCommandSuccess,
-				-> 3
+				-> {
+					3
+				}
+
 				is SecurityCommandFailure -> {
 					status.retries ?: 0
 				}

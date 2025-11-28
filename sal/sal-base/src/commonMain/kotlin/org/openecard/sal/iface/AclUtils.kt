@@ -74,7 +74,10 @@ fun CifAclOr.reduceWithAuthenticatedDids(solvedDids: Set<DidStateReference>): Ci
 								term
 							}
 						}
-						else -> term
+
+						else -> {
+							term
+						}
 					}
 				}
 			BoolTreeAnd(newAnd)

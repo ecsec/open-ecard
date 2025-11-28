@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 
 package org.openecard.richclient.tr03124
 
@@ -59,30 +59,35 @@ internal suspend fun BindingResponse.toKtorResponse(call: RoutingCall) {
 						status = httpStatus,
 					)
 				}
+
 				BindingResponse.ContentCode.TC_TOKEN_RETRIEVAL_ERROR -> {
 					call.respondText(
 						text = I18N.strings.tr03112_tctoken_retrieval_exception.localized(),
 						status = httpStatus,
 					)
 				}
+
 				BindingResponse.ContentCode.COMMUNICATION_ERROR -> {
 					call.respondText(
 						text = I18N.strings.tr03112_communication_error.localized(),
 						status = httpStatus,
 					)
 				}
+
 				BindingResponse.ContentCode.OTHER_PROCESS_RUNNING -> {
 					call.respondText(
 						text = I18N.strings.tr03112_auth_process_running.localized(),
 						status = httpStatus,
 					)
 				}
+
 				BindingResponse.ContentCode.NO_ACCEPTABLE_FORMAT -> {
 					call.respondText(
 						text = I18N.strings.http_406.localized(),
 						status = httpStatus,
 					)
 				}
+
 				BindingResponse.ContentCode.INTERNAL_ERROR -> {
 					call.respondText(
 						text = I18N.strings.tr03112_error_internal.localized(),

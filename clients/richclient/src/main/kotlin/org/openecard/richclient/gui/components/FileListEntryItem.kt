@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,8 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+
 package org.openecard.richclient.gui.components
 
 import org.openecard.i18n.I18N
@@ -43,6 +44,9 @@ import javax.swing.event.DocumentListener
 /**
  * Implements a dynamic gui element which is able to remove and add a file entry.
  *
+ * @param fileType A semicolon separated list of accepted file types.
+ * @param property The name of the property which relates to this configuration entry.
+ * @param properties A Settings object which is used to retrieve and set the current value of the configuration entry.
  * @author Hans-Martin Haase
  */
 class FileListEntryItem(
@@ -88,13 +92,6 @@ class FileListEntryItem(
 	 */
 	private var currentYCoordinate: Int = 0
 
-	/**
-	 * Creates a new FileListEntryItem object.
-	 *
-	 * @param fileType A semicolon separated list of accepted file types.
-	 * @param property The name of the property which relates to this configuration entry.
-	 * @param properties A Settings object which is used to retrieve and set the current value of the configuration entry.
-	 */
 	init {
 		setLayout(GridBagLayout())
 		this.fileType = fileType

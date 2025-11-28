@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 
 package org.openecard.richclient.gui.graphics
 
@@ -70,6 +70,7 @@ fun oecImage(
 						grayscale(img, kind.grayVal)
 					}
 				}
+
 				else -> {}
 			}
 		}.getBufferedImage() ?: throw(IllegalStateException("Image could not be loaded"))

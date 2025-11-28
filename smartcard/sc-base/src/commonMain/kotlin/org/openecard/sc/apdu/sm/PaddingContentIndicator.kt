@@ -56,10 +56,22 @@ sealed interface PaddingContentIndicator {
 				val keyNibble = (byte.toUInt() and 0xFu).toUByte()
 				val upper = byte.toUInt() shr 4
 				when (upper) {
-					1u -> DataEncryption(keyNibble)
-					2u -> KeyEncryption(keyNibble)
-					3u -> PrivateKeyReference(keyNibble)
-					4u -> Password(keyNibble)
+					1u -> {
+						DataEncryption(keyNibble)
+					}
+
+					2u -> {
+						KeyEncryption(keyNibble)
+					}
+
+					3u -> {
+						PrivateKeyReference(keyNibble)
+					}
+
+					4u -> {
+						Password(keyNibble)
+					}
+
 					else -> {
 						throw IllegalArgumentException("Content Indicator Byte contains and undefined value 0x${byte.toHexString()}")
 					}

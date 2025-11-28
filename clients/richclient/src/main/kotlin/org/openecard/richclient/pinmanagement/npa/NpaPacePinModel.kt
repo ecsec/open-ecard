@@ -28,8 +28,11 @@ class NpaPacePinModel(
 
 	fun getPinStatus(): PinStatus =
 		when (val status = pacePin.passwordStatus()) {
-			is SecurityCommandSuccess -> PinStatus.OK
-			is SecurityCommandFailure ->
+			is SecurityCommandSuccess -> {
+				PinStatus.OK
+			}
+
+			is SecurityCommandFailure -> {
 				when (status.retries) {
 					3 -> PinStatus.OK
 					2 -> PinStatus.OK
@@ -37,6 +40,7 @@ class NpaPacePinModel(
 					0 -> PinStatus.Blocked
 					else -> PinStatus.Unknown
 				}
+			}
 		}
 
 	fun enterPin(pinValue: String): Boolean = pacePin.enterPassword(pinValue) == null

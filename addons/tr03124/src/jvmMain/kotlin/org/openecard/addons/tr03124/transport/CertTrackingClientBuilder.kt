@@ -91,6 +91,7 @@ class CertTrackingClientBuilder(
 									certTracker.addCertHash(hash.toUByteArray())
 								}
 							}
+
 							else -> {
 								throw IllegalStateException("Non TLS socket used in eID Process")
 							}
@@ -176,6 +177,7 @@ class CertTrackingClientBuilder(
 				log.info { "Building attached eID-Server PAOS client" }
 				buildAttachedClient()
 			}
+
 			is TcToken.TcTokenPsk -> {
 				log.info { "Building PSK PAOS client" }
 				buildPskClient(token.sessionIdentifier, token.psk.v.toByteArray())

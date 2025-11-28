@@ -26,6 +26,7 @@ class AndroidTerminalConnection(
 	override fun disconnect(disposition: CardDisposition) {
 		when (disposition) {
 			CardDisposition.LEAVE -> {}
+
 			CardDisposition.RESET,
 			CardDisposition.POWER_OFF,
 			CardDisposition.EJECT,
@@ -38,7 +39,10 @@ class AndroidTerminalConnection(
 
 	fun connectTag() {
 		when (val localTag = tag) {
-			null -> throw RemovedCard()
+			null -> {
+				throw RemovedCard()
+			}
+
 			else -> {
 				if (localTag.isConnected) {
 					throw SharingViolation()

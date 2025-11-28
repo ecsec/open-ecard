@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 
 package org.openecard.richclient.gui.update
 
@@ -38,16 +38,29 @@ class UpdateMessageCreator {
 			val (data, advice) = it
 			val updateStr =
 				when (advice) {
-					UpdateAdvice.UNMAINTAINED ->
+					UpdateAdvice.UNMAINTAINED -> {
 						return I18N.strings.update_version_not_maintained
 							.format(
 								updateChecker.installedVersion,
 								data.version.toString() + " (major update)",
 							).localized()
-					UpdateAdvice.MAINTAINED_UPDATE -> data.version.toString() + " (minor update)"
-					UpdateAdvice.UPDATE -> data.version.toString() + " (minor update)"
-					UpdateAdvice.SECURITY_UPDATE -> data.version.toString() + " (security update)"
-					else -> null
+					}
+
+					UpdateAdvice.MAINTAINED_UPDATE -> {
+						data.version.toString() + " (minor update)"
+					}
+
+					UpdateAdvice.UPDATE -> {
+						data.version.toString() + " (minor update)"
+					}
+
+					UpdateAdvice.SECURITY_UPDATE -> {
+						data.version.toString() + " (security update)"
+					}
+
+					else -> {
+						null
+					}
 				}
 
 			if (updateStr != null) {

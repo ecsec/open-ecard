@@ -55,6 +55,7 @@ internal fun readOpenSSLError(): String {
 internal fun getCodes(lst: MutableList<UInt>) {
 	when (val c = ERR_get_error().convert<UInt>()) {
 		0u -> {}
+
 		else -> {
 			lst.add(c)
 			getCodes(lst)

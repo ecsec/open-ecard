@@ -1,3 +1,5 @@
+package org.openecard.utils.openssl
+
 import dev.whyoleg.cryptography.providers.openssl3.internal.cinterop.ERR_error_string
 import dev.whyoleg.cryptography.providers.openssl3.internal.cinterop.ERR_get_error
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -13,22 +15,22 @@ import kotlinx.cinterop.toKString
 
 private val logger = KotlinLogging.logger { }
 
-internal class OpenSSLError(
+class OpenSSLError(
 	message: String,
 ) : Exception(message)
 
-internal fun Int.assertSuccess() {
+fun Int.assertSuccess() {
 	if (this <= 0) throw openSSLError()
 }
 
 @OptIn(ExperimentalForeignApi::class)
-internal fun <T : CPointed> CPointer<T>?.assertNotNull(): CPointer<T> =
+fun <T : CPointed> CPointer<T>?.assertNotNull(): CPointer<T> =
 	when (this) {
 		null -> throw openSSLError()
 		else -> this
 	}
 
-internal fun openSSLError(): OpenSSLError =
+fun openSSLError(): OpenSSLError =
 	try {
 		OpenSSLError(readOpenSSLError()).also {
 			logger.error(it) { "Error in OpenSsl" }
@@ -39,7 +41,7 @@ internal fun openSSLError(): OpenSSLError =
 	}
 
 @OptIn(ExperimentalForeignApi::class, UnsafeNumber::class)
-internal fun readOpenSSLError(): String {
+fun readOpenSSLError(): String {
 	val codes = mutableListOf<UInt>().also { getCodes(it) }.toList()
 
 	return codes.joinToString("\n", prefix = "Openssl error:") { code ->
@@ -52,7 +54,7 @@ internal fun readOpenSSLError(): String {
 }
 
 @OptIn(ExperimentalForeignApi::class, UnsafeNumber::class)
-internal fun getCodes(lst: MutableList<UInt>) {
+fun getCodes(lst: MutableList<UInt>) {
 	when (val c = ERR_get_error().convert<UInt>()) {
 		0u -> {}
 

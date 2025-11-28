@@ -43,5 +43,70 @@ kotlin {
 			implementation(libs.logback.classic)
 			implementation(project(":smartcard:pcsc-native"))
 		}
+
+		iosMain.dependencies {
+			api(project(":utils:common"))
+			implementation(libs.kotlin.crypto.openssl)
+			implementation(libs.ktor.client.darwin)
+			implementation(libs.ktor.client.cio)
+		}
+
+		listOf(
+			iosArm64(),
+			iosSimulatorArm64(),
+		).forEach {
+			it.compilations {
+				val main by getting {
+					cinterops.create("SwiftNio")
+				}
+			}
+			it.binaries.framework {
+				baseName = "openecard_${project.name}"
+				isStatic = true
+			}
+		}
+		listOf(
+			iosSimulatorArm64(),
+		).forEach {
+			it.binaries.getTest("debug").apply {
+				freeCompilerArgs +=
+					listOf(
+						"-Xoverride-konan-properties=osVersionMin.ios_simulator_arm64=16.0",
+					)
+				linkerOpts +=
+					listOf(
+						"-all_load",
+					)
+			}
+		}
+	}
+}
+
+swiftPackageConfig {
+	val path = "${project.layout.buildDirectory.dir("SPM").get().asFile.path}"
+	create("SwiftNio") {
+		minIos = "15.0"
+		spmWorkingPath = path
+		dependency {
+			remotePackageVersion(
+				url = URI("https://github.com/swift-server/async-http-client.git"),
+				products = {
+					add("AsyncHTTPClient")
+				},
+				version = "1.20.0",
+				packageName = "async-http-client",
+			)
+		}
+		dependency {
+			remotePackageVersion(
+				url = URI("https://github.com/apple/swift-nio-extras"),
+				version = "1.20.0",
+				products = {
+					add("NIOHTTPTypesHTTP1")
+					add("NIOHTTPTypes")
+					add("NIOExtras")
+				},
+			)
+		}
 	}
 }

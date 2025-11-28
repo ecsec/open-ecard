@@ -17,6 +17,9 @@ kotlin {
 			implementation(libs.bundles.test.basics.kotlin)
 		}
 
+		nativeMain.dependencies {
+			implementation(libs.kotlin.crypto.openssl)
+		}
 		jvmTest.dependencies {
 		}
 		iosMain.dependencies {

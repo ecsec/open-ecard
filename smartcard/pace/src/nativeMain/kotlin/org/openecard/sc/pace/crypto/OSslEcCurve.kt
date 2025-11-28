@@ -1,9 +1,5 @@
 package org.openecard.sc.pace.crypto
 
-import MemoryManager.Companion.memoryManaged
-import OpenSSLError
-import assertNotNull
-import assertSuccess
 import cnames.structs.ec_point_st
 import dev.whyoleg.cryptography.providers.openssl3.internal.cinterop.BIGNUM
 import dev.whyoleg.cryptography.providers.openssl3.internal.cinterop.BN_CTX_new
@@ -32,15 +28,18 @@ import dev.whyoleg.cryptography.providers.openssl3.internal.cinterop.NID_brainpo
 import dev.whyoleg.cryptography.providers.openssl3.internal.cinterop.NID_secp224r1
 import dev.whyoleg.cryptography.providers.openssl3.internal.cinterop.NID_secp384r1
 import dev.whyoleg.cryptography.providers.openssl3.internal.cinterop.NID_secp521r1
-import dev.whyoleg.cryptography.random.CryptographyRandom
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.CValuesRef
 import kotlinx.cinterop.ExperimentalForeignApi
 import org.openecard.sc.pace.asn1.StandardizedDomainParameters
 import org.openecard.utils.common.nextBitField
-import toBigNum
-import toUByteArray
+import org.openecard.utils.openssl.MemoryManager.Companion.memoryManaged
+import org.openecard.utils.openssl.OpenSSLError
+import org.openecard.utils.openssl.assertNotNull
+import org.openecard.utils.openssl.assertSuccess
+import org.openecard.utils.openssl.toBigNum
+import org.openecard.utils.openssl.toUByteArray
 import kotlin.UByteArray
 import kotlin.random.Random
 

@@ -1,3 +1,5 @@
+package org.openecard.utils.openssl
+
 import cnames.structs.bignum_st
 import dev.whyoleg.cryptography.providers.openssl3.internal.cinterop.BIGNUM
 import dev.whyoleg.cryptography.providers.openssl3.internal.cinterop.BN_CTX
@@ -9,7 +11,6 @@ import dev.whyoleg.cryptography.providers.openssl3.internal.cinterop.BN_num_bits
 import dev.whyoleg.cryptography.providers.openssl3.internal.cinterop.EC_POINT
 import dev.whyoleg.cryptography.providers.openssl3.internal.cinterop.EC_POINT_free
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.cinterop.CPointed
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.CValuesRef
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -19,7 +20,7 @@ import kotlinx.cinterop.usePinned
 private val logger = KotlinLogging.logger { }
 
 @OptIn(ExperimentalForeignApi::class)
-internal fun CPointer<bignum_st>?.toUByteArray(): UByteArray {
+fun CPointer<bignum_st>?.toUByteArray(): UByteArray {
 	val byteArray = UByteArray((BN_num_bits(this) + 7) / 8)
 	byteArray.usePinned {
 		BN_bn2bin(this, it.addressOf(0)).assertSuccess()
@@ -28,7 +29,7 @@ internal fun CPointer<bignum_st>?.toUByteArray(): UByteArray {
 }
 
 @OptIn(ExperimentalForeignApi::class)
-internal fun UByteArray.toBigNum(): CPointer<BIGNUM> =
+fun UByteArray.toBigNum(): CPointer<BIGNUM> =
 	this.usePinned { pinnedValue ->
 		BN_bin2bn(
 			s = pinnedValue.addressOf(0),
@@ -38,7 +39,7 @@ internal fun UByteArray.toBigNum(): CPointer<BIGNUM> =
 	}
 
 @OptIn(ExperimentalForeignApi::class)
-internal class MemoryManager : AutoCloseable {
+class MemoryManager : AutoCloseable {
 	private val freeFunctions = mutableListOf<() -> Unit>()
 
 	override fun close() {

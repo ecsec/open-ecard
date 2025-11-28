@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 package org.openecard.richclient.processui.swing
 
 import io.github.oshai.kotlinlogging.KotlinLogging

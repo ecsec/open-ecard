@@ -162,7 +162,10 @@ class AndroidEgkPaceTest {
 								),
 							)
 					when (missing) {
-						MissingAuthentications.Unsolveable -> fail("PACE should be the only DID needed for this DS")
+						MissingAuthentications.Unsolveable -> {
+							fail("PACE should be the only DID needed for this DS")
+						}
+
 						is MissingAuthentications.MissingDidAuthentications -> {
 							val authOption = missing.options.first()
 							assert(authOption.size == 1)
@@ -172,7 +175,10 @@ class AndroidEgkPaceTest {
 									assert(!did.capturePasswordInHardware())
 									runBlocking { did.establishChannel(activity.can.await(), null, null) }
 								}
-								else -> assertFails { "Non PACE DID found" }
+
+								else -> {
+									assertFails { "Non PACE DID found" }
+								}
 							}
 						}
 					}

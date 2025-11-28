@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -33,10 +33,4 @@ import kotlin.random.Random
 abstract class IDTrait(
 	random: Random = Random.Default,
 	override var id: String = random.generateSessionIdBase64(),
-) : InfoUnit {
-	/**
-	 * Creates an IDTrait instance and initializes its ID to the given value.
-	 *
-	 * @param id The ID with which this instance will be initialized.
-	 */
-}
+) : InfoUnit

@@ -18,20 +18,30 @@ actual fun handleExeptions(
 	ex: Exception,
 ): BindingException =
 	when (ex) {
-		is CancellationException ->
+		is CancellationException -> {
 			UserCanceled(eserviceClient, cause = ex)
-		is UntrustedCertificateError ->
+		}
+
+		is UntrustedCertificateError -> {
 			UnknownTrustedChannelError(eserviceClient, "Channel used untrusted certificate", ex)
-		is InvalidTlsParameter ->
+		}
+
+		is InvalidTlsParameter -> {
 			UnknownTrustedChannelError(eserviceClient, "Channel used invalid parameters", ex)
+		}
+
 		is IOException -> {
 			doIf(ex.cause != null) { handleIoExceptions(eserviceClient, ex) }
 				?: UnknownTrustedChannelError(eserviceClient, "Unknown error in channel establishment", ex)
 		}
-		is BindingException ->
+
+		is BindingException -> {
 			ex
-		else ->
+		}
+
+		else -> {
 			UnknownClientError(eserviceClient, cause = ex)
+		}
 	}
 
 private fun handleIoExceptions(
@@ -39,16 +49,27 @@ private fun handleIoExceptions(
 	ex: Exception,
 ): BindingException =
 	when (val cause = ex.cause) {
-		is CertificateExpiredException ->
+		is CertificateExpiredException -> {
 			UnknownTrustedChannelError(eserviceClient, "Channel used expired certificate", ex)
-		is CertificateNotYetValidException ->
+		}
+
+		is CertificateNotYetValidException -> {
 			UnknownTrustedChannelError(eserviceClient, "Channel used not yet valid certificate", ex)
-		is InvalidTlsParameter ->
+		}
+
+		is InvalidTlsParameter -> {
 			UnknownTrustedChannelError(eserviceClient, "Channel used invalid parameters", ex)
-		is UntrustedCertificateError ->
+		}
+
+		is UntrustedCertificateError -> {
 			UnknownTrustedChannelError(eserviceClient, "Channel used untrusted certificate", ex)
-		is CertificateException ->
+		}
+
+		is CertificateException -> {
 			UnknownTrustedChannelError(eserviceClient, "Channel used invalid certificate", ex)
-		else ->
+		}
+
+		else -> {
 			UnknownClientError(eserviceClient, cause = ex)
+		}
 	}

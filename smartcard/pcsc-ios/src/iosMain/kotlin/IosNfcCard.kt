@@ -71,6 +71,7 @@ class IosCardChannel internal constructor(
 						ResponseApdu(data?.toUByteArray() ?: UByteArray(0), sw1, sw2),
 					)
 				}
+
 				100L,
 				102L,
 				-> {
@@ -80,6 +81,7 @@ class IosCardChannel internal constructor(
 							CancellationException(cause = RemovedCard()),
 					)
 				}
+
 				else -> {
 					logger.debug { "Converting error to comm error due to unknown code." }
 					res.cancel(

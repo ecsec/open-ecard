@@ -50,17 +50,30 @@ sealed class Chat<Self : Chat<Self>>(
 							?: throw IllegalArgumentException("No rights flags present in CHAT")
 
 					when (identifier.value) {
-						CvCertificatesObjectIdentifier.id_IS -> TODO("Implement Inspection Terminal")
-						CvCertificatesObjectIdentifier.id_AT ->
+						CvCertificatesObjectIdentifier.id_IS -> {
+							TODO("Implement Inspection Terminal")
+						}
+
+						CvCertificatesObjectIdentifier.id_AT -> {
 							AuthenticationTerminalChat(
 								identifier,
 								bitSetOf(*rightsData.reversedArray()),
 							)
-						CvCertificatesObjectIdentifier.id_ST -> TODO("Implement Signature Terminal")
-						else -> throw IllegalArgumentException("Unknown terminal type ($identifier)")
+						}
+
+						CvCertificatesObjectIdentifier.id_ST -> {
+							TODO("Implement Signature Terminal")
+						}
+
+						else -> {
+							throw IllegalArgumentException("Unknown terminal type ($identifier)")
+						}
 					}
 				}
-				else -> throw IllegalArgumentException("CHAT TLV is not primitive")
+
+				else -> {
+					throw IllegalArgumentException("CHAT TLV is not primitive")
+				}
 			}
 		}
 
@@ -71,17 +84,30 @@ sealed class Chat<Self : Chat<Self>>(
 			bitRange: IntProgression,
 		): Role =
 			when (accessRights.slice(bitRange).toUByteArray()[0].toUInt()) {
-				3u -> Role.CVCA
-				2u -> Role.DV_OFFICIAL
-				1u -> Role.DV_NON_OFFICIAL
-				0u ->
+				3u -> {
+					Role.CVCA
+				}
+
+				2u -> {
+					Role.DV_OFFICIAL
+				}
+
+				1u -> {
+					Role.DV_NON_OFFICIAL
+				}
+
+				0u -> {
 					when (terminalType.value) {
 						CvCertificatesObjectIdentifier.id_IS -> Role.INSPECTION_TERMINAL
 						CvCertificatesObjectIdentifier.id_AT -> Role.AUTHENTICATION_TERMINAL
 						CvCertificatesObjectIdentifier.id_ST -> Role.SIGNATURE_TERMINAL
 						else -> throw IllegalStateException("CHAT loaded with unsupported terminal type")
 					}
-				else -> throw IllegalStateException("Logic error in CHAT Role evaluation")
+				}
+
+				else -> {
+					throw IllegalStateException("Logic error in CHAT Role evaluation")
+				}
 			}
 	}
 

@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,8 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+
 package org.openecard.richclient.processui.swing.components
 
 import org.openecard.richclient.processui.definition.OutputInfoUnit
@@ -46,14 +47,20 @@ class Text(
 
 		val textString =
 			when (textValue.mimeType) {
-				"text/plain" -> "<html><body>" + textValue.value.decodeToString() + "</body></html>"
+				"text/plain" -> {
+					"<html><body>" + textValue.value.decodeToString() + "</body></html>"
+				}
 
-				"text/html" -> // pray that the code is HTML 3.2 compliant
+				"text/html" -> {
+					// pray that the code is HTML 3.2 compliant
 					textValue.value.decodeToString()
+				}
 
-				else -> throw IllegalArgumentException(
-					"Content with the MimeType " + textValue.mimeType + " is not supported by the Swing Text implementation.",
-				)
+				else -> {
+					throw IllegalArgumentException(
+						"Content with the MimeType " + textValue.mimeType + " is not supported by the Swing Text implementation.",
+					)
+				}
 			}
 
 		textArea = JTextPane()

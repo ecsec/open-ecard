@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2013-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 
 package org.openecard.richclient.gui.manage
 
@@ -43,9 +43,6 @@ abstract class SettingsPanel : JPanel() {
 	private val groups: ArrayList<SettingsGroup> = ArrayList()
 	private val contentPane: JPanel = JPanel()
 
-	/**
-	 * Creates a panel instance.
-	 */
 	init {
 		contentPane.setLayout(GridBagLayout())
 		setLayout(GridBagLayout())

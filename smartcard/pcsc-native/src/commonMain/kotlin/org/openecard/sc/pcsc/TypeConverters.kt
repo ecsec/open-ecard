@@ -34,9 +34,13 @@ internal fun PreferredCardProtocol.toPcsc(): Protocol =
 internal fun Protocol?.toSc(): CardProtocol =
 	when (this) {
 		Protocol.T0 -> CardProtocol.T0
+
 		Protocol.T1 -> CardProtocol.T1
+
 		Protocol.T15 -> CardProtocol.T15
+
 		Protocol.Raw -> CardProtocol.RAW
+
 		// unhandled types throw a hard error
 		else -> throw IllegalArgumentException("Invalid protocol value received from PCSC backend")
 	}
@@ -52,8 +56,11 @@ internal fun CardDisposition.toPcscDisconnect(): DisconnectDisposition =
 internal fun CardDisposition.toPcscConnect(): Initialization =
 	when (this) {
 		CardDisposition.LEAVE -> Initialization.Leave
+
 		CardDisposition.RESET -> Initialization.Reset
+
 		CardDisposition.POWER_OFF -> Initialization.Unpower
+
 		// eject does not exist, let's do unpower instead
 		CardDisposition.EJECT -> Initialization.Unpower
 	}

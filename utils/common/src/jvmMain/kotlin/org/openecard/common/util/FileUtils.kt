@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012-2024 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 
 package org.openecard.common.util
 
@@ -46,20 +46,19 @@ import java.util.jar.JarFile
  */
 @Deprecated("Legacy OeC Code")
 object FileUtils {
-	@JvmStatic
+	/**
+	 * Finds and returns the user specific config directory.
+	 * The config directory is defined as '$HOME/.openecard'. This function evaluates the system property 'user.home'
+	 * and simply appends '.openecard'. <br></br>
+	 * The config directory can be used to save logging configs, logs, certificates and anything else one might think
+	 * of.
+	 *
+	 * @return File object pointing to the config directory.
+	 * @throws IOException In case the directory can not be found.
+	 * @throws SecurityException In case the directory and/or one of its parents could not be created.
+	 */
 	@get:Throws(IOException::class, SecurityException::class)
 	val homeConfigDir: File
-		/**
-		 * Finds and returns the user specific config directory.
-		 * The config directory is defined as '$HOME/.openecard'. This function evaluates the system property 'user.home'
-		 * and simply appends '.openecard'. <br></br>
-		 * The config directory can be used to save logging configs, logs, certificates and anything else one might think
-		 * of.
-		 *
-		 * @return File object pointing to the config directory.
-		 * @throws IOException In case the directory can not be found.
-		 * @throws SecurityException In case the directory and/or one of its parents could not be created.
-		 */
 		get() {
 			val dirName = "openecard"
 			val home = System.getProperty("user.home")
@@ -74,38 +73,36 @@ object FileUtils {
 			}
 		}
 
-	@JvmStatic
+	/**
+	 * Finds and returns the user specific addons directory.
+	 * The addons directory is defined as '$HOME/.openecard/addons'. This function evaluates the system property 'user.home'
+	 * and simply appends '.openecard/addons'. <br></br>
+	 * The addons directory can be used to save addons, their configuration and related stuff.
+	 *
+	 * @return File object pointing to the addons directory.
+	 * @throws IOException In case the directory can not be found.
+	 * @throws SecurityException In case the directory and/or one of its parents could not be created.
+	 */
 	@get:Throws(IOException::class, SecurityException::class)
 	val addonsDir: File
-		/**
-		 * Finds and returns the user specific addons directory.
-		 * The addons directory is defined as '$HOME/.openecard/addons'. This function evaluates the system property 'user.home'
-		 * and simply appends '.openecard/addons'. <br></br>
-		 * The addons directory can be used to save addons, their configuration and related stuff.
-		 *
-		 * @return File object pointing to the addons directory.
-		 * @throws IOException In case the directory can not be found.
-		 * @throws SecurityException In case the directory and/or one of its parents could not be created.
-		 */
 		get() {
 			val path = File(homeConfigDir, "addons")
 			path.mkdirs()
 			return path
 		}
 
-	@JvmStatic
+	/**
+	 * Finds and returns the user specific addons configuration directory.
+	 * The addons directory is defined as '$HOME/.openecard/addons/conf'. This function evaluates the system property
+	 * 'user.home' and simply appends '.openecard/addons/conf'. <br></br>
+	 * The addons conf directory can be used to save the configuration of the specific addon.
+	 *
+	 * @return File object pointing to the addons directory.
+	 * @throws IOException In case the directory can not be found.
+	 * @throws SecurityException In case the directory and/or one of its parents could not be created.
+	 */
 	@get:Throws(IOException::class, SecurityException::class)
 	val addonsConfDir: File
-		/**
-		 * Finds and returns the user specific addons configuration directory.
-		 * The addons directory is defined as '$HOME/.openecard/addons/conf'. This function evaluates the system property
-		 * 'user.home' and simply appends '.openecard/addons/conf'. <br></br>
-		 * The addons conf directory can be used to save the configuration of the specific addon.
-		 *
-		 * @return File object pointing to the addons directory.
-		 * @throws IOException In case the directory can not be found.
-		 * @throws SecurityException In case the directory and/or one of its parents could not be created.
-		 */
 		get() {
 			val path = File(addonsDir, "conf")
 			path.mkdirs()
@@ -120,7 +117,6 @@ object FileUtils {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	@JvmStatic
 	@Throws(FileNotFoundException::class, IOException::class)
 	fun toByteArray(file: File): ByteArray {
 		val inStream = BufferedInputStream(FileInputStream(file))
@@ -136,7 +132,6 @@ object FileUtils {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	@JvmStatic
 	@Throws(FileNotFoundException::class, IOException::class)
 	fun toByteArray(
 		file: File,
@@ -146,7 +141,6 @@ object FileUtils {
 		return toByteArray(inStream)
 	}
 
-	@JvmStatic
 	@Throws(IOException::class)
 	fun toByteArray(inStream: InputStream): ByteArray {
 		val baos = ByteArrayOutputStream()
@@ -167,8 +161,6 @@ object FileUtils {
 	 * @throws IOException
 	 * @throws UnsupportedEncodingException
 	 */
-	@JvmStatic
-	@JvmOverloads
 	@Throws(FileNotFoundException::class, IOException::class, UnsupportedEncodingException::class)
 	fun toString(
 		file: File,
@@ -178,15 +170,13 @@ object FileUtils {
 	/**
 	 * Reads a file.
 	 *
-	 * @param file File
+	 * @param inStream InputStream
 	 * @param charset Charset
 	 * @return File content as a String
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 * @throws UnsupportedEncodingException
 	 */
-	@JvmStatic
-	@JvmOverloads
 	@Throws(UnsupportedEncodingException::class, IOException::class)
 	fun toString(
 		inStream: InputStream,
@@ -287,7 +277,6 @@ object FileUtils {
 	 * @throws UnsupportedEncodingException
 	 * @throws IOException
 	 */
-	@JvmStatic
 	@Throws(UnsupportedEncodingException::class, IOException::class)
 	fun getResourceFileListing(
 		clazz: Class<*>,
@@ -320,7 +309,6 @@ object FileUtils {
 	 * @return Open stream to the resource or null if none found.
 	 * @throws IOException
 	 */
-	@JvmStatic
 	@Throws(IOException::class)
 	fun resolveResourceAsStream(
 		clazz: Class<*>,
@@ -341,7 +329,6 @@ object FileUtils {
 	 * @param name name of the resource.
 	 * @return URL to the resource or null if none found.
 	 */
-	@JvmStatic
 	fun resolveResourceAsURL(
 		clazz: Class<*>,
 		name: String,
@@ -364,7 +351,6 @@ object FileUtils {
 	 * @return Open stream to the resource or null if none found.
 	 * @throws IOException
 	 */
-	@JvmStatic
 	@Throws(IOException::class)
 	fun resolveResourceAsStream(
 		loader: ClassLoader,
@@ -398,8 +384,6 @@ object FileUtils {
 		return url
 	}
 
-	@JvmStatic
-	@JvmOverloads
 	fun readLinesFromConfig(
 		inStream: InputStream,
 		charset: String = "UTF-8",

@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,11 +18,12 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 
 package org.openecard.richclient.gui
 
-import org.openecard.richclient.processui.swing.Logo
+import org.openecard.richclient.processui.swing.asPanel
+import org.openecard.richclient.processui.swing.loadLogoIcon
 import java.awt.Dimension
 import java.awt.Font
 import java.awt.Insets
@@ -64,7 +65,7 @@ class MessageDialog
 			val scrollPane = JScrollPane(messageLabel)
 			scrollPane.border = BorderFactory.createEmptyBorder()
 
-			val logo = Logo()
+			val logo = loadLogoIcon().asPanel()
 
 			// Config layout
 			val layout = GroupLayout(this)

@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 
 package org.openecard.richclient.gui.manage
 
@@ -41,6 +41,9 @@ import javax.swing.ScrollPaneConstants
 
 /**
  * Implements an about panel which contains basic information about the installed addon.
+ *
+ * @param coreAddon Indicates whether the add-on is a core add-on or not.
+ * @param dialog
  *
  * @author Hans-Martin Haase
  */
@@ -207,14 +210,6 @@ class AboutPanel(
 			}
 		}
 
-	/**
-	 * Creates an new AboutPanel instance.
-	 *
-	 * @param addonSpecification The add-on manifest content which is the information source.
-	 * @param coreAddon Indicates whether the add-on is a core add-on or not.
-	 * @param manager
-	 * @param dialog
-	 */
 	init {
 		this.setLayout(layout)
 		this.dialog = dialog

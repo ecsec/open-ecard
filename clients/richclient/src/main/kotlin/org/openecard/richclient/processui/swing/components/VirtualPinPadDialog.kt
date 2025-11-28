@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2014-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 package org.openecard.richclient.processui.swing.components
 
 import org.openecard.richclient.processui.definition.PasswordField
@@ -55,13 +55,6 @@ class VirtualPinPadDialog(
 	) {
 	private var numCharsEntered = 0
 
-	/**
-	 * Creates a new instance of the dialog.
-	 *
-	 * @param pinButton
-	 * @param inputField The component capturing the PIN.
-	 * @param passDef The definition of the password field.
-	 */
 	init {
 		this.inputField.text = ""
 

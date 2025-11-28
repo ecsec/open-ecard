@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,8 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+
 package org.openecard.richclient.processui.swing.steplayout
 
 import org.openecard.richclient.processui.definition.Checkbox
@@ -83,25 +84,46 @@ class DefaultStepLayouter(
 		for (next in infoUnits) {
 			val nextComponent =
 				when (next.type()) {
-					InfoUnitElementType.CHECK_BOX ->
+					InfoUnitElementType.CHECK_BOX -> {
 						org.openecard.richclient.processui.swing.components
 							.Checkbox(next as Checkbox)
-					InfoUnitElementType.HYPERLINK ->
+					}
+
+					InfoUnitElementType.HYPERLINK -> {
 						org.openecard.richclient.processui.swing.components
 							.Hyperlink(next as Hyperlink)
-					InfoUnitElementType.IMAGE_BOX ->
+					}
+
+					InfoUnitElementType.IMAGE_BOX -> {
 						org.openecard.richclient.processui.swing.components
 							.ImageBox(next as ImageBox)
-					InfoUnitElementType.PASSWORD_FIELD -> AbstractInput(next as PasswordField)
-					InfoUnitElementType.RADIO_BOX -> Radiobutton(next as Radiobox)
-					InfoUnitElementType.SIGNAUTRE_FIELD -> throw UnsupportedOperationException("Not implemented yet.")
-					InfoUnitElementType.TEXT ->
+					}
+
+					InfoUnitElementType.PASSWORD_FIELD -> {
+						AbstractInput(next as PasswordField)
+					}
+
+					InfoUnitElementType.RADIO_BOX -> {
+						Radiobutton(next as Radiobox)
+					}
+
+					InfoUnitElementType.SIGNAUTRE_FIELD -> {
+						throw UnsupportedOperationException("Not implemented yet.")
+					}
+
+					InfoUnitElementType.TEXT -> {
 						org.openecard.richclient.processui.swing.components
 							.Text(next as Text)
-					InfoUnitElementType.TEXT_FIELD -> AbstractInput(next as TextField)
-					InfoUnitElementType.TOGGLE_TEXT ->
+					}
+
+					InfoUnitElementType.TEXT_FIELD -> {
+						AbstractInput(next as TextField)
+					}
+
+					InfoUnitElementType.TOGGLE_TEXT -> {
 						org.openecard.richclient.processui.swing.components
 							.ToggleText(next as ToggleText)
+					}
 				}
 			components.add(nextComponent)
 			contentPanel.add(nextComponent.component)

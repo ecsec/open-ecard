@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 package org.openecard.richclient.processui.swing
 
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -105,12 +105,12 @@ class StepFrame(
 		return true
 	}
 
+	/**
+	 * Get result for all components on the frame that support result values.
+	 *
+	 * @return List containing all result values. As a matter of fact this list can be empty.
+	 */
 	val resultContent: MutableList<OutputInfoUnit>
-		/**
-		 * Get result for all components on the frame that support result values.
-		 *
-		 * @return List containing all result values. As a matter of fact this list can be empty.
-		 */
 		get() {
 			val result = mutableListOf<OutputInfoUnit>()
 			for (next in components) {

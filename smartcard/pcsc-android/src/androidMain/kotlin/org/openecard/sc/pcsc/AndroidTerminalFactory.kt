@@ -38,11 +38,13 @@ class AndroidTerminalFactory internal constructor(
 
 	override fun load() =
 		when {
-			!nfcAvailable ->
+			!nfcAvailable -> {
 				throw SmartCardStackMissing("NFC not available on this device.", null)
+			}
 
-			!nfcEnabled ->
+			!nfcEnabled -> {
 				throw ReaderUnavailable("NFC is not enabled in system settings.")
+			}
 
 			else -> {
 				AndroidTerminals(this, androidActivity, nfcAdapter).also {

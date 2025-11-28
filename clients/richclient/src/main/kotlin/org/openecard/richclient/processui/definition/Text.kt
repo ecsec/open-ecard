@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -80,14 +80,15 @@ class Text :
 		document = doc
 	}
 
+	/**
+	 * The text for this instance.
+	 *
+	 * @param text The text to set for this instance.
+	 * @return The text of this instance or an empty string if the underlying [Document] is `NULL` or the
+	 * value of the [Document] or the MimeType of the underlying [Document] is `NULL` or does not start
+	 * with `text/`.
+	 */
 	var text: String
-		/**
-		 * Gets the text set for this instance.
-		 *
-		 * @return The text of this instance or an empty string if the underlying [Document] is `NULL` or the
-		 * value of the [Document] or the MimeType of the underlying [Document] is `NULL` or does not start
-		 * with `text/`.
-		 */
 		get() {
 			val document = document
 			return if (document == null || document.value.isEmpty() || !document.mimeType.startsWith("text/")) {
@@ -97,11 +98,6 @@ class Text :
 			}
 		}
 
-		/**
-		 * Sets the text for this instance.
-		 *
-		 * @param text The text to set for this instance.
-		 */
 		set(text) {
 			document = Document("text/plain", text.toByteArray(Charset.forName("UTF-8")))
 		}

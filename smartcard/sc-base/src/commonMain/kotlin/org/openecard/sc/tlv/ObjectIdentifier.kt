@@ -83,10 +83,13 @@ fun UByteArray.toObjectIdentifier(): ObjectIdentifier {
 					groups.add(0u)
 					groups.add(result)
 				}
+
 				result < 80u -> {
 					groups.add(1u)
 					groups.add(result - 40u)
-				} else -> {
+				}
+
+				else -> {
 					groups.add(2u)
 					groups.add(result - 80u)
 				}

@@ -158,14 +158,17 @@ class CifVerifier(
 			val did = a.dids.find { it.name == name }
 			if (did != null) {
 				when (did.scope) {
-					DidScope.LOCAL ->
+					DidScope.LOCAL -> {
 						if (a.name == localApp.name) {
 							return
 						} else {
 							throw IllegalArgumentException("Local DID '$name' in app '${a.name}' referenced from app '${localApp.name}'")
 						}
+					}
 
-					DidScope.GLOBAL -> return
+					DidScope.GLOBAL -> {
+						return
+					}
 				}
 			}
 		}

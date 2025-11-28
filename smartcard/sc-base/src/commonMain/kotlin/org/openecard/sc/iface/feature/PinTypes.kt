@@ -55,12 +55,13 @@ class PinStatus(
 @Throws(ApduProcessingError::class)
 fun SecurityCommandResult.toPinStatusOrThrow(): PinStatus =
 	when (this) {
-		is SecurityCommandFailure ->
+		is SecurityCommandFailure -> {
 			when (this.resultType) {
 				SecurityCommandResultType.AUTH_DEACTIVATED,
 				SecurityCommandResultType.AUTH_BLOCKED,
 				SecurityCommandResultType.COUNTER,
 				-> PinStatus(this.retries, this.resultType)
+
 				SecurityCommandResultType.VERIFICATION_FAILED,
 				SecurityCommandResultType.CONDITION_NOT_SATISFIED,
 				SecurityCommandResultType.SEC_STATUS_NOT_SATISFIED,
@@ -68,9 +69,14 @@ fun SecurityCommandResult.toPinStatusOrThrow(): PinStatus =
 				SecurityCommandResultType.OTHER_ERROR,
 				// this is an error and not a successfully retrieved pin status
 				-> throw this.ex
+
 				SecurityCommandResultType.OK,
 				// this is captured in the other type
 				-> throw IllegalStateException("Logic error in PinState creation")
 			}
-		is SecurityCommandSuccess -> PinStatus(null, this.resultType)
+		}
+
+		is SecurityCommandSuccess -> {
+			PinStatus(null, this.resultType)
+		}
 	}

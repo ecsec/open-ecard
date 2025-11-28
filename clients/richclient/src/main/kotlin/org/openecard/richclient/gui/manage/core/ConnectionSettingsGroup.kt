@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 
 package org.openecard.richclient.gui.manage.core
 
@@ -103,6 +103,7 @@ class ConnectionSettingsGroup : OpenecardPropertiesSettingsGroup(GROUP) {
 						setEnabledComponent(pass, false)
 						setEnabledComponent(excl, true)
 					}
+
 					"HTTP" -> {
 						setEnabledComponent(host!!, true)
 						setEnabledComponent(port!!, true)
@@ -111,6 +112,7 @@ class ConnectionSettingsGroup : OpenecardPropertiesSettingsGroup(GROUP) {
 						setEnabledComponent(pass, true)
 						setEnabledComponent(excl, true)
 					}
+
 					"HTTPS" -> {
 						setEnabledComponent(host!!, true)
 						setEnabledComponent(port!!, true)
@@ -119,6 +121,7 @@ class ConnectionSettingsGroup : OpenecardPropertiesSettingsGroup(GROUP) {
 						setEnabledComponent(pass, true)
 						setEnabledComponent(excl, true)
 					}
+
 					else -> {
 						setEnabledComponent(host!!, false)
 						setEnabledComponent(port!!, false)

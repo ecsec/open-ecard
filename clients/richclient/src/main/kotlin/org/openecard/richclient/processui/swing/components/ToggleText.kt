@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,8 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+
 package org.openecard.richclient.processui.swing.components
 
 import dev.icerock.moko.resources.format
@@ -112,13 +113,6 @@ class ToggleText(
 		collapsed,
 	)
 
-	/**
-	 * Creates a new ToggleText.
-	 *
-	 * @param buttonText Text of the button
-	 * @param content [Document] representing the content of the instance.
-	 * @param collapsed Collapsed (content is visible or not)
-	 */
 	init {
 		text = initText(content)
 		initComponents()
@@ -132,8 +126,14 @@ class ToggleText(
 
 	private fun initText(content: Document): JComponent =
 		when (val mimeType = content.mimeType) {
-			"text/html" -> createHtmlPane(content.value)
-			"text/plain" -> createJTextArea(content.value.decodeToString())
+			"text/html" -> {
+				createHtmlPane(content.value)
+			}
+
+			"text/plain" -> {
+				createJTextArea(content.value.decodeToString())
+			}
+
 			"application/pdf" -> {
 				if (!externalPdf) {
 					createPdfComponent(content.value)

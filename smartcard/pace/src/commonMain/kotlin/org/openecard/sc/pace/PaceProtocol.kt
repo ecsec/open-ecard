@@ -110,6 +110,7 @@ class PaceProtocol
 					is InternalSystemError,
 					is CancellationException,
 					-> throw ex
+
 					else -> throw InternalSystemError(msg = "Unexpected error: ${ex.message}", cause = ex)
 				}
 			}

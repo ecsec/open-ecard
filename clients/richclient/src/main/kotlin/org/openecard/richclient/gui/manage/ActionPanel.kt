@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 
 package org.openecard.richclient.gui.manage
 
@@ -38,9 +38,6 @@ import javax.swing.JPanel
 class ActionPanel : JPanel() {
 	private val glue: Component
 
-	/**
-	 * Creates a panel instance.
-	 */
 	init {
 		setLayout(BoxLayout(this, BoxLayout.Y_AXIS))
 		setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 0))

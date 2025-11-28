@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -19,6 +19,7 @@
  * you and ecsec GmbH.
  *
  */
+
 package org.openecard.richclient.processui.executor
 
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -49,12 +50,13 @@ class ExecutionEngine(
 	private val navigator: UserConsentNavigator,
 ) {
 	private val _results = mutableMapOf<String, ExecutionResults>()
+
+	/**
+	 * Get all step results of the execution.
+	 *
+	 * @return Mapping of the step results with step ID as key.
+	 */
 	val results: Map<String, ExecutionResults>
-		/**
-		 * Get all step results of the execution.
-		 *
-		 * @return Mapping of the step results with step ID as key.
-		 */
 		get() = Collections.unmodifiableMap(_results)
 
 	/**
@@ -114,15 +116,22 @@ class ExecutionEngine(
 				if (replaceStep != null) {
 					logger.debug { "Replacing with step.id=${replaceStep.id}" }
 					when (next.status) {
-						ResultStatus.BACK -> next = navigator.replacePrevious(replaceStep)
-						ResultStatus.OK ->
+						ResultStatus.BACK -> {
+							next = navigator.replacePrevious(replaceStep)
+						}
+
+						ResultStatus.OK -> {
 							if (navigator.hasNext()) {
 								next = navigator.replaceNext(replaceStep)
 							} else {
 								return convertStatus(StepActionResultStatus.NEXT)
 							}
+						}
 
-						ResultStatus.RELOAD -> next = navigator.replaceCurrent(replaceStep)
+						ResultStatus.RELOAD -> {
+							next = navigator.replaceCurrent(replaceStep)
+						}
+
 						else -> {}
 					}
 				} else {
@@ -160,29 +169,43 @@ class ExecutionEngine(
 					if (actionReplace != null) {
 						logger.debug { "Replacing after action with step.id=${actionReplace.id}." }
 						when (actionResult.status) {
-							StepActionResultStatus.BACK -> next = navigator.replacePrevious(actionReplace)
-							StepActionResultStatus.NEXT ->
+							StepActionResultStatus.BACK -> {
+								next = navigator.replacePrevious(actionReplace)
+							}
+
+							StepActionResultStatus.NEXT -> {
 								if (navigator.hasNext()) {
 									next = navigator.replaceNext(actionReplace)
 								} else {
 									return convertStatus(StepActionResultStatus.NEXT)
 								}
+							}
 
-							StepActionResultStatus.REPEAT -> next = navigator.replaceCurrent(actionReplace)
+							StepActionResultStatus.REPEAT -> {
+								next = navigator.replaceCurrent(actionReplace)
+							}
+
 							else -> {}
 						}
 					} else {
 						// no replacement just proceed
 						when (actionResult.status) {
-							StepActionResultStatus.BACK -> next = navigator.previous()
-							StepActionResultStatus.NEXT ->
+							StepActionResultStatus.BACK -> {
+								next = navigator.previous()
+							}
+
+							StepActionResultStatus.NEXT -> {
 								if (navigator.hasNext()) {
 									next = navigator.next()
 								} else {
 									return convertStatus(StepActionResultStatus.NEXT)
 								}
+							}
 
-							StepActionResultStatus.REPEAT -> next = navigator.current()
+							StepActionResultStatus.REPEAT -> {
+								next = navigator.current()
+							}
+
 							else -> {}
 						}
 					}

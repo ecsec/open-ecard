@@ -152,7 +152,10 @@ class AndroidTerminal(
 					TerminalStateType.ABSENT
 				}
 			}
-			null -> TerminalStateType.ABSENT
+
+			null -> {
+				TerminalStateType.ABSENT
+			}
 		}
 
 	override fun connectTerminalOnly() = AndroidTerminalConnection(this)
@@ -213,8 +216,12 @@ class AndroidTerminal(
 
 inline fun <reified T : Parcelable> Intent.parcelable(key: String): T? =
 	when {
-		Build.VERSION.SDK_INT >= 33 -> getParcelableExtra(key, T::class.java)
-		else ->
+		Build.VERSION.SDK_INT >= 33 -> {
+			getParcelableExtra(key, T::class.java)
+		}
+
+		else -> {
 			@Suppress("DEPRECATION")
 			getParcelableExtra(key) as? T
+		}
 	}

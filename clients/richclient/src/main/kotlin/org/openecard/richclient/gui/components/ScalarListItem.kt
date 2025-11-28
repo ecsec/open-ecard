@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 package org.openecard.richclient.gui.components
 
 import org.openecard.richclient.gui.manage.Settings
@@ -48,6 +48,10 @@ import javax.swing.event.DocumentListener
 
 /**
  * This class models a graphical representation of a ScalarListEntry from the add-on manifest specification.
+ *
+ * @param property The property which is represented by this ScalarListEntry.
+ * @param properties Settings object which manages the setting of changed property values in the configuration file.
+ * @param type The type of the ScalarListEntry which is managed by this ScalarListItem.
  *
  * @author Hans-Martin Haase
  */
@@ -91,13 +95,6 @@ class ScalarListItem(
 	 */
 	private var lastPlus: JButton? = null
 
-	/**
-	 * Creates a new ScalarListItem from the given `property` and `type`.
-	 *
-	 * @param property The property which is represented by this ScalarListEntry.
-	 * @param properties Settings object which manages the setting of changed property values in the configuration file.
-	 * @param type The type of the ScalarListEntry which is managed by this ScalarListItem.
-	 */
 	init {
 		this.type =
 			when (type) {
@@ -405,66 +402,56 @@ class ScalarListItem(
 
 	/**
 	 * ActionListener implementation which dynamically adds a new JTextField or JSpinner to the layout.
+	 * @param button The button which is associated with this Listener.
+	 * @param field
 	 */
-	private inner class AddRowListener
-		/**
-		 * Creates a new AddRowListener dependent on the given components.
-		 *
-		 * @param button The button which is associated with this Listener.
-		 * @param field
-		 */
-		constructor(
-			private val button: JButton,
-			private val field: JComponent,
-		) : ActionListener {
-			override fun actionPerformed(e: ActionEvent) {
-				if (textFieldList != null && (field as JTextField).getText() != "") {
-					addEmptyRow()
-					button.isVisible = false
-				} else if (spinnerList != null && properties.getProperty(property) != null) {
-					addEmptyRow()
-					button.isVisible = false
-				}
+	private inner class AddRowListener(
+		private val button: JButton,
+		private val field: JComponent,
+	) : ActionListener {
+		override fun actionPerformed(e: ActionEvent) {
+			if (textFieldList != null && (field as JTextField).getText() != "") {
+				addEmptyRow()
+				button.isVisible = false
+			} else if (spinnerList != null && properties.getProperty(property) != null) {
+				addEmptyRow()
+				button.isVisible = false
 			}
 		}
+	}
 
 	/**
 	 * ActionListener implementation which removes a row from the layout.
+	 * @param item A JComponent which shall be removed. This a have to be a JSpinner or a JTextField.
 	 */
-	private inner class RemoveRowListener
-		/**
-		 * Creates a  new RemoveRowListener dependent on the input `item`.
-		 *
-		 * @param item A JComponent which shall be removed. This a have to be a JSpinner or a JTextField.
-		 */
-		constructor(
-			private val item: JComponent,
-		) : ActionListener {
-			override fun actionPerformed(e: ActionEvent) {
-				if (properties.getProperty(property) != null) {
-					if (textFieldList == null) {
-						if (type == ScalarListEntryType.BIGDECIMAL) {
-							val currentVal: String =
-								((item as JSpinner).model.value as BigDecimal).toPlainString() + ";"
-							var props: String? = properties.getProperty(property)
-							props = props!!.replaceFirst(currentVal.toRegex(), "")
-							properties.setProperty(property, props)
-						} else {
-							val currentVal: String =
-								((item as JSpinner).model.value as BigInteger).toString(10) + ";"
-							var props: String? = properties.getProperty(property)
-							props = props!!.replaceFirst(currentVal.toRegex(), "")
-							properties.setProperty(property, props)
-						}
-						spinnerList!!.remove(item)
+	private inner class RemoveRowListener(
+		private val item: JComponent,
+	) : ActionListener {
+		override fun actionPerformed(e: ActionEvent) {
+			if (properties.getProperty(property) != null) {
+				if (textFieldList == null) {
+					if (type == ScalarListEntryType.BIGDECIMAL) {
+						val currentVal: String =
+							((item as JSpinner).model.value as BigDecimal).toPlainString() + ";"
+						var props: String? = properties.getProperty(property)
+						props = props!!.replaceFirst(currentVal.toRegex(), "")
+						properties.setProperty(property, props)
 					} else {
-						(item as JTextField).setText("")
-						textFieldList!!.remove(item)
+						val currentVal: String =
+							((item as JSpinner).model.value as BigInteger).toString(10) + ";"
+						var props: String? = properties.getProperty(property)
+						props = props!!.replaceFirst(currentVal.toRegex(), "")
+						properties.setProperty(property, props)
 					}
+					spinnerList!!.remove(item)
+				} else {
+					(item as JTextField).text = ""
+					textFieldList!!.remove(item)
 				}
-				rebuild()
 			}
+			rebuild()
 		}
+	}
 
 	companion object {
 		/**

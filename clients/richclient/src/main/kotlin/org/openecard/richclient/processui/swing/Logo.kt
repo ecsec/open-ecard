@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 package org.openecard.richclient.processui.swing
 
 import org.openecard.richclient.gui.graphics.OecIconType
@@ -32,24 +32,13 @@ import javax.swing.JSeparator
 import javax.swing.SwingConstants
 import javax.swing.border.EmptyBorder
 
-/**
- * Open eCard logo for the sidebar of the Swing GUI.
- * The logo is placed on a JPanel, so that it can be placed on any component conveniently.
- *
- * @author Moritz Horsch
- * @author Dirk Petrautzki
- */
-
 fun loadLogoIcon(): ImageIcon =
 	ImageIcon().apply {
 		setImage(oecImage(OecIconType.COLORED, 60, 60))
 	}
 
-class Logo : JPanel() {
-	/**
-	 * Load logo from classpath and instantiate panel.
-	 */
-	init {
+fun ImageIcon.asPanel(): JPanel =
+	JPanel().apply {
 		val logo: ImageIcon = loadLogoIcon()
 		val lbl = JLabel(logo)
 
@@ -71,4 +60,3 @@ class Logo : JPanel() {
 		// add a space of 10 at the bottom
 		setBorder(EmptyBorder(0, 0, 10, 0))
 	}
-}

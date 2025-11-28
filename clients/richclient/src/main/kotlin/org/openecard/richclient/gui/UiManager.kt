@@ -61,6 +61,7 @@ class UiManager(
 						isVisible = true
 					}
 			}
+
 			else -> {
 				dialog.toFront()
 			}
@@ -91,6 +92,7 @@ class UiManager(
 						isVisible = true
 					}
 			}
+
 			else -> {
 				dialog.toFront()
 			}

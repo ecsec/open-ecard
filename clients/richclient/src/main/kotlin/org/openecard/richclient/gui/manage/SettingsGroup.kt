@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2013-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 
 package org.openecard.richclient.gui.manage
 
@@ -60,6 +60,9 @@ private val LOG = KotlinLogging.logger { }
  * Aggregator class for settings entries.
  * The entries form a group with an optional caption.
  *
+ * @param title Optional title to display as group caption.
+ * @param properties Settings object which wraps a Properties object or an AddonProperties object.
+ *
  * @author Tobias Wich
  * @author Hans-Martin Haase
  */
@@ -71,14 +74,7 @@ open class SettingsGroup(
 	private val fieldLabels: MutableMap<Component, JLabel> = mutableMapOf()
 	protected var itemIdx: Int = 0
 
-	/**
-	 * Creates an instance bound to a set of properties.
-	 *
-	 * @param title Optional title to display as group caption.
-	 * @param settings Settings object which wraps a Properties object or an AddonProperties object.
-	 */
 	init {
-
 		var frameBorder: Border = BorderFactory.createEmptyBorder(2, 2, 2, 2)
 		if (title != null) {
 			val titleBorder: TitledBorder = BorderFactory.createTitledBorder(frameBorder, title)

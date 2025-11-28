@@ -78,6 +78,7 @@ class NpaPinOperationsTest {
 						fail { "PIN status is not usable" }
 					}
 				}
+
 				is SecurityCommandSuccess -> {
 					assertNotNull(pacePin.enterPassword(pinWrong)).let {
 						assertEquals(2, it.retries)
@@ -95,7 +96,10 @@ class NpaPinOperationsTest {
 
 			val pinStatus2 = pacePin.passwordStatus()
 			when (pinStatus2) {
-				is SecurityCommandFailure -> fail { "PIN status reports error after successful PIN entry" }
+				is SecurityCommandFailure -> {
+					fail { "PIN status reports error after successful PIN entry" }
+				}
+
 				is SecurityCommandSuccess -> {}
 			}
 		}
@@ -143,6 +147,7 @@ class NpaPinOperationsTest {
 						// there we want to be
 					}
 				}
+
 				is SecurityCommandSuccess -> {
 					assertNotNull(pacePin.enterPassword(pinWrong)).let {
 						assertEquals(2, it.retries)
@@ -166,7 +171,10 @@ class NpaPinOperationsTest {
 
 			val pinStatus2 = pacePin.passwordStatus()
 			when (pinStatus2) {
-				is SecurityCommandFailure -> fail { "PIN status reports error after successful reset with PUK" }
+				is SecurityCommandFailure -> {
+					fail { "PIN status reports error after successful reset with PUK" }
+				}
+
 				is SecurityCommandSuccess -> {}
 			}
 
@@ -201,6 +209,7 @@ class NpaPinOperationsTest {
 				is SecurityCommandFailure -> {
 					fail { "PIN must be in RC3 state to continue" }
 				}
+
 				is SecurityCommandSuccess -> {
 					assertNull(pacePin.enterPassword(npaPin))
 				}

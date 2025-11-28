@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012-2019 Ruhr Uni Bochum.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 package org.openecard.richclient.processui.swing
 
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -486,7 +486,8 @@ class RunGUI {
 			val data = step.inputInfoUnits.toTypedArray()
 			// 		    Object[] data = uc.steps.get(uc.steps.indexOf("PIN-Eingabe"));
 			when (result.status) {
-				ResultStatus.BACK -> // 			    for (int i = 0; i < data.length; i++) {
+				ResultStatus.BACK -> {
+					// 			    for (int i = 0; i < data.length; i++) {
 // 				if (data[i] instanceof Checkbox) {
 // 				    Checkbox c = (Checkbox) data[i];
 // 				    c.boxItems.clear();
@@ -494,6 +495,7 @@ class RunGUI {
 // 				}
 // 			    }
 					return StepActionResult(StepActionResultStatus.BACK)
+				}
 
 				ResultStatus.OK -> {
 					var i = 0
@@ -508,7 +510,9 @@ class RunGUI {
 					return StepActionResult(StepActionResultStatus.NEXT)
 				}
 
-				else -> return StepActionResult(StepActionResultStatus.REPEAT)
+				else -> {
+					return StepActionResult(StepActionResultStatus.REPEAT)
+				}
 			}
 		}
 	}
@@ -556,7 +560,8 @@ class RunGUI {
 					return StepActionResult(StepActionResultStatus.BACK)
 				}
 
-				ResultStatus.OK -> // 			    for (int i = 0; i < data.length; i++) {
+				ResultStatus.OK -> {
+					// 			    for (int i = 0; i < data.length; i++) {
 // 				if (data[i] instanceof Checkbox) {
 // 				    Checkbox c = (Checkbox) data[i];
 // 				    c.boxItems.clear();
@@ -564,8 +569,11 @@ class RunGUI {
 // 				}
 // 			    }
 					return StepActionResult(StepActionResultStatus.NEXT)
+				}
 
-				else -> return StepActionResult(StepActionResultStatus.REPEAT)
+				else -> {
+					return StepActionResult(StepActionResultStatus.REPEAT)
+				}
 			}
 		}
 	}

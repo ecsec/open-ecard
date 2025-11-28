@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -27,6 +27,10 @@ import java.util.Arrays
 /**
  * File filter checking any wrapped FileFilters.
  * This FileFilter accepts a file if any of the filters agrees to accept the file.
+
+ * In case no filter is given, the [AcceptAllFilesFilter] is used as the only choice.
+ *
+ * @param filters Filters to be combined.
  *
  * @author Tobias Wich
  */
@@ -44,15 +48,9 @@ class CombiningOrFilter(
 	 */
 	constructor(vararg filters: FileFilter) : this(listOf<FileFilter>(*filters))
 
-	/**
-	 * Creates a new CombiningFilter.
-	 * In case no filter is given, the [AcceptAllFilesFilter] is used as the only choice.
-	 *
-	 * @param filters Filters to be combined.
-	 */
 	init {
 		if (filters.isEmpty()) {
-			this.filters = Arrays.asList(AcceptAllFilesFilter())
+			this.filters = listOf(AcceptAllFilesFilter())
 		} else {
 			this.filters = filters
 		}

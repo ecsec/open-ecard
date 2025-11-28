@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -19,6 +19,7 @@
  * you and ecsec GmbH.
  *
  */
+
 package org.openecard.sc.tlv
 
 import org.openecard.utils.common.hex

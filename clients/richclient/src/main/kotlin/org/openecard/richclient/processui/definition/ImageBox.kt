@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -36,46 +36,23 @@ class ImageBox(
 	var document: Document,
 ) : IDTrait(),
 	InputInfoUnit {
+	/**
+	 * The raw data of the image.
+	 */
 	var imageData: ByteArray
-		/**
-		 * Get the raw data of the image.
-		 *
-		 * @see .setImageData
-		 * @return The raw image data.
-		 */
 		get() {
 			val imageData = document.value
 			return imageData.copyOf(imageData.size)
 		}
-
-		/**
-		 * Sets the raw image data for this instance.
-		 * The image must be given in the serialized form of an image container format such as PNG, JPEG, etc.
-		 *
-		 * @param imageData The raw image data.
-		 */
 		set(imageData) {
 			document.value = imageData.copyOf(imageData.size)
 		}
 
+	/**
+	 * The MIME type for the image represented by this instance.
+	 */
 	var mimeType: String
-		/**
-		 * Gets the MIME type for the image represented by this instance.
-		 *
-		 * @see .setMimeType
-		 * @return String containing the MIME type.
-		 */
 		get() = document.mimeType
-
-		/**
-		 * Sets the MIME type for the image represented by this instance.
-		 *
-		 * @see [IANA Registered MIME Types](https://www.iana.org/assignments/media-types/)
-		 *
-		 * @see [IANA Registered Image MIME Types](https://www.iana.org/assignments/media-types/image/)
-		 *
-		 * @param mimeType MIME type describing the image type.
-		 */
 		set(mimeType) {
 			document.mimeType = mimeType
 		}

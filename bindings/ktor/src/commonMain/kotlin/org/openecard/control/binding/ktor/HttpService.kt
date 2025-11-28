@@ -39,12 +39,15 @@ fun extractContent(content: OutgoingContent): String? =
 		is OutgoingContent.ContentWrapper -> {
 			extractContent(content.delegate())
 		}
+
 		is TextContent -> {
 			content.text
 		}
+
 		is OutgoingContent.ByteArrayContent -> {
 			content.bytes().toString(content.contentType?.charset() ?: StandardCharsets.UTF_8)
 		}
+
 		else -> {
 			logger.warn { "Unhandled outgoing of outgoing type: ${content.javaClass}" }
 			null

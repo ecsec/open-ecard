@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,9 +18,10 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 package org.openecard.richclient.gui.components
 
+import org.openecard.utils.common.cast
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.ParseException
@@ -32,6 +33,21 @@ import javax.swing.text.NumberFormatter
 import kotlin.math.max
 
 /**
+ * Construct a `JSpinner` editor that supports displaying and editing the value of a
+ * `SpinnerNumberModel` with a `JFormattedTextField`.
+ * This `NumberEditor` becomes both a `ChangeListener` on the spinner and a
+ * `PropertyChangeListener` on the new `JFormattedTextField`.
+ *
+ * @param spinner The spinner whose model this editor will monitor.
+ * @param format The initial pattern for the `DecimalFormat` object that's used to display and parse
+ * the value of the text field.
+ * @exception IllegalArgumentException Thrown if the spinners model is not an instance of
+ * `SpinnerNumberModel`.
+ *
+ * @see .getTextField
+ * @see javax.swing.SpinnerNumberModel
+ *
+ * @see java.text.DecimalFormat
  *
  * @author Hans-Martin Haase
  */
@@ -39,38 +55,21 @@ class MathNumberEditor(
 	spinner: JSpinner,
 	format: DecimalFormat?,
 ) : JSpinner.DefaultEditor(spinner) {
-	/**
-	 * Construct a `JSpinner` editor that supports displaying and editing the value of a
-	 * `SpinnerNumberModel` with a `JFormattedTextField`.
-	 * This `NumberEditor` becomes both a `ChangeListener` on the spinner and a
-	 * `PropertyChangeListener` on the new `JFormattedTextField`.
-	 *
-	 * @param spinner The spinner whose model this editor will monitor.
-	 * @param format The initial pattern for the `DecimalFormat` object that's used to display and parse
-	 * the value of the text field.
-	 * @exception IllegalArgumentException Thrown if the spinners model is not an instance of
-	 * `SpinnerNumberModel`.
-	 *
-	 * @see .getTextField
-	 * @see javax.swing.SpinnerNumberModel
-	 *
-	 * @see java.text.DecimalFormat
-	 */
 	init {
-		require(spinner.getModel() is SpinnerMathNumberModel) { "model not a SpinnerMathNumberModel" }
-
-		val model: SpinnerMathNumberModel = spinner.getModel() as SpinnerMathNumberModel
+		val model: SpinnerMathNumberModel =
+			spinner.model.cast()
+				?: run { throw IllegalArgumentException("model not a SpinnerMathNumberModel") }
 		val formatter: NumberFormatter =
 			MathNumberEditorFormatter(
 				model,
 				format,
 			)
-		val factory: DefaultFormatterFactory =
+		val factory =
 			DefaultFormatterFactory(
 				formatter,
 			)
-		val ftf: JFormattedTextField = getTextField()
-		ftf.setEditable(true)
+		val ftf: JFormattedTextField = textField
+		ftf.isEditable = true
 		ftf.setFormatterFactory(factory)
 		ftf.setHorizontalAlignment(JTextField.RIGHT)
 
@@ -92,34 +91,34 @@ class MathNumberEditor(
 		}
 	}
 
+	/**
+	 * Returns the `java.text.DecimalFormat` object the
+	 * `JFormattedTextField` uses to parse and format
+	 * numbers.
+	 *
+	 * @return the value of `getTextField().getFormatter().getFormat()`.
+	 * @see .getTextField
+	 *
+	 * @see java.text.DecimalFormat
+	 */
 	val format: DecimalFormat
-		/**
-		 * Returns the `java.text.DecimalFormat` object the
-		 * `JFormattedTextField` uses to parse and format
-		 * numbers.
-		 *
-		 * @return the value of `getTextField().getFormatter().getFormat()`.
-		 * @see .getTextField
-		 *
-		 * @see java.text.DecimalFormat
-		 */
 		get() {
 			val format: DecimalFormat =
-				((getTextField().getFormatter()) as NumberFormatter).getFormat() as DecimalFormat
+				((textField.formatter) as NumberFormatter).format as DecimalFormat
 			format.setRoundingMode(RoundingMode.HALF_UP)
 			return format
 		}
 
+	/**
+	 * Return our spinner ancestor's `SpinnerMathNumberModel`.
+	 *
+	 * @return `getSpinner().getModel()`
+	 * @see .getSpinner
+	 *
+	 * @see .getTextField
+	 */
 	val model: SpinnerMathNumberModel
-		/**
-		 * Return our spinner ancestor's `SpinnerMathNumberModel`.
-		 *
-		 * @return `getSpinner().getModel()`
-		 * @see .getSpinner
-		 *
-		 * @see .getTextField
-		 */
 		get() {
-			return (getSpinner().getModel()) as SpinnerMathNumberModel
+			return (getSpinner().model) as SpinnerMathNumberModel
 		}
 }

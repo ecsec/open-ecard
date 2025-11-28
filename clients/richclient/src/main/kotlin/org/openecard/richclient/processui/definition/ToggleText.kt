@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -54,7 +54,7 @@ class ToggleText :
 	 * Note: The [Document] type allows every mime type. The ability to render [Document]s of types other
 	 * than text/plain depends on the GUI implementation and is not granted.
 	 *
-	 * @param doc [Document] to set for this ToggleText.
+	 * @param document [Document] to set for this ToggleText.
 	 */
 	var document: Document? = null
 
@@ -67,18 +67,18 @@ class ToggleText :
 	 * Sets whether the text is collapsed or not.
 	 * In the collapsed state, the element's text is not visible.
 	 *
-	 * @param collapsed `true` if the text is collapsed, `false` otherwise.
+	 * @param isCollapsed `true` if the text is collapsed, `false` otherwise.
 	 */
 	var isCollapsed: Boolean = false
 
+	/**
+	 * The text of this instance.
+	 *
+	 * @return The text of this instance or an empty string if the underlying [Document] is `NULL` or the
+	 * value of the [Document] or the MimeType of the underlying [Document] is `NULL` or does not start
+	 * with `text/`.
+	 */
 	var text: String
-		/**
-		 * Gets the text of this instance.
-		 *
-		 * @return The text of this instance or an empty string if the underlying [Document] is `NULL` or the
-		 * value of the [Document] or the MimeType of the underlying [Document] is `NULL` or does not start
-		 * with `text/`.
-		 */
 		get() {
 			if (document == null || document?.value == null || document?.value!!.isEmpty()) {
 				return ""
@@ -91,11 +91,6 @@ class ToggleText :
 			}
 		}
 
-		/**
-		 * Sets the text of this instance.
-		 *
-		 * @param text The text of this instance.
-		 */
 		set(text) {
 			document = Document("text/plain", text.toByteArray(Charset.forName("UTF-8")))
 		}

@@ -222,6 +222,7 @@ internal class UiStepImpl(
 				val eac2In =
 					when (val msg = ctx.eidServer.sendDidAuthResponse(eac1Out)) {
 						is Eac2Input -> msg
+
 						else -> throw InvalidServerData(
 							ctx.eserviceClient,
 							"EAC2Input message expected, but server sent something else",
@@ -369,6 +370,7 @@ internal class UiStepImpl(
 					is NoSuchElementException,
 					is IllegalArgumentException,
 					-> throw InvalidServerData(eserviceClient, "Invalid data received in EAC1", cause = ex)
+
 					else -> throw ex
 				}
 			}

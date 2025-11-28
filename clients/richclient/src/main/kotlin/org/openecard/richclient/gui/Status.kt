@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 
 package org.openecard.richclient.gui
 
@@ -90,9 +90,6 @@ class Status(
 	private var gradPanel: GradientPanel? = null
 	private var updateLabel: JLabel? = null
 
-	/**
-	 * Constructor of Status class.
-	 */
 	init {
 		setupBaseUI()
 	}
@@ -312,20 +309,25 @@ class Status(
 							evt.cardState.terminalsWithCard.forEach { updateInfo(it, null) }
 							evt.cardState.recognizedCards.forEach { updateInfo(it.terminal, it.cardType) }
 						}
+
 						is CardStateEvent.TerminalAdded -> {
 							addInfo(evt.terminalName)
 						}
+
 						is CardStateEvent.TerminalRemoved -> {
 							removeInfo(evt.terminalName)
 							// updateInfo(evt.terminalName, null)
 						}
+
 						is CardStateEvent.CardInserted -> {
 							// addInfo(evt.terminalName, null)
 							updateInfo(evt.terminalName, UNKNOWN_CARD)
 						}
+
 						is CardStateEvent.CardRemoved -> {
 							updateInfo(evt.terminalName, null)
 						}
+
 						is CardStateEvent.CardRecognized -> {
 							// addInfo(evt.terminalName, evt.cardType)
 							updateInfo(evt.terminalName, evt.cardType)

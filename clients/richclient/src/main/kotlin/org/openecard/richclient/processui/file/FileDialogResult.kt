@@ -1,4 +1,4 @@
-/****************************************************************************
+/*
  * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -35,17 +35,6 @@ class FileDialogResult(
 ) : Serializable {
 	var selectedFiles: List<File>
 
-	/**
-	 * Creates a result with status OK.
-	 * The instance returned by this constructor returns `true` in the [.isOK] method and returns
-	 * a non empty list in the [.getSelectedFiles] method.
-	 *
-	 * @param selectedFiles The list of files selected in the dialog, or the empty list if no files were selected.
-
-	 * Creates a result with status CANCEL.
-	 * The instance returned by this constructor returns `true` in the [.isCancel] method and returns
-	 * an empty list in the [.getSelectedFiles] method.
-	 */
 	init {
 		if (selectedFiles == null) {
 			this.selectedFiles = emptyList()
@@ -54,20 +43,19 @@ class FileDialogResult(
 		}
 	}
 
+	/**
+	 * The result status of the file dialog.
+	 *
+	 * @return `true` if the dialog finished successfully and at least one file was selected, `false` otherwise.
+	 */
 	val isOK: Boolean
-		/**
-		 * Returns the result status of the file dialog.
-		 *
-		 * @return `true` if the dialog finished successfully and at least one file was selected,
-		 * `false` otherwise.
-		 */
 		get() = !isCancel
 
+	/**
+	 * The result status of the file dialog.
+	 *
+	 * @return `true` if the dialog was cancelled and no file was selected, `false` otherwise.
+	 */
 	val isCancel: Boolean
-		/**
-		 * Returns the result status of the file dialog.
-		 *
-		 * @return `true` if the dialog was cancelled and no file was selected, `false` otherwise.
-		 */
 		get() = selectedFiles.isEmpty()
 }

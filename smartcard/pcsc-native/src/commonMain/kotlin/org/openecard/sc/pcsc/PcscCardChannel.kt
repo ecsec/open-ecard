@@ -30,6 +30,7 @@ class PcscCardChannel(
 			when (channelNumber) {
 				// basic channel does not need to be closed
 				0 -> {}
+
 				else -> {
 					TODO("Not yet implemented")
 				}

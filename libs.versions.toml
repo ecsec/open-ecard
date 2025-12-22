@@ -36,7 +36,7 @@ androidx-test-runner = "1.7.0"
 android-slf4j = "2.0.+"
 
 # JVM dependencies
-bouncycastle = "1.82"
+bouncycastle = "1.83"
 kotlin-pcsc = "1.1.0"
 apache-batik="1.19"
 proxy-vole = "1.1.7"

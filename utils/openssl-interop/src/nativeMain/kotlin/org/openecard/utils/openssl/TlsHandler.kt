@@ -1,8 +1,14 @@
 package org.openecard.utils.openssl
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.cinterop.*
+import kotlinx.cinterop.CPointer
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.cstr
+import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.toKString
+import kotlinx.cinterop.usePinned
 import org.openecard.openssl.BIO_C_DO_STATE_MACHINE
 import org.openecard.openssl.BIO_ctrl
 import org.openecard.openssl.BIO_new_connect
@@ -31,7 +37,6 @@ import kotlin.ByteArray
 import kotlin.Int
 import kotlin.OptIn
 import kotlin.String
-import kotlin.compareTo
 import kotlin.let
 
 private val logger = KotlinLogging.logger { }

@@ -13,18 +13,27 @@ actual fun handleExeptions(
 ): BindingException =
 
 	when (ex) {
-		is CancellationException ->
+		is CancellationException -> {
 			UserCanceled(eserviceClient, cause = ex)
-		is UntrustedCertificateError ->
+		}
+
+		is UntrustedCertificateError -> {
 			UnknownTrustedChannelError(eserviceClient, "Channel used untrusted certificate", ex)
-		is InvalidTlsParameter ->
+		}
+
+		is InvalidTlsParameter -> {
 			UnknownTrustedChannelError(eserviceClient, "Channel used invalid parameters", ex)
+		}
+
 		// is IOException -> {
 		// 	doIf(ex.cause != null) { handleIoExceptions(eserviceClient, ex) }
 		// 		?: UnknownTrustedChannelError(eserviceClient, "Unknown error in channel establishment", ex)
 		// }
-		is BindingException ->
+		is BindingException -> {
 			ex
-		else ->
+		}
+
+		else -> {
 			UnknownClientError(eserviceClient, cause = ex)
+		}
 	}

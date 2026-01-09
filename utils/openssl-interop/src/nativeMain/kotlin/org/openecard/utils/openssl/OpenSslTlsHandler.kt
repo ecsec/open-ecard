@@ -12,7 +12,6 @@ import kotlinx.cinterop.asStableRef
 import kotlinx.cinterop.cValuesOf
 import kotlinx.cinterop.convert
 import kotlinx.cinterop.cstr
-import kotlinx.cinterop.invoke
 import kotlinx.cinterop.set
 import kotlinx.cinterop.staticCFunction
 import kotlinx.cinterop.toKString
@@ -41,7 +40,6 @@ import org.openecard.openssl.SSL_ERROR_ZERO_RETURN
 import org.openecard.openssl.SSL_OP_NO_SSLv3
 import org.openecard.openssl.SSL_OP_NO_TLSv1
 import org.openecard.openssl.SSL_OP_NO_TLSv1_1
-import org.openecard.openssl.SSL_OP_NO_TLSv1_2
 import org.openecard.openssl.SSL_OP_NO_TLSv1_3
 import org.openecard.openssl.SSL_VERIFY_NONE
 import org.openecard.openssl.SSL_ctrl
@@ -60,8 +58,6 @@ import org.openecard.openssl.SSL_set_ex_data
 import org.openecard.openssl.SSL_shutdown
 import org.openecard.openssl.SSL_state_string_long
 import org.openecard.openssl.SSL_write
-import org.openecard.openssl.SSLv23_client_method
-import org.openecard.openssl.TLS1_2_VERSION
 import org.openecard.openssl.TLSEXT_NAMETYPE_host_name
 import org.openecard.openssl.TLS_client_method
 import org.openecard.openssl.i2d_X509

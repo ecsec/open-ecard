@@ -23,6 +23,7 @@ semver = "3.0.0"
 jwtkt = "1.2.1"
 kotlin-crypto = "0.5.0"
 kotlin-bignum = "0.3.10"
+okio = "3.16.4"
 
 # Android
 agp = "8.13.+"
@@ -120,6 +121,7 @@ slf4j-android = { group = "uk.uuid.slf4j", name = "slf4j-android", version.ref =
 
 # utilities
 kotlinPoet = { group = "com.squareup", name = "kotlinpoet-jvm", version.ref = "kotlinPoet" }
+okio = {group = "com.squareup.okio", name = "okio", version.ref="okio"}
 
 # testing
 junit-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit" }

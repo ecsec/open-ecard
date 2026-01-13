@@ -6,7 +6,7 @@ import platform.CoreNFC.NFCISO7816APDU
 import platform.Foundation.NSData
 
 @Throws(Exception::class)
-fun commandApduFromRawData(data: NSData): CommandApdu? = data.toUByteArray()?.toCommandApdu()
+fun commandApduFromRawData(data: NSData): CommandApdu = data.toUByteArray().toCommandApdu()
 
 @Throws(Exception::class)
 fun commandApduFromNFCISO7816APDU(

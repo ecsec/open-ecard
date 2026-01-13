@@ -1,5 +1,6 @@
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.convert
 import kotlinx.cinterop.readBytes
 import kotlinx.cinterop.usePinned
 import platform.Foundation.NSData
@@ -7,15 +8,14 @@ import platform.Foundation.dataWithBytes
 import kotlin.collections.toUByteArray
 
 @OptIn(ExperimentalForeignApi::class)
-fun NSData.toUByteArray(): UByteArray? =
-	if (length > 0.toUInt()) {
-		bytes?.readBytes(length.toInt())?.toUByteArray()
-	} else {
-		null
+fun NSData.toUByteArray(): UByteArray =
+	when (val b = bytes) {
+		null -> ubyteArrayOf()
+		else -> b.readBytes(length.convert()).toUByteArray()
 	}
 
 @OptIn(ExperimentalForeignApi::class)
-fun NSData.toByteArray(): ByteArray? = if (length > 0.toUInt()) bytes?.readBytes(length.toInt()) else null
+fun NSData.toByteArray(): ByteArray = bytes?.readBytes(length.convert()) ?: byteArrayOf()
 
 @OptIn(ExperimentalForeignApi::class)
 fun UByteArray.toNSData() =

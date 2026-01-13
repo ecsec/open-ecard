@@ -60,8 +60,6 @@ class EserviceCertTracker {
 		allowedCommCerts?.checkCertHashes(setOf(certHash.toPrintable()))
 	}
 
-	fun getCertsSeen() = certsSeen
-
 	companion object {
 		@OptIn(ExperimentalUnsignedTypes::class)
 		@Throws(UntrustedCertificateError::class, IllegalArgumentException::class)

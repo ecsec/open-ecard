@@ -3,7 +3,6 @@ import kotlin.text.replace
 plugins {
 	id("openecard.kmp-conventions")
 	id("openecard.publish-conventions")
-	id("dev.mokkery")
 }
 
 base {

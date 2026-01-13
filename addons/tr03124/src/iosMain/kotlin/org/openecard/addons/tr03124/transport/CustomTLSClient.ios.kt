@@ -25,7 +25,6 @@ import kotlinx.atomicfu.atomic
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
-import okio.ByteString.Companion.toByteString
 import org.openecard.utils.common.doIf
 import org.openecard.utils.openssl.OpenSslTlsHandler
 import org.openecard.utils.openssl.TlsConfig
@@ -123,7 +122,7 @@ class SwiftNioEngine(
 			onPeerCert = { certBytes, closeNotify ->
 				certBytes?.let {
 					logger.debug { "Adding cert hash" }
-					config.certTracker?.addCertHash(it.certHash())
+					config.certTracker?.addCertHash(it.sha256().toUByteArray())
 				}
 				doIf(!config.performHttp) {
 					logger.debug { "Closing since we only fetch certs." }
@@ -188,10 +187,3 @@ private fun OutgoingContent.stringBody() =
 		is OutgoingContent.ByteArrayContent -> this.bytes().decodeToString()
 		else -> null
 	}
-
-private fun ByteArray.certHash(): UByteArray =
-	this
-		.toByteString()
-		.sha256()
-		.toByteArray()
-		.toUByteArray()

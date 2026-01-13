@@ -28,7 +28,6 @@ kotlin {
 			implementation(libs.ktor.client.nego)
 			implementation(libs.ktor.serde.xml)
 			api(libs.ktor.client.logging)
-			implementation(libs.okio)
 		}
 
 		jvmMain.dependencies {

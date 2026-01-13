@@ -14,6 +14,8 @@ gradle-versions = "0.53.0"
 gradle-jfx = "0.1.0"
 android-sdkloader = "3.1.0"
 moko = "0.25.2"
+swiftKlib = "0.6.4"
+spmForKmp = "1.0.4"
 
 # common
 ktor = "3.3.+"
@@ -175,8 +177,10 @@ test-android-kotlin = [
 ]
 
 [plugins]
+spmForKmp = {id = "io.github.frankois944.spmForKmp", version.ref = "spmForKmp"}
 androidKmpLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 androidSdkLoader = { id = "com.quittle.setup-android-sdk", version.ref = "android-sdkloader" }
+swiftKlib = {id = "io.github.ttypic.swiftklib", version.ref = "swiftKlib"}
 
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-plugin" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

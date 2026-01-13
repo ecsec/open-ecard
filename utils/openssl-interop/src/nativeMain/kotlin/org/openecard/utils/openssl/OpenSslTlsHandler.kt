@@ -158,9 +158,9 @@ class OpenSslTlsHandler(
 			logger.debug { "Creating SSL-Context" }
 			return SSL_CTX_new(
 				TLS_client_method(),
-			).assertNotNull().also {
+			).assertNotNull().also { ctx ->
 				SSL_CTX_set_options(
-					it,
+					ctx,
 					SSL_OP_NO_TLSv1 or
 						SSL_OP_NO_TLSv1_1 or
 						SSL_OP_NO_SSLv3 or
@@ -168,24 +168,24 @@ class OpenSslTlsHandler(
 				)
 
 				if (!tlsConfig.verifyPeer) {
-					SSL_CTX_set_verify(it, SSL_VERIFY_NONE, null)
+					SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, null)
 				}
 
 				SSL_CTX_set_psk_client_callback(
-					it,
+					ctx,
 					pskCallback(),
 				)
 
 				tlsConfig.ciphersTls12?.let { ciphers ->
 					SSL_CTX_set_cipher_list(
-						it,
+						ctx,
 						ciphers.joinToString(":"),
 					).assertSuccess()
 				}
 
 				tlsConfig.ciphersTls13?.let { ciphers ->
 					SSL_CTX_set_ciphersuites(
-						it,
+						ctx,
 						ciphers.joinToString(":"),
 					).assertSuccess()
 				}

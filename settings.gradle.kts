@@ -42,6 +42,8 @@ include("i18n")
 include("clients:richclient-res")
 include("clients:richclient")
 
+includeBuild("demo")
+
 dependencyResolutionManagement {
 
 	repositories {

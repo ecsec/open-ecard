@@ -18,6 +18,8 @@ dependencies {
 	implementation(libs.plugins.androidKmpLibrary)
 	implementation(libs.plugins.spmForKmp)
 
+	implementation(libs.plugins.androidApplication)
+
 	implementation(libs.jose4j)
 	implementation(libs.semver)
 	implementation(libs.jgit)

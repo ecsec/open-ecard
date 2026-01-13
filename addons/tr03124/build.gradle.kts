@@ -14,8 +14,8 @@ kotlin {
 	sourceSets {
 		commonMain.dependencies {
 			implementation(libs.kotlin.logging)
-			// api(project(":utils:common"))
 			api(project(":smartcard:sc-base"))
+			api(project(":sal:sal-base"))
 			implementation(project(":smartcard:pace"))
 			implementation(project(":sal:smartcard-sal"))
 			implementation(project(":cif:bundled-cifs"))

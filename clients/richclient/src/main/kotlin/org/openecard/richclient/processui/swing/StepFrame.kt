@@ -68,7 +68,7 @@ class StepFrame(
 	}
 
 	private fun initComponents() {
-		val stepLayouter: StepLayouter = StepLayouter.create(step.inputInfoUnits, dialogType, step.title!!)
+		val stepLayouter: StepLayouter = StepLayouter.create(step.inputInfoUnits, dialogType, step.title)
 		val contentPanel = stepLayouter.panel
 		panel.add(contentPanel, BorderLayout.CENTER)
 
@@ -231,10 +231,6 @@ class StepFrame(
 			}
 
 			StepActionResultStatus.CANCEL -> {
-				stepResult.setResultStatus(ResultStatus.CANCEL)
-			}
-
-			else -> {
 				stepResult.setResultStatus(ResultStatus.CANCEL)
 			}
 		}

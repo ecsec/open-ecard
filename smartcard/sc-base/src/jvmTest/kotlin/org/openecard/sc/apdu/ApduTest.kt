@@ -244,7 +244,7 @@ class ApduTest {
 		UByteArray(lcInput.toInt()) { 0.toUByte() }.let { data ->
 			val dataStr = data.toHexString()
 			val lc = data.size.toUByte().toHexString()
-			val le = leInput.toUByte().toHexString()
+			val le = leInput.toHexString()
 			"00010203$lc$dataStr$le".hexToUByteArray().let { apduData ->
 				val rewrite = apduData.toCommandApdu().toBytes
 				assertContentEquals(apduData, rewrite)

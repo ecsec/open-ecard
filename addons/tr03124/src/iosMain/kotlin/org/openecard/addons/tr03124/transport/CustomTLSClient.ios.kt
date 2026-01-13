@@ -120,14 +120,14 @@ class SwiftNioEngine(
 			sslCtx,
 			host = data.url.host,
 			config.tlsConfig.psk,
-			onPeerCert = { handler, certBytes ->
+			onPeerCert = { certBytes, closeNotify ->
 				certBytes?.let {
 					logger.debug { "Adding cert hash" }
 					config.certTracker?.addCertHash(it.certHash())
 				}
 				doIf(!config.performHttp) {
 					logger.debug { "Closing since we only fetch certs." }
-					handler.closeNotify()
+					closeNotify.invoke()
 					responseDeffered.cancel(ClientAbort())
 				}
 			},

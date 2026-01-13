@@ -146,12 +146,14 @@ fun pskCallback() =
 		}
 	}
 
+typealias PeerCertHandler = ((certBytes: ByteArray?, closeNotify: () -> Unit) -> Unit)?
+
 @OptIn(ExperimentalForeignApi::class, UnsafeNumber::class)
 class OpenSslTlsHandler(
 	ctx: CPointer<SSL_CTX>,
 	val host: String,
 	psk: TlsPsk?,
-	val onPeerCert: ((handler: OpenSslTlsHandler, ByteArray?) -> Unit)?,
+	val onPeerCert: PeerCertHandler,
 ) : AutoCloseable {
 	companion object {
 		fun sslCtx(tlsConfig: TlsConfig): CPointer<SSL_CTX> {
@@ -268,7 +270,7 @@ class OpenSslTlsHandler(
 				"Host: $host - agreed cipher: ${ SSL_CIPHER_get_name(cipher)?.toKString() }"
 			}
 
-			onPeerCert?.invoke(this, getPeerCertDer())
+			onPeerCert?.invoke(getPeerCertDer()) { closeNotify() }
 
 			flushOutBoundBufferToSSL()
 			return

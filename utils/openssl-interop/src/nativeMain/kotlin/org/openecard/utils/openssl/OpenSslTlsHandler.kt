@@ -62,6 +62,7 @@ import org.openecard.openssl.TLSEXT_NAMETYPE_host_name
 import org.openecard.openssl.TLS_client_method
 import org.openecard.openssl.i2d_X509
 import org.openecard.utils.openssl.MemoryManager.Companion.memoryManaged
+import org.openecard.utils.openssl.assertNotNull
 import kotlin.collections.toUByteArray
 
 private val logger = KotlinLogging.logger { }
@@ -115,13 +116,13 @@ fun pskCallback() =
 
 		when (tlsPsk) {
 			null -> {
-				logger.error { "PSK value was null" }
+				logger.error { "PSK values not set" }
 				0u
 			}
 
 			else -> {
 				if (tlsPsk.identity.size + 1 > maxIdentityLen.convert<Int>()) {
-					logger.error { "pskRef identity to big" }
+					logger.error { "PSK identity value is larger than maximum allowed size" }
 					0u
 				} else {
 					tlsPsk.identity.forEachIndexed { i, b ->
@@ -130,14 +131,14 @@ fun pskCallback() =
 					ident?.set(tlsPsk.identity.size, 0)
 
 					if (tlsPsk.pskVal.size > maxPskLen.convert<Int>()) {
-						logger.error { "pskRef val to big" }
+						logger.error { "PSK key value is larger than maximum allowed size" }
 						0u
 					} else {
 						tlsPsk.pskVal.forEachIndexed { i, b ->
 							psk?.set(i, b)
 						}
 						tlsPsk.pskVal.size.convert<UInt>().also {
-							logger.debug { "all good returing $it" }
+							logger.trace { "PSK callback succeeded providing values to openssl (result: $it)" }
 						}
 					}
 				}

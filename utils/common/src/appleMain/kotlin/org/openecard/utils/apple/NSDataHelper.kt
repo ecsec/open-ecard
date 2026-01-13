@@ -1,3 +1,5 @@
+package org.openecard.utils.apple
+
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.convert

@@ -12,7 +12,7 @@ import org.openecard.sc.iface.CardChannel
 import org.openecard.sc.iface.CardProtocol
 import org.openecard.sc.iface.CommError
 import org.openecard.sc.iface.RemovedCard
-import kotlin.UByteArray
+import org.openecard.utils.apple.toUByteArray
 
 private val logger = KotlinLogging.logger { }
 

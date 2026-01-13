@@ -23,13 +23,13 @@ import kotlinx.atomicfu.atomic
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import org.openecard.utils.apple.toByteArray
+import org.openecard.utils.apple.toNSData
 import org.openecard.utils.common.doIf
 import org.openecard.utils.openssl.OpenSslTlsHandler
 import org.openecard.utils.openssl.TlsConfig
 import platform.Foundation.NSData
 import platform.Foundation.NSError
-import toByteArray
-import toNSData
 
 private val logger = KotlinLogging.logger { }
 

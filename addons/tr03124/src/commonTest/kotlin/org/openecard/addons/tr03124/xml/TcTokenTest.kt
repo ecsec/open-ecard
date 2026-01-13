@@ -1,6 +1,5 @@
 package org.openecard.addons.tr03124.xml
 
-import org.junit.jupiter.api.assertInstanceOf
 import org.openecard.addons.tr03124.xml.TcTokenXml.Companion.parseTcToken
 import org.openecard.addons.tr03124.xml.TcTokenXml.Companion.toBindingType
 import org.openecard.addons.tr03124.xml.TcTokenXml.Companion.toSecurityProtocolType
@@ -8,6 +7,7 @@ import org.openecard.utils.common.hex
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 
 class TcTokenTest {
 	@OptIn(ExperimentalUnsignedTypes::class)
@@ -35,7 +35,7 @@ class TcTokenTest {
 		assertEquals("https://service.example.de/ComError?7eb39f62", token.communicationErrorAddress)
 		assertEquals(TcTokenXml.BindingType.PAOS, token.binding?.toBindingType())
 		assertEquals(TcTokenXml.SecurityProtocolType.TLS_PSK, token.securityProtocol?.toSecurityProtocolType())
-		assertContentEquals(hex("4BC1A0B5"), assertInstanceOf<TcTokenXml.PskParams>(token.securityParameters).psk?.v)
+		assertContentEquals(hex("4BC1A0B5"), assertIs<TcTokenXml.PskParams>(token.securityParameters).psk?.v)
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)

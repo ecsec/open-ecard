@@ -5,6 +5,7 @@ plugins {
 	id("openecard.kmp-jvm-conventions")
 	id("openecard.kmp-ios-conventions")
 	id("openecard.kmp-desktop-conventions")
+	id("openecard.kmp-cinterop-conventions")
 	id("openecard.kmp-android-lib-conventions")
 }
 

@@ -5,6 +5,7 @@ plugins {
 	id("openecard.kmp-jvm-conventions")
 	id("openecard.kmp-ios-conventions")
 	id("openecard.kmp-desktop-conventions")
+	id("openecard.kmp-cinterop-conventions")
 }
 
 kotlin {
@@ -15,14 +16,6 @@ kotlin {
 
 		commonTest.dependencies {
 			implementation(libs.bundles.test.basics.kotlin)
-		}
-
-		nativeMain.dependencies {
-			implementation(libs.kotlin.crypto.openssl)
-		}
-		jvmTest.dependencies {
-		}
-		iosMain.dependencies {
 		}
 	}
 }

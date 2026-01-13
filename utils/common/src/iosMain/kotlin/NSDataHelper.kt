@@ -7,7 +7,15 @@ import platform.Foundation.dataWithBytes
 import kotlin.collections.toUByteArray
 
 @OptIn(ExperimentalForeignApi::class)
-fun NSData.toUByteArray(): UByteArray? = bytes?.readBytes(length.toInt())?.toUByteArray()
+fun NSData.toUByteArray(): UByteArray? =
+	if (length > 0.toUInt()) {
+		bytes?.readBytes(length.toInt())?.toUByteArray()
+	} else {
+		null
+	}
+
+@OptIn(ExperimentalForeignApi::class)
+fun NSData.toByteArray(): ByteArray? = if (length > 0.toUInt()) bytes?.readBytes(length.toInt()) else null
 
 @OptIn(ExperimentalForeignApi::class)
 fun UByteArray.toNSData() =

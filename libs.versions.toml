@@ -130,7 +130,7 @@ kotlin-crypto-asn1-core = { module = "dev.whyoleg.cryptography:cryptography-seri
 kotlin-crypto-asn1-modules = { module = "dev.whyoleg.cryptography:cryptography-serialization-asn1-modules", version.ref = "kotlin-crypto" }
 kotlin-crypto-jvm = { module = "dev.whyoleg.cryptography:cryptography-provider-jdk", version.ref = "kotlin-crypto" }
 kotlin-crypto-apple = { module = "dev.whyoleg.cryptography:cryptography-provider-apple", version.ref = "kotlin-crypto" }
-kotlin-crypto-openssl = { module = "dev.whyoleg.cryptography:cryptography-provider-openssl3-prebuilt", version.ref = "kotlin-crypto" }
+kotlin-crypto-openssl = { module = "dev.whyoleg.cryptography:cryptography-provider-openssl3-api", version.ref = "kotlin-crypto" }
 kotlin-crypto-webcrypto = { module = "dev.whyoleg.cryptography:cryptography-provider-webcrypto", version.ref = "kotlin-crypto" }
 
 kotlin-bignum = { module = "com.ionspin.kotlin:bignum", version.ref = "kotlin-bignum" }

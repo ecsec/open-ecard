@@ -5,6 +5,7 @@ plugins {
 	id("openecard.kmp-jvm-conventions")
 	id("openecard.kmp-ios-conventions")
 	id("openecard.kmp-desktop-conventions")
+	id("openecard.kmp-cinterop-conventions")
 }
 
 kotlin {
@@ -35,6 +36,7 @@ kotlin {
 
 		nativeMain.dependencies {
 			implementation(libs.kotlin.crypto.random)
+			implementation(project(":utils:openssl-interop"))
 			implementation(libs.kotlin.crypto.openssl)
 		}
 	}

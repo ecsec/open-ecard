@@ -2,8 +2,6 @@ package org.openecard.addons.tr03124.transport
 
 import SwiftNio.OpenSslTlsChannelHandler
 import SwiftNio.SwiftNioHttpPskClient
-import dev.whyoleg.cryptography.CryptographyProviderApi
-import dev.whyoleg.cryptography.providers.base.toNSData
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.HttpClientEngineBase
@@ -31,6 +29,7 @@ import org.openecard.utils.openssl.TlsConfig
 import platform.Foundation.NSData
 import platform.Foundation.NSError
 import toByteArray
+import toNSData
 
 private val logger = KotlinLogging.logger { }
 
@@ -57,7 +56,7 @@ class SwiftNioEngineFactory : HttpClientEngineFactory<SwiftNioEngineConfig> {
 		)
 }
 
-@OptIn(ExperimentalForeignApi::class, CryptographyProviderApi::class)
+@OptIn(ExperimentalForeignApi::class)
 class SwiftNioEngine(
 	override val config: SwiftNioEngineConfig,
 ) : HttpClientEngineBase("SwiftNioEngine") {
@@ -95,7 +94,6 @@ class SwiftNioEngine(
 			},
 		)
 
-	@OptIn(CryptographyProviderApi::class)
 	@InternalAPI
 	override suspend fun execute(data: HttpRequestData): HttpResponseData {
 		logger.debug { "Executing request $data" }

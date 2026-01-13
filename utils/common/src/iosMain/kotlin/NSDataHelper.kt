@@ -22,3 +22,9 @@ fun UByteArray.toNSData() =
 	usePinned {
 		NSData.dataWithBytes(it.addressOf(0), it.get().size.toULong())
 	}
+
+@OptIn(ExperimentalForeignApi::class)
+fun ByteArray.toNSData() =
+	usePinned {
+		NSData.dataWithBytes(it.addressOf(0), it.get().size.toULong())
+	}

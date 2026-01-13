@@ -6,7 +6,6 @@ import kotlinx.serialization.decodeFromString
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import org.openecard.utils.serialization.PrintableUByteArray
-import java.lang.IllegalArgumentException
 
 @Serializable
 @SerialName("TCTokenType")

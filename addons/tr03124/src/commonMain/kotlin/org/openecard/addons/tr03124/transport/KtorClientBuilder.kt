@@ -1,7 +1,12 @@
 package org.openecard.addons.tr03124.transport
 
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging.logger
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.api.createClientPlugin
 import org.openecard.addons.tr03124.xml.TcToken
+
+private val logger = KotlinLogging.logger { }
 
 interface KtorClientBuilder {
 	/**

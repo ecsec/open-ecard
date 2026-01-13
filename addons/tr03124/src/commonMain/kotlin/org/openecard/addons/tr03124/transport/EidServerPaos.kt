@@ -39,7 +39,6 @@ import org.openecard.addons.tr03124.xml.TransmitResponse
 import org.openecard.addons.tr03124.xml.eacXml
 import org.openecard.addons.tr03124.xml.toBody
 import org.openecard.utils.common.generateSessionId
-import java.lang.IllegalStateException
 import kotlin.random.Random
 
 private val log = KotlinLogging.logger { }

@@ -4,7 +4,6 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
-import org.openecard.addons.tr03124.xml.TcToken
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

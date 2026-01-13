@@ -39,7 +39,7 @@ interface EidServerInterface {
 	 * @param ex The exception to throw after receiving the server response.
 	 * @param protocol The protocol to set in the protocol data message.
 	 */
-	@Throws(BindingException::class)
+	@Throws(BindingException::class, CancellationException::class)
 	suspend fun sendError(
 		ex: BindingException,
 		protocol: String = ECardConstants.Protocol.EAC2,

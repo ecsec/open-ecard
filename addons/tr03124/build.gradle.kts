@@ -1,10 +1,13 @@
+import java.net.URI
+
 description = "TR03124 implementation"
 
 plugins {
 	id("openecard.kmp-lib-conventions")
 	id("openecard.kmp-jvm-conventions")
-	id("openecard.kmp-ios-conventions")
-	// id("openecard.kmp-desktop-conventions")
+	id("openecard.kmp-spm-ios-conventions")
+	id("openecard.kmp-desktop-conventions")
+	id("openecard.kmp-cinterop-conventions")
 }
 
 kotlin {
@@ -14,16 +17,18 @@ kotlin {
 			// api(project(":utils:common"))
 			// api(project(":smartcard:sc-base"))
 			implementation(project(":smartcard:pace"))
-			api(project(":sal:smartcard-sal"))
+			implementation(project(":sal:smartcard-sal"))
 			implementation(project(":cif:bundled-cifs"))
 
 			implementation(libs.kotlin.serialization.core)
 			implementation(libs.kotlin.serialization.xml)
+			implementation(libs.ktor.serde.json)
 
 			implementation(libs.ktor.client.core)
 			implementation(libs.ktor.client.nego)
 			implementation(libs.ktor.serde.xml)
 			api(libs.ktor.client.logging)
+			implementation(libs.okio)
 		}
 
 		jvmMain.dependencies {
@@ -45,10 +50,15 @@ kotlin {
 		}
 
 		iosMain.dependencies {
-			api(project(":utils:common"))
-			implementation(libs.kotlin.crypto.openssl)
+			implementation(project(":utils:openssl-interop"))
 			implementation(libs.ktor.client.darwin)
 			implementation(libs.ktor.client.cio)
+			implementation(project(":cif:bundled-cifs"))
+			implementation(project(":smartcard:pcsc-ios"))
+		}
+
+		linuxX64Test.dependencies {
+			implementation(project(":utils:openssl-interop"))
 		}
 
 		listOf(
@@ -60,6 +70,7 @@ kotlin {
 					cinterops.create("SwiftNio")
 				}
 			}
+
 			it.binaries.framework {
 				baseName = "openecard_${project.name}"
 				isStatic = true

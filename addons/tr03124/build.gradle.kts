@@ -81,7 +81,7 @@ kotlin {
 			it.binaries.getTest("debug").apply {
 				freeCompilerArgs +=
 					listOf(
-						"-Xoverride-konan-properties=osVersionMin.ios_simulator_arm64=16.0",
+						"-Xoverride-konan-properties=osVersionMin.ios_simulator_arm64=${libs.versions.iosMinSimulator}",
 					)
 				linkerOpts +=
 					listOf(
@@ -92,10 +92,11 @@ kotlin {
 	}
 }
 
+val iosPlatformVersion: String by project
 swiftPackageConfig {
 	val path = "${project.layout.buildDirectory.dir("SPM").get().asFile.path}"
 	create("SwiftNio") {
-		minIos = "15.0"
+		minIos = iosPlatformVersion
 		spmWorkingPath = path
 		dependency {
 			remotePackageVersion(
@@ -103,14 +104,14 @@ swiftPackageConfig {
 				products = {
 					add("AsyncHTTPClient")
 				},
-				version = "1.20.0",
+				version = libs.versions.swiftNio.get(),
 				packageName = "async-http-client",
 			)
 		}
 		dependency {
 			remotePackageVersion(
 				url = URI("https://github.com/apple/swift-nio-extras"),
-				version = "1.20.0",
+				version = libs.versions.swiftNio.get(),
 				products = {
 					add("NIOHTTPTypesHTTP1")
 					add("NIOHTTPTypes")

@@ -6,7 +6,6 @@ plugins {
 	id("openecard.kmp-lib-conventions")
 	id("openecard.kmp-jvm-conventions")
 	id("openecard.kmp-spm-ios-conventions")
-	id("openecard.kmp-cinterop-conventions")
 }
 
 kotlin {

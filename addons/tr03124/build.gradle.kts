@@ -6,7 +6,6 @@ plugins {
 	id("openecard.kmp-lib-conventions")
 	id("openecard.kmp-jvm-conventions")
 	id("openecard.kmp-spm-ios-conventions")
-	id("openecard.kmp-desktop-conventions")
 	id("openecard.kmp-cinterop-conventions")
 }
 
@@ -54,10 +53,6 @@ kotlin {
 			implementation(libs.ktor.client.cio)
 			implementation(project(":cif:bundled-cifs"))
 			implementation(project(":smartcard:pcsc-ios"))
-		}
-
-		linuxX64Test.dependencies {
-			implementation(project(":utils:openssl-interop"))
 		}
 
 		listOf(

@@ -10,7 +10,6 @@ import okhttp3.ConnectionSpec
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.TlsVersion
-import okio.ByteString.Companion.toByteString
 import org.bchateau.pskfactories.BcPskSSLSocketFactory
 import org.bchateau.pskfactories.BcPskTlsParams
 import org.bouncycastle.jce.provider.BouncyCastleProvider
@@ -260,7 +259,7 @@ class CertTrackingClientBuilder(
 		}
 }
 
-fun Certificate.contentSha256(): ByteArray = encoded.toByteString().sha256().toByteArray()
+fun Certificate.contentSha256(): ByteArray = encoded.sha256()
 
 object SslSettings {
 	init {

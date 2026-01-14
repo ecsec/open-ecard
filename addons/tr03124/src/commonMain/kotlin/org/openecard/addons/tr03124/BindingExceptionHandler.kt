@@ -1,12 +1,13 @@
 package org.openecard.addons.tr03124
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.ktor.utils.io.CancellationException
 import org.openecard.addons.tr03124.transport.EidServerInterface
 import org.openecard.addons.tr03124.transport.EserviceClient
 
 private val log = KotlinLogging.logger { }
 
-@Throws(BindingException::class)
+@Throws(BindingException::class, CancellationException::class)
 suspend fun <T> runEacCatching(
 	eserviceClient: EserviceClient,
 	eidServer: EidServerInterface?,

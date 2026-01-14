@@ -184,8 +184,6 @@ class ExecutionEngine(
 							StepActionResultStatus.REPEAT -> {
 								next = navigator.replaceCurrent(actionReplace)
 							}
-
-							else -> {}
 						}
 					} else {
 						// no replacement just proceed
@@ -205,8 +203,6 @@ class ExecutionEngine(
 							StepActionResultStatus.REPEAT -> {
 								next = navigator.current()
 							}
-
-							else -> {}
 						}
 					}
 				}

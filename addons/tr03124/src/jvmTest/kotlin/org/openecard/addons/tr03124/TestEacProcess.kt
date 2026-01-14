@@ -2,7 +2,6 @@ package org.openecard.addons.tr03124
 
 import io.ktor.client.plugins.logging.LogLevel
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assumptions
 import org.junit.jupiter.api.assertInstanceOf
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable

@@ -10,7 +10,7 @@ sealed interface ClassByte {
 			if ((data.toInt() and 0b1110_0000) == 0) {
 				val smVal = ((data.toInt() shr 2) and 0b11).toUByte()
 				val sm =
-					SecureMessagingIndication.entries.find { it.value.toUByte() == smVal }!!
+					SecureMessagingIndication.entries.find { it.value == smVal }!!
 				InterIndustryClassByte(
 					data.toInt() and 0b0000_0011,
 					sm,

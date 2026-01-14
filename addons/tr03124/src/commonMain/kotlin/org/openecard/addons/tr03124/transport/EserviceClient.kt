@@ -5,12 +5,13 @@ import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.addons.tr03124.xml.StartPaos
 import org.openecard.addons.tr03124.xml.TcToken
 import org.openecard.sc.pace.cvc.CertificateDescription
+import kotlin.coroutines.cancellation.CancellationException
 
 interface EserviceClient {
 	val tcTokenUrl: String
 	val certTracker: EserviceCertTracker
 
-	@Throws(BindingException::class)
+	@Throws(BindingException::class, CancellationException::class)
 	suspend fun fetchToken(): TcToken
 
 	fun buildEidServerInterface(startPaos: StartPaos): EidServerInterface

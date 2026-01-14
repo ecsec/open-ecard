@@ -14,6 +14,8 @@ gradle-versions = "0.53.0"
 gradle-jfx = "0.1.0"
 android-sdkloader = "3.1.0"
 moko = "0.25.2"
+swiftKlib = "0.6.4"
+spmForKmp = "1.0.4"
 
 # common
 ktor = "3.3.+"
@@ -34,6 +36,10 @@ androidx-material = "1.11.+"
 androidx-test-junit = "1.3.0"
 androidx-test-runner = "1.7.0"
 android-slf4j = "2.0.+"
+
+# iOS
+iosMinSimulator ="16.0"
+swiftNio="1.20.0"
 
 # JVM dependencies
 bouncycastle = "1.83"
@@ -130,7 +136,7 @@ kotlin-crypto-asn1-core = { module = "dev.whyoleg.cryptography:cryptography-seri
 kotlin-crypto-asn1-modules = { module = "dev.whyoleg.cryptography:cryptography-serialization-asn1-modules", version.ref = "kotlin-crypto" }
 kotlin-crypto-jvm = { module = "dev.whyoleg.cryptography:cryptography-provider-jdk", version.ref = "kotlin-crypto" }
 kotlin-crypto-apple = { module = "dev.whyoleg.cryptography:cryptography-provider-apple", version.ref = "kotlin-crypto" }
-kotlin-crypto-openssl = { module = "dev.whyoleg.cryptography:cryptography-provider-openssl3-prebuilt", version.ref = "kotlin-crypto" }
+kotlin-crypto-openssl = { module = "dev.whyoleg.cryptography:cryptography-provider-openssl3-api", version.ref = "kotlin-crypto" }
 kotlin-crypto-webcrypto = { module = "dev.whyoleg.cryptography:cryptography-provider-webcrypto", version.ref = "kotlin-crypto" }
 
 kotlin-bignum = { module = "com.ionspin.kotlin:bignum", version.ref = "kotlin-bignum" }
@@ -175,8 +181,10 @@ test-android-kotlin = [
 ]
 
 [plugins]
+spmForKmp = {id = "io.github.frankois944.spmForKmp", version.ref = "spmForKmp"}
 androidKmpLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 androidSdkLoader = { id = "com.quittle.setup-android-sdk", version.ref = "android-sdkloader" }
+swiftKlib = {id = "io.github.ttypic.swiftklib", version.ref = "swiftKlib"}
 
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-plugin" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

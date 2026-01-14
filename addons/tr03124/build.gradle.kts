@@ -1,24 +1,26 @@
+import java.net.URI
+
 description = "TR03124 implementation"
 
 plugins {
 	id("openecard.kmp-lib-conventions")
 	id("openecard.kmp-jvm-conventions")
-	// id("openecard.kmp-ios-conventions")
-	// id("openecard.kmp-desktop-conventions")
+	id("openecard.kmp-spm-ios-conventions")
 }
 
 kotlin {
 	sourceSets {
 		commonMain.dependencies {
 			implementation(libs.kotlin.logging)
-			// api(project(":utils:common"))
-			// api(project(":smartcard:sc-base"))
+			api(project(":smartcard:sc-base"))
+			api(project(":sal:sal-base"))
 			implementation(project(":smartcard:pace"))
-			api(project(":sal:smartcard-sal"))
+			implementation(project(":sal:smartcard-sal"))
 			implementation(project(":cif:bundled-cifs"))
 
 			implementation(libs.kotlin.serialization.core)
 			implementation(libs.kotlin.serialization.xml)
+			implementation(libs.ktor.serde.json)
 
 			implementation(libs.ktor.client.core)
 			implementation(libs.ktor.client.nego)
@@ -42,6 +44,74 @@ kotlin {
 			implementation(libs.junit.params)
 			implementation(libs.logback.classic)
 			implementation(project(":smartcard:pcsc-native"))
+		}
+
+		iosMain.dependencies {
+			implementation(project(":utils:openssl-interop"))
+			implementation(libs.ktor.client.darwin)
+			implementation(libs.ktor.client.cio)
+			implementation(project(":cif:bundled-cifs"))
+			implementation(project(":smartcard:pcsc-ios"))
+		}
+
+		listOf(
+			iosArm64(),
+			iosSimulatorArm64(),
+		).forEach {
+			it.compilations {
+				val main by getting {
+					cinterops.create("SwiftNio")
+				}
+			}
+
+			it.binaries.framework {
+				baseName = "openecard_${project.name}"
+				isStatic = true
+			}
+		}
+		listOf(
+			iosSimulatorArm64(),
+		).forEach {
+			it.binaries.getTest("debug").apply {
+				freeCompilerArgs +=
+					listOf(
+						"-Xoverride-konan-properties=osVersionMin.ios_simulator_arm64=${libs.versions.iosMinSimulator}",
+					)
+				linkerOpts +=
+					listOf(
+						"-all_load",
+					)
+			}
+		}
+	}
+}
+
+val iosPlatformVersion: String by project
+swiftPackageConfig {
+	val path = "${project.layout.buildDirectory.dir("SPM").get().asFile.path}"
+	create("SwiftNio") {
+		minIos = iosPlatformVersion
+		spmWorkingPath = path
+		dependency {
+			remotePackageVersion(
+				url = URI("https://github.com/swift-server/async-http-client.git"),
+				products = {
+					add("AsyncHTTPClient")
+				},
+				version = libs.versions.swiftNio.get(),
+				packageName = "async-http-client",
+			)
+		}
+		dependency {
+			remotePackageVersion(
+				url = URI("https://github.com/apple/swift-nio-extras"),
+				version = libs.versions.swiftNio.get(),
+				products = {
+					add("NIOHTTPTypesHTTP1")
+					add("NIOHTTPTypes")
+					add("NIOExtras")
+				},
+			)
 		}
 	}
 }

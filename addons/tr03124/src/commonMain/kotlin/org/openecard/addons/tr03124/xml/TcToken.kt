@@ -3,7 +3,6 @@ package org.openecard.addons.tr03124.xml
 import org.openecard.addons.tr03124.xml.TcTokenXml.Companion.toBindingType
 import org.openecard.addons.tr03124.xml.TcTokenXml.Companion.toSecurityProtocolType
 import org.openecard.utils.serialization.PrintableUByteArray
-import kotlin.jvm.Throws
 
 sealed interface TcToken {
 	val communicationErrorAddress: String?

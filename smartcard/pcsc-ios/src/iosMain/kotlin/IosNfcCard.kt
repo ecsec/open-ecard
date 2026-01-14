@@ -12,7 +12,7 @@ import org.openecard.sc.iface.CardChannel
 import org.openecard.sc.iface.CardProtocol
 import org.openecard.sc.iface.CommError
 import org.openecard.sc.iface.RemovedCard
-import kotlin.UByteArray
+import org.openecard.utils.apple.toUByteArray
 
 private val logger = KotlinLogging.logger { }
 
@@ -68,7 +68,7 @@ class IosCardChannel internal constructor(
 			when (error?.code) {
 				null -> {
 					res.complete(
-						ResponseApdu(data?.toUByteArray() ?: UByteArray(0), sw1, sw2),
+						ResponseApdu(data?.toUByteArray() ?: ubyteArrayOf(), sw1, sw2),
 					)
 				}
 

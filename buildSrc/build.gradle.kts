@@ -16,6 +16,7 @@ dependencies {
 	implementation(libs.plugins.mokkery)
 
 	implementation(libs.plugins.androidKmpLibrary)
+	implementation(libs.plugins.spmForKmp)
 
 	implementation(libs.jose4j)
 	implementation(libs.semver)

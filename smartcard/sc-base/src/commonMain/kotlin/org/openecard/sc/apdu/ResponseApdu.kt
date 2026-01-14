@@ -28,7 +28,7 @@ fun UByteArray.toResponseApdu(): ResponseApdu {
 	require(size >= 2)
 	val sw = takeLast(2)
 	val data = sliceArray(0 until size - 2)
-	return ResponseApdu(data.toUByteArray(), sw1 = sw[0].toUByte(), sw2 = sw[1].toUByte())
+	return ResponseApdu(data.toUByteArray(), sw1 = sw[0], sw2 = sw[1])
 }
 
 val ResponseApdu.isNormalProcessed: Boolean

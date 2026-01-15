@@ -63,25 +63,6 @@ kotlin {
 					cinterops.create("SwiftNio")
 				}
 			}
-
-			it.binaries.framework {
-				baseName = "openecard_${project.name}"
-				isStatic = true
-			}
-		}
-		listOf(
-			iosSimulatorArm64(),
-		).forEach {
-			it.binaries.getTest("debug").apply {
-				freeCompilerArgs +=
-					listOf(
-						"-Xoverride-konan-properties=osVersionMin.ios_simulator_arm64=${libs.versions.iosMinSimulator}",
-					)
-				linkerOpts +=
-					listOf(
-						"-all_load",
-					)
-			}
 		}
 	}
 }

@@ -16,14 +16,14 @@ kotlin {
 		}
 	}
 
- 	listOf(
- 		iosArm64(),
- 	).forEach { iosTarget ->
- 		iosTarget.binaries.framework {
- 			baseName = "ComposeApp"
- 			isStatic = true
- 		}
- 	}
+	listOf(
+		iosArm64(),
+	).forEach { iosTarget ->
+		iosTarget.binaries.framework {
+			baseName = "ComposeApp"
+			isStatic = true
+		}
+	}
 
 	jvm()
 
@@ -37,18 +37,19 @@ kotlin {
 			implementation(compose.components.uiToolingPreview)
 			implementation(libs.androidx.lifecycle.viewmodelCompose)
 			implementation(libs.androidx.lifecycle.runtimeCompose)
+
+			implementation("org.openecard.addons:tr03124")
 		}
 		commonTest.dependencies {
 			implementation(libs.kotlin.test)
 		}
-         androidMain.dependencies {
-             implementation(compose.preview)
-             implementation(libs.androidx.activity.compose)
-         }
+		androidMain.dependencies {
+			implementation(compose.preview)
+			implementation(libs.androidx.activity.compose)
+		}
 
 		iosMain.dependencies {
-			implementation(libs.oec.utils.openssl)
-			implementation(libs.oec.addons.transport)
+			implementation("org.openecard.utils:openssl-interop")
 		}
 	}
 }

@@ -1,4 +1,4 @@
-package org.example.project
+package org.openecard.demo
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image

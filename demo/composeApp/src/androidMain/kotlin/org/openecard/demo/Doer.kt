@@ -1,3 +1,3 @@
-package org.example.project
+package org.openecard.demo
 
 actual suspend fun doSth() {}

@@ -1,4 +1,4 @@
-package org.example.project
+package org.openecard.demo
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -8,18 +8,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
-        super.onCreate(savedInstanceState)
+	override fun onCreate(savedInstanceState: Bundle?) {
+		enableEdgeToEdge()
+		super.onCreate(savedInstanceState)
 
-        setContent {
-            App()
-        }
-    }
+		setContent {
+			App()
+		}
+	}
 }
 
 @Preview
 @Composable
 fun AppAndroidPreview() {
-    App()
+	App()
 }

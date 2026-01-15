@@ -1,26 +1,15 @@
-package org.example.project
+package org.openecard.demo
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import io.ktor.utils.io.core.toByteArray
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
-import org.openecard.addons.tr03124.transport.CertTrackingClientBuilder
 import org.openecard.addons.tr03124.transport.EserviceCertTracker
 import org.openecard.addons.tr03124.transport.SwiftNioEngineFactory
 import org.openecard.utils.openssl.TlsConfig
 import org.openecard.utils.openssl.TlsPsk
-import kotlin.native.concurrent.TransferMode
-import kotlin.native.concurrent.Worker
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds

@@ -9,7 +9,7 @@ kotlin {
 
 	sourceSets {
 		androidMain.dependencies {
-			implementation(libs.kotlin.logging.android)
+			implementation(libs.kotlin.logging)
 			api(project(":smartcard:sc-base"))
 		}
 

@@ -138,7 +138,8 @@ class AndroidEgkPaceTest {
 
 					assertNotNull(terminals)
 
-					val recognition = DirectCardRecognition(CompleteTree.calls.removeUnsupported(setOf(EgkCifDefinitions.cardType)))
+					val recognition =
+						DirectCardRecognition(CompleteTree.calls.removeUnsupported(setOf(EgkCifDefinitions.cardType)))
 					val paceFactory = PaceFeatureSoftwareFactory()
 					val sal = SmartcardSal(terminals, setOf(EgkCif), recognition, paceFactory)
 
@@ -185,7 +186,10 @@ class AndroidEgkPaceTest {
 
 					app.connect()
 					val certData = certDs.read()
-					val certs = CertificateFactory.getInstance("X.509").generateCertificates(certData.toByteArray().inputStream())
+					val certs =
+						CertificateFactory
+							.getInstance("X.509")
+							.generateCertificates(certData.toByteArray().inputStream())
 					assert(certs.isNotEmpty())
 
 					mf.connect()

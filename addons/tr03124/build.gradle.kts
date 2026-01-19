@@ -12,11 +12,9 @@ kotlin {
 	sourceSets {
 		commonMain.dependencies {
 			implementation(libs.kotlin.logging)
-			api(project(":smartcard:sc-base"))
-			api(project(":sal:sal-base"))
-			implementation(project(":smartcard:pace"))
-			implementation(project(":sal:smartcard-sal"))
-			implementation(project(":cif:bundled-cifs"))
+			api(project(":smartcard:pace"))
+			api(project(":sal:smartcard-sal"))
+			api(project(":cif:bundled-cifs"))
 
 			implementation(libs.kotlin.serialization.core)
 			implementation(libs.kotlin.serialization.xml)
@@ -50,8 +48,6 @@ kotlin {
 			implementation(project(":utils:openssl-interop"))
 			implementation(libs.ktor.client.darwin)
 			implementation(libs.ktor.client.cio)
-			implementation(project(":cif:bundled-cifs"))
-			implementation(project(":smartcard:pcsc-ios"))
 		}
 
 		listOf(

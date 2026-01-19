@@ -106,7 +106,7 @@ fun <T : Terminals, R> T.withContext(block: (T) -> R): R {
 	// coroutines
 	CancellationException::class,
 )
-suspend fun <T : Terminals, R> T.withContextSuspend(block: suspend (T) -> R): R {
+suspend fun <T : Terminals, R> T.withContextSuspend(block: suspend (Terminals) -> R): R {
 	establishContext()
 	try {
 		return block.invoke(this)

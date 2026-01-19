@@ -18,18 +18,17 @@ import demo.composeapp.generated.resources.compose_multiplatform
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-
-expect suspend fun doSth(): Unit
+import org.openecard.sc.iface.TerminalFactory
 
 @Composable
 @Preview
-fun App() {
+fun App(nfcTerminalFactory: TerminalFactory? = null) {
 	MaterialTheme {
 		var showContent by remember { mutableStateOf(false) }
 		val scope = rememberCoroutineScope()
 		SideEffect {
 			scope.launch {
-				doSth()
+				doNFC(nfcTerminalFactory)
 			}
 		}
 		Column(
@@ -41,9 +40,9 @@ fun App() {
 			horizontalAlignment = Alignment.CenterHorizontally,
 		) {
 			Button(onClick = {
-				scope.launch {
-					doSth()
-				}
+				// scope.launch {
+				// 	doNFC()
+				// }
 				showContent = !showContent
 			}) {
 				Text("Click me!")

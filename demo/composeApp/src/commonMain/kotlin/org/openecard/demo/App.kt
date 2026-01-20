@@ -32,6 +32,7 @@ import org.openecard.sc.iface.TerminalFactory
 fun App(nfcTerminalFactory: TerminalFactory? = null) {
 	MaterialTheme {
 		var result by remember { mutableStateOf("Nothing yet.") }
+		var resultActive by remember { mutableStateOf(false) }
 		val scope = rememberCoroutineScope()
 		val uriHandler = LocalUriHandler.current
 		// SideEffect {
@@ -48,10 +49,11 @@ fun App(nfcTerminalFactory: TerminalFactory? = null) {
 			horizontalAlignment = Alignment.CenterHorizontally,
 		) {
 			Button(onClick = {
-				result = "Working"
+				result = "Working on it"
 				scope.launch {
 					CoroutineScope(Dispatchers.IO).launch {
-						result = doNFC(nfcTerminalFactory) ?: "erorr"
+						result = doNFC(nfcTerminalFactory) ?: "err"
+						resultActive = true
 					}
 				}
 			}) {
@@ -62,13 +64,16 @@ fun App(nfcTerminalFactory: TerminalFactory? = null) {
 					modifier = Modifier.fillMaxWidth(),
 					horizontalAlignment = Alignment.CenterHorizontally,
 				) {
-					Text("Compose: $result")
+					Text("Result-URL: $result")
 				}
 			}
-			Button(onClick = {
-				uriHandler.openUri(result)
-			}) {
-				Text("Open")
+			Button(
+				enabled = resultActive,
+				onClick = {
+					uriHandler.openUri(result)
+				},
+			) {
+				Text("Open Result")
 			}
 		}
 	}

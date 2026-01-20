@@ -58,6 +58,7 @@ kotlin {
 
 		iosMain.dependencies {
 			implementation("org.openecard.utils:openssl-interop")
+			implementation("org.openecard.smartcard:pcsc-ios")
 		}
 	}
 }

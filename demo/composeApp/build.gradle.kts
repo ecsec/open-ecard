@@ -42,7 +42,7 @@ kotlin {
 			implementation(libs.ktor.client.logging)
 			implementation(libs.ktor.serde.json)
 			implementation(libs.ktor.serde.xml)
-			implementation(libs.ktor.client.cio)
+			implementation(libs.ktor.client.core)
 
 			implementation("org.openecard.addons:tr03124")
 		}
@@ -59,6 +59,7 @@ kotlin {
 		iosMain.dependencies {
 			implementation("org.openecard.utils:openssl-interop")
 			implementation("org.openecard.smartcard:pcsc-ios")
+			implementation(libs.ktor.client.darwin)
 		}
 	}
 }

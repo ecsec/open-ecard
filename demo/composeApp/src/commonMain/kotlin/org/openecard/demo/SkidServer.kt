@@ -2,7 +2,7 @@ package org.openecard.demo
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.engine.cio.CIO
+import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.plugins.logging.LogLevel
@@ -23,7 +23,7 @@ class SkidServer(
 	val fsCidUrl: String,
 	val brokerUrl: String,
 	val client: HttpClient =
-		io.ktor.client.HttpClient(CIO) {
+		io.ktor.client.HttpClient {
 			install(HttpCookies)
 			install(ContentNegotiation) {
 				json()

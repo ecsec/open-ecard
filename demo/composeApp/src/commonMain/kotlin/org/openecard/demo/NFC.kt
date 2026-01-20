@@ -1,6 +1,8 @@
 package org.openecard.demo
 
 import androidx.compose.runtime.Composable
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging.logger
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.addons.tr03124.ClientInformation
@@ -15,6 +17,8 @@ import org.openecard.sal.sc.recognition.DirectCardRecognition
 import org.openecard.sc.iface.TerminalFactory
 import org.openecard.sc.iface.withContextSuspend
 import org.openecard.sc.pace.PaceFeatureSoftwareFactory
+
+private val logger = KotlinLogging.logger { }
 
 @OptIn(ExperimentalUnsignedTypes::class)
 suspend fun doNFC(terminalFactory: TerminalFactory?): String? =

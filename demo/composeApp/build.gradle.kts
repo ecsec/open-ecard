@@ -43,6 +43,7 @@ kotlin {
 			implementation(libs.ktor.serde.json)
 			implementation(libs.ktor.serde.xml)
 			implementation(libs.ktor.client.core)
+			implementation(libs.kotlin.logging)
 
 			implementation("org.openecard.addons:tr03124")
 		}
@@ -54,6 +55,7 @@ kotlin {
 			implementation(libs.androidx.activity.compose)
 			implementation(libs.ktor.client.android)
 			implementation("org.openecard.smartcard:pcsc-android")
+			implementation(libs.sfl4j.android)
 		}
 
 		iosMain.dependencies {

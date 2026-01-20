@@ -29,7 +29,9 @@ suspend fun doNFC(terminalFactory: TerminalFactory?): String? =
 
 			val session = sal.startSession()
 
-			val tokenUrl = GovernikusTestServer().loadTcTokenUrl()
+// 			val tokenUrl = GovernikusTestServer().loadTcTokenUrl()
+			val tokenUrl = SkidServer.forStageSystem().loadTcTokenUrl()
+// 			val tokenUrl = SkidServer.forProdSystem().loadTcTokenUrl()
 
 			when (val terminal = ctx.getTerminal("")) {
 				null -> {

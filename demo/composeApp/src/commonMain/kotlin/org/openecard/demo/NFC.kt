@@ -61,5 +61,6 @@ suspend fun doNFC(terminalFactory: TerminalFactory?): String? =
 			}
 		}
 	} catch (e: Throwable) {
-		"horrible error ${e.message}"
+		logger.debug(e) { "Error" }
+		e.message
 	}

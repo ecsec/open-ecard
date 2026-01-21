@@ -33,6 +33,7 @@ kotlin {
 			implementation(libs.ktor.client.okhttp)
 			implementation(libs.bc.tls)
 			implementation(libs.bc.prov)
+			implementation(libs.bc.pkix)
 		}
 
 		commonTest.dependencies {

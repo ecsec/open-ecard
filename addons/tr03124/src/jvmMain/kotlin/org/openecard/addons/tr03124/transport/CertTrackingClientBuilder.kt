@@ -20,6 +20,7 @@ import org.openecard.addons.tr03124.transport.EidServerPaos.Companion.registerPa
 import org.openecard.addons.tr03124.xml.TcToken
 import org.openecard.utils.common.cast
 import org.openecard.utils.common.doIf
+import java.security.SecureRandom
 import java.security.Security
 import java.security.cert.Certificate
 import java.security.cert.X509Certificate
@@ -282,10 +283,11 @@ object SslSettings {
 	internal fun getSslContext(tm: TrustManager): SSLContext {
 		val sslContext =
 			SSLContext.getInstance(
-				"TLS", // "BCJSSE"
+				"TLS",
+				"BCJSSE",
 			)
 		val tms = listOf(tm)
-		sslContext.init(null, tms.toTypedArray(), null)
+		sslContext.init(null, tms.toTypedArray(), SecureRandom.getInstanceStrong())
 		return sslContext
 	}
 

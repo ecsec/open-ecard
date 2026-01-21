@@ -1,7 +1,6 @@
 package org.openecard.demo
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,32 +13,47 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.input.KeyboardType.Companion.Uri
-import demo.composeapp.generated.resources.Res
-import demo.composeapp.generated.resources.compose_multiplatform
-import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.openecard.sc.iface.TerminalFactory
+
+typealias TokenUrlProvider = suspend () -> String
+
+@Composable
+fun EacButton(
+	text: String,
+	nfcTerminalFactory: TerminalFactory? = null,
+	scope: CoroutineScope,
+	tokenUrlProvider: TokenUrlProvider,
+	onClick: () -> Unit,
+	result: (r: String?) -> Unit,
+) {
+	Button(onClick = {
+		onClick()
+		scope.launch {
+			CoroutineScope(Dispatchers.IO).launch {
+				result(
+					doEAC(nfcTerminalFactory, tokenUrlProvider()),
+				)
+			}
+		}
+	}) {
+		Text(text)
+	}
+}
 
 @Composable
 @Preview
 fun App(nfcTerminalFactory: TerminalFactory? = null) {
 	MaterialTheme {
-		var result by remember { mutableStateOf("Nothing yet.") }
-		var resultActive by remember { mutableStateOf(false) }
+		var status: String? by remember { mutableStateOf(null) }
+		var result: String? by remember { mutableStateOf(null) }
 		val scope = rememberCoroutineScope()
 		val uriHandler = LocalUriHandler.current
-		// SideEffect {
-		// 	scope.launch {
-		// 		doNFC(nfcTerminalFactory)
-		// 	}
-		// }
+
 		Column(
 			modifier =
 				Modifier
@@ -48,32 +62,68 @@ fun App(nfcTerminalFactory: TerminalFactory? = null) {
 					.fillMaxSize(),
 			horizontalAlignment = Alignment.CenterHorizontally,
 		) {
-			Button(onClick = {
-				result = "Working on it"
-				scope.launch {
-					CoroutineScope(Dispatchers.IO).launch {
-						result = doNFC(nfcTerminalFactory) ?: "err"
-						resultActive = true
-					}
-				}
-			}) {
-				Text("Click me!")
+			EacButton(
+				"EAC - SkidStaging",
+				nfcTerminalFactory,
+				scope,
+				{
+					SkidServer.forStageSystem().loadTcTokenUrl()
+				},
+				{
+					status = "Bring card"
+					result = null
+				},
+				{ result = it },
+			)
+			EacButton(
+				"EAC - SkidProd",
+				nfcTerminalFactory,
+				scope,
+				{
+					SkidServer.forProdSystem().loadTcTokenUrl()
+				},
+				{
+					status = "Bring card"
+					result = null
+				},
+				{ result = it },
+			)
+			EacButton(
+				"EAC - Governikus",
+				nfcTerminalFactory,
+				scope,
+				{
+					GovernikusTestServer().loadTcTokenUrl()
+				},
+				{
+					status = "Bring card"
+					result = null
+				},
+				{ result = it },
+			)
+			Column(
+				modifier = Modifier.fillMaxWidth(),
+				horizontalAlignment = Alignment.CenterHorizontally,
+			) {
+				Text("Status: $status")
 			}
-			AnimatedVisibility(true) {
-				Column(
-					modifier = Modifier.fillMaxWidth(),
-					horizontalAlignment = Alignment.CenterHorizontally,
-				) {
-					Text("Result-URL: $result")
-				}
+
+			Column(
+				modifier = Modifier.fillMaxWidth(),
+				horizontalAlignment = Alignment.CenterHorizontally,
+			) {
+				Text("Result-URL: $result")
 			}
+
 			Button(
-				enabled = resultActive,
+				enabled = result != null,
 				onClick = {
-					uriHandler.openUri(result)
+					result?.let {
+						uriHandler.openUri(it)
+					}
 				},
 			) {
-				Text("Open Result")
+				Text("Open Result-URL")
 			}
 		}
 	}

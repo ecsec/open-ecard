@@ -1,9 +1,6 @@
 package org.openecard.demo
 
-import androidx.compose.runtime.Composable
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.github.oshai.kotlinlogging.KotlinLogging.logger
-import kotlinx.coroutines.suspendCancellableCoroutine
 import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.addons.tr03124.ClientInformation
 import org.openecard.addons.tr03124.EidActivation
@@ -21,7 +18,10 @@ import org.openecard.sc.pace.PaceFeatureSoftwareFactory
 private val logger = KotlinLogging.logger { }
 
 @OptIn(ExperimentalUnsignedTypes::class)
-suspend fun doNFC(terminalFactory: TerminalFactory?): String? =
+suspend fun doEAC(
+	terminalFactory: TerminalFactory?,
+	tokenUrl: String,
+): String? =
 	try {
 		terminalFactory?.load()?.withContextSuspend { ctx ->
 			val recognition =
@@ -32,10 +32,6 @@ suspend fun doNFC(terminalFactory: TerminalFactory?): String? =
 			val clientInfo = ClientInformation(UserAgent("Open-eCard Test", UserAgent.Version(1, 0, 0)))
 
 			val session = sal.startSession()
-
-			val tokenUrl = GovernikusTestServer().loadTcTokenUrl()
-// 			val tokenUrl = SkidServer.forStageSystem().loadTcTokenUrl()
-// 			val tokenUrl = SkidServer.forProdSystem().loadTcTokenUrl()
 
 			when (val terminal = ctx.getTerminal("")) {
 				null -> {

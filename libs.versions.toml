@@ -9,6 +9,20 @@ kx-serde-xml = "0.91.3"
 kt-logging = "7.0.+"
 kx-datetime = "0.7.1"
 
+# richclient
+# necessary as long as kotlin does not support Java 25 in its compilation
+richclientJavaTargetVersion="25"
+
+# java
+javaTarget="17"
+
+# iOS
+iosPlatformVersion="15.0"
+
+# android
+androidCompileSdk="34"
+androidMinSdk="21"
+
 material3 = "1.4.0"     # Compose Material3 version
 
 # Plugins

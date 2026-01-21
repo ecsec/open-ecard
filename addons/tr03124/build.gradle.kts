@@ -59,11 +59,10 @@ kotlin {
 		iosArm64(),
 		iosSimulatorArm64(),
 	).forEach { target ->
-		val iosPlatformVersion: String by project
 		target.swiftPackageConfig(cinteropName = "SwiftNio") {
 			val path = "${project.layout.buildDirectory.dir("SPM").get().asFile.path}"
 
-			minIos = iosPlatformVersion
+			minIos = libs.versions.iosPlatformVersion.get()
 			spmWorkingPath = path
 			dependency {
 				remotePackageVersion(
@@ -89,4 +88,3 @@ kotlin {
 		}
 	}
 }
-

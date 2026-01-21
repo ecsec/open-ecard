@@ -31,12 +31,11 @@ application {
 	mainClass = "org.openecard.richclient.RichClient"
 }
 
-val richclientJavaTargetVersion: String by project
 kotlin {
-	compilerOptions.jvmTarget = JvmTarget.fromTarget(richclientJavaTargetVersion)
+	compilerOptions.jvmTarget = JvmTarget.fromTarget(libs.versions.richclientJavaTargetVersion.get())
 }
 java {
-	val jVersion = JavaVersion.toVersion(richclientJavaTargetVersion)
+	val jVersion = JavaVersion.toVersion(libs.versions.richclientJavaTargetVersion.get())
 	sourceCompatibility = jVersion
 	targetCompatibility = jVersion
 }

@@ -20,8 +20,8 @@ javaTarget="17"
 iosPlatformVersion="15.0"
 
 # android
-androidCompileSdk="34"
-androidMinSdk="21"
+androidCompileSdk="36"
+androidMinSdk="23"
 
 material3 = "1.4.0"     # Compose Material3 version
 
@@ -116,13 +116,6 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-test-core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "androidx-test-ktx" }
 androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-junit" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidx-test-runner" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidx-espresso-core" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
-androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidx-material" }
-androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "androidx-constraintlayout" }
-androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
-androidx-lifecycle-viewmodelCompose = { module = "androidx.lifecycle:viewmodel-compose", version.ref = "androidx-lifecycle-viewmodelCompose" }
-androidx-lifecycle-runtimeCompose = { module = "androidx.lifecycle:runtime-compose", version.ref = "androidx-lifecycle-runtimeCompose" }
 
 moko-resources = { module = "dev.icerock.moko:resources", version.ref = "moko" }
 moko-resourcesTest = { module = "dev.icerock.moko:resources-test", version.ref = "moko" }

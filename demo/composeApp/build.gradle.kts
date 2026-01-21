@@ -4,9 +4,9 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
 	alias(libs.plugins.kotlinMultiplatform)
 	alias(libs.plugins.androidApplication)
-	alias(libs.plugins.composeMultiplatform)
-	alias(libs.plugins.composeCompiler)
-	alias(libs.plugins.composeHotReload)
+	alias(appLibs.plugins.composeMultiplatform)
+	alias(appLibs.plugins.composeCompiler)
+	alias(appLibs.plugins.composeHotReload)
 	alias(libs.plugins.kotlinSerialization)
 }
 
@@ -36,8 +36,8 @@ kotlin {
 			implementation(compose.ui)
 			implementation(compose.components.resources)
 			implementation(compose.components.uiToolingPreview)
-			implementation(libs.androidx.lifecycle.viewmodelCompose)
-			implementation(libs.androidx.lifecycle.runtimeCompose)
+			implementation(appLibs.androidx.lifecycle.viewmodelCompose)
+			implementation(appLibs.androidx.lifecycle.runtimeCompose)
 			implementation(libs.ktor.client.nego)
 			implementation(libs.ktor.client.logging)
 			implementation(libs.ktor.serde.json)
@@ -52,10 +52,10 @@ kotlin {
 		}
 		androidMain.dependencies {
 			implementation(compose.preview)
-			implementation(libs.androidx.activity.compose)
+			implementation(appLibs.androidx.activity.compose)
 			implementation(libs.ktor.client.android)
 			implementation("org.openecard.smartcard:pcsc-android")
-			implementation(libs.sfl4j.android)
+			implementation(appLibs.sfl4j.android)
 		}
 
 		iosMain.dependencies {
@@ -68,18 +68,18 @@ kotlin {
 android {
 	namespace = "org.openecard.demo"
 	compileSdk =
-		libs.versions.android.compileSdk
+		libs.versions.androidCompileSdk
 			.get()
 			.toInt()
 
 	defaultConfig {
 		applicationId = "org.openecard.demo"
 		minSdk =
-			libs.versions.android.minSdk
+			libs.versions.androidMinSdk
 				.get()
 				.toInt()
 		targetSdk =
-			libs.versions.android.targetSdk
+			appLibs.versions.android.targetSdk
 				.get()
 				.toInt()
 		versionCode = 1

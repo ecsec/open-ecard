@@ -27,6 +27,15 @@ dependencyResolutionManagement {
 		mavenCentral()
 		mavenLocal()
 	}
+
+	versionCatalogs {
+		create("appLibs") {
+			from(files("./libs.versions.toml"))
+		}
+		create("libs") {
+			from(files("../libs.versions.toml"))
+		}
+	}
 }
 
 plugins {

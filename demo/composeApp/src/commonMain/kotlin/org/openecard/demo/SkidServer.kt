@@ -2,11 +2,6 @@ package org.openecard.demo
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.engine.HttpClientEngine
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.cookies.HttpCookies
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.accept
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.parameter
@@ -15,24 +10,16 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.parameters
-import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.Serializable
+
+expect fun skidentityClient(): HttpClient
 
 class SkidServer(
 	val idsUrl: String,
 	val fsCidUrl: String,
 	val brokerUrl: String,
 	val client: HttpClient =
-		io.ktor.client.HttpClient {
-			install(HttpCookies)
-			install(ContentNegotiation) {
-				json()
-			}
-			install(Logging) {
-				level = LogLevel.ALL
-			}
-			followRedirects = false
-		},
+		skidentityClient(),
 ) {
 	companion object {
 		fun forSystem(baseUrl: String) = SkidServer("$baseUrl/idm/w3", "$baseUrl/fs", "$baseUrl/broker")

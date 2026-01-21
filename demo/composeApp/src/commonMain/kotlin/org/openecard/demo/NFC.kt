@@ -33,8 +33,8 @@ suspend fun doNFC(terminalFactory: TerminalFactory?): String? =
 
 			val session = sal.startSession()
 
-// 			val tokenUrl = GovernikusTestServer().loadTcTokenUrl()
-			val tokenUrl = SkidServer.forStageSystem().loadTcTokenUrl()
+			val tokenUrl = GovernikusTestServer().loadTcTokenUrl()
+// 			val tokenUrl = SkidServer.forStageSystem().loadTcTokenUrl()
 // 			val tokenUrl = SkidServer.forProdSystem().loadTcTokenUrl()
 
 			when (val terminal = ctx.getTerminal("")) {
@@ -49,7 +49,7 @@ suspend fun doNFC(terminalFactory: TerminalFactory?): String? =
 					val paceResp =
 						uiStep.getPaceDid().establishChannel(
 							"123123",
-							uiStep.guiData.requiredChat.asBytes,
+							uiStep.guiData.optionalChat.asBytes,
 							uiStep.guiData.certificateDescription.asBytes,
 						)
 					val serverStep = uiStep.processAuthentication(paceResp)

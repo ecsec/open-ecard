@@ -8,9 +8,12 @@ import io.ktor.http.parameters
 /**
  * Utility class to interact with the governikus test server.
  */
+
+expect fun governikusClient(): HttpClient
+
 class GovernikusTestServer(
 	val url: String = "https://test.governikus-eid.de/Autent-DemoApplication/samlstationary",
-	val client: HttpClient = HttpClient { followRedirects = false },
+	val client: HttpClient = governikusClient(),
 ) {
 	/**
 	 * Loads a new TC Token from the server.

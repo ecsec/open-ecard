@@ -21,7 +21,9 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.runner.RunWith
 import org.openecard.sc.apdu.StatusWord
 import org.openecard.sc.apdu.command.Select
+import org.openecard.sc.iface.TerminalConnection
 import org.openecard.sc.iface.TerminalStateType
+import org.openecard.sc.iface.Terminals
 import org.openecard.sc.iface.withContextSuspend
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -139,7 +141,7 @@ class NfcTest {
 	private fun CoroutineScope.connectWithTimeout(
 		activity: TestActivity,
 		testInstructions: String = "Bring card to device",
-		block: suspend (connection: AndroidTerminalConnection) -> Unit,
+		block: suspend (connection: TerminalConnection) -> Unit,
 	): Job {
 		val countDown =
 			launch {
@@ -152,10 +154,10 @@ class NfcTest {
 			activity.factory
 				?.load()
 				?.withContextSuspend { terminals ->
-					val androidTerminal = terminals.androidTerminal
-					androidTerminal.waitForCardPresent()
+					val terminal = assertNotNull(terminals.getTerminal(""))
+					terminal.waitForCardPresent()
 					countDown.cancelAndJoin()
-					block(androidTerminal.connect())
+					block(terminal.connect())
 				}
 		}
 	}
@@ -178,7 +180,7 @@ class NfcTest {
 		runBackgroundTestJobWithActivity { activity ->
 			connectWithTimeout(activity) { connection ->
 				assertTrue(connection.isCardConnected(), "Card not connected")
-				assertNotNull(connection.card.atr()) { "Atr could not be read" }
+				assertNotNull(connection.card?.atr()) { "Atr could not be read" }
 			}
 		}
 	}
@@ -233,7 +235,7 @@ class NfcTest {
 		runBackgroundTestJobWithActivity { activity ->
 			connectWithTimeout(activity) { connection ->
 				assertNotNull(
-					connection.card.atr().historicalBytes,
+					connection.card?.atr()?.historicalBytes,
 					"Historical Bytes in parsed Atr must not be null",
 				)
 			}
@@ -245,7 +247,7 @@ class NfcTest {
 	fun toggle_terminal_without_discovering_to_see_if_dispatch_disabling_works_without_crash() {
 		runBackgroundTestJobWithActivity { activity ->
 			launch(Dispatchers.IO) {
-				var terminalsRef: AndroidTerminals? = null
+				var terminalsRef: Terminals? = null
 				activity.factory?.load()?.withContextSuspend { terminals ->
 					// dispatch is on through withContextSuspend
 					assertTrue { terminals.isEstablished }
@@ -262,6 +264,7 @@ class NfcTest {
 		runBackgroundTestJobWithActivity { activity ->
 			launch(Dispatchers.IO) {
 				activity.factory?.load()?.withContextSuspend { terminals ->
+					val terminal = assertNotNull(terminals.getTerminal(""))
 					// dispatch is on through withContextSuspend
 					countDown(
 						activity,
@@ -280,9 +283,9 @@ class NfcTest {
 								}
 							}
 
-						terminals.androidTerminal.waitForCardPresent()
+						terminal.waitForCardPresent()
 						countDown.cancelAndJoin()
-						assertTrue { terminals.androidTerminal.connect().isCardConnected() }
+						assertTrue { terminal.connect().isCardConnected() }
 					}
 				} ?: fail("Could not establish context")
 			}
@@ -308,6 +311,7 @@ class NfcTest {
 
 					activity.factory?.load()?.withContextSuspend { terminals ->
 						// dispatch is on through withContextSuspend
+						val terminal = assertNotNull(terminals.getTerminal(""))
 						val countDown =
 							launch {
 								countDown(activity, "Bring card to device.") {
@@ -315,9 +319,9 @@ class NfcTest {
 								}
 							}
 
-						terminals.androidTerminal.waitForCardPresent()
+						terminal.waitForCardPresent()
 						countDown.cancelAndJoin()
-						assertTrue { terminals.androidTerminal.connect().isCardConnected() }
+						assertTrue { terminal.connect().isCardConnected() }
 					}
 				}
 			}

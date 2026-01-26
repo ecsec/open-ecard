@@ -137,6 +137,7 @@ class AndroidEgkPaceTest {
 				activity.factory?.load()?.withContextSuspend { terminals ->
 
 					assertNotNull(terminals)
+					val terminal = assertNotNull(terminals.getTerminal(""))
 
 					val recognition =
 						DirectCardRecognition(CompleteTree.calls.removeUnsupported(setOf(EgkCifDefinitions.cardType)))
@@ -144,8 +145,8 @@ class AndroidEgkPaceTest {
 					val sal = SmartcardSal(terminals, setOf(EgkCif), recognition, paceFactory)
 
 					val session = sal.startSession()
-					terminals.androidTerminal.waitForCardPresent()
-					val con = session.connect(terminals.androidTerminal.name)
+					terminal.waitForCardPresent()
+					val con = session.connect(terminal.name)
 
 					assert(EgkCif.metadata.id == con.deviceType) { "Recognized card is not an eGK" }
 

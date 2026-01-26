@@ -44,6 +44,7 @@ kotlin {
 			implementation(compose.components.uiToolingPreview)
 			implementation(appLibs.androidx.lifecycle.viewmodelCompose)
 			implementation(appLibs.androidx.lifecycle.runtimeCompose)
+			implementation(appLibs.composeNavigation)
 			implementation(appLibs.ktor.client.nego)
 			implementation(appLibs.ktor.client.logging)
 			implementation(appLibs.ktor.serde.json)

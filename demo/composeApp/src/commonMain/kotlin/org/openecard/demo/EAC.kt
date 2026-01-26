@@ -8,6 +8,7 @@ import org.openecard.addons.tr03124.UserAgent
 import org.openecard.cif.bundled.CompleteTree
 import org.openecard.cif.bundled.NpaCif
 import org.openecard.cif.bundled.NpaDefinitions
+import org.openecard.cif.bundled.NpaDefinitions.Apps.Mf.Dids.pin
 import org.openecard.cif.definition.recognition.removeUnsupported
 import org.openecard.sal.sc.SmartcardSal
 import org.openecard.sal.sc.recognition.DirectCardRecognition
@@ -21,6 +22,9 @@ private val logger = KotlinLogging.logger { }
 suspend fun doEAC(
 	terminalFactory: TerminalFactory?,
 	tokenUrl: String,
+// 	tokenUrl: String,
+	pin: String,
+	nfcDetected: () -> Unit,
 ): String? =
 	try {
 		terminalFactory?.load()?.withContextSuspend { ctx ->
@@ -40,11 +44,13 @@ suspend fun doEAC(
 
 				else -> {
 					terminal.waitForCardPresent()
+					nfcDetected()
+
 					val uiStep = EidActivation.startEacProcess(clientInfo, tokenUrl, session, terminal.name)
 
 					val paceResp =
 						uiStep.getPaceDid().establishChannel(
-							"123123",
+							pin,
 							uiStep.guiData.optionalChat.asBytes,
 							uiStep.guiData.certificateDescription.asBytes,
 						)

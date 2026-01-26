@@ -1,0 +1,53 @@
+diff --git a/demo/composeApp/src/commonMain/kotlin/org/openecard/demo/core/Navigation.kt b/demo/composeApp/src/commonMain/kotlin/org/openecard/demo/core/Navigation.kt
+index 48c9d3db3..ea99b6b4d 100644
+--- a/demo/composeApp/src/commonMain/kotlin/org/openecard/demo/core/Navigation.kt
++++ b/demo/composeApp/src/commonMain/kotlin/org/openecard/demo/core/Navigation.kt
+@@ -1,7 +1,6 @@
+ package org.openecard.demo.core
+ 
+ import androidx.compose.runtime.Composable
+-import androidx.compose.runtime.getValue
+ import androidx.compose.runtime.mutableStateOf
+ import androidx.compose.runtime.saveable.rememberSaveable
+ import androidx.navigation.compose.NavHost
+@@ -92,11 +91,11 @@ fun Navigation(nfcTerminalFactory: TerminalFactory?) {
+ 		}
+ 
+ 		composable<Result> { backStackEntry ->
+-			val result = backStackEntry.toRoute<Result>()
++			val pinStatus = backStackEntry.toRoute<Result>().pinStatus
+ 			// 			val result: PinStatus = backStackEntry.toRoute()
+ 			ResultScreen(
+ 				nfcTerminalFactory = nfcTerminalFactory,
+-				result.pinStatus,
++				pinStatus,
+ 				navigateToStart = {
+ 					nfcDetected.value = false
+ 
+@@ -107,7 +106,7 @@ fun Navigation(nfcTerminalFactory: TerminalFactory?) {
+ 				navigateToOperation = {
+ 					nfcDetected.value = false
+ 
+-					when (result.pinStatus) {
++					when (pinStatus) {
+ 						PinStatus.Suspended -> {
+ 							navController.navigate(CAN)
+ 						}
+diff --git a/demo/composeApp/src/commonMain/kotlin/org/openecard/demo/core/Screen.kt b/demo/composeApp/src/commonMain/kotlin/org/openecard/demo/core/Screen.kt
+index e54e628c3..801c5177b 100644
+--- a/demo/composeApp/src/commonMain/kotlin/org/openecard/demo/core/Screen.kt
++++ b/demo/composeApp/src/commonMain/kotlin/org/openecard/demo/core/Screen.kt
+@@ -26,6 +26,11 @@ object Success
+ 
+ @Serializable
+ data class Result(
+-	val pinStatus: PinStatus,
++	val pinStatusString: String,
+ // 	val pinChanged: Boolean,
+-)
++) {
++	constructor(pinStatus: PinStatus) : this(pinStatus.name)
++
++	val pinStatus: PinStatus
++		get() = PinStatus.valueOf(pinStatusString)
++}

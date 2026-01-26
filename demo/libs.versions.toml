@@ -20,6 +20,7 @@ javaTarget="17"
 #android
 androidCompileSdk="36"
 androidMinSdk="23"
+composeNavigation = "2.9.1"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
@@ -40,6 +41,7 @@ ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+composeNavigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "composeNavigation" }
 
 sfl4j-android = { module = "uk.uuid.slf4j:slf4j-android", version.ref = "slf4jAndroid"}
 

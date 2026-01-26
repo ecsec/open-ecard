@@ -1,13 +1,10 @@
 package org.openecard.demo
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -16,122 +13,73 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalUriHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.launch
+import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.openecard.demo.core.Navigation
+import org.openecard.demo.ui.NfcScreen
 import org.openecard.sc.iface.TerminalFactory
 
 typealias TokenUrlProvider = suspend () -> String
 
+
+// @Preview
 @Suppress("ktlint:standard:function-naming")
 @Composable
-fun EacButton(
-	text: String,
-	nfcTerminalFactory: TerminalFactory? = null,
-	scope: CoroutineScope,
-	tokenUrlProvider: TokenUrlProvider,
-	onClick: () -> Unit,
-	result: (r: String?) -> Unit,
-) {
-	Button(onClick = {
-		onClick()
-		scope.launch {
-			CoroutineScope(Dispatchers.IO).launch {
-				result(
-					doEAC(nfcTerminalFactory, tokenUrlProvider()),
-				)
-			}
+fun App(nfcTerminalFactory: TerminalFactory? = null) {
+	MaterialTheme {
+		Scaffold(
+			topBar = { AppBar(AppBarState("Open eCard", true, true, {})) },
+		) { innerPadding ->
+			Navigation(nfcTerminalFactory)
+// 			NfcScreen()
 		}
-	}) {
-		Text(text)
 	}
 }
 
+data class AppBarState(
+	val title: String? = null,
+	val includeTopBar: Boolean = true,
+	val canNavigateUp: Boolean = false,
+	val navigateUp: () -> Unit = {},
+)
+
 @Suppress("ktlint:standard:function-naming")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Preview
-fun App(nfcTerminalFactory: TerminalFactory? = null) {
-	MaterialTheme {
-		var status: String? by remember { mutableStateOf(null) }
-		var result: String? by remember { mutableStateOf(null) }
-		val scope = rememberCoroutineScope()
-		val uriHandler = LocalUriHandler.current
-
-		Column(
-			modifier =
-				Modifier
-					.background(MaterialTheme.colorScheme.primaryContainer)
-					.safeContentPadding()
-					.fillMaxSize(),
-			horizontalAlignment = Alignment.CenterHorizontally,
-		) {
-			EacButton(
-				"EAC - SkidStaging",
-				nfcTerminalFactory,
-				scope,
-				{
-					SkidServer.forStageSystem().loadTcTokenUrl()
-				},
-				{
-					status = "Bring card"
-					result = null
-				},
-				{ result = it },
-			)
-			EacButton(
-				"EAC - SkidProd",
-				nfcTerminalFactory,
-				scope,
-				{
-					SkidServer.forProdSystem().loadTcTokenUrl()
-				},
-				{
-					status = "Bring card"
-					result = null
-				},
-				{ result = it },
-			)
-			EacButton(
-				"EAC - Governikus",
-				nfcTerminalFactory,
-				scope,
-				{
-					GovernikusTestServer().loadTcTokenUrl()
-				},
-				{
-					status = "Bring card"
-					result = null
-				},
-				{ result = it },
-			)
-			Column(
-				modifier = Modifier.fillMaxWidth(),
-				horizontalAlignment = Alignment.CenterHorizontally,
-			) {
-				Text("Status: $status")
-			}
-
-			Column(
-				modifier = Modifier.fillMaxWidth(),
-				horizontalAlignment = Alignment.CenterHorizontally,
-			) {
-				Text("Result-URL: $result")
-			}
-
-			Button(
-				enabled = result != null,
-				onClick = {
-					result?.let {
-						uriHandler.openUri(it)
+fun AppBar(
+	state: AppBarState,
+	modifier: Modifier = Modifier,
+) {
+	if (state.includeTopBar) {
+		TopAppBar(
+			title = {
+				if (state.title != null) {
+					Text(state.title)
+				}
+			},
+			colors =
+				TopAppBarDefaults.topAppBarColors(
+					containerColor = MaterialTheme.colorScheme.primaryContainer,
+					scrolledContainerColor = Color.Unspecified,
+					navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+					titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+					actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+				),
+			modifier = modifier,
+			navigationIcon = {
+				if (state.canNavigateUp) {
+					IconButton(onClick = state.navigateUp) {
+						Icon(
+							imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+							contentDescription = "",
+						)
 					}
-				},
-			) {
-				Text("Open Result-URL")
-			}
-		}
+				}
+			},
+		)
 	}
 }

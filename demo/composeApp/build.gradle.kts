@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
 	alias(libs.plugins.kotlinMultiplatform)
-	alias(libs.plugins.androidApplication)
+	alias(appLibs.plugins.androidApplication)
 	alias(appLibs.plugins.composeMultiplatform)
 	alias(appLibs.plugins.composeCompiler)
 	alias(appLibs.plugins.composeHotReload)

@@ -206,7 +206,6 @@ test-android-kotlin = [
 
 [plugins]
 spmForKmp = {id = "io.github.frankois944.spmForKmp", version.ref = "spmForKmp"}
-androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidKmpLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 androidSdkLoader = { id = "com.quittle.setup-android-sdk", version.ref = "android-sdkloader" }
 swiftKlib = {id = "io.github.ttypic.swiftklib", version.ref = "swiftKlib"}

@@ -18,7 +18,7 @@ swiftKlib = "0.6.4"
 spmForKmp = "1.0.4"
 
 # common
-ktor = "3.3.+"
+ktor = "3.4.+"
 semver = "3.0.0"
 jwtkt = "1.2.1"
 kotlin-crypto = "0.5.0"

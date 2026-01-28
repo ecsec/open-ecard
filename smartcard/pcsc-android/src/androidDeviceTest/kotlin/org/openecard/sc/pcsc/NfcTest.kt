@@ -311,15 +311,16 @@ class NfcTest {
 
 					activity.factory?.load()?.withContextSuspend { terminals ->
 						// dispatch is on through withContextSuspend
-						val terminal = assertNotNull(terminals.getTerminal(""))
+
 						val countDown =
 							launch {
 								countDown(activity, "Bring card to device.") {
 									fail("Card not connected within $testTimeout")
 								}
 							}
-
+						val terminal = assertNotNull(terminals.getTerminal(""))
 						terminal.waitForCardPresent()
+
 						countDown.cancelAndJoin()
 						assertTrue { terminal.connect().isCardConnected() }
 					}

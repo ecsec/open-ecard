@@ -15,7 +15,7 @@ gradle-jfx = "0.1.0"
 android-sdkloader = "3.1.0"
 moko = "0.25.2"
 swiftKlib = "0.6.4"
-spmForKmp = "1.0.4"
+spmForKmp = "1.4.6"
 
 # common
 ktor = "3.4.+"

@@ -174,7 +174,7 @@ test-basics-kotlin = ["kotlin-test", "kotlin-coroutines-test"]
 test-jvm-kotlin = ["junit-params", "logback-classic"]
 test-android-kotlin = [
 	"kotlin-test", "kotlin-coroutines-test",
-	"junit-params", "kotlin-logging-android", "slf4j-android",
+	"kotlin-logging-android", "slf4j-android",
 	"androidx-test-core-ktx",
 	"androidx-test-junit",
 	"androidx-test-runner"

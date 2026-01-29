@@ -1,5 +1,5 @@
 [versions]
-agp = "8.12.3"
+agp = "9.0.+"
 android-targetSdk = "36"
 androidx-activity = "1.12.2"
 androidx-appcompat = "1.7.1"
@@ -31,3 +31,4 @@ androidApplication = { id = "com.android.application", version.ref = "agp" }
 composeHotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "composeHotReload" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

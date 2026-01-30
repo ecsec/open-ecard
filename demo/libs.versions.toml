@@ -13,6 +13,11 @@ kotlin = "2.3.0"
 kotlinx-coroutines = "1.10.2"
 slf4jAndroid = "2.0.17-0"
 
+# java
+javaTarget="17"
+#android
+androidCompileSdk="36"
+
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
 androidx-testExt-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-testExt" }

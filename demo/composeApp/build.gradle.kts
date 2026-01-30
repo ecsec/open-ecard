@@ -12,14 +12,13 @@ plugins {
 
 kotlin {
 	android {
-		compileSdk { version = release(36) }
+		compileSdk { version = release(Integer.parseInt(appLibs.versions.androidCompileSdk.get())) }
 	}
 
 	androidLibrary {
 		namespace = "org.openecard.demo.composedemolibrary"
-		// compileSdk = libs.versions.android.compileSdk.get().toInt()
 		compilerOptions {
-			jvmTarget.set(JvmTarget.JVM_25)
+			jvmTarget.set(JvmTarget.fromTarget(appLibs.versions.javaTarget.get()))
 		}
 		androidResources {
 			enable = true
@@ -72,13 +71,6 @@ kotlin {
 		}
 	}
 }
-
-/*
-dependencies {
-	debugImplementation(compose.uiTooling)
-}
-
- */
 
 compose.desktop {
 	application {

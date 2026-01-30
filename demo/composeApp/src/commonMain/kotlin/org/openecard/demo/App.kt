@@ -9,7 +9,12 @@ import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
@@ -22,6 +27,7 @@ import org.openecard.sc.iface.TerminalFactory
 
 typealias TokenUrlProvider = suspend () -> String
 
+@Suppress("ktlint:standard:function-naming")
 @Composable
 fun EacButton(
 	text: String,
@@ -45,6 +51,7 @@ fun EacButton(
 	}
 }
 
+@Suppress("ktlint:standard:function-naming")
 @Composable
 @Preview
 fun App(nfcTerminalFactory: TerminalFactory? = null) {

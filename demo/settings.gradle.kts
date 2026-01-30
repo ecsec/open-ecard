@@ -43,5 +43,6 @@ plugins {
 }
 
 includeBuild("..")
+
 include(":composeApp")
-// include(":androidApp")
+include(":androidApp")

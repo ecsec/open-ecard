@@ -14,7 +14,7 @@ kotlin {
 	android {
 		compileSdk { version = release(36) }
 	}
-	/*
+
 	androidLibrary {
 		namespace = "org.openecard.demo.composedemolibrary"
 		// compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -25,8 +25,6 @@ kotlin {
 			enable = true
 		}
 	}
-
-	 */
 
 	listOf(
 		iosArm64(),

@@ -34,8 +34,6 @@ kotlin {
 	}
 }
 
-java {
-	val jVersion = JavaVersion.toVersion(javaTarget)
-	sourceCompatibility = jVersion
-	targetCompatibility = jVersion
+tasks.withType<JavaCompile>().configureEach {
+	options.release = javaTarget.toInt()
 }

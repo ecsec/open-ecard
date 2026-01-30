@@ -10,7 +10,10 @@ kotlin {
 		minSdk = 21
 		compileSdk = 36
 
-		withHostTestBuilder { }
+		// kover has issue with variants if active
+		// https://github.com/Kotlin/kotlinx-kover/issues/772
+		// deactivating for now
+		// withHostTestBuilder { }
 		withDeviceTestBuilder { }.configure {
 			instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 			packaging {

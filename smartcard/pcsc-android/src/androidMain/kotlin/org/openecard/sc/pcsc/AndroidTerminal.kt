@@ -61,7 +61,6 @@ class AndroidTerminal(
 	 * set the resumeNfc flag to postpone a second attempt when the activity gets resumed again.
 	 */
 	private var waitingForTag = false
-	private var resumeNfc = false
 
 	private val lifeCycleCallbacks =
 		object : Application.ActivityLifecycleCallbacks {
@@ -82,17 +81,13 @@ class AndroidTerminal(
 			override fun onActivityDestroyed(activity: Activity) = Unit
 
 			override fun onActivityResumed(activity: Activity) {
-				if (waitingForTag && resumeNfc) {
+				if (waitingForTag) {
 					nfcTagDiscoveryOn()
-					resumeNfc = false
 				}
 			}
 
 			override fun onActivityPaused(activity: Activity) {
-				if (waitingForTag) {
-					resumeNfc = true
-					nfcTagDiscoveryOff()
-				}
+				nfcTagDiscoveryOff()
 			}
 		}
 
@@ -180,7 +175,6 @@ class AndroidTerminal(
 		try {
 			nfcTagDiscoveryOn()
 		} catch (e: IllegalStateException) {
-			resumeNfc = true
 			logger.warn {
 				"Catch and ignore ${e.message} due to activity being paused." +
 					" Nfc will get switched on when resumed."

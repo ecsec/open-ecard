@@ -17,7 +17,6 @@ kotlin {
 			implementation(libs.bundles.test.basics.kotlin)
 		}
 
-		androidHostTest.dependencies { }
 		androidDeviceTest.dependencies {
 			implementation(libs.bundles.test.android.kotlin)
 		}

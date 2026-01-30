@@ -4,7 +4,7 @@ ktlint = "1.8.0"
 ktlint-githubreporter = "2.0.1"
 ktlint-plugin = "14.0.+"
 kx-co = "1.10.+"
-kx-serde = "1.9.+"
+kx-serde = "1.10.+"
 kx-serde-xml = "0.91.3"
 kt-logging = "7.0.+"
 kx-datetime = "0.7.1"
@@ -15,21 +15,21 @@ gradle-jfx = "0.1.0"
 android-sdkloader = "3.1.0"
 moko = "0.25.2"
 swiftKlib = "0.6.4"
-spmForKmp = "1.0.4"
+spmForKmp = "1.4.6"
 
 # common
-ktor = "3.3.+"
+ktor = "3.4.+"
 semver = "3.0.0"
 jwtkt = "1.2.1"
 kotlin-crypto = "0.5.0"
 kotlin-bignum = "0.3.10"
 
 # Android
-agp = "8.13.+"
-androidx-activityCompose = "1.11.+"
+agp = "9.0.+"
+androidx-activityCompose = "1.12.+"
 androidx-appcompat = "1.6.+"
 androidx-constraintlayout = "2.1.+"
-androidx-core-ktx = "1.15.+"
+androidx-core-ktx = "1.16.+"
 androidx-test-ktx = "1.7.+"
 androidx-espresso-core = "3.5.+"
 androidx-material = "1.11.+"
@@ -45,7 +45,7 @@ swiftNio="1.20.0"
 bouncycastle = "1.83"
 kotlin-pcsc = "1.1.0"
 apache-batik="1.19"
-proxy-vole = "1.1.7"
+proxy-vole = "1.1.8"
 pdfbox = "3.0.6"
 jfx = "24.0.2"
 jna = "5.18.1"
@@ -61,7 +61,7 @@ kotlinPoet = "2.2.0"
 junit = "6.0.+"
 wiremock = "3.13.+"
 mokkery = "3.1.1"
-kover = "0.9.2"
+kover = "0.9.4"
 
 
 [libraries]
@@ -174,7 +174,7 @@ test-basics-kotlin = ["kotlin-test", "kotlin-coroutines-test"]
 test-jvm-kotlin = ["junit-params", "logback-classic"]
 test-android-kotlin = [
 	"kotlin-test", "kotlin-coroutines-test",
-	"junit-params", "kotlin-logging-android", "slf4j-android",
+	"kotlin-logging-android", "slf4j-android",
 	"androidx-test-core-ktx",
 	"androidx-test-junit",
 	"androidx-test-runner"

@@ -17,7 +17,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
-import org.junit.jupiter.api.BeforeAll
 import org.junit.runner.RunWith
 import org.openecard.sc.apdu.StatusWord
 import org.openecard.sc.apdu.command.Select
@@ -25,6 +24,7 @@ import org.openecard.sc.iface.TerminalConnection
 import org.openecard.sc.iface.TerminalStateType
 import org.openecard.sc.iface.Terminals
 import org.openecard.sc.iface.withContextSuspend
+import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -102,7 +102,7 @@ class TestActivity : Activity() {
 class NfcTest {
 	private val testTimeout = 10.seconds
 
-	@BeforeAll
+	@BeforeTest
 	fun assureNfcOn() {
 		runBlocking {
 			launchActivity<TestActivity>().use {
@@ -311,15 +311,16 @@ class NfcTest {
 
 					activity.factory?.load()?.withContextSuspend { terminals ->
 						// dispatch is on through withContextSuspend
-						val terminal = assertNotNull(terminals.getTerminal(""))
+
 						val countDown =
 							launch {
 								countDown(activity, "Bring card to device.") {
 									fail("Card not connected within $testTimeout")
 								}
 							}
-
+						val terminal = assertNotNull(terminals.getTerminal(""))
 						terminal.waitForCardPresent()
+
 						countDown.cancelAndJoin()
 						assertTrue { terminal.connect().isCardConnected() }
 					}

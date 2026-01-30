@@ -32,9 +32,6 @@ dependencyResolutionManagement {
 		create("appLibs") {
 			from(files("./libs.versions.toml"))
 		}
-		create("libs") {
-			from(files("../libs.versions.toml"))
-		}
 	}
 }
 

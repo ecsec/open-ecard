@@ -2,12 +2,12 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-	alias(libs.plugins.androidKmpLibrary)
-	alias(libs.plugins.kotlinMultiplatform)
+	alias(appLibs.plugins.androidKmpLibrary)
+	alias(appLibs.plugins.kotlinMultiplatform)
 	alias(appLibs.plugins.composeMultiplatform)
 	alias(appLibs.plugins.composeCompiler)
 	alias(appLibs.plugins.composeHotReload)
-	alias(libs.plugins.kotlinSerialization)
+	alias(appLibs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -44,22 +44,22 @@ kotlin {
 			implementation(compose.components.uiToolingPreview)
 			implementation(appLibs.androidx.lifecycle.viewmodelCompose)
 			implementation(appLibs.androidx.lifecycle.runtimeCompose)
-			implementation(libs.ktor.client.nego)
-			implementation(libs.ktor.client.logging)
-			implementation(libs.ktor.serde.json)
-			implementation(libs.ktor.serde.xml)
-			implementation(libs.ktor.client.core)
-			implementation(libs.kotlin.logging)
+			implementation(appLibs.ktor.client.nego)
+			implementation(appLibs.ktor.client.logging)
+			implementation(appLibs.ktor.serde.json)
+			implementation(appLibs.ktor.serde.xml)
+			implementation(appLibs.ktor.client.core)
+			implementation(appLibs.kotlin.logging)
 
 			implementation("org.openecard.addons:tr03124")
 		}
 		commonTest.dependencies {
-			implementation(libs.kotlin.test)
+			implementation(appLibs.kotlin.test)
 		}
 		androidMain.dependencies {
 			implementation(compose.preview)
 			implementation(appLibs.androidx.activity.compose)
-			implementation(libs.ktor.client.android)
+			implementation(appLibs.ktor.client.android)
 			implementation(appLibs.sfl4j.android)
 			api("org.openecard.smartcard:pcsc-android")
 		}
@@ -67,7 +67,7 @@ kotlin {
 		iosMain.dependencies {
 			implementation("org.openecard.utils:openssl-interop")
 			implementation("org.openecard.smartcard:pcsc-ios")
-			implementation(libs.ktor.client.darwin)
+			implementation(appLibs.ktor.client.darwin)
 		}
 	}
 }

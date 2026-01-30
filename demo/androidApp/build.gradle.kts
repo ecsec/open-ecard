@@ -1,45 +1,34 @@
 
 plugins {
-// 	alias(libs.plugins.kotlinMultiplatform)
-// 	alias(libs.plugins.androidKmpLibrary)
 	alias(appLibs.plugins.androidApplication)
-// 	alias(appLibs.plugins.kotlinAndroid)
 	alias(appLibs.plugins.composeMultiplatform)
 	alias(appLibs.plugins.composeCompiler)
 	alias(appLibs.plugins.composeHotReload)
-	alias(libs.plugins.kotlinSerialization)
+	alias(appLibs.plugins.kotlinSerialization)
 }
 
 kotlin {
 	dependencies {
 		implementation(appLibs.androidx.activity.compose)
 		implementation(compose.components.uiToolingPreview)
-		implementation(libs.ktor.client.android)
+		implementation(appLibs.ktor.client.android)
 		implementation(appLibs.sfl4j.android)
 		implementation(projects.composeApp)
 	}
-	/*
-	target {
-		compilerOptions {
-			// jvmTarget.set(JvmTarget.JVM_25)
-		}
-	}
-
-	 */
 }
 
 android {
 
 	namespace = "org.openecard.demo"
 	compileSdk =
-		libs.versions.androidCompileSdk
+		appLibs.versions.androidCompileSdk
 			.get()
 			.toInt()
 
 	defaultConfig {
 		applicationId = "org.openecard.demo"
 		minSdk =
-			libs.versions.androidMinSdk
+			appLibs.versions.androidMinSdk
 				.get()
 				.toInt()
 		targetSdk =

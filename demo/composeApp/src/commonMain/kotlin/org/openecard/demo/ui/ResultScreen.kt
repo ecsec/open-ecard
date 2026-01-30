@@ -37,10 +37,10 @@ fun ResultScreen(
 				.fillMaxSize()
 				.padding(16.dp),
 		horizontalAlignment = Alignment.CenterHorizontally,
-		verticalArrangement = Arrangement.SpaceEvenly,
+		verticalArrangement = Arrangement.Center,
 	) {
 		if (pinStatus != null) {
-			Spacer(modifier = Modifier.weight(1f))
+//			Spacer(modifier = Modifier.weight(1f))
 			Text(
 				text = "Result: $pinStatus",
 				fontSize = 24.sp,
@@ -48,9 +48,10 @@ fun ResultScreen(
 			)
 			when (pinStatus) {
 				PinStatus.OK, PinStatus.Unknown -> {
-					Spacer(Modifier.weight(1f))
+//					Spacer(Modifier.weight(1f))
 
 					Button(
+//						modifier = Modifier.padding(bottom = 32.dp),
 						onClick = {
 							navigateToStart()
 						},
@@ -65,14 +66,15 @@ fun ResultScreen(
 						fontSize = 16.sp,
 					)
 
-					Spacer(Modifier.weight(1f))
+//					Spacer(Modifier.weight(1f))
 
 					Row(
 						horizontalArrangement = Arrangement.Center,
 						verticalAlignment = Alignment.CenterVertically,
-						modifier = Modifier.padding(bottom = 32.dp),
+//						modifier = Modifier.padding(bottom = 32.dp),
 					) {
 						Button(
+							modifier = Modifier.padding(bottom = 16.dp),
 							onClick = {
 								navigateToStart()
 							},
@@ -82,6 +84,7 @@ fun ResultScreen(
 						Spacer(Modifier.width(8.dp))
 
 						Button(
+							modifier = Modifier.padding(bottom = 16.dp),
 							onClick = {
 								navigateToOperation(pinStatus)
 							},
@@ -92,7 +95,7 @@ fun ResultScreen(
 				}
 			}
 		} else if (eacResult != null) {
-			Spacer(modifier = Modifier.weight(1f))
+//			Spacer(modifier = Modifier.weight(1f))
 			Text(
 				text = "Result: $eacResult",
 				fontSize = 24.sp,
@@ -108,9 +111,10 @@ fun ResultScreen(
 			) {
 				Text("Open Result-URL")
 			}
-			Spacer(Modifier.weight(1f))
+//			Spacer(Modifier.weight(1f))
 
 			Button(
+//				modifier = Modifier.padding(bottom = 16.dp),
 				onClick = {
 					navigateToStart()
 				},
@@ -118,13 +122,13 @@ fun ResultScreen(
 				Text("Back to start")
 			}
 		} else {
-			Spacer(modifier = Modifier.weight(1f))
+//			Spacer(modifier = Modifier.weight(1f))
 			Text(
 				text = "Nothing to show",
 				fontSize = 24.sp,
 				style = MaterialTheme.typography.headlineMedium,
 			)
-			Spacer(Modifier.weight(1f))
+//			Spacer(Modifier.weight(1f))
 
 			Button(
 				onClick = {

@@ -41,6 +41,7 @@ kotlin {
 			implementation(compose.material3)
 			implementation(compose.ui)
 			implementation(compose.components.resources)
+			implementation(compose.materialIconsExtended)
 			implementation(compose.components.uiToolingPreview)
 			implementation(appLibs.androidx.lifecycle.viewmodelCompose)
 			implementation(appLibs.androidx.lifecycle.runtimeCompose)

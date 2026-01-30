@@ -13,6 +13,7 @@ plugins {
 kotlin {
 	dependencies {
 		implementation(appLibs.androidx.activity.compose)
+		implementation(compose.components.uiToolingPreview)
 		implementation(libs.ktor.client.android)
 		implementation(appLibs.sfl4j.android)
 		implementation(projects.composeApp)

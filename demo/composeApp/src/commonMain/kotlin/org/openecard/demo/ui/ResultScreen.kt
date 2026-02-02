@@ -26,6 +26,7 @@ fun ResultScreen(
 	nfcTerminalFactory: TerminalFactory?,
 	pinStatus: PinStatus?,
 	eacResult: String?,
+	egkResult: Boolean?,
 	navigateToStart: () -> Unit,
 	navigateToOperation: (PinStatus) -> Unit,
 ) {
@@ -121,7 +122,27 @@ fun ResultScreen(
 			) {
 				Text("Back to start")
 			}
-		} else {
+		} else if (egkResult != null) {
+			Text(
+				text = "Result: $egkResult",
+				fontSize = 24.sp,
+				style = MaterialTheme.typography.headlineMedium,
+			)
+//			Spacer(Modifier.weight(1f))
+
+			Button(
+//				modifier = Modifier.padding(bottom = 16.dp),
+				onClick = {
+					navigateToStart()
+				},
+			) {
+				Text("Back to start")
+			}
+		}
+
+
+
+		else {
 //			Spacer(modifier = Modifier.weight(1f))
 			Text(
 				text = "Nothing to show",

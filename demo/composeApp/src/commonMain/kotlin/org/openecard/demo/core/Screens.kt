@@ -22,6 +22,9 @@ object NFC
 object EAC
 
 @Serializable
+object EGK
+
+@Serializable
 object Success
 
 @Serializable
@@ -37,4 +40,9 @@ data class PinResult(
 @Serializable
 data class EacResult(
 	val url: String,
+)
+
+@Serializable
+data class EgkResult(
+	val success: Boolean,
 )

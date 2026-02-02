@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -18,40 +17,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.launch
 import org.openecard.demo.GovernikusTestServer
 import org.openecard.demo.SkidServer
 import org.openecard.demo.TokenUrlProvider
-import org.openecard.demo.doEAC
 import org.openecard.sc.iface.TerminalFactory
 
-// @Suppress("ktlint:standard:function-naming")
-// @Composable
-// fun EacButton2(
-// 	text: String,
-// 	nfcTerminalFactory: TerminalFactory? = null,
-// 	scope: CoroutineScope,
-// 	tokenUrlProvider: TokenUrlProvider,
-// 	onClick: () -> Unit,
-// 	result: (r: String?) -> Unit,
-// ) {
-// 	Button(onClick = {
-// 		onClick()
-// 		scope.launch {
-// 			CoroutineScope(Dispatchers.IO).launch {
-// 				result(
-// 					doEAC(nfcTerminalFactory, tokenUrlProvider()),
-// // 				onClick()
-// 				)
-// 			}
-// 		}
-// 	}) {
-// 		Text(text)
-// 	}
-// }
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
@@ -61,7 +31,6 @@ fun StartScreen(
 	navigateToEgk: () -> Unit,
 	nfcTerminalFactory: TerminalFactory?,
 ) {
-// 	val nfcTerminalFactory: TerminalFactory? = null
 
 	var status: String? by remember { mutableStateOf(null) }
 	var result: String? by remember { mutableStateOf(null) }
@@ -79,19 +48,7 @@ fun StartScreen(
 		horizontalAlignment = Alignment.CenterHorizontally,
 		verticalArrangement = Arrangement.SpaceEvenly,
 	) {
-// 		EacButton2(
-// 			"EAC - SkidProd",
-// 			nfcTerminalFactory,
-// 			scope,
-// 			{
-// 				SkidServer.Companion.forProdSystem().loadTcTokenUrl()
-// 			},
-// 			{
-// 				status = "Bring card"
-// 				result = null
-// 			},
-// 			{ result = it },
-// 		)
+
 		EacButton(
 			"EAC - SkidStaging",
 			{
@@ -127,6 +84,12 @@ fun StartScreen(
 			navigateToPin()
 		}) {
 			Text("Change PIN")
+		}
+
+		Button(onClick = {
+			navigateToEgk()
+		}) {
+			Text("eGK")
 		}
 	}
 }

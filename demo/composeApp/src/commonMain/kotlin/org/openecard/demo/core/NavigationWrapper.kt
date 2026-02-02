@@ -12,6 +12,7 @@ import org.openecard.demo.PinStatus
 import org.openecard.demo.SkidServer
 import org.openecard.demo.ui.CanEntryScreen
 import org.openecard.demo.ui.EacPinEntryScreen
+import org.openecard.demo.ui.EgkCanEntryScreen
 import org.openecard.demo.ui.NfcScreen
 import org.openecard.demo.ui.PinChangeScreen
 import org.openecard.demo.ui.PukEntryScreen
@@ -21,7 +22,7 @@ import org.openecard.sc.iface.TerminalFactory
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
-fun Navigation(
+fun NavigationWrapper(
 	nfcTerminalFactory: TerminalFactory?,
 // 	tokenUrlProvider: TokenUrlProvider,
 ) {
@@ -46,6 +47,7 @@ fun Navigation(
 					navController.navigate(EAC)
 				},
 				navigateToEgk = {
+					navController.navigate(EGK)
 				},
 			)
 		}
@@ -62,30 +64,6 @@ fun Navigation(
 				nfcDetected = {
 					nfcDetected.value = true
 				},
-			)
-		}
-
-		composable<NFC> {
-			NfcScreen(nfcDetected.value)
-		}
-
-		composable<EAC> {
-			EacPinEntryScreen(
-				nfcTerminalFactory = nfcTerminalFactory,
-				tokenUrlProvider = {
-					SkidServer.Companion.forProdSystem().loadTcTokenUrl()
-				},
-				tokenUrl = tokenUrl.value,
-				nfcDetected = {
-					nfcDetected.value = true
-				},
-				navigateToNfc = {
-					navController.navigate(NFC)
-				},
-				navigateToResult = { result ->
-					navController.navigate(EacResult(result))
-				},
-// 				result = { result.value },
 			)
 		}
 
@@ -111,6 +89,46 @@ fun Navigation(
 					navController.navigate(PinResult(result))
 				},
 			)
+		}
+
+		composable<EAC> {
+			EacPinEntryScreen(
+				nfcTerminalFactory = nfcTerminalFactory,
+				tokenUrlProvider = {
+					SkidServer.Companion.forProdSystem().loadTcTokenUrl()
+				},
+				tokenUrl = tokenUrl.value,
+				nfcDetected = {
+					nfcDetected.value = true
+				},
+				navigateToNfc = {
+					navController.navigate(NFC)
+				},
+				navigateToResult = { result ->
+					navController.navigate(EacResult(result))
+				},
+// 				result = { result.value },
+			)
+		}
+
+		composable<EGK> {
+			EgkCanEntryScreen(
+				nfcTerminalFactory = nfcTerminalFactory,
+				nfcDetected = {
+					nfcDetected.value = true
+				},
+				navigateToNfc = {
+					navController.navigate(NFC)
+				},
+				navigateToResult = { result ->
+					navController.navigate(EgkResult(result))
+				},
+// 				result = { result.value },
+			)
+		}
+
+		composable<NFC> {
+			NfcScreen(nfcDetected.value)
 		}
 
 		composable<PinResult> { backStackEntry ->
@@ -144,6 +162,7 @@ fun Navigation(
 					}
 				},
 				eacResult = null,
+				egkResult = null
 			)
 			// 			ResultScreen(result) {
 		}
@@ -163,6 +182,27 @@ fun Navigation(
 				},
 				navigateToOperation = {},
 				eacResult = eacResult.url,
+				egkResult = null
+			)
+			// 			ResultScreen(result) {
+		}
+
+		composable<EgkResult> { backStackEntry ->
+			val egkResult = backStackEntry.toRoute<EgkResult>()
+			// 			val result: PinStatus = backStackEntry.toRoute()
+			ResultScreen(
+				nfcTerminalFactory = nfcTerminalFactory,
+				null,
+				navigateToStart = {
+					nfcDetected.value = false
+
+					navController.navigate(Start) {
+						popUpTo<Start>()
+					}
+				},
+				navigateToOperation = {},
+				eacResult = null,
+				egkResult = egkResult.success
 			)
 			// 			ResultScreen(result) {
 		}

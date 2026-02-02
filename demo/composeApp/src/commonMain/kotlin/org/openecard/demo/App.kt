@@ -11,10 +11,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import org.openecard.demo.core.Navigation
+import org.openecard.demo.core.NavigationWrapper
 import org.openecard.sc.iface.TerminalFactory
 
 typealias TokenUrlProvider = suspend () -> String
@@ -28,7 +27,7 @@ fun App(nfcTerminalFactory: TerminalFactory? = null) {
 		Scaffold(
 			topBar = { AppBar(AppBarState("Open eCard", true, true, {})) },
 		) { innerPadding ->
-			Navigation(nfcTerminalFactory)
+			NavigationWrapper(nfcTerminalFactory)
 // 			NfcScreen()
 		}
 	}

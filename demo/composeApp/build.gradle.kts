@@ -53,6 +53,10 @@ kotlin {
 			implementation(appLibs.ktor.client.core)
 			implementation(appLibs.kotlin.logging)
 
+			implementation(appLibs.fleeksoft.charset)
+			implementation(appLibs.okio)
+
+
 			implementation("org.openecard.addons:tr03124")
 		}
 		commonTest.dependencies {

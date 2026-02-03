@@ -15,6 +15,9 @@ slf4jAndroid = "2.0.17-0"
 kt-logging = "7.0.+"
 ktor = "3.4.+"
 
+fleeksoft = "0.0.5"
+okio = "3.16.2"
+
 # java
 javaTarget="17"
 #android
@@ -44,6 +47,9 @@ kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotl
 composeNavigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "composeNavigation" }
 
 sfl4j-android = { module = "uk.uuid.slf4j:slf4j-android", version.ref = "slf4jAndroid"}
+
+fleeksoft-charset = {module = "com.fleeksoft.charset:charset",version.ref="fleeksoft"}
+okio = {module = "com.squareup.okio:okio", version.ref = "okio"}
 
 [plugins]
 androidLibrary = { id = "com.android.library", version.ref = "agp" }

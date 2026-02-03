@@ -12,6 +12,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -28,21 +29,31 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.openecard.demo.App
+import org.openecard.demo.AppBar
+import org.openecard.demo.AppBarState
+import org.openecard.demo.DemoAppScaffold
 import org.openecard.demo.PinStatus
 import org.openecard.demo.changePassword
+import org.openecard.demo.viewmodel.PinMgmtViewModel
+import org.openecard.demo.viewmodel.RootViewModel
 import org.openecard.sc.iface.TerminalFactory
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
 fun PinChangeScreen(
+	pinMgmtViewModel: PinMgmtViewModel = viewModel(),
 	nfcTerminalFactory: TerminalFactory?,
 	navigateToResult: (PinStatus) -> Unit,
 	navigateToNfc: () -> Unit,
+	navigateBack: () -> Unit,
 	nfcDetected: () -> Unit,
 ) {
 	val oldPin = rememberSaveable { mutableStateOf("") }
@@ -51,13 +62,8 @@ fun PinChangeScreen(
 
 	val scope = rememberCoroutineScope()
 	var allFilled by remember { mutableStateOf(false) }
-// 	var validInput by remember { mutableStateOf(false) }
 
 	allFilled = !(oldPin.value.isBlank() || newPin.value.isBlank() || repeat.value.isBlank())
-
-// 	validInput =
-// 		oldPin.value.length in 5..6 || newPin.value.length in 5..6 || repeat.value.length in 5..6 ||
-// 		newPin.value != repeat.value
 
 	var dialogMessage by remember { mutableStateOf("") }
 
@@ -69,111 +75,130 @@ fun PinChangeScreen(
 
 	var result by remember { mutableStateOf(PinStatus.Unknown) }
 
-	Column(
-		modifier =
-			Modifier
-				.fillMaxSize()
-				.padding(16.dp),
-		horizontalAlignment = Alignment.CenterHorizontally,
-		verticalArrangement = Arrangement.Center,
+	val pinMgmtState by pinMgmtViewModel.pinMgmtUiState.collectAsStateWithLifecycle()
+
+	val rootViewModel: RootViewModel = viewModel()
+
+	Scaffold(
+		topBar = {
+			AppBar(
+				AppBarState(
+					title = "Change your PIN",
+					canNavigateUp = true,
+					navigateUp = navigateBack
+				)
+			)
+		}
 	) {
-		Text(
-			text = "Change your PIN",
-			fontSize = 28.sp,
-			style = MaterialTheme.typography.headlineMedium,
-			modifier = Modifier.padding(bottom = 32.dp),
-		)
-
-		OutlinedTextField(
-			value = oldPin.value,
-			onValueChange = {
-				oldPin.value = it
-			},
-			label = { Text("old PIN") },
-			visualTransformation = PasswordVisualTransformation(),
+		Column(
 			modifier =
 				Modifier
-					.fillMaxWidth()
-					.padding(bottom = 24.dp),
-			singleLine = true,
-			keyboardOptions =
-				KeyboardOptions(
-					keyboardType = KeyboardType.NumberPassword,
-					imeAction = ImeAction.Done,
-				),
-		)
+					.fillMaxSize()
+					.padding(16.dp),
+			horizontalAlignment = Alignment.CenterHorizontally,
+			verticalArrangement = Arrangement.Center,
+		) {
+			Text(
+				text = "Change your PIN",
+				fontSize = 28.sp,
+				style = MaterialTheme.typography.headlineMedium,
+			)
 
-		OutlinedTextField(
-			value = newPin.value,
-			onValueChange = {
-				newPin.value = it
-			},
-			label = { Text("new PIN") },
-			visualTransformation = PasswordVisualTransformation(),
-			modifier =
-				Modifier
-					.fillMaxWidth()
-					.padding(bottom = 24.dp),
-			singleLine = true,
-			keyboardOptions =
-				KeyboardOptions(
-					keyboardType = KeyboardType.NumberPassword,
-					imeAction = ImeAction.Done,
-				),
-		)
+			Spacer(Modifier.height(32.dp))
 
-		OutlinedTextField(
-			value = repeat.value,
-			onValueChange = {
-				repeat.value = it
-			},
-			label = { Text("repeat new PIN") },
-			visualTransformation = PasswordVisualTransformation(),
-			modifier =
-				Modifier
-					.fillMaxWidth()
-					.padding(bottom = 24.dp),
-			singleLine = true,
-			keyboardOptions =
-				KeyboardOptions(
-					keyboardType = KeyboardType.NumberPassword,
-					imeAction = ImeAction.Done,
-				),
-		)
+			OutlinedTextField(
+				value = oldPin.value,
+				onValueChange = {
+					oldPin.value = it
+				},
+				label = { Text("old PIN") },
+				visualTransformation = PasswordVisualTransformation(),
+				modifier =
+					Modifier
+						.fillMaxWidth(),
+				singleLine = true,
+				keyboardOptions =
+					KeyboardOptions(
+						keyboardType = KeyboardType.NumberPassword,
+						imeAction = ImeAction.Done,
+					),
+			)
 
-		Spacer(Modifier.height(8.dp))
+			Spacer(Modifier.height(16.dp))
 
-		Button(
-			enabled = allFilled,
-			onClick = {
-				if (validInput) {
-					navigateToNfc()
 
-// 				TRY:
-					scope.launch {
-						CoroutineScope(Dispatchers.IO).launch {
-							try {
-								val result = changePassword(nfcTerminalFactory, oldPin.value, newPin.value, nfcDetected)
+			OutlinedTextField(
+				value = newPin.value,
+				onValueChange = {
+					newPin.value = it
+				},
+				label = { Text("new PIN") },
+				visualTransformation = PasswordVisualTransformation(),
+				modifier =
+					Modifier
+						.fillMaxWidth(),
+				singleLine = true,
+				keyboardOptions =
+					KeyboardOptions(
+						keyboardType = KeyboardType.NumberPassword,
+						imeAction = ImeAction.Done,
+					),
+			)
 
-								withContext(Dispatchers.Main) {
-									navigateToResult(result)
-								}
-								// does not navigate because of scope
+			Spacer(Modifier.height(16.dp))
+
+
+			OutlinedTextField(
+				value = repeat.value,
+				onValueChange = {
+					repeat.value = it
+				},
+				label = { Text("repeat new PIN") },
+				visualTransformation = PasswordVisualTransformation(),
+				modifier =
+					Modifier
+						.fillMaxWidth(),
+				singleLine = true,
+				keyboardOptions =
+					KeyboardOptions(
+						keyboardType = KeyboardType.NumberPassword,
+						imeAction = ImeAction.Done,
+					),
+			)
+
+			Spacer(Modifier.height(16.dp))
+
+			Button(
+				enabled = allFilled,
+				onClick = {
+					if (validInput) {
+						navigateToNfc()
+
+						scope.launch {
+							CoroutineScope(Dispatchers.IO).launch {
+								try {
+									val result =
+										changePassword(nfcTerminalFactory, oldPin.value, newPin.value, nfcDetected)
+
+									withContext(Dispatchers.Main) {
+										navigateToResult(result)
+									}
+//							does not navigate because of scope
 // 							navigateToResult(result)
-							} catch (e: Exception) {
-								e.message
+								} catch (e: Exception) {
+									e.message
+								}
 							}
 						}
+					} else {
+						showDialog = true
+						dialogMessage =
+							when {
+								!lengthValid -> "PIN must be 5 to 6 digits long."
+								!pinsMatch -> "New PINs do not match."
+								else -> "Invalid input."
+							}
 					}
-				} else {
-					showDialog = true
-					dialogMessage =
-						when {
-							!lengthValid -> "PIN must be 5 to 6 digits long."
-							!pinsMatch -> "New PINs do not match."
-							else -> "Invalid input."
-						}
-				}
 
 // 				if (pinChanged) {
 // 					// success screen?
@@ -181,46 +206,25 @@ fun PinChangeScreen(
 // 					// depending on RC
 // 				}
 // 				onClick(pinChanged)
-			},
-			modifier =
-				Modifier
-					.fillMaxWidth()
-					.height(50.dp),
-		) {
-			Text(text = "Submit", fontSize = 16.sp)
-		}
+				},
+				modifier =
+					Modifier
+						.fillMaxWidth()
+						.height(50.dp),
+			) {
+				Text(text = "Submit", fontSize = 16.sp)
+			}
 
-		if (showDialog) {
-			AlertDialog(
-				onDismissRequest = { showDialog = false },
-				title = { Text("Invalid Input") },
-				text = { Text(dialogMessage) },
-				confirmButton = { TextButton(onClick = { showDialog = false }) { Text("OK") } },
-			)
+			Spacer(Modifier.height(100.dp))
+
+			if (showDialog) {
+				AlertDialog(
+					onDismissRequest = { showDialog = false },
+					title = { Text("Invalid Input") },
+					text = { Text(dialogMessage) },
+					confirmButton = { TextButton(onClick = { showDialog = false }) { Text("OK") } },
+				)
+			}
 		}
 	}
 }
-
-// private fun validateInput(): Boolean {
-// 	val old = oldP
-// 	val new = newPinField.text
-// 	val repeat = repeatPinField.text
-//
-// 	return when {
-// 		old.isBlank() || new.isBlank() || repeat.isBlank() -> {
-// 			false
-// 		}
-//
-// 		old.length !in 5..6 || new.length !in 5..6 || repeat.length !in 5..6 -> {
-// 			false
-// 		}
-//
-// 		new != repeat -> {
-// 			false
-// 		}
-//
-// 		else -> {
-// 			true
-// 		}
-// 	}
-// }

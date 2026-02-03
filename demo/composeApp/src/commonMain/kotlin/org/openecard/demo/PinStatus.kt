@@ -5,4 +5,7 @@ enum class PinStatus {
 	Suspended,
 	Blocked,
 	Unknown,
+	WrongPIN,
+	WrongCAN,
+	WrongPUK
 }

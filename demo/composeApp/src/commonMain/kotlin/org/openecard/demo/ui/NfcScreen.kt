@@ -8,10 +8,14 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,47 +38,6 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.openecard.demo.PinStatus
 import org.openecard.sc.iface.TerminalFactory
 
-// @Preview(showBackground = true)
-@Suppress("ktlint:standard:function-naming")
-@Composable
-fun NfcScreen2(
-// 	result: PinStatus,
-// 	nfcTerminalFactory: TerminalFactory?,
-	nfcDetected: Boolean,
-) {
-	val progress by remember { mutableStateOf(false) }
-
-	Column(
-		modifier =
-			Modifier
-				.fillMaxSize()
-				.padding(16.dp),
-		horizontalAlignment = Alignment.CenterHorizontally,
-		verticalArrangement = Arrangement.Center,
-	) {
-		Text(
-			text = "Bitte Karte anlegen",
-			fontSize = 26.sp,
-			style = MaterialTheme.typography.headlineMedium,
-		)
-
-		Box(
-			modifier = Modifier.clip(CircleShape),
-			contentAlignment = Alignment.Center,
-		) {
-			Image(
-				painter = painterResource(Res.drawable.contactless_200dp_E3E3E3),
-				contentDescription = "",
-				contentScale = ContentScale.Fit,
-				modifier =
-					Modifier
-						.size(180.dp)
-						.clip(CircleShape),
-				alignment = Alignment.Center,
-			)
-		}
-	}
-}
 
 // 		val rainbowColorsBrush =
 // 			remember {
@@ -130,7 +93,10 @@ fun NfcScreen2(
 // 		}
 
 @Composable
-fun NfcScreen(nfcDetected: Boolean) {
+fun NfcScreen(
+	nfcDetected: Boolean,
+	onCancel: () -> Unit
+) {
 	val progress by animateFloatAsState(
 		targetValue = if (nfcDetected) 1f else 0f,
 		animationSpec = tween(durationMillis = 1500, easing = LinearEasing),
@@ -149,8 +115,10 @@ fun NfcScreen(nfcDetected: Boolean) {
 			text = "Bitte Karte anlegen",
 			fontSize = 26.sp,
 			style = MaterialTheme.typography.headlineMedium,
-			modifier = Modifier.padding(bottom = 8.dp),
 		)
+
+		Spacer(Modifier.height(24.dp))
+
 
 		Box(
 			modifier = Modifier.size(220.dp),
@@ -172,10 +140,20 @@ fun NfcScreen(nfcDetected: Boolean) {
 				contentDescription = "",
 				modifier =
 					Modifier
-						.size(180.dp)
+						.size(200.dp)
 						.clip(CircleShape),
 				contentScale = ContentScale.Fit,
 			)
+		}
+
+		Spacer(Modifier.height(24.dp))
+
+		Button(
+			onClick = {
+				onCancel()
+			},
+		) {
+			Text("Cancel")
 		}
 	}
 }

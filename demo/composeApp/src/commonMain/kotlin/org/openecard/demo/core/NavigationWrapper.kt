@@ -9,7 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import org.openecard.demo.PinStatus
-import org.openecard.demo.SkidServer
+import org.openecard.demo.TokenUrlProvider
 import org.openecard.demo.ui.CanEntryScreen
 import org.openecard.demo.ui.EacPinEntryScreen
 import org.openecard.demo.ui.EgkCanEntryScreen
@@ -24,32 +24,85 @@ import org.openecard.sc.iface.TerminalFactory
 @Composable
 fun NavigationWrapper(
 	nfcTerminalFactory: TerminalFactory?,
-// 	tokenUrlProvider: TokenUrlProvider,
+	tokenUrlProvider: TokenUrlProvider?
 ) {
+
+
 	val navController = rememberNavController()
 
 	val nfcDetected = rememberSaveable { mutableStateOf(false) }
 
 	val tokenUrl = rememberSaveable { mutableStateOf("") }
 
+
+
 	val result = rememberSaveable { mutableStateOf("") }
 
 	val scope = rememberCoroutineScope()
 
 	NavHost(navController = navController, startDestination = Start) {
+
 		composable<Start> {
 			StartScreen(
 				nfcTerminalFactory = nfcTerminalFactory,
+				tokenUrlProvider = tokenUrlProvider,
 				navigateToPin = {
 					navController.navigate(PIN)
 				},
-				navigateToEac = {
-					navController.navigate(EAC)
+				navigateToEac = { url ->
+						navController.navigate(EAC(url))
+
 				},
 				navigateToEgk = {
 					navController.navigate(EGK)
 				},
 			)
+		}
+
+//		composable<EAC> {
+//			if (tokenUrlProvider != null) {
+//				EacPinEntryScreen(
+//					nfcTerminalFactory = nfcTerminalFactory,
+//					tokenUrlProvider = {
+//						tokenUrlProvider()
+//					},
+//					tokenUrl = tokenUrl.value,
+//					nfcDetected = {
+//						nfcDetected.value = true
+//					},
+//					navigateToNfc = {
+//						navController.navigate(NFC)
+//					},
+//					navigateToResult = { result ->
+//						navController.navigate(EacResult(result))
+//					},
+//					// 				result = { result.value },
+//				)
+//			}
+//		}
+
+		composable<EAC> { backStackEntry ->
+			val eac = backStackEntry.toRoute<EAC>()
+
+				EacPinEntryScreen(
+					nfcTerminalFactory = nfcTerminalFactory,
+					tokenUrlProvider = {
+						eac.tokenUrl
+					},
+					tokenUrl = tokenUrl.value,
+					nfcDetected = {
+						nfcDetected.value = true
+					},
+					navigateToNfc = {
+						navController.navigate(NFC)
+					},
+					navigateToResult = { result ->
+						navController.navigate(EacResult(result))
+					},
+					navigateBack = {
+						navController.navigateUp()
+					}
+				)
 		}
 
 		composable<PIN> {
@@ -64,6 +117,9 @@ fun NavigationWrapper(
 				nfcDetected = {
 					nfcDetected.value = true
 				},
+				navigateBack = {
+					navController.navigateUp()
+				}
 			)
 		}
 
@@ -76,6 +132,9 @@ fun NavigationWrapper(
 				navigateToResult = { result ->
 					navController.navigate(PinResult(result))
 				},
+				navigateBack = {
+					navController.navigateUp()
+				}
 			)
 		}
 
@@ -88,28 +147,13 @@ fun NavigationWrapper(
 				navigateToResult = { result ->
 					navController.navigate(PinResult(result))
 				},
+				navigateBack = {
+					navController.navigateUp()
+				}
 			)
 		}
 
-		composable<EAC> {
-			EacPinEntryScreen(
-				nfcTerminalFactory = nfcTerminalFactory,
-				tokenUrlProvider = {
-					SkidServer.Companion.forProdSystem().loadTcTokenUrl()
-				},
-				tokenUrl = tokenUrl.value,
-				nfcDetected = {
-					nfcDetected.value = true
-				},
-				navigateToNfc = {
-					navController.navigate(NFC)
-				},
-				navigateToResult = { result ->
-					navController.navigate(EacResult(result))
-				},
-// 				result = { result.value },
-			)
-		}
+
 
 		composable<EGK> {
 			EgkCanEntryScreen(
@@ -123,12 +167,20 @@ fun NavigationWrapper(
 				navigateToResult = { result ->
 					navController.navigate(EgkResult(result))
 				},
+				navigateBack = {
+					navController.navigateUp()
+				}
 // 				result = { result.value },
 			)
 		}
 
 		composable<NFC> {
-			NfcScreen(nfcDetected.value)
+			NfcScreen(
+				nfcDetected.value,
+				onCancel = {
+					navController.navigate(Start)
+				}
+			)
 		}
 
 		composable<PinResult> { backStackEntry ->
@@ -162,7 +214,7 @@ fun NavigationWrapper(
 					}
 				},
 				eacResult = null,
-				egkResult = null
+				egkResult = null,
 			)
 			// 			ResultScreen(result) {
 		}
@@ -202,7 +254,7 @@ fun NavigationWrapper(
 				},
 				navigateToOperation = {},
 				eacResult = null,
-				egkResult = egkResult.success
+				egkResult = egkResult.result,
 			)
 			// 			ResultScreen(result) {
 		}

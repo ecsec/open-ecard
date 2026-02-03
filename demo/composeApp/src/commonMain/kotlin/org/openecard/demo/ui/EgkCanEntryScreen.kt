@@ -12,6 +12,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -33,6 +34,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.openecard.demo.AppBar
+import org.openecard.demo.AppBarState
 import org.openecard.demo.doPaceWithEgk
 import org.openecard.sc.iface.TerminalFactory
 
@@ -40,13 +43,10 @@ import org.openecard.sc.iface.TerminalFactory
 @Composable
 fun EgkCanEntryScreen(
 	nfcTerminalFactory: TerminalFactory? = null,
-// 	scope: CoroutineScope,
-//	tokenUrlProvider: TokenUrlProvider,
-//	tokenUrl: String,
-	navigateToResult: (Boolean) -> Unit,
+	navigateToResult: (String) -> Unit,
 	navigateToNfc: () -> Unit,
+	navigateBack: () -> Unit,
 	nfcDetected: () -> Unit,
-// 	result: (r: String?) -> Unit,
 ) {
 	val can = rememberSaveable { mutableStateOf("") }
 
@@ -57,6 +57,7 @@ fun EgkCanEntryScreen(
 	allFilled = !can.value.isBlank()
 
 
+	var dialogTitle by remember { mutableStateOf("") }
 	var dialogMessage by remember { mutableStateOf("") }
 
 	val validInput = can.value.length in 5..6
@@ -65,90 +66,109 @@ fun EgkCanEntryScreen(
 
 	var result: String? by remember { mutableStateOf(null) }
 
-	Column(
-		modifier =
-			Modifier
-				.fillMaxSize()
-				.padding(16.dp),
-		horizontalAlignment = Alignment.CenterHorizontally,
-		verticalArrangement = Arrangement.Center,
+	Scaffold(
+		topBar = {
+			AppBar(
+				AppBarState(
+					title = "Enter your CAN",
+					canNavigateUp = true,
+					navigateUp = navigateBack
+				)
+			)
+		}
 	) {
-		Text(
-			text = "Please enter your CAN",
-			fontSize = 28.sp,
-			style = MaterialTheme.typography.headlineMedium,
-		)
-
-		Spacer(Modifier.height(32.dp))
-
-		OutlinedTextField(
-			value = can.value,
-			onValueChange = {
-				can.value = it
-			},
-			label = { Text("CAN") },
-			visualTransformation = PasswordVisualTransformation(),
+		Column(
 			modifier =
 				Modifier
-					.fillMaxWidth(),
-			singleLine = true,
-			keyboardOptions =
-				KeyboardOptions(
-					keyboardType = KeyboardType.NumberPassword,
-					imeAction = ImeAction.Done,
-				),
-		)
+					.fillMaxSize()
+					.padding(16.dp),
+			horizontalAlignment = Alignment.CenterHorizontally,
+			verticalArrangement = Arrangement.Center,
+		) {
+			Text(
+				text = "Please enter your CAN",
+				fontSize = 28.sp,
+				style = MaterialTheme.typography.headlineMedium,
+			)
 
-		Spacer(Modifier.height(24.dp))
+			Spacer(Modifier.height(32.dp))
 
-		Button(
-			enabled = allFilled,
-			onClick = {
-				if (validInput) {
-					navigateToNfc()
+			OutlinedTextField(
+				value = can.value,
+				onValueChange = {
+					can.value = it
+				},
+				label = { Text("CAN") },
+				visualTransformation = PasswordVisualTransformation(),
+				modifier =
+					Modifier
+						.fillMaxWidth(),
+				singleLine = true,
+				keyboardOptions =
+					KeyboardOptions(
+						keyboardType = KeyboardType.NumberPassword,
+						imeAction = ImeAction.Done,
+					),
+			)
 
-					scope.launch {
-						CoroutineScope(Dispatchers.IO).launch {
-							try {
-								val result =
-									doPaceWithEgk(
-										nfcTerminalFactory,
-										can.value,
-										nfcDetected,
-									)
+			Spacer(Modifier.height(24.dp))
 
-								withContext(Dispatchers.Main) {
-									navigateToResult(result)
+			Button(
+				enabled = allFilled,
+				onClick = {
+					if (validInput) {
+						navigateToNfc()
+
+						scope.launch {
+							CoroutineScope(Dispatchers.IO).launch {
+								try {
+									val result =
+										doPaceWithEgk(
+											nfcTerminalFactory,
+											can.value,
+											nfcDetected,
+										)
+
+									withContext(Dispatchers.Main) {
+										if (result != null) {
+											navigateToResult(result)
+										} else {
+											showDialog = true
+											dialogTitle = "Error"
+											dialogMessage = "Something went wrong. Please try again."
+										}
+									}
+								} catch (e: Exception) {
+									e.message
 								}
-							} catch (e: Exception) {
-								e.message
 							}
 						}
+					} else {
+						showDialog = true
+						dialogTitle = "Error"
+						dialogMessage =
+							when {
+								!validInput -> "CAN must be 6 digits long."
+								else -> "Invalid input."
+							}
 					}
-				} else {
-					showDialog = true
-					dialogMessage =
-						when {
-							!validInput -> "CAN must be 6 digits long."
-							else -> "Invalid input."
-						}
-				}
-			},
-			modifier =
-				Modifier
-					.fillMaxWidth()
-					.height(50.dp),
-		) {
-			Text(text = "Submit", fontSize = 16.sp)
-		}
+				},
+				modifier =
+					Modifier
+						.fillMaxWidth()
+						.height(50.dp),
+			) {
+				Text(text = "Submit", fontSize = 16.sp)
+			}
 
-		if (showDialog) {
-			AlertDialog(
-				onDismissRequest = { showDialog = false },
-				title = { Text("Invalid Input") },
-				text = { Text(dialogMessage) },
-				confirmButton = { TextButton(onClick = { showDialog = false }) { Text("OK") } },
-			)
+			if (showDialog) {
+				AlertDialog(
+					onDismissRequest = { showDialog = false },
+					title = { Text(dialogTitle) },
+					text = { Text(dialogMessage) },
+					confirmButton = { TextButton(onClick = { showDialog = false }) { Text("OK") } },
+				)
+			}
 		}
 	}
 }

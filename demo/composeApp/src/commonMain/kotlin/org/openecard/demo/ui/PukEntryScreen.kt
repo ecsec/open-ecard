@@ -11,6 +11,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -29,6 +30,8 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.openecard.cif.bundled.NpaDefinitions.Apps.Mf.Dids.pin
+import org.openecard.demo.AppBar
+import org.openecard.demo.AppBarState
 import org.openecard.demo.PinStatus
 import org.openecard.demo.suspendRecovery
 import org.openecard.demo.unblockPin
@@ -40,69 +43,82 @@ fun PukEntryScreen(
 	nfcTerminalFactory: TerminalFactory?,
 	navigateToNfc: () -> Unit,
 	navigateToResult: (PinStatus) -> Unit,
+	navigateBack: () -> Unit,
 ) {
 	val scope = rememberCoroutineScope()
 	val puk = rememberSaveable { mutableStateOf("") }
 
-	Column(
-		modifier =
-			Modifier
-				.fillMaxSize()
-				.padding(16.dp),
-		horizontalAlignment = Alignment.CenterHorizontally,
-		verticalArrangement = Arrangement.Center,
+	Scaffold(
+		topBar = {
+			AppBar(
+				AppBarState(
+					title = "Enter your PUK",
+					canNavigateUp = true,
+					navigateUp = navigateBack
+				)
+			)
+		}
 	) {
-		Text(
-			text = "Unblock your PIN",
-			fontSize = 28.sp,
-			style = MaterialTheme.typography.headlineMedium,
-			modifier = Modifier.padding(bottom = 32.dp),
-		)
-
-		OutlinedTextField(
-			value = puk.value,
-			onValueChange = {
-				puk.value = it
-			},
-			label = { Text("PUK") },
-			visualTransformation = PasswordVisualTransformation(),
+		Column(
 			modifier =
 				Modifier
-					.fillMaxWidth()
-					.padding(bottom = 24.dp),
-			singleLine = true,
-			keyboardOptions =
-				KeyboardOptions(
-					keyboardType = KeyboardType.NumberPassword,
-					imeAction = ImeAction.Done,
-				),
-		)
+					.fillMaxSize()
+					.padding(16.dp),
+			horizontalAlignment = Alignment.CenterHorizontally,
+			verticalArrangement = Arrangement.Center,
+		) {
+			Text(
+				text = "Unblock your PIN",
+				fontSize = 28.sp,
+				style = MaterialTheme.typography.headlineMedium,
+			)
 
-		Spacer(Modifier.height(8.dp))
+			Spacer(Modifier.height(32.dp))
 
-		Button(
-			onClick = {
-				navigateToNfc()
+			OutlinedTextField(
+				value = puk.value,
+				onValueChange = {
+					puk.value = it
+				},
+				label = { Text("PUK") },
+				visualTransformation = PasswordVisualTransformation(),
+				modifier =
+					Modifier
+						.fillMaxWidth(),
+				singleLine = true,
+				keyboardOptions =
+					KeyboardOptions(
+						keyboardType = KeyboardType.NumberPassword,
+						imeAction = ImeAction.Done,
+					),
+			)
 
-				scope.launch {
-					CoroutineScope(Dispatchers.IO).launch {
-						try {
-							val result = unblockPin(nfcTerminalFactory, puk.value)
-							withContext(Dispatchers.Main) {
-								navigateToResult(result)
+			Spacer(Modifier.height(24.dp))
+
+			Button(
+				onClick = {
+					navigateToNfc()
+
+					scope.launch {
+						CoroutineScope(Dispatchers.IO).launch {
+							try {
+								val result = unblockPin(nfcTerminalFactory, puk.value)
+								withContext(Dispatchers.Main) {
+									navigateToResult(result)
+								}
+							} catch (e: Exception) {
+								e.message
 							}
-						} catch (e: Exception) {
-							e.message
 						}
 					}
-				}
-			},
-			modifier =
-				Modifier
-					.fillMaxWidth()
-					.height(50.dp),
-		) {
-			Text(text = "Submit", fontSize = 16.sp)
+				},
+				modifier =
+					Modifier
+						.fillMaxWidth()
+						.height(50.dp),
+			) {
+				Text(text = "Submit", fontSize = 16.sp)
+			}
 		}
 	}
 }

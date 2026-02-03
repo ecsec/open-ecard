@@ -18,8 +18,8 @@ object PUK
 @Serializable
 object NFC
 
-@Serializable
-object EAC
+//@Serializable
+//object EAC
 
 @Serializable
 object EGK
@@ -44,5 +44,10 @@ data class EacResult(
 
 @Serializable
 data class EgkResult(
-	val success: Boolean,
+	val result: String,
+)
+
+@Serializable
+data class EAC(
+	val tokenUrl: String,
 )

@@ -8,6 +8,7 @@ import org.openecard.cif.definition.acl.DidStateReference
 import org.openecard.cif.definition.recognition.removeUnsupported
 import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.dids.PaceDid
+import org.openecard.sal.sc.SmartcardApplication
 import org.openecard.sal.sc.SmartcardSal
 import org.openecard.sal.sc.recognition.DirectCardRecognition
 import org.openecard.sc.iface.TerminalFactory
@@ -18,13 +19,18 @@ import org.openecard.sc.pace.PaceFeatureSoftwareFactory
 private val logger = KotlinLogging.logger { }
 
 @OptIn(ExperimentalUnsignedTypes::class)
+private fun SmartcardApplication.readDataSet(name: String): UByteArray? =
+	datasets.find { it.name == name }?.run {
+		this@readDataSet.connect()
+		read()
+	} //readError(name)
+
+@OptIn(ExperimentalUnsignedTypes::class)
 suspend fun doPaceWithEgk(
 	terminalFactory: TerminalFactory?,
-//	tokenUrl: String,
-// 	tokenUrl: String,
 	can: String,
 	nfcDetected: () -> Unit,
-): Boolean {
+): String? {
 	return try {
 
 		terminalFactory?.load()?.withContextSuspend { ctx ->
@@ -41,32 +47,18 @@ suspend fun doPaceWithEgk(
 				}
 
 				else -> {
-//					terminal.waitForCardPresent()
-//					nfcDetected()
-//
-//					val uiStep = EidActivation.startEacProcess(clientInfo, tokenUrl, session, terminal.name)
-//
-//					val paceResp =
-//						uiStep.getPaceDid().establishChannel(
-//							pin,
-//							uiStep.guiData.optionalChat.asBytes,
-//							uiStep.guiData.certificateDescription.asBytes,
-//						)
-//					val serverStep = uiStep.processAuthentication(paceResp)
-//					when (val result = serverStep.processEidServerLogic()) {
-//						is BindingResponse.RedirectResponse -> result.redirectUrl
-//						else -> "failed result ${result.status}"
-//					}
-					// -------------------
 					terminal.waitForCardPresent()
 					nfcDetected()
 
 					val con = session.connect(terminal.name)
 
-					EgkCif.metadata.id == con.deviceType// { "Recognized card is not an eGK" }
+					EgkCif.metadata.id == con.deviceType
 
 					val mf = con.applications.find { it.name == EgkCifDefinitions.Apps.Mf.name }
 					val app = con.applications.find { it.name == EgkCifDefinitions.Apps.ESign.name }
+
+					val hcaApp = con.applications.find { it.name == EgkCifDefinitions.Apps.Hca.name }
+
 					mf?.connect()
 
 					val certDs = app?.datasets?.find { it.name == "EF.C.CH.AUT.E256" }
@@ -80,8 +72,7 @@ suspend fun doPaceWithEgk(
 							)
 					when (missing) {
 						MissingAuthentications.Unsolveable -> {
-							"PACE should be the only DID needed for this DS"
-							false
+							null
 						}
 
 						is MissingAuthentications.MissingDidAuthentications -> {
@@ -92,46 +83,36 @@ suspend fun doPaceWithEgk(
 								is PaceDid -> {
 									!did.capturePasswordInHardware()
 									did.establishChannel(can, null, null)
-									true
+									hcaApp?.connect()
+
+									val pdDataSet =
+										hcaApp?.datasets?.find { it.name == EgkCifDefinitions.Apps.Hca.Datasets.efPd }
+
+									val pd = pdDataSet?.read()
+
+									logger.debug { "personal data: ${pd?.toPersonalData()?.versicherter?.person?.nachname}" }
+//									listOf(
+//										pd?.toPersonalData()?.versicherter?.person?.vorname,
+//										pd?.toPersonalData()?.versicherter?.person?.nachname,
+//									).toString()
+									val person = pd?.toPersonalData()?.versicherter?.person
+									"Hello ${person?.vorname} ${person?.nachname}"
 								}
 
 								else -> {
-									"Non PACE DID found"
-									false
+									throw Error("NO PACE DID")
 								}
 							}
 						}
 					}
-
-//					app.connect()
-//					val certData = certDs.read()
-//					val certs =
-//						CertificateFactory
-//							.getInstance("X.509")
-//							.generateCertificates(certData.toByteArray().inputStream())
-//					certs.isNotEmpty()
-
-//					mf?.connect()
-//					val efDirDs = mf?.datasets?.find { it.name == "EF.DIR" }
-//					val efDirData = efDirDs?.read()
-//					efDirData?.isNotEmpty()
-
-
-//					@OptIn(ExperimentalUnsignedTypes::class)
-//					val personalData: PersoenlicheVersichertendaten by lazy {
-//						connection.applications.find { it.name == EgkCifDefinitions.Apps.Hca.name }?.run {
-//							readDataSet(EgkCifDefinitions.Apps.Hca.Datasets.efPd).toPersonalData()
-//						} ?: readError(EgkCifDefinitions.Apps.Hca.Datasets.efPd)
-//					}
 				}
 			}
-		} ?: false
+		}
 
 
 	} catch (e: Throwable) {
 		logger.debug(e) { "Error" }
 		e.message
-		false
 	}
 }
 

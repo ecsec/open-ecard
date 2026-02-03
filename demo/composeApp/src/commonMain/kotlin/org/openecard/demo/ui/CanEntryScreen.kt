@@ -11,6 +11,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +29,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.openecard.demo.AppBar
+import org.openecard.demo.AppBarState
 import org.openecard.demo.PinStatus
 import org.openecard.demo.suspendRecovery
 import org.openecard.sc.iface.TerminalFactory
@@ -38,89 +41,102 @@ fun CanEntryScreen(
 	nfcTerminalFactory: TerminalFactory?,
 	navigateToNfc: () -> Unit,
 	navigateToResult: (PinStatus) -> Unit,
+	navigateBack: () -> Unit,
 ) {
 	val scope = rememberCoroutineScope()
 	val can = rememberSaveable { mutableStateOf("") }
 	val pin = rememberSaveable { mutableStateOf("") }
-
-	Column(
-		modifier =
-			Modifier
-				.fillMaxSize()
-				.padding(16.dp),
-		horizontalAlignment = Alignment.CenterHorizontally,
-		verticalArrangement = Arrangement.Center,
+	Scaffold(
+		topBar = {
+			AppBar(
+				AppBarState(
+					title = "Change your PIN",
+					canNavigateUp = true,
+					navigateUp = navigateBack
+				)
+			)
+		}
 	) {
-		Text(
-			text = "Recover your PIN",
-			fontSize = 28.sp,
-			style = MaterialTheme.typography.headlineMedium,
-			modifier = Modifier.padding(bottom = 32.dp),
-		)
-
-		OutlinedTextField(
-			value = can.value,
-			onValueChange = {
-				can.value = it
-			},
-			label = { Text("CAN") },
-			visualTransformation = PasswordVisualTransformation(),
+		Column(
 			modifier =
 				Modifier
-					.fillMaxWidth()
-					.padding(bottom = 24.dp),
-			singleLine = true,
-			keyboardOptions =
-				KeyboardOptions(
-					keyboardType = KeyboardType.NumberPassword,
-					imeAction = ImeAction.Done,
-				),
-		)
+					.fillMaxSize()
+					.padding(16.dp),
+			horizontalAlignment = Alignment.CenterHorizontally,
+			verticalArrangement = Arrangement.Center,
+		) {
+			Text(
+				text = "Recover your PIN",
+				fontSize = 28.sp,
+				style = MaterialTheme.typography.headlineMedium,
+			)
 
-		OutlinedTextField(
-			value = pin.value,
-			onValueChange = {
-				pin.value = it
-			},
-			label = { Text("PIN") },
-			visualTransformation = PasswordVisualTransformation(),
-			modifier =
-				Modifier
-					.fillMaxWidth()
-					.padding(bottom = 24.dp),
-			singleLine = true,
-			keyboardOptions =
-				KeyboardOptions(
-					keyboardType = KeyboardType.NumberPassword,
-					imeAction = ImeAction.Done,
-				),
-		)
+			Spacer(Modifier.height(32.dp))
 
-		Spacer(Modifier.height(8.dp))
+			OutlinedTextField(
+				value = can.value,
+				onValueChange = {
+					can.value = it
+				},
+				label = { Text("CAN") },
+				visualTransformation = PasswordVisualTransformation(),
+				modifier =
+					Modifier
+						.fillMaxWidth(),
+				singleLine = true,
+				keyboardOptions =
+					KeyboardOptions(
+						keyboardType = KeyboardType.NumberPassword,
+						imeAction = ImeAction.Done,
+					),
+			)
 
-		Button(
-			onClick = {
-				navigateToNfc()
+			Spacer(Modifier.height(24.dp))
 
-				scope.launch {
-					CoroutineScope(Dispatchers.IO).launch {
-						try {
-							val result = suspendRecovery(nfcTerminalFactory, can = can.value, pin = pin.value)
-							withContext(Dispatchers.Main) {
-								navigateToResult(result)
+			OutlinedTextField(
+				value = pin.value,
+				onValueChange = {
+					pin.value = it
+				},
+				label = { Text("PIN") },
+				visualTransformation = PasswordVisualTransformation(),
+				modifier =
+					Modifier
+						.fillMaxWidth(),
+				singleLine = true,
+				keyboardOptions =
+					KeyboardOptions(
+						keyboardType = KeyboardType.NumberPassword,
+						imeAction = ImeAction.Done,
+					),
+			)
+
+			Spacer(Modifier.height(24.dp))
+
+			Button(
+				onClick = {
+					navigateToNfc()
+
+					scope.launch {
+						CoroutineScope(Dispatchers.IO).launch {
+							try {
+								val result = suspendRecovery(nfcTerminalFactory, can = can.value, pin = pin.value)
+								withContext(Dispatchers.Main) {
+									navigateToResult(result)
+								}
+							} catch (e: Exception) {
+								e.message
 							}
-						} catch (e: Exception) {
-							e.message
 						}
 					}
-				}
-			},
-			modifier =
-				Modifier
-					.fillMaxWidth()
-					.height(50.dp),
-		) {
-			Text(text = "Submit", fontSize = 16.sp)
+				},
+				modifier =
+					Modifier
+						.fillMaxWidth()
+						.height(50.dp),
+			) {
+				Text(text = "Submit", fontSize = 16.sp)
+			}
 		}
 	}
 }

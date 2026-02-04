@@ -195,26 +195,7 @@ class AndroidTerminal(
 
 		val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE else 0
 
-		val pendingIntent =
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-				val bundle =
-					ActivityOptions
-						.makeBasic()
-						.let {
-							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
-								it.setPendingIntentCreatorBackgroundActivityStartMode(
-									ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE,
-								)
-							} else {
-								it.setPendingIntentCreatorBackgroundActivityStartMode(
-									ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED,
-								)
-							}
-						}.toBundle()
-				PendingIntent.getActivity(androidActivity, 0, activityIntent, flags, bundle)
-			} else {
-				PendingIntent.getActivity(androidActivity, 0, activityIntent, flags)
-			}
+		val pendingIntent = PendingIntent.getActivity(androidActivity, 0, activityIntent, flags)
 
 		nfcAdapter?.enableForegroundDispatch(
 			androidActivity,

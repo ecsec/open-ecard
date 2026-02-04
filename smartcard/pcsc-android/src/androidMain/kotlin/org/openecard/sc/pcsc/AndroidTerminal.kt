@@ -2,9 +2,11 @@ package org.openecard.sc.pcsc
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.ActivityOptions
 import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
+import android.content.IntentFilter
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
@@ -190,10 +192,40 @@ class AndroidTerminal(
 	internal fun nfcTagDiscoveryOn() {
 		val activityIntent: Intent =
 			Intent(androidActivity, androidActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-		val flags = if (Build.VERSION.SDK_INT >= 31) PendingIntent.FLAG_MUTABLE else 0
-		val pendingIntent: PendingIntent = PendingIntent.getActivity(androidActivity, 0, activityIntent, flags)
 
-		nfcAdapter?.enableForegroundDispatch(androidActivity, pendingIntent, null, null)
+		val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE else 0
+
+		val pendingIntent =
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+				val bundle =
+					ActivityOptions
+						.makeBasic()
+						.let {
+							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+								it.setPendingIntentCreatorBackgroundActivityStartMode(
+									ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE,
+								)
+							} else {
+								it.setPendingIntentCreatorBackgroundActivityStartMode(
+									ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED,
+								)
+							}
+						}.toBundle()
+				PendingIntent.getActivity(androidActivity, 0, activityIntent, flags, bundle)
+			} else {
+				PendingIntent.getActivity(androidActivity, 0, activityIntent, flags)
+			}
+
+		nfcAdapter?.enableForegroundDispatch(
+			androidActivity,
+			pendingIntent,
+			arrayOf(
+				IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED),
+				IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED),
+				IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED),
+			),
+			null,
+		)
 	}
 
 	override suspend fun waitForCardAbsent() {
@@ -203,7 +235,7 @@ class AndroidTerminal(
 
 inline fun <reified T : Parcelable> Intent.parcelable(key: String): T? =
 	when {
-		Build.VERSION.SDK_INT >= 33 -> {
+		Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
 			getParcelableExtra(key, T::class.java)
 		}
 

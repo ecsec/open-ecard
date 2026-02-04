@@ -13,9 +13,6 @@ import android.os.Bundle
 import android.os.Parcelable
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import org.openecard.sc.iface.Cancelled
 import org.openecard.sc.iface.NoSmartcard
 import org.openecard.sc.iface.PreferredCardProtocol
 import org.openecard.sc.iface.ReaderUnsupported
@@ -24,7 +21,6 @@ import org.openecard.sc.iface.Terminal
 import org.openecard.sc.iface.TerminalStateType
 import org.openecard.sc.iface.Terminals
 import kotlin.jvm.java
-import kotlin.random.Random
 
 private val logger = KotlinLogging.logger { }
 
@@ -90,8 +86,6 @@ class AndroidTerminal(
 				nfcTagDiscoveryOff()
 			}
 		}
-
-	private val random = Random(0)
 
 	private fun registerLifeCycleCallbacks() {
 		androidActivity.registerActivityLifecycleCallbacks(lifeCycleCallbacks)

@@ -36,13 +36,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.openecard.demo.AppBar
 import org.openecard.demo.AppBarState
-import org.openecard.demo.doPaceWithEgk
-import org.openecard.sc.iface.TerminalFactory
+import org.openecard.demo.viewmodel.EgkViewModel
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
 fun EgkCanEntryScreen(
-	nfcTerminalFactory: TerminalFactory? = null,
+	egkViewModel: EgkViewModel,
 	navigateToResult: (String) -> Unit,
 	navigateToNfc: () -> Unit,
 	navigateBack: () -> Unit,
@@ -55,7 +54,6 @@ fun EgkCanEntryScreen(
 	var allFilled by remember { mutableStateOf(false) }
 
 	allFilled = !can.value.isBlank()
-
 
 	var dialogTitle by remember { mutableStateOf("") }
 	var dialogMessage by remember { mutableStateOf("") }
@@ -123,10 +121,9 @@ fun EgkCanEntryScreen(
 							CoroutineScope(Dispatchers.IO).launch {
 								try {
 									val result =
-										doPaceWithEgk(
-											nfcTerminalFactory,
-											can.value,
+										egkViewModel.readEgk(
 											nfcDetected,
+											can.value
 										)
 
 									withContext(Dispatchers.Main) {

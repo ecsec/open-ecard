@@ -37,15 +37,13 @@ import kotlinx.coroutines.withContext
 import org.openecard.demo.AppBar
 import org.openecard.demo.AppBarState
 import org.openecard.demo.TokenUrlProvider
-import org.openecard.demo.doEAC
-import org.openecard.sc.iface.TerminalFactory
+import org.openecard.demo.viewmodel.EacViewModel
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
 fun EacPinEntryScreen(
-	nfcTerminalFactory: TerminalFactory? = null,
+	eacViewModel: EacViewModel,
 	tokenUrlProvider: TokenUrlProvider,
-	tokenUrl: String,
 	navigateToResult: (String) -> Unit,
 	navigateToNfc: () -> Unit,
 	navigateBack: () -> Unit,
@@ -127,11 +125,10 @@ fun EacPinEntryScreen(
 							CoroutineScope(Dispatchers.IO).launch {
 								try {
 									val result =
-										doEAC(
-											nfcTerminalFactory,
-											tokenUrlProvider(),
-											pin.value,
+										eacViewModel.doEac(
 											nfcDetected,
+											tokenUrlProvider(),
+											pin.value
 										)
 
 									withContext(Dispatchers.Main) {

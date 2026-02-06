@@ -33,16 +33,8 @@ fun StartScreen(
 	navigateToPin: () -> Unit,
 	navigateToEac: (tokenUrl: String) -> Unit,
 	navigateToEgk: () -> Unit,
-	nfcTerminalFactory: TerminalFactory?,
-	tokenUrlProvider: TokenUrlProvider?,
 ) {
-
-	var status: String? by remember { mutableStateOf(null) }
-	var result: String? by remember { mutableStateOf(null) }
 	val scope = rememberCoroutineScope()
-	val uriHandler = LocalUriHandler.current
-
-	var pinChanged by remember { mutableStateOf(false) }
 
 	Scaffold(
 		topBar = {
@@ -94,9 +86,13 @@ fun StartScreen(
 						}
 					},
 			)
-
 			Button(onClick = {
-				navigateToPin()
+				try {
+					navigateToPin()
+
+				} catch (e: Exception) {
+					e.message
+				}
 			}) {
 				Text("Change PIN")
 			}
@@ -110,19 +106,19 @@ fun StartScreen(
 	}
 }
 
-	@Suppress("ktlint:standard:function-naming")
-	@Composable
-	fun EacButton(
-		text: String,
-		onClick: () -> Unit,
-	) {
-		Button(
-			onClick = {
-				onClick()
-			},
-		)
-		{
-			Text(text)
-		}
+@Suppress("ktlint:standard:function-naming")
+@Composable
+fun EacButton(
+	text: String,
+	onClick: () -> Unit,
+) {
+	Button(
+		onClick = {
+			onClick()
+		},
+	)
+	{
+		Text(text)
 	}
+}
 

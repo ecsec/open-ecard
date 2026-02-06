@@ -29,55 +29,43 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.openecard.demo.App
 import org.openecard.demo.AppBar
 import org.openecard.demo.AppBarState
-import org.openecard.demo.DemoAppScaffold
 import org.openecard.demo.PinStatus
-import org.openecard.demo.changePassword
 import org.openecard.demo.viewmodel.PinMgmtViewModel
-import org.openecard.demo.viewmodel.RootViewModel
-import org.openecard.sc.iface.TerminalFactory
 
-@Suppress("ktlint:standard:function-naming")
 @Composable
 fun PinChangeScreen(
-	pinMgmtViewModel: PinMgmtViewModel = viewModel(),
-	nfcTerminalFactory: TerminalFactory?,
+	pinMgmtViewModel: PinMgmtViewModel,
 	navigateToResult: (PinStatus) -> Unit,
 	navigateToNfc: () -> Unit,
 	navigateBack: () -> Unit,
 	nfcDetected: () -> Unit,
 ) {
+	val scope = rememberCoroutineScope()
+
 	val oldPin = rememberSaveable { mutableStateOf("") }
 	val newPin = rememberSaveable { mutableStateOf("") }
 	val repeat = rememberSaveable { mutableStateOf("") }
 
-	val scope = rememberCoroutineScope()
-	var allFilled by remember { mutableStateOf(false) }
+	val allFilled = oldPin.value.isNotBlank() &&
+		newPin.value.isNotBlank() &&
+		repeat.value.isNotBlank()
 
-	allFilled = !(oldPin.value.isBlank() || newPin.value.isBlank() || repeat.value.isBlank())
+	val lengthValid = oldPin.value.length in 5..6 &&
+		newPin.value.length in 5..6 &&
+		repeat.value.length in 5..6
 
-	var dialogMessage by remember { mutableStateOf("") }
-
-	val lengthValid = oldPin.value.length in 5..6 && newPin.value.length in 5..6 && repeat.value.length in 5..6
 	val pinsMatch = newPin.value == repeat.value
 	val validInput = lengthValid && pinsMatch
 
 	var showDialog by remember { mutableStateOf(false) }
-
-	var result by remember { mutableStateOf(PinStatus.Unknown) }
-
-	val pinMgmtState by pinMgmtViewModel.pinMgmtUiState.collectAsStateWithLifecycle()
-
-	val rootViewModel: RootViewModel = viewModel()
+	var dialogMessage by remember { mutableStateOf("") }
 
 	Scaffold(
 		topBar = {
@@ -91,10 +79,9 @@ fun PinChangeScreen(
 		}
 	) {
 		Column(
-			modifier =
-				Modifier
-					.fillMaxSize()
-					.padding(16.dp),
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(16.dp),
 			horizontalAlignment = Alignment.CenterHorizontally,
 			verticalArrangement = Arrangement.Center,
 		) {
@@ -103,6 +90,7 @@ fun PinChangeScreen(
 				fontSize = 28.sp,
 				style = MaterialTheme.typography.headlineMedium,
 			)
+
 
 			Spacer(Modifier.height(32.dp))
 
@@ -166,7 +154,7 @@ fun PinChangeScreen(
 					),
 			)
 
-			Spacer(Modifier.height(16.dp))
+			Spacer(Modifier.height(24.dp))
 
 			Button(
 				enabled = allFilled,
@@ -175,16 +163,19 @@ fun PinChangeScreen(
 						navigateToNfc()
 
 						scope.launch {
+
 							CoroutineScope(Dispatchers.IO).launch {
 								try {
 									val result =
-										changePassword(nfcTerminalFactory, oldPin.value, newPin.value, nfcDetected)
+										pinMgmtViewModel.changePin(
+											nfcDetected,
+											oldPin.value,
+											newPin.value,
+										)
 
 									withContext(Dispatchers.Main) {
 										navigateToResult(result)
 									}
-//							does not navigate because of scope
-// 							navigateToResult(result)
 								} catch (e: Exception) {
 									e.message
 								}
@@ -199,30 +190,26 @@ fun PinChangeScreen(
 								else -> "Invalid input."
 							}
 					}
-
-// 				if (pinChanged) {
-// 					// success screen?
-// 				} else {
-// 					// depending on RC
-// 				}
-// 				onClick(pinChanged)
 				},
-				modifier =
-					Modifier
-						.fillMaxWidth()
-						.height(50.dp),
+				modifier = Modifier
+					.fillMaxWidth()
+					.height(50.dp),
 			) {
-				Text(text = "Submit", fontSize = 16.sp)
+				Text("Submit", fontSize = 16.sp)
 			}
 
-			Spacer(Modifier.height(100.dp))
+			Spacer(Modifier.height(120.dp))
 
 			if (showDialog) {
 				AlertDialog(
 					onDismissRequest = { showDialog = false },
 					title = { Text("Invalid Input") },
 					text = { Text(dialogMessage) },
-					confirmButton = { TextButton(onClick = { showDialog = false }) { Text("OK") } },
+					confirmButton = {
+						TextButton(onClick = { showDialog = false }) {
+							Text("OK")
+						}
+					}
 				)
 			}
 		}

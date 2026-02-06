@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -29,30 +28,28 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.openecard.cif.bundled.NpaDefinitions.Apps.Mf.Dids.pin
 import org.openecard.demo.AppBar
 import org.openecard.demo.AppBarState
 import org.openecard.demo.PinStatus
-import org.openecard.demo.suspendRecovery
-import org.openecard.demo.unblockPin
-import org.openecard.sc.iface.TerminalFactory
+import org.openecard.demo.viewmodel.PinMgmtViewModel
 
-@Suppress("ktlint:standard:function-naming")
 @Composable
 fun PukEntryScreen(
-	nfcTerminalFactory: TerminalFactory?,
+	pinMgmtViewModel: PinMgmtViewModel,
 	navigateToNfc: () -> Unit,
 	navigateToResult: (PinStatus) -> Unit,
 	navigateBack: () -> Unit,
+	nfcDetected: () -> Unit,
 ) {
 	val scope = rememberCoroutineScope()
+
 	val puk = rememberSaveable { mutableStateOf("") }
 
 	Scaffold(
 		topBar = {
 			AppBar(
 				AppBarState(
-					title = "Enter your PUK",
+					title = "Unblock your PIN",
 					canNavigateUp = true,
 					navigateUp = navigateBack
 				)
@@ -60,18 +57,13 @@ fun PukEntryScreen(
 		}
 	) {
 		Column(
-			modifier =
-				Modifier
-					.fillMaxSize()
-					.padding(16.dp),
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(16.dp),
 			horizontalAlignment = Alignment.CenterHorizontally,
 			verticalArrangement = Arrangement.Center,
 		) {
-			Text(
-				text = "Unblock your PIN",
-				fontSize = 28.sp,
-				style = MaterialTheme.typography.headlineMedium,
-			)
+			Text("Unblock your PIN", fontSize = 28.sp)
 
 			Spacer(Modifier.height(32.dp))
 
@@ -100,24 +92,30 @@ fun PukEntryScreen(
 					navigateToNfc()
 
 					scope.launch {
+
 						CoroutineScope(Dispatchers.IO).launch {
 							try {
-								val result = unblockPin(nfcTerminalFactory, puk.value)
+								val result =
+									pinMgmtViewModel.unblockPin(
+										nfcDetected,
+										puk.value,
+									)
+
 								withContext(Dispatchers.Main) {
 									navigateToResult(result)
 								}
+
 							} catch (e: Exception) {
 								e.message
 							}
 						}
 					}
 				},
-				modifier =
-					Modifier
-						.fillMaxWidth()
-						.height(50.dp),
+				modifier = Modifier
+					.fillMaxWidth()
+					.height(50.dp),
 			) {
-				Text(text = "Submit", fontSize = 16.sp)
+				Text("Submit", fontSize = 16.sp)
 			}
 		}
 	}

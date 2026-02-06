@@ -2,14 +2,13 @@ package org.openecard.demo.core
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import org.openecard.demo.PinStatus
-import org.openecard.demo.TokenUrlProvider
 import org.openecard.demo.ui.CanEntryScreen
 import org.openecard.demo.ui.EacPinEntryScreen
 import org.openecard.demo.ui.EgkCanEntryScreen
@@ -18,39 +17,31 @@ import org.openecard.demo.ui.PinChangeScreen
 import org.openecard.demo.ui.PukEntryScreen
 import org.openecard.demo.ui.ResultScreen
 import org.openecard.demo.ui.StartScreen
+import org.openecard.demo.viewmodel.EacViewModel
+import org.openecard.demo.viewmodel.EgkViewModel
+import org.openecard.demo.viewmodel.PinMgmtViewModel
 import org.openecard.sc.iface.TerminalFactory
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
 fun NavigationWrapper(
 	nfcTerminalFactory: TerminalFactory?,
-	tokenUrlProvider: TokenUrlProvider?
 ) {
-
-
 	val navController = rememberNavController()
-
 	val nfcDetected = rememberSaveable { mutableStateOf(false) }
-
-	val tokenUrl = rememberSaveable { mutableStateOf("") }
-
-
-
-	val result = rememberSaveable { mutableStateOf("") }
-
-	val scope = rememberCoroutineScope()
+	val pinMgmtViewModel = remember { PinMgmtViewModel(nfcTerminalFactory) }
+	val eacViewModel = remember { EacViewModel(nfcTerminalFactory) }
+	val egkViewModel = remember { EgkViewModel(nfcTerminalFactory) }
 
 	NavHost(navController = navController, startDestination = Start) {
 
 		composable<Start> {
 			StartScreen(
-				nfcTerminalFactory = nfcTerminalFactory,
-				tokenUrlProvider = tokenUrlProvider,
 				navigateToPin = {
 					navController.navigate(PIN)
 				},
 				navigateToEac = { url ->
-						navController.navigate(EAC(url))
+					navController.navigate(EAC(url))
 
 				},
 				navigateToEgk = {
@@ -59,55 +50,9 @@ fun NavigationWrapper(
 			)
 		}
 
-//		composable<EAC> {
-//			if (tokenUrlProvider != null) {
-//				EacPinEntryScreen(
-//					nfcTerminalFactory = nfcTerminalFactory,
-//					tokenUrlProvider = {
-//						tokenUrlProvider()
-//					},
-//					tokenUrl = tokenUrl.value,
-//					nfcDetected = {
-//						nfcDetected.value = true
-//					},
-//					navigateToNfc = {
-//						navController.navigate(NFC)
-//					},
-//					navigateToResult = { result ->
-//						navController.navigate(EacResult(result))
-//					},
-//					// 				result = { result.value },
-//				)
-//			}
-//		}
-
-		composable<EAC> { backStackEntry ->
-			val eac = backStackEntry.toRoute<EAC>()
-
-				EacPinEntryScreen(
-					nfcTerminalFactory = nfcTerminalFactory,
-					tokenUrlProvider = {
-						eac.tokenUrl
-					},
-					tokenUrl = tokenUrl.value,
-					nfcDetected = {
-						nfcDetected.value = true
-					},
-					navigateToNfc = {
-						navController.navigate(NFC)
-					},
-					navigateToResult = { result ->
-						navController.navigate(EacResult(result))
-					},
-					navigateBack = {
-						navController.navigateUp()
-					}
-				)
-		}
-
 		composable<PIN> {
 			PinChangeScreen(
-				nfcTerminalFactory = nfcTerminalFactory,
+				pinMgmtViewModel = pinMgmtViewModel,
 				navigateToNfc = {
 					navController.navigate(NFC)
 				},
@@ -118,14 +63,14 @@ fun NavigationWrapper(
 					nfcDetected.value = true
 				},
 				navigateBack = {
-					navController.navigateUp()
+					navController.navigate(Start)
 				}
 			)
 		}
 
 		composable<CAN> {
 			CanEntryScreen(
-				nfcTerminalFactory = nfcTerminalFactory,
+				pinMgmtViewModel = pinMgmtViewModel,
 				navigateToNfc = {
 					navController.navigate(NFC)
 				},
@@ -133,14 +78,18 @@ fun NavigationWrapper(
 					navController.navigate(PinResult(result))
 				},
 				navigateBack = {
-					navController.navigateUp()
-				}
-			)
+					navController.navigate(Start)
+				},
+				nfcDetected = {
+					nfcDetected.value = true
+				},
+
+				)
 		}
 
 		composable<PUK> {
 			PukEntryScreen(
-				nfcTerminalFactory = nfcTerminalFactory,
+				pinMgmtViewModel = pinMgmtViewModel,
 				navigateToNfc = {
 					navController.navigate(NFC)
 				},
@@ -148,46 +97,17 @@ fun NavigationWrapper(
 					navController.navigate(PinResult(result))
 				},
 				navigateBack = {
-					navController.navigateUp()
-				}
-			)
-		}
-
-
-
-		composable<EGK> {
-			EgkCanEntryScreen(
-				nfcTerminalFactory = nfcTerminalFactory,
+					navController.navigate(Start)
+				},
 				nfcDetected = {
 					nfcDetected.value = true
 				},
-				navigateToNfc = {
-					navController.navigate(NFC)
-				},
-				navigateToResult = { result ->
-					navController.navigate(EgkResult(result))
-				},
-				navigateBack = {
-					navController.navigateUp()
-				}
-// 				result = { result.value },
-			)
-		}
-
-		composable<NFC> {
-			NfcScreen(
-				nfcDetected.value,
-				onCancel = {
-					navController.navigate(Start)
-				}
 			)
 		}
 
 		composable<PinResult> { backStackEntry ->
 			val pinResult = backStackEntry.toRoute<PinResult>()
-			// 			val result: PinStatus = backStackEntry.toRoute()
 			ResultScreen(
-				nfcTerminalFactory = nfcTerminalFactory,
 				pinResult.pinStatus,
 				navigateToStart = {
 					nfcDetected.value = false
@@ -200,11 +120,15 @@ fun NavigationWrapper(
 					nfcDetected.value = false
 
 					when (pinResult.pinStatus) {
-						PinStatus.Suspended -> {
+						PinStatus.WrongPIN -> {
+							navController.navigate(PIN)
+						}
+
+						PinStatus.Suspended, PinStatus.WrongCAN -> {
 							navController.navigate(CAN)
 						}
 
-						PinStatus.Blocked -> {
+						PinStatus.Blocked, PinStatus.WrongPUK -> {
 							navController.navigate(PUK)
 						}
 
@@ -216,14 +140,62 @@ fun NavigationWrapper(
 				eacResult = null,
 				egkResult = null,
 			)
-			// 			ResultScreen(result) {
+		}
+
+		composable<NFC> {
+			NfcScreen(
+				nfcDetected = nfcDetected.value,
+				onCancel = {
+					navController.navigateUp()
+				}
+			)
+		}
+
+		composable<EAC> { backStackEntry ->
+			val eac = backStackEntry.toRoute<EAC>()
+
+			EacPinEntryScreen(
+				tokenUrlProvider = {
+					eac.tokenUrl
+				},
+				nfcDetected = {
+					nfcDetected.value = true
+				},
+				navigateToNfc = {
+					navController.navigate(NFC)
+				},
+				navigateToResult = { result ->
+					navController.navigate(EacResult(result))
+				},
+				navigateBack = {
+					navController.navigate(Start)
+				},
+				eacViewModel = eacViewModel
+			)
+		}
+
+		composable<EGK> {
+			EgkCanEntryScreen(
+				nfcDetected = {
+					nfcDetected.value = true
+				},
+				navigateToNfc = {
+					navController.navigate(NFC)
+				},
+				navigateToResult = { result ->
+					navController.navigate(EgkResult(result))
+				},
+				navigateBack = {
+					navController.navigate(Start)
+
+				},
+				egkViewModel = egkViewModel
+			)
 		}
 
 		composable<EacResult> { backStackEntry ->
 			val eacResult = backStackEntry.toRoute<EacResult>()
-			// 			val result: PinStatus = backStackEntry.toRoute()
 			ResultScreen(
-				nfcTerminalFactory = nfcTerminalFactory,
 				null,
 				navigateToStart = {
 					nfcDetected.value = false
@@ -236,14 +208,11 @@ fun NavigationWrapper(
 				eacResult = eacResult.url,
 				egkResult = null
 			)
-			// 			ResultScreen(result) {
 		}
 
 		composable<EgkResult> { backStackEntry ->
 			val egkResult = backStackEntry.toRoute<EgkResult>()
-			// 			val result: PinStatus = backStackEntry.toRoute()
 			ResultScreen(
-				nfcTerminalFactory = nfcTerminalFactory,
 				null,
 				navigateToStart = {
 					nfcDetected.value = false
@@ -256,52 +225,6 @@ fun NavigationWrapper(
 				eacResult = null,
 				egkResult = egkResult.result,
 			)
-			// 			ResultScreen(result) {
 		}
 	}
 }
-
-// 	NavHost(navController = navController, startDestination = Start) {
-// 		composable<Start> {
-// 			StartScreen {
-// 				navController.navigate(PIN)
-// 			}
-// 		}
-//
-// 		composable<PIN> {
-// 			PinChangeScreen { result ->
-// 				navController.navigate(Result(result))
-// 			}
-// 		}
-//
-// 		composable<Result> { backStackEntry ->
-// 			val result = backStackEntry.toRoute<Result>()
-// 			// 			val result: PinStatus = backStackEntry.toRoute()
-// // 			ResultScreen(result.pinChanged) {
-// 				 			ResultScreen(result.pinStatus) {
-// 				navController.navigate(Start) {
-// 					// 					popUpTo(Start)
-// 					popUpTo<Start>()
-// 				}
-// 			}
-// 		}
-// 	}
-
-// 	NavHost(navController = navController, startDestination = "start") {
-// 		composable("start") {
-// 			StartScreen {
-// 				navController.navigate("pin")
-// 			}
-// 		}
-//
-// 		composable("pin") {
-// 			PinChangeScreen { result ->
-// 				navController.navigate("result/$result")
-// 			}
-// 		}
-//
-// 		composable("result") { backStackEntry ->
-// 			val result = backStackEntry.toRoute<Result>()
-// 			ResultScreen(result)
-// 		}
-// 	}

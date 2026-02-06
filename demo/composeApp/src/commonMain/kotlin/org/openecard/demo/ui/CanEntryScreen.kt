@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,25 +31,26 @@ import kotlinx.coroutines.withContext
 import org.openecard.demo.AppBar
 import org.openecard.demo.AppBarState
 import org.openecard.demo.PinStatus
-import org.openecard.demo.suspendRecovery
-import org.openecard.sc.iface.TerminalFactory
+import org.openecard.demo.viewmodel.PinMgmtViewModel
 
-@Suppress("ktlint:standard:function-naming")
 @Composable
 fun CanEntryScreen(
-	nfcTerminalFactory: TerminalFactory?,
+	pinMgmtViewModel: PinMgmtViewModel,
 	navigateToNfc: () -> Unit,
 	navigateToResult: (PinStatus) -> Unit,
 	navigateBack: () -> Unit,
+	nfcDetected: () -> Unit,
 ) {
 	val scope = rememberCoroutineScope()
+
 	val can = rememberSaveable { mutableStateOf("") }
 	val pin = rememberSaveable { mutableStateOf("") }
+
 	Scaffold(
 		topBar = {
 			AppBar(
 				AppBarState(
-					title = "Change your PIN",
+					title = "Recover your PIN",
 					canNavigateUp = true,
 					navigateUp = navigateBack
 				)
@@ -58,18 +58,13 @@ fun CanEntryScreen(
 		}
 	) {
 		Column(
-			modifier =
-				Modifier
-					.fillMaxSize()
-					.padding(16.dp),
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(16.dp),
 			horizontalAlignment = Alignment.CenterHorizontally,
 			verticalArrangement = Arrangement.Center,
 		) {
-			Text(
-				text = "Recover your PIN",
-				fontSize = 28.sp,
-				style = MaterialTheme.typography.headlineMedium,
-			)
+			Text("Recover your PIN", fontSize = 28.sp)
 
 			Spacer(Modifier.height(32.dp))
 
@@ -91,7 +86,7 @@ fun CanEntryScreen(
 					),
 			)
 
-			Spacer(Modifier.height(24.dp))
+			Spacer(Modifier.height(16.dp))
 
 			OutlinedTextField(
 				value = pin.value,
@@ -116,26 +111,32 @@ fun CanEntryScreen(
 			Button(
 				onClick = {
 					navigateToNfc()
-
 					scope.launch {
+
 						CoroutineScope(Dispatchers.IO).launch {
 							try {
-								val result = suspendRecovery(nfcTerminalFactory, can = can.value, pin = pin.value)
+								val result =
+									pinMgmtViewModel.recoverWithCan(
+										nfcDetected,
+										can.value,
+										pin.value,
+									)
+
 								withContext(Dispatchers.Main) {
 									navigateToResult(result)
 								}
+
 							} catch (e: Exception) {
 								e.message
 							}
 						}
 					}
 				},
-				modifier =
-					Modifier
-						.fillMaxWidth()
-						.height(50.dp),
+				modifier = Modifier
+					.fillMaxWidth()
+					.height(50.dp),
 			) {
-				Text(text = "Submit", fontSize = 16.sp)
+				Text("Submit", fontSize = 16.sp)
 			}
 		}
 	}

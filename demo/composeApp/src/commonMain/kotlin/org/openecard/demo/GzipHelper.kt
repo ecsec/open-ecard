@@ -1,6 +1,5 @@
 package org.openecard.demo
 
-
 import okio.Buffer
 import okio.GzipSource
 

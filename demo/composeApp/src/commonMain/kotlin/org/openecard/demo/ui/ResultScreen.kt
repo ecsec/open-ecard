@@ -21,13 +21,10 @@ import androidx.compose.ui.unit.sp
 import org.openecard.demo.AppBar
 import org.openecard.demo.AppBarState
 import org.openecard.demo.PinStatus
-import org.openecard.sc.iface.TerminalFactory
 
-// @Preview(showBackground = true)
 @Suppress("ktlint:standard:function-naming")
 @Composable
 fun ResultScreen(
-	nfcTerminalFactory: TerminalFactory?,
 	pinStatus: PinStatus?,
 	eacResult: String?,
 	egkResult: String?,
@@ -35,6 +32,7 @@ fun ResultScreen(
 	navigateToOperation: (PinStatus) -> Unit,
 ) {
 	val uriHandler = LocalUriHandler.current
+
 	Scaffold(
 		topBar = {
 			AppBar(
@@ -52,7 +50,6 @@ fun ResultScreen(
 			horizontalAlignment = Alignment.CenterHorizontally,
 			verticalArrangement = Arrangement.Center,
 		) {
-//			Spacer(Modifier.weight(1f))
 			if (pinStatus != null) {
 				Text(
 					text = "Result: $pinStatus",
@@ -61,8 +58,10 @@ fun ResultScreen(
 				)
 				when (pinStatus) {
 					PinStatus.OK, PinStatus.Unknown -> {
+						val infoText = InfoText(pinStatus)
 
-//						Spacer(Modifier.weight(1f))
+						Text(infoText)
+
 						Spacer(Modifier.height(24.dp))
 
 						Button(
@@ -74,14 +73,28 @@ fun ResultScreen(
 						}
 					}
 
+					PinStatus.WrongPIN, PinStatus.WrongCAN, PinStatus.WrongPUK -> {
+						val infoText = InfoText(pinStatus)
+
+						Text(infoText)
+
+						Spacer(Modifier.height(24.dp))
+
+						Button(
+							onClick = {
+								navigateToOperation(pinStatus)
+							},
+						) {
+							Text("Try again")
+						}
+					}
+
 					PinStatus.Suspended, PinStatus.Blocked -> {
-						Text(
-							text = "Your PIN is in state $pinStatus. Click next if you want to solve this.",
-							fontSize = 16.sp,
-						)
+						val infoText = InfoText(pinStatus)
+
+						Text(infoText)
 
 
-//						Spacer(Modifier.weight(1f))
 						Spacer(Modifier.height(24.dp))
 
 
@@ -107,6 +120,10 @@ fun ResultScreen(
 							}
 						}
 					}
+
+					else -> {
+
+					}
 				}
 			} else if (eacResult != null) {
 				Text(
@@ -115,20 +132,23 @@ fun ResultScreen(
 					style = MaterialTheme.typography.headlineMedium,
 				)
 
-				Button(
-					onClick = {
-						try {
-							uriHandler.openUri(eacResult)
+				val isResultUrl = eacResult.startsWith("https")
 
-						} catch (e: Exception) {
-							e.message
-						}
+				if (isResultUrl) {
+					Button(
+						onClick = {
+							try {
+								uriHandler.openUri(eacResult)
 
-					},
-				) {
-					Text("Open Result-URL")
+							} catch (e: Exception) {
+								e.message
+							}
+
+						},
+					) {
+						Text("Open Result-URL")
+					}
 				}
-//				Spacer(Modifier.weight(1f))
 				Spacer(Modifier.height(24.dp))
 
 
@@ -146,9 +166,7 @@ fun ResultScreen(
 					style = MaterialTheme.typography.headlineMedium,
 				)
 
-//				Spacer(Modifier.weight(1f))
 				Spacer(Modifier.height(24.dp))
-
 
 				Button(
 					onClick = {
@@ -175,6 +193,22 @@ fun ResultScreen(
 					Text("Back to start")
 				}
 			}
+		}
+	}
+}
+
+fun InfoText(pinStatus: PinStatus)
+	: String {
+	return when (pinStatus) {
+		PinStatus.OK -> "Success"
+		PinStatus.WrongPIN -> "PIN was wrong. Please try again."
+		PinStatus.Retry -> ""
+		PinStatus.Suspended -> "PIN is suspended. Please click next to solve this."
+		PinStatus.WrongCAN -> "CAN was wrong. Please try again."
+		PinStatus.Blocked -> "PIN is blocked. Please click next if you want to solve this."
+		PinStatus.WrongPUK -> "PUK was wrong."
+		else -> {
+			"Something went wrong."
 		}
 	}
 }

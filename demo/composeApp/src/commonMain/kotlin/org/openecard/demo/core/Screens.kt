@@ -18,9 +18,6 @@ object PUK
 @Serializable
 object NFC
 
-//@Serializable
-//object EAC
-
 @Serializable
 object EGK
 

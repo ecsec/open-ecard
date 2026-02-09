@@ -1,13 +1,15 @@
 package org.openecard.demo.viewmodel
 
 import androidx.lifecycle.ViewModel
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.openecard.demo.domain.logger
 import org.openecard.demo.data.ConnectNpaPin
 import org.openecard.demo.PinStatus
 import org.openecard.sc.iface.TerminalFactory
+
+private val logger = KotlinLogging.logger { }
 
 class PukEntryViewModel(
 	private val terminalFactory: TerminalFactory?

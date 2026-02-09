@@ -1,12 +1,14 @@
 package org.openecard.demo.viewmodel
 
 import androidx.lifecycle.ViewModel
-import org.openecard.demo.domain.logger
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.openecard.demo.data.ConnectEgk
 import org.openecard.sc.iface.TerminalFactory
+
+private val logger = KotlinLogging.logger { }
 
 class EgkViewModel(
 	private val terminalFactory: TerminalFactory?

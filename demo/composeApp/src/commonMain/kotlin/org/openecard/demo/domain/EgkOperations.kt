@@ -1,11 +1,14 @@
 package org.openecard.demo.domain
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.cif.bundled.EgkCifDefinitions
 import org.openecard.cif.definition.acl.DidStateReference
 import org.openecard.demo.utils.toPersonalData
 import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.dids.PaceDid
 import org.openecard.sal.sc.SmartcardDeviceConnection
+
+private val logger = KotlinLogging.logger { }
 
 class EgkOperations(
 	private val connection: SmartcardDeviceConnection,

@@ -8,7 +8,7 @@ import org.openecard.addons.tr03124.UserAgent
 import org.openecard.demo.data.NpaEacModel
 import org.openecard.sc.iface.feature.PaceError
 
-val logger = KotlinLogging.logger { }
+private val logger = KotlinLogging.logger { }
 
 class EacOperations(
 	private val model: NpaEacModel,

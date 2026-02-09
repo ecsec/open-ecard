@@ -125,11 +125,7 @@ fun EgkCanEntryScreen(
 						dialogMessage = error
 						showDialog = true
 					}
-
 				},
-				modifier = Modifier
-					.fillMaxWidth()
-					.height(50.dp),
 			) {
 				Text(text = "Submit", fontSize = 16.sp)
 			}

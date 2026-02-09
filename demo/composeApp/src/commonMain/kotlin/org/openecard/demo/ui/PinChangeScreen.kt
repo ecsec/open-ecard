@@ -161,7 +161,6 @@ fun PinChangeScreen(
 						showDialog = true
 					}
 				},
-				modifier = Modifier.fillMaxWidth().height(50.dp)
 			) {
 				Text("Submit")
 			}

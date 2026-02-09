@@ -64,12 +64,8 @@ fun ResultScreen(
 
 						Spacer(Modifier.height(24.dp))
 
-						Button(
-							onClick = {
-								navigateToStart()
-							},
-						) {
-							Text("Back to start")
+						BackToStartButton {
+							navigateToStart()
 						}
 					}
 
@@ -102,12 +98,8 @@ fun ResultScreen(
 							horizontalArrangement = Arrangement.Center,
 							verticalAlignment = Alignment.CenterVertically,
 						) {
-							Button(
-								onClick = {
-									navigateToStart()
-								},
-							) {
-								Text("Back to start")
+							BackToStartButton {
+								navigateToStart()
 							}
 							Spacer(Modifier.width(8.dp))
 
@@ -127,6 +119,7 @@ fun ResultScreen(
 				}
 			} else if (eacResult != null) {
 				Text(
+					modifier = Modifier.padding(16.dp),
 					text = "Result: $eacResult",
 					fontSize = 24.sp,
 					style = MaterialTheme.typography.headlineMedium,
@@ -135,6 +128,8 @@ fun ResultScreen(
 				val isResultUrl = eacResult.startsWith("https")
 
 				if (isResultUrl) {
+					Spacer(Modifier.height(24.dp))
+
 					Button(
 						onClick = {
 							try {
@@ -152,12 +147,8 @@ fun ResultScreen(
 				Spacer(Modifier.height(24.dp))
 
 
-				Button(
-					onClick = {
-						navigateToStart()
-					},
-				) {
-					Text("Back to start")
+				BackToStartButton {
+					navigateToStart()
 				}
 			} else if (egkResult != null) {
 				Text(
@@ -168,12 +159,8 @@ fun ResultScreen(
 
 				Spacer(Modifier.height(24.dp))
 
-				Button(
-					onClick = {
-						navigateToStart()
-					},
-				) {
-					Text("Back to start")
+				BackToStartButton {
+					navigateToStart()
 				}
 			} else {
 				Text(
@@ -185,15 +172,22 @@ fun ResultScreen(
 				Spacer(Modifier.height(24.dp))
 
 
-				Button(
-					onClick = {
-						navigateToStart()
-					},
-				) {
-					Text("Back to start")
+				BackToStartButton {
+					navigateToStart()
 				}
 			}
 		}
+	}
+}
+
+@Composable
+fun BackToStartButton(navigateToStart: () -> Unit) {
+	Button(
+		onClick = {
+			navigateToStart()
+		},
+	) {
+		Text("Back to start")
 	}
 }
 

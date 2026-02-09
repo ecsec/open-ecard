@@ -49,9 +49,9 @@ fun NfcScreen(
 		horizontalAlignment = Alignment.CenterHorizontally,
 		verticalArrangement = Arrangement.Center,
 	) {
-		Text("Bitte Karte anlegen", fontSize = 26.sp)
+		Text("Please bring card", fontSize = 24.sp)
 
-		Spacer(Modifier.height(24.dp))
+		Spacer(Modifier.height(32.dp))
 
 		Box(
 			modifier = Modifier.size(220.dp),
@@ -78,7 +78,7 @@ fun NfcScreen(
 			)
 		}
 
-		Spacer(Modifier.height(24.dp))
+		Spacer(Modifier.height(32.dp))
 
 		Button(onClick = onCancel) {
 			Text("Cancel")

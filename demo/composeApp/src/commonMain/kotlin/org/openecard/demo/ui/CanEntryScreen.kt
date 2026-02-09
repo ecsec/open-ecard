@@ -130,7 +130,6 @@ fun CanEntryScreen(
 						showDialog = true
 					}
 				},
-				modifier = Modifier.fillMaxWidth().height(50.dp),
 			) {
 				Text("Submit", fontSize = 16.sp)
 			}

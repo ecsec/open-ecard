@@ -16,11 +16,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,22 +46,11 @@ fun EgkCanEntryScreen(
 	navigateBack: () -> Unit,
 	nfcDetected: () -> Unit,
 ) {
-	val can = rememberSaveable { mutableStateOf("") }
-
-	val scope = rememberCoroutineScope()
-
-	var allFilled by remember { mutableStateOf(false) }
-
-	allFilled = !can.value.isBlank()
-
-	var dialogTitle by remember { mutableStateOf("") }
-	var dialogMessage by remember { mutableStateOf("") }
-
-	val validInput = can.value.length in 5..6
+	val state by egkViewModel.egkUiState.collectAsState()
 
 	var showDialog by remember { mutableStateOf(false) }
-
-	var result: String? by remember { mutableStateOf(null) }
+	var dialogTitle by remember { mutableStateOf("") }
+	var dialogMessage by remember { mutableStateOf("") }
 
 	Scaffold(
 		topBar = {
@@ -76,10 +64,9 @@ fun EgkCanEntryScreen(
 		}
 	) {
 		Column(
-			modifier =
-				Modifier
-					.fillMaxSize()
-					.padding(16.dp),
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(16.dp),
 			horizontalAlignment = Alignment.CenterHorizontally,
 			verticalArrangement = Arrangement.Center,
 		) {
@@ -92,68 +79,57 @@ fun EgkCanEntryScreen(
 			Spacer(Modifier.height(32.dp))
 
 			OutlinedTextField(
-				value = can.value,
+				value = state.can,
 				onValueChange = {
-					can.value = it
+					egkViewModel.onCanChanged(it)
 				},
 				label = { Text("CAN") },
 				visualTransformation = PasswordVisualTransformation(),
-				modifier =
-					Modifier
-						.fillMaxWidth(),
+				modifier = Modifier.fillMaxWidth(),
 				singleLine = true,
-				keyboardOptions =
-					KeyboardOptions(
-						keyboardType = KeyboardType.NumberPassword,
-						imeAction = ImeAction.Done,
-					),
+				keyboardOptions = KeyboardOptions(
+					keyboardType = KeyboardType.NumberPassword,
+					imeAction = ImeAction.Done,
+				),
 			)
 
 			Spacer(Modifier.height(24.dp))
 
 			Button(
-				enabled = allFilled,
+				enabled = state.isSubmitEnabled,
 				onClick = {
-					if (validInput) {
+					val error = egkViewModel.validateCan()
+					if (error == null) {
 						navigateToNfc()
 
-						scope.launch {
-							CoroutineScope(Dispatchers.IO).launch {
-								try {
-									val result =
-										egkViewModel.readEgk(
-											nfcDetected,
-											can.value
-										)
+						CoroutineScope(Dispatchers.IO).launch {
+							val result = egkViewModel.readEgk(
+								nfcDetected,
+								state.can
+							)
 
-									withContext(Dispatchers.Main) {
-										if (result != null) {
-											navigateToResult(result)
-										} else {
-											showDialog = true
-											dialogTitle = "Error"
-											dialogMessage = "Something went wrong. Please try again."
-										}
-									}
-								} catch (e: Exception) {
-									e.message
+							withContext(Dispatchers.Main) {
+								if (result != null) {
+									navigateToResult(result)
+								} else {
+									dialogTitle = "Error"
+									dialogMessage = "Something went wrong. Please try again."
+									showDialog = true
 								}
 							}
 						}
 					} else {
+						egkViewModel.clear()
+
+						dialogTitle = "Invalid Input"
+						dialogMessage = error
 						showDialog = true
-						dialogTitle = "Error"
-						dialogMessage =
-							when {
-								!validInput -> "CAN must be 6 digits long."
-								else -> "Invalid input."
-							}
 					}
+
 				},
-				modifier =
-					Modifier
-						.fillMaxWidth()
-						.height(50.dp),
+				modifier = Modifier
+					.fillMaxWidth()
+					.height(50.dp),
 			) {
 				Text(text = "Submit", fontSize = 16.sp)
 			}
@@ -163,7 +139,11 @@ fun EgkCanEntryScreen(
 					onDismissRequest = { showDialog = false },
 					title = { Text(dialogTitle) },
 					text = { Text(dialogMessage) },
-					confirmButton = { TextButton(onClick = { showDialog = false }) { Text("OK") } },
+					confirmButton = {
+						TextButton(onClick = { showDialog = false }) {
+							Text("OK")
+						}
+					},
 				)
 			}
 		}

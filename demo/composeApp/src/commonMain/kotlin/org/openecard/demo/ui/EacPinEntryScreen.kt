@@ -16,11 +16,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,23 +48,11 @@ fun EacPinEntryScreen(
 	navigateBack: () -> Unit,
 	nfcDetected: () -> Unit,
 ) {
-	val pin = rememberSaveable { mutableStateOf("") }
-
-	val scope = rememberCoroutineScope()
-
-	var allFilled by remember { mutableStateOf(false) }
-
-	allFilled = !pin.value.isBlank()
-
-	var dialogTitle by remember { mutableStateOf("") }
-
-	var dialogMessage by remember { mutableStateOf("") }
-
-	val validInput = pin.value.length in 5..6
+	val state by eacViewModel.eacUiState.collectAsState()
 
 	var showDialog by remember { mutableStateOf(false) }
-
-	var result: String? by remember { mutableStateOf(null) }
+	var dialogTitle by remember { mutableStateOf("") }
+	var dialogMessage by remember { mutableStateOf("") }
 
 	Scaffold(
 		topBar = {
@@ -80,10 +67,9 @@ fun EacPinEntryScreen(
 	) {
 
 		Column(
-			modifier =
-				Modifier
-					.fillMaxSize()
-					.padding(16.dp),
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(16.dp),
 			horizontalAlignment = Alignment.CenterHorizontally,
 			verticalArrangement = Arrangement.Center,
 		) {
@@ -96,68 +82,56 @@ fun EacPinEntryScreen(
 			Spacer(Modifier.height(32.dp))
 
 			OutlinedTextField(
-				value = pin.value,
+				value = state.pin,
 				onValueChange = {
-					pin.value = it
+					eacViewModel.onPinChanged(it)
 				},
 				label = { Text("PIN") },
 				visualTransformation = PasswordVisualTransformation(),
-				modifier =
-					Modifier
-						.fillMaxWidth(),
+				modifier = Modifier.fillMaxWidth(),
 				singleLine = true,
-				keyboardOptions =
-					KeyboardOptions(
-						keyboardType = KeyboardType.NumberPassword,
-						imeAction = ImeAction.Done,
-					),
+				keyboardOptions = KeyboardOptions(
+					keyboardType = KeyboardType.NumberPassword,
+					imeAction = ImeAction.Done,
+				),
 			)
 
 			Spacer(Modifier.height(24.dp))
 
 			Button(
-				enabled = allFilled,
+				enabled = state.isSubmitEnabled,
 				onClick = {
-					if (validInput) {
+					val error = eacViewModel.validatePin()
+					if (error == null) {
 						navigateToNfc()
 
-						scope.launch {
-							CoroutineScope(Dispatchers.IO).launch {
-								try {
-									val result =
-										eacViewModel.doEac(
-											nfcDetected,
-											tokenUrlProvider(),
-											pin.value
-										)
-
-									withContext(Dispatchers.Main) {
-										if (result != null) {
-											navigateToResult(result)
-										} else {
-											showDialog = true
-											dialogTitle = "Error"
-											dialogMessage = "Something went wrong. Please try again."
-										}
-									}
-								} catch (e: Exception) {
-									e.message
+						CoroutineScope(Dispatchers.IO).launch {
+							val result = eacViewModel.doEac(
+								nfcDetected,
+								tokenUrlProvider(),
+								state.pin
+							)
+							withContext(Dispatchers.Main) {
+								if (result != null) {
+									navigateToResult(result)
+								} else {
+									dialogTitle = "Error"
+									dialogMessage = "Something went wrong. Please try again."
+									showDialog = true
 								}
 							}
 						}
 					} else {
+						eacViewModel.clear()
+
+						dialogTitle = "Invalid Input"
+						dialogMessage = error
 						showDialog = true
-						dialogMessage =
-							when {
-								!validInput -> "PIN must be 5 to 6 digits long."
-								else -> "Invalid input."
-							}
 					}
 				},
-				modifier =
-					Modifier
-						.fillMaxWidth()
-						.height(50.dp),
+				modifier = Modifier
+					.fillMaxWidth()
+					.height(50.dp),
 			) {
 				Text(text = "Submit", fontSize = 16.sp)
 			}
@@ -167,7 +141,11 @@ fun EacPinEntryScreen(
 					onDismissRequest = { showDialog = false },
 					title = { Text(dialogTitle) },
 					text = { Text(dialogMessage) },
-					confirmButton = { TextButton(onClick = { showDialog = false }) { Text("OK") } },
+					confirmButton = {
+						TextButton(onClick = { showDialog = false }) {
+							Text("OK")
+						}
+					},
 				)
 			}
 		}

@@ -1,0 +1,77 @@
+package org.openecard.demo.viewmodel
+
+import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import org.openecard.demo.data.logger
+import org.openecard.demo.model.ConnectNpaPin
+import org.openecard.demo.model.PinStatus
+import org.openecard.sc.iface.TerminalFactory
+
+class PukEntryViewModel(
+	private val terminalFactory: TerminalFactory?
+) : ViewModel() {
+	private val _pukUiState = MutableStateFlow(PukUiState())
+	val pukUiState = _pukUiState.asStateFlow()
+
+	fun onPukChanged(value: String) {
+		_pukUiState.update {
+			it.copy(puk = value, isSubmitEnabled = value.isNotBlank())
+		}
+	}
+
+	fun validatePuk(): String? {
+		val state = _pukUiState.value
+
+		if (state.puk.length != 10) {
+			return "PUK must be 10 digits long."
+		}
+		return null
+	}
+
+	suspend fun unblockPin(
+		nfcDetected: () -> Unit,
+		puk: String,
+	): PinStatus {
+		return try {
+			val model = terminalFactory?.let { ConnectNpaPin.createPinModel(it, nfcDetected) }
+
+			if (model != null) {
+				val status = model.getPinStatus()
+
+				when (status) {
+					PinStatus.Blocked -> {
+						if (model.enterPuk(puk)) {
+							PinStatus.OK
+						} else {
+							PinStatus.WrongPUK
+						}
+					}
+
+					else -> {
+						status
+					}
+				}
+			} else {
+				logger.error { "Could not connect card." }
+				return PinStatus.Unknown
+			}
+		} catch (e: Exception) {
+			logger.error(e) { "PIN operation failed." }
+			e.message
+			PinStatus.Unknown
+		}
+	}
+
+	fun clear() {
+		_pukUiState.value = PukUiState()
+	}
+}
+
+data class PukUiState(
+	val puk: String = "",
+	val isSubmitEnabled: Boolean = false,
+	val errorMessage: String? = null
+)
+

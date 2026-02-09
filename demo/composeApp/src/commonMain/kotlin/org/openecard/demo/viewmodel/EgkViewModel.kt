@@ -2,12 +2,36 @@ package org.openecard.demo.viewmodel
 
 import androidx.lifecycle.ViewModel
 import org.openecard.demo.data.logger
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import org.openecard.demo.model.ConnectEgk
 import org.openecard.sc.iface.TerminalFactory
 
 class EgkViewModel(
 	private val terminalFactory: TerminalFactory?
 ) : ViewModel() {
+
+	private val _egkUiState = MutableStateFlow(EgkUiState())
+	val egkUiState = _egkUiState.asStateFlow()
+
+	fun onCanChanged(value: String) {
+		_egkUiState.update {
+			it.copy(
+				can = value,
+				isSubmitEnabled = value.isNotBlank()
+			)
+		}
+	}
+
+	fun validateCan(): String? {
+		val state = egkUiState.value
+
+		if (state.can.length != 6) {
+			return "CAN must be 6 digits long."
+		}
+		return null
+	}
 
 	suspend fun readEgk(
 		nfcDetected: () -> Unit,
@@ -33,4 +57,15 @@ class EgkViewModel(
 			e.message
 		}
 	}
+
+	fun clear() {
+		_egkUiState.value = EgkUiState()
+	}
 }
+
+data class EgkUiState(
+	val can: String = "",
+	val isSubmitEnabled: Boolean = false,
+	val errorMessage: String? = null
+)
+

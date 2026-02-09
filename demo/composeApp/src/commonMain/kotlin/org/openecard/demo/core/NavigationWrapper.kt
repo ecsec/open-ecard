@@ -22,9 +22,11 @@ import org.openecard.demo.ui.PinChangeScreen
 import org.openecard.demo.ui.PukEntryScreen
 import org.openecard.demo.ui.ResultScreen
 import org.openecard.demo.ui.StartScreen
+import org.openecard.demo.viewmodel.CanEntryViewModel
 import org.openecard.demo.viewmodel.EacViewModel
 import org.openecard.demo.viewmodel.EgkViewModel
-import org.openecard.demo.viewmodel.PinMgmtViewModel
+import org.openecard.demo.viewmodel.PinChangeViewModel
+import org.openecard.demo.viewmodel.PukEntryViewModel
 import org.openecard.sc.iface.TerminalFactory
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -35,13 +37,24 @@ fun NavigationWrapper(
 ) {
 	val navController = rememberNavController()
 	val nfcDetected = rememberSaveable { mutableStateOf(false) }
-	val pinMgmtViewModel = remember { PinMgmtViewModel(nfcTerminalFactory) }
+	val pinChangeViewModel = remember { PinChangeViewModel(nfcTerminalFactory) }
+	val canEntryViewModel = remember { CanEntryViewModel(nfcTerminalFactory) }
+	val pukEntryViewModel = remember { PukEntryViewModel(nfcTerminalFactory) }
 	val eacViewModel = remember { EacViewModel(nfcTerminalFactory) }
 	val egkViewModel = remember { EgkViewModel(nfcTerminalFactory) }
 
-	NavHost(navController = navController, startDestination = Start) {
+	fun clearAll() {
+		pinChangeViewModel.clear()
+		canEntryViewModel.clear()
+		pukEntryViewModel.clear()
+		eacViewModel.clear()
+		egkViewModel.clear()
+	}
 
+	NavHost(navController = navController, startDestination = Start) {
 		composable<Start> {
+			clearAll()
+
 			StartScreen(
 				navigateToPin = {
 					navController.navigate(PIN)
@@ -64,25 +77,25 @@ fun NavigationWrapper(
 
 		composable<PIN> {
 			PinChangeScreen(
-				pinMgmtViewModel = pinMgmtViewModel,
+				pinChangeViewModel = pinChangeViewModel,
 				navigateToNfc = {
 					navController.navigate(NFC)
 				},
 				navigateToResult = { result ->
 					navController.navigate(PinResult(result))
 				},
+				navigateBack = {
+					navController.navigate(Start)
+				},
 				nfcDetected = {
 					nfcDetected.value = true
 				},
-				navigateBack = {
-					navController.navigate(Start)
-				}
 			)
 		}
 
 		composable<CAN> {
 			CanEntryScreen(
-				pinMgmtViewModel = pinMgmtViewModel,
+				canEntryViewModel = canEntryViewModel,
 				navigateToNfc = {
 					navController.navigate(NFC)
 				},
@@ -100,7 +113,7 @@ fun NavigationWrapper(
 
 		composable<PUK> {
 			PukEntryScreen(
-				pinMgmtViewModel = pinMgmtViewModel,
+				pukEntryViewModel = pukEntryViewModel,
 				navigateToNfc = {
 					navController.navigate(NFC)
 				},
@@ -132,6 +145,8 @@ fun NavigationWrapper(
 
 					when (pinResult.pinStatus) {
 						PinStatus.WrongPIN -> {
+							pinChangeViewModel.clear()
+
 							navController.navigate(PIN)
 						}
 
@@ -256,7 +271,6 @@ fun NavigationWrapper(
 			)
 		}
 	}
-
 }
 
 @Composable

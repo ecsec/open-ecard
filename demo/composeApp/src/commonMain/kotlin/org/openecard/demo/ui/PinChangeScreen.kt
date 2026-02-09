@@ -16,11 +16,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,33 +35,18 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.openecard.demo.AppBar
 import org.openecard.demo.AppBarState
-import org.openecard.demo.PinStatus
-import org.openecard.demo.viewmodel.PinMgmtViewModel
+import org.openecard.demo.model.PinStatus
+import org.openecard.demo.viewmodel.PinChangeViewModel
 
 @Composable
 fun PinChangeScreen(
-	pinMgmtViewModel: PinMgmtViewModel,
+	pinChangeViewModel: PinChangeViewModel,
 	navigateToResult: (PinStatus) -> Unit,
 	navigateToNfc: () -> Unit,
 	navigateBack: () -> Unit,
 	nfcDetected: () -> Unit,
 ) {
-	val scope = rememberCoroutineScope()
-
-	val oldPin = rememberSaveable { mutableStateOf("") }
-	val newPin = rememberSaveable { mutableStateOf("") }
-	val repeat = rememberSaveable { mutableStateOf("") }
-
-	val allFilled = oldPin.value.isNotBlank() &&
-		newPin.value.isNotBlank() &&
-		repeat.value.isNotBlank()
-
-	val lengthValid = oldPin.value.length in 5..6 &&
-		newPin.value.length in 5..6 &&
-		repeat.value.length in 5..6
-
-	val pinsMatch = newPin.value == repeat.value
-	val validInput = lengthValid && pinsMatch
+	val state by pinChangeViewModel.pinChangeState.collectAsState()
 
 	var showDialog by remember { mutableStateOf(false) }
 	var dialogMessage by remember { mutableStateOf("") }
@@ -91,13 +75,12 @@ fun PinChangeScreen(
 				style = MaterialTheme.typography.headlineMedium,
 			)
 
-
 			Spacer(Modifier.height(32.dp))
 
 			OutlinedTextField(
-				value = oldPin.value,
+				value = state.oldPin,
 				onValueChange = {
-					oldPin.value = it
+					pinChangeViewModel.onOldPinChanged(it)
 				},
 				label = { Text("old PIN") },
 				visualTransformation = PasswordVisualTransformation(),
@@ -114,11 +97,10 @@ fun PinChangeScreen(
 
 			Spacer(Modifier.height(16.dp))
 
-
 			OutlinedTextField(
-				value = newPin.value,
+				value = state.newPin,
 				onValueChange = {
-					newPin.value = it
+					pinChangeViewModel.onNewPinChanged(it)
 				},
 				label = { Text("new PIN") },
 				visualTransformation = PasswordVisualTransformation(),
@@ -135,11 +117,10 @@ fun PinChangeScreen(
 
 			Spacer(Modifier.height(16.dp))
 
-
 			OutlinedTextField(
-				value = repeat.value,
+				value = state.repeatPin,
 				onValueChange = {
-					repeat.value = it
+					pinChangeViewModel.onRepeatPinChanged(it)
 				},
 				label = { Text("repeat new PIN") },
 				visualTransformation = PasswordVisualTransformation(),
@@ -157,48 +138,35 @@ fun PinChangeScreen(
 			Spacer(Modifier.height(24.dp))
 
 			Button(
-				enabled = allFilled,
+				enabled = state.isSubmitEnabled,
 				onClick = {
-					if (validInput) {
+					val error = pinChangeViewModel.validatePin()
+					if (error == null) {
 						navigateToNfc()
 
-						scope.launch {
-
-							CoroutineScope(Dispatchers.IO).launch {
-								try {
-									val result =
-										pinMgmtViewModel.changePin(
-											nfcDetected,
-											oldPin.value,
-											newPin.value,
-										)
-
-									withContext(Dispatchers.Main) {
-										navigateToResult(result)
-									}
-								} catch (e: Exception) {
-									e.message
-								}
+						CoroutineScope(Dispatchers.IO).launch {
+							val result = pinChangeViewModel.changePin(
+								nfcDetected,
+								state.oldPin,
+								state.newPin
+							)
+							withContext(Dispatchers.Main) {
+								navigateToResult(result)
 							}
 						}
 					} else {
+						pinChangeViewModel.clear()
+
+						dialogMessage = error
 						showDialog = true
-						dialogMessage =
-							when {
-								!lengthValid -> "PIN must be 5 to 6 digits long."
-								!pinsMatch -> "New PINs do not match."
-								else -> "Invalid input."
-							}
 					}
 				},
-				modifier = Modifier
-					.fillMaxWidth()
-					.height(50.dp),
+				modifier = Modifier.fillMaxWidth().height(50.dp)
 			) {
-				Text("Submit", fontSize = 16.sp)
+				Text("Submit")
 			}
-
 			Spacer(Modifier.height(120.dp))
+
 
 			if (showDialog) {
 				AlertDialog(

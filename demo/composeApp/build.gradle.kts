@@ -52,6 +52,7 @@ kotlin {
 			implementation(appLibs.ktor.serde.xml)
 			implementation(appLibs.ktor.client.core)
 			implementation(appLibs.kotlin.logging)
+			implementation(appLibs.compose.navigationevent)
 
 			implementation(appLibs.fleeksoft.charset)
 			implementation(appLibs.okio)

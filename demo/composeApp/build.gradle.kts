@@ -36,13 +36,9 @@ kotlin {
 
 	sourceSets {
 		commonMain.dependencies {
-			implementation(compose.runtime)
-			implementation(compose.foundation)
-			implementation(compose.material3)
-			implementation(compose.ui)
-			implementation(compose.components.resources)
-			implementation(compose.materialIconsExtended)
-			implementation(compose.components.uiToolingPreview)
+			implementation(appLibs.compose.material3)
+			implementation(appLibs.compose.components.resources)
+			implementation(appLibs.compose.materialIconsExtended)
 			implementation(appLibs.androidx.lifecycle.viewmodelCompose)
 			implementation(appLibs.androidx.lifecycle.runtimeCompose)
 			implementation(appLibs.composeNavigation)

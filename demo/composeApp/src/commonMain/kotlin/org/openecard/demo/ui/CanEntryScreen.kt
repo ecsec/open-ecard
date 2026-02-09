@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.openecard.demo.AppBar
 import org.openecard.demo.AppBarState
-import org.openecard.demo.model.PinStatus
+import org.openecard.demo.PinStatus
 import org.openecard.demo.viewmodel.CanEntryViewModel
 
 @Composable

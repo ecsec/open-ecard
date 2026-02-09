@@ -1,4 +1,4 @@
-package org.openecard.demo
+package org.openecard.demo.utils
 
 import com.fleeksoft.charset.Charsets
 import com.fleeksoft.charset.decodeToString

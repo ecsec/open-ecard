@@ -10,21 +10,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalUriHandler
 import kotlinx.coroutines.launch
 import org.openecard.demo.AppBar
 import org.openecard.demo.AppBarState
 import org.openecard.demo.GovernikusTestServer
 import org.openecard.demo.SkidServer
-import org.openecard.demo.TokenUrlProvider
-import org.openecard.sc.iface.TerminalFactory
 
 
 @Suppress("ktlint:standard:function-naming")

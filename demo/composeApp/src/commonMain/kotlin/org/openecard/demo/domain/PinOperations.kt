@@ -1,4 +1,4 @@
-package org.openecard.demo.data
+package org.openecard.demo.domain
 
 import org.openecard.demo.PinStatus
 import org.openecard.sal.iface.dids.PaceDid

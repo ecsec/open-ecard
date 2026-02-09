@@ -1,11 +1,11 @@
 package org.openecard.demo.viewmodel
 
 import androidx.lifecycle.ViewModel
-import org.openecard.demo.data.logger
+import org.openecard.demo.domain.logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.openecard.demo.model.ConnectEgk
+import org.openecard.demo.data.ConnectEgk
 import org.openecard.sc.iface.TerminalFactory
 
 class EgkViewModel(

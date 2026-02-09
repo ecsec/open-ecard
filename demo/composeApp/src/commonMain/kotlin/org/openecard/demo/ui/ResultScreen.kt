@@ -58,7 +58,7 @@ fun ResultScreen(
 				)
 				when (pinStatus) {
 					PinStatus.OK, PinStatus.Unknown -> {
-						val infoText = InfoText(pinStatus)
+						val infoText = infoText(pinStatus)
 
 						Text(infoText)
 
@@ -74,7 +74,7 @@ fun ResultScreen(
 					}
 
 					PinStatus.WrongPIN, PinStatus.WrongCAN, PinStatus.WrongPUK -> {
-						val infoText = InfoText(pinStatus)
+						val infoText = infoText(pinStatus)
 
 						Text(infoText)
 
@@ -90,7 +90,7 @@ fun ResultScreen(
 					}
 
 					PinStatus.Suspended, PinStatus.Blocked -> {
-						val infoText = InfoText(pinStatus)
+						val infoText = infoText(pinStatus)
 
 						Text(infoText)
 
@@ -197,15 +197,15 @@ fun ResultScreen(
 	}
 }
 
-fun InfoText(pinStatus: PinStatus)
+fun infoText(pinStatus: PinStatus)
 	: String {
 	return when (pinStatus) {
 		PinStatus.OK -> "Success"
 		PinStatus.WrongPIN -> "PIN was wrong. Please try again."
 		PinStatus.Retry -> ""
-		PinStatus.Suspended -> "PIN is suspended. Please click next to solve this."
+		PinStatus.Suspended -> "PIN is suspended. Please click next to resolve this."
 		PinStatus.WrongCAN -> "CAN was wrong. Please try again."
-		PinStatus.Blocked -> "PIN is blocked. Please click next if you want to solve this."
+		PinStatus.Blocked -> "PIN is blocked. Please click next to resolve this."
 		PinStatus.WrongPUK -> "PUK was wrong."
 		else -> {
 			"Something went wrong."

@@ -4,9 +4,9 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.openecard.demo.data.logger
-import org.openecard.demo.model.ConnectNpaPin
-import org.openecard.demo.model.PinStatus
+import org.openecard.demo.domain.logger
+import org.openecard.demo.data.ConnectNpaPin
+import org.openecard.demo.PinStatus
 import org.openecard.sc.iface.TerminalFactory
 
 class PukEntryViewModel(

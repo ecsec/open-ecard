@@ -1,10 +1,10 @@
-package org.openecard.demo.model
+package org.openecard.demo.data
 
 import org.openecard.cif.bundled.CompleteTree
 import org.openecard.cif.bundled.EgkCif
 import org.openecard.cif.bundled.EgkCifDefinitions
 import org.openecard.cif.definition.recognition.removeUnsupported
-import org.openecard.demo.data.EgkOperations
+import org.openecard.demo.domain.EgkOperations
 import org.openecard.sal.sc.SmartcardDeviceConnection
 import org.openecard.sal.sc.SmartcardSal
 import org.openecard.sal.sc.recognition.DirectCardRecognition

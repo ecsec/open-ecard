@@ -1,4 +1,4 @@
-package org.openecard.demo
+package org.openecard.demo.utils
 
 import okio.Buffer
 import okio.GzipSource

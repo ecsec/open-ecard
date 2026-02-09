@@ -1,8 +1,8 @@
-package org.openecard.demo.data
+package org.openecard.demo.domain
 
 import org.openecard.cif.bundled.EgkCifDefinitions
 import org.openecard.cif.definition.acl.DidStateReference
-import org.openecard.demo.toPersonalData
+import org.openecard.demo.utils.toPersonalData
 import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.dids.PaceDid
 import org.openecard.sal.sc.SmartcardDeviceConnection
@@ -35,11 +35,11 @@ class EgkOperations(
 						did.establishChannel(can, null, null)
 						true
 					} catch (e: Exception) {
-						logger.error(e) {"Could not establish channel."}
+						logger.error(e) { "Could not establish channel." }
 						false
 					}
 				} else {
-					logger.error {"PACE DID not found."}
+					logger.error { "PACE DID not found." }
 					false
 				}
 			}
@@ -64,5 +64,3 @@ class EgkOperations(
 		return person?.let { "Hello ${it.vorname} ${it.nachname}" }
 	}
 }
-
-

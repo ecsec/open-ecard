@@ -1,6 +1,6 @@
-package org.openecard.demo.model
+package org.openecard.demo.data
 
-import org.openecard.demo.data.EacOperations
+import org.openecard.demo.domain.EacOperations
 import org.openecard.cif.bundled.CompleteTree
 import org.openecard.cif.bundled.NpaCif
 import org.openecard.cif.bundled.NpaDefinitions
@@ -23,7 +23,6 @@ class ConnectNpaEac {
 			nfcDetected: () -> Unit
 		): EacOperations {
 			val model = connectCard(terminalFactory, nfcDetected)
-
 
 			return EacOperations(model)
 		}

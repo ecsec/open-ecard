@@ -1,8 +1,8 @@
-package org.openecard.demo.model
+package org.openecard.demo.data
 
 import org.openecard.cif.bundled.NpaCif
 import org.openecard.cif.bundled.NpaDefinitions
-import org.openecard.demo.data.PinOperations
+import org.openecard.demo.domain.PinOperations
 import org.openecard.sal.sc.SmartcardApplication
 import org.openecard.sal.sc.SmartcardSal
 import org.openecard.sal.sc.recognition.CardRecognition

@@ -78,14 +78,3 @@ kotlin {
 	}
 }
 
-compose.desktop {
-	application {
-		mainClass = "org.openecard.demo.MainKt"
-
-		nativeDistributions {
-			targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-			packageName = "org.openecard.demo"
-			packageVersion = "1.0.0"
-		}
-	}
-}

@@ -1,11 +1,14 @@
 package org.openecard.demo.data
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.addons.tr03124.ClientInformation
 import org.openecard.addons.tr03124.EidActivation
 import org.openecard.addons.tr03124.UserAgent
 import org.openecard.demo.model.NpaEacModel
 import org.openecard.sc.iface.feature.PaceError
+
+val logger = KotlinLogging.logger {  }
 
 class EacOperations(
 	private val model: NpaEacModel,
@@ -35,8 +38,10 @@ class EacOperations(
 						uiStep.guiData.certificateDescription.asBytes
 					)
 				} catch (p: PaceError) {
-					return "Wrong PIN"
+					logger.error(p) {"PACE error occurred - could not establish channel."}
+					return "Wrong PIN or card not available"
 				} catch (e: Exception) {
+					logger.error(e) {"Could not establish channel."}
 					return e.message
 				}
 
@@ -47,6 +52,7 @@ class EacOperations(
 				else -> "failed result ${result.status}"
 			}
 		} catch (e: Exception) {
+			logger.error(e) {"Error"}
 			e.message
 		}
 	}

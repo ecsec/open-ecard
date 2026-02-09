@@ -35,9 +35,11 @@ class EgkOperations(
 						did.establishChannel(can, null, null)
 						true
 					} catch (e: Exception) {
+						logger.error(e) {"Could not establish channel."}
 						false
 					}
 				} else {
+					logger.error {"PACE DID not found."}
 					false
 				}
 			}

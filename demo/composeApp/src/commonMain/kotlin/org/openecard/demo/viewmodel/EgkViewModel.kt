@@ -1,6 +1,7 @@
 package org.openecard.demo.viewmodel
 
 import androidx.lifecycle.ViewModel
+import org.openecard.demo.data.logger
 import org.openecard.demo.model.ConnectEgk
 import org.openecard.sc.iface.TerminalFactory
 
@@ -13,18 +14,22 @@ class EgkViewModel(
 		can: String
 	): String? {
 		return try {
-			val model = terminalFactory?.let {
-				ConnectEgk.createConnectedModel(it, nfcDetected)
-			} ?: return null
+			val model = terminalFactory?.let { ConnectEgk.createConnectedModel(it, nfcDetected) }
 
-			val paceOk = model.doPace(can)
+			if (model != null) {
+				val paceOk = model.doPace(can)
 
-			if (!paceOk) {
-				return "Wrong CAN"
+				if (!paceOk) {
+					return "Wrong CAN"
+				}
+
+				model.readPersonalData()
+			} else {
+				logger.error { "Could not connect card." }
+				return null
 			}
-
-			model.readPersonalData()
 		} catch (e: Exception) {
+			logger.error(e) { "PACE operation failed." }
 			e.message
 		}
 	}

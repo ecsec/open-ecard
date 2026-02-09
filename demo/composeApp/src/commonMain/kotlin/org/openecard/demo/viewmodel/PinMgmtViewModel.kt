@@ -2,6 +2,7 @@ package org.openecard.demo.viewmodel
 
 import androidx.lifecycle.ViewModel
 import org.openecard.demo.PinStatus
+import org.openecard.demo.data.logger
 import org.openecard.demo.model.ConnectNpaPin
 import org.openecard.sc.iface.TerminalFactory
 
@@ -15,35 +16,43 @@ class PinMgmtViewModel(
 	): PinStatus {
 		return try {
 			val model = terminalFactory?.let { ConnectNpaPin.createPinModel(it, nfcDetected) }
-			val status = model?.getPinStatus()
 
-			when (status) {
-				PinStatus.OK -> {
+			if (model != null) {
+				val status = model.getPinStatus()
 
-					val success = model.changePin(oldPin, newPin)
+				when (status) {
+					PinStatus.OK -> {
 
-					if (success)
-						PinStatus.OK
-					else {
-						PinStatus.WrongPIN
+						val success = model.changePin(oldPin, newPin)
+
+						if (success)
+							PinStatus.OK
+						else {
+							PinStatus.WrongPIN
+						}
+					}
+
+					PinStatus.Retry -> {
+						val success = model.changePin(oldPin, newPin)
+
+						if (success)
+							PinStatus.OK
+						else {
+							PinStatus.Suspended
+						}
+					}
+
+					else -> {
+						status
 					}
 				}
 
-				PinStatus.Retry -> {
-					val success = model.changePin(oldPin, newPin)
-
-					if (success)
-						PinStatus.OK
-					else {
-						PinStatus.Suspended
-					}
-				}
-
-				else -> {
-					status
-				}
-			} ?: PinStatus.Unknown
+			} else {
+				logger.error { "Could not connect card." }
+				return PinStatus.Unknown
+			}
 		} catch (e: Exception) {
+			logger.error(e) { "PIN operation failed." }
 			e.message
 			PinStatus.Unknown
 		}
@@ -56,25 +65,31 @@ class PinMgmtViewModel(
 	): PinStatus {
 		return try {
 			val model = terminalFactory?.let { ConnectNpaPin.createPinModel(it, nfcDetected) }
-			val status = model?.getPinStatus()
 
-			when (status) {
-				PinStatus.Suspended -> {
-					if (!model.enterCan(can)) {
-						PinStatus.WrongCAN
-					} else if (model.enterPin(pin)) {
-						PinStatus.OK
-					} else {
+			if (model != null) {
+				val status = model.getPinStatus()
+
+				when (status) {
+					PinStatus.Suspended -> {
+						if (!model.enterCan(can)) {
+							PinStatus.WrongCAN
+						} else if (model.enterPin(pin)) {
+							PinStatus.OK
+						} else {
+							status
+						}
+					}
+
+					else -> {
 						status
 					}
 				}
-
-
-				else -> {
-					status
-				}
-			} ?: PinStatus.Unknown
+			} else {
+				logger.error { "Could not connect card." }
+				return PinStatus.Unknown
+			}
 		} catch (e: Exception) {
+			logger.error(e) { "PIN operation failed." }
 			e.message
 			PinStatus.Unknown
 		}
@@ -86,22 +101,29 @@ class PinMgmtViewModel(
 	): PinStatus {
 		return try {
 			val model = terminalFactory?.let { ConnectNpaPin.createPinModel(it, nfcDetected) }
-			val status = model?.getPinStatus()
+			
+			if (model != null) {
+				val status = model.getPinStatus()
 
-			when (status) {
-				PinStatus.Blocked -> {
-					if (model.enterPuk(puk)) {
-						PinStatus.OK
-					} else {
-						PinStatus.WrongPUK
+				when (status) {
+					PinStatus.Blocked -> {
+						if (model.enterPuk(puk)) {
+							PinStatus.OK
+						} else {
+							PinStatus.WrongPUK
+						}
+					}
+
+					else -> {
+						status
 					}
 				}
-
-				else -> {
-					status
-				}
-			} ?: PinStatus.Unknown
+			} else {
+				logger.error { "Could not connect card." }
+				return PinStatus.Unknown
+			}
 		} catch (e: Exception) {
+			logger.error(e) { "PIN operation failed." }
 			e.message
 			PinStatus.Unknown
 		}

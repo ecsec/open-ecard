@@ -4,10 +4,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import org.openecard.demo.PinStatus
 import org.openecard.demo.ui.CanEntryScreen
 import org.openecard.demo.ui.EacPinEntryScreen
@@ -22,6 +27,7 @@ import org.openecard.demo.viewmodel.EgkViewModel
 import org.openecard.demo.viewmodel.PinMgmtViewModel
 import org.openecard.sc.iface.TerminalFactory
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Suppress("ktlint:standard:function-naming")
 @Composable
 fun NavigationWrapper(
@@ -47,6 +53,12 @@ fun NavigationWrapper(
 				navigateToEgk = {
 					navController.navigate(EGK)
 				},
+			)
+			BackHandler(
+				navController = navController,
+				onCleanup = {
+					nfcDetected.value = false
+				}
 			)
 		}
 
@@ -83,8 +95,7 @@ fun NavigationWrapper(
 				nfcDetected = {
 					nfcDetected.value = true
 				},
-
-				)
+			)
 		}
 
 		composable<PUK> {
@@ -139,6 +150,12 @@ fun NavigationWrapper(
 				},
 				eacResult = null,
 				egkResult = null,
+			)
+			BackHandler(
+				navController = navController,
+				onCleanup = {
+					nfcDetected.value = false
+				}
 			)
 		}
 
@@ -208,6 +225,12 @@ fun NavigationWrapper(
 				eacResult = eacResult.url,
 				egkResult = null
 			)
+			BackHandler(
+				navController = navController,
+				onCleanup = {
+					nfcDetected.value = false
+				}
+			)
 		}
 
 		composable<EgkResult> { backStackEntry ->
@@ -225,6 +248,31 @@ fun NavigationWrapper(
 				eacResult = null,
 				egkResult = egkResult.result,
 			)
+			BackHandler(
+				navController = navController,
+				onCleanup = {
+					nfcDetected.value = false
+				}
+			)
 		}
 	}
+
 }
+
+@Composable
+fun BackHandler(
+	navController: NavController,
+	onCleanup: () -> Unit
+) {
+	NavigationBackHandler(
+		state = rememberNavigationEventState(NavigationEventInfo.None),
+		isBackEnabled = true,
+		onBackCompleted = {
+			onCleanup()
+			navController.navigate(Start)
+		}
+	)
+}
+
+
+

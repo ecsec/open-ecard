@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.openecard.demo.PinStatus
 import org.openecard.demo.data.ConnectNpaPin
+import org.openecard.demo.domain.PinOperations
 import org.openecard.sc.iface.TerminalFactory
 
 private val logger = KotlinLogging.logger { }
@@ -61,8 +62,10 @@ class PinChangeViewModel(
 		oldPin: String,
 		newPin: String,
 	): PinStatus {
+		var model: PinOperations? = null
+
 		return try {
-			val model = terminalFactory?.let { ConnectNpaPin.createPinModel(it, nfcDetected) }
+			model = terminalFactory?.let { ConnectNpaPin.createPinModel(it, nfcDetected) }
 
 			if (model != null) {
 				val status = model.getPinStatus()
@@ -102,6 +105,8 @@ class PinChangeViewModel(
 			logger.error(e) { "PIN operation failed." }
 			e.message
 			PinStatus.Unknown
+		} finally {
+			model?.shutdownStack()
 		}
 	}
 

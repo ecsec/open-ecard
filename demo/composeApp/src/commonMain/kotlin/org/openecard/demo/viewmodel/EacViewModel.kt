@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.openecard.demo.data.ConnectNpaEac
+import org.openecard.demo.domain.EacOperations
 import org.openecard.sc.iface.TerminalFactory
 
 private val logger = KotlinLogging.logger { }
@@ -40,8 +41,10 @@ class EacViewModel(
 		tokenUrl: String,
 		pin: String
 	): String? {
+		var model: EacOperations? = null
+
 		return try {
-			val model = terminalFactory?.let { ConnectNpaEac.createEacModel(it, nfcDetected) }
+			model = terminalFactory?.let { ConnectNpaEac.createEacModel(it, nfcDetected) }
 
 			if (model != null) {
 				model.doEac(tokenUrl, pin)
@@ -52,6 +55,8 @@ class EacViewModel(
 		} catch (e: Exception) {
 			logger.error(e) { "EAC operation failed." }
 			e.message
+		} finally {
+			model?.shutdownStack()
 		}
 	}
 

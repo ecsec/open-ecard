@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.openecard.demo.data.ConnectEgk
+import org.openecard.demo.domain.EgkOperations
 import org.openecard.sc.iface.TerminalFactory
 
 private val logger = KotlinLogging.logger { }
@@ -39,8 +40,10 @@ class EgkViewModel(
 		nfcDetected: () -> Unit,
 		can: String
 	): String? {
+		var model: EgkOperations? = null
+
 		return try {
-			val model = terminalFactory?.let { ConnectEgk.createConnectedModel(it, nfcDetected) }
+			model = terminalFactory?.let { ConnectEgk.createConnectedModel(it, nfcDetected) }
 
 			if (model != null) {
 				val paceOk = model.doPace(can)
@@ -57,6 +60,8 @@ class EgkViewModel(
 		} catch (e: Exception) {
 			logger.error(e) { "PACE operation failed." }
 			e.message
+		} finally {
+			model?.shutdownStack()
 		}
 	}
 

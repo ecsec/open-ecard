@@ -9,7 +9,7 @@ import org.openecard.sc.apdu.command.SecurityCommandSuccess
 import org.openecard.sc.iface.feature.PaceError
 
 class PinOperations(
-	application: SmartcardApplication,
+	private val application: SmartcardApplication,
 ) {
 	val pacePin: PaceDid =
 		application.dids.filterIsInstance<PaceDid>().find { it.name == "PACE_PIN" }
@@ -69,5 +69,9 @@ class PinOperations(
 				throw ex
 			}
 		}
+	}
+
+	fun shutdownStack() {
+		application.device.session.shutdownStack()
 	}
 }

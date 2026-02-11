@@ -56,4 +56,8 @@ class EacOperations(
 			e.message
 		}
 	}
+
+	fun shutdownStack() {
+		model.session.shutdownStack()
+	}
 }

@@ -66,4 +66,8 @@ class EgkOperations(
 
 		return person?.let { "Hello ${it.vorname} ${it.nachname}" }
 	}
+
+	fun shutdownStack() {
+		connection.session.shutdownStack()
+	}
 }

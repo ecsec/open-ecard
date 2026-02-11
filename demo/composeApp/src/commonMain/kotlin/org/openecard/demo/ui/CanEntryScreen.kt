@@ -45,6 +45,7 @@ import org.openecard.demo.AppBarState
 import org.openecard.demo.PinStatus
 import org.openecard.demo.viewmodel.CanEntryViewModel
 
+@Suppress("ktlint:standard:function-naming")
 @Composable
 fun CanEntryScreen(
 	canEntryViewModel: CanEntryViewModel,

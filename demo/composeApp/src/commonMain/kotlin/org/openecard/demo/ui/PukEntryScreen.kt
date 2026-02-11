@@ -44,6 +44,7 @@ import org.openecard.demo.AppBarState
 import org.openecard.demo.PinStatus
 import org.openecard.demo.viewmodel.PukEntryViewModel
 
+@Suppress("ktlint:standard:function-naming")
 @Composable
 fun PukEntryScreen(
 	pukEntryViewModel: PukEntryViewModel,

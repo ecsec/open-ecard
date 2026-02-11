@@ -22,9 +22,6 @@ object NFC
 object EGK
 
 @Serializable
-object Success
-
-@Serializable
 data class PinResult(
 	val pinStatusString: String,
 ) {
@@ -36,7 +33,7 @@ data class PinResult(
 
 @Serializable
 data class EacResult(
-	val url: String,
+	val resultUrl: String,
 )
 
 @Serializable
@@ -44,7 +41,18 @@ data class EgkResult(
 	val result: String,
 )
 
+// @Serializable
+// data class EacChat(
+// 	val tokenUrl: String,
+// )
+//
+// @Serializable
+// data class EacPin(
+// 	val tokenUrl: String,
+// )
+
 @Serializable
-data class EAC(
-	val tokenUrl: String,
-)
+object EacChat
+
+@Serializable
+object EacPin

@@ -45,11 +45,11 @@ import org.openecard.demo.AppBarState
 import org.openecard.demo.TokenUrlProvider
 import org.openecard.demo.viewmodel.EacViewModel
 
+@OptIn(ExperimentalUnsignedTypes::class)
 @Suppress("ktlint:standard:function-naming")
 @Composable
 fun EacPinEntryScreen(
 	eacViewModel: EacViewModel,
-	tokenUrlProvider: TokenUrlProvider,
 	navigateToResult: (String) -> Unit,
 	navigateToNfc: () -> Unit,
 	navigateBack: () -> Unit,
@@ -133,11 +133,15 @@ fun EacPinEntryScreen(
 
 						CoroutineScope(Dispatchers.IO).launch {
 							val result =
-								eacViewModel.doEac(
+// 								eacViewModel.doEac(
+// 									state.pin,
+// 									nfcDetected,
+// 								)
+								eacViewModel.startEacProcess(
 									nfcDetected,
-									tokenUrlProvider(),
 									state.pin,
 								)
+
 							withContext(Dispatchers.Main) {
 								if (result != null) {
 									navigateToResult(result)

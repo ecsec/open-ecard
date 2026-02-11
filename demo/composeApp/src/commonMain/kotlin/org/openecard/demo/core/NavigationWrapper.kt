@@ -3,6 +3,7 @@ package org.openecard.demo.core
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.navigation.NavController
@@ -13,8 +14,10 @@ import androidx.navigation.toRoute
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import kotlinx.coroutines.launch
 import org.openecard.demo.PinStatus
 import org.openecard.demo.ui.CanEntryScreen
+import org.openecard.demo.ui.EacChatSelectionScreen
 import org.openecard.demo.ui.EacPinEntryScreen
 import org.openecard.demo.ui.EgkCanEntryScreen
 import org.openecard.demo.ui.NfcScreen
@@ -29,7 +32,7 @@ import org.openecard.demo.viewmodel.PinChangeViewModel
 import org.openecard.demo.viewmodel.PukEntryViewModel
 import org.openecard.sc.iface.TerminalFactory
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalUnsignedTypes::class)
 @Suppress("ktlint:standard:function-naming")
 @Composable
 fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
@@ -40,6 +43,8 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 	val pukEntryViewModel = remember { PukEntryViewModel(nfcTerminalFactory) }
 	val eacViewModel = remember { EacViewModel(nfcTerminalFactory) }
 	val egkViewModel = remember { EgkViewModel(nfcTerminalFactory) }
+
+	val scope = rememberCoroutineScope()
 
 	fun resetToDefault() {
 		pinChangeViewModel.setDefaults()
@@ -57,8 +62,13 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				navigateToPin = {
 					navController.navigate(PIN)
 				},
-				navigateToEac = { url ->
-					navController.navigate(EAC(url))
+				navigateToChatSelection = { url ->
+					scope.launch {
+						val ok = eacViewModel.setChatItems(url)
+						if (ok) {
+							navController.navigate(EacChat)
+						}
+					}
 				},
 				navigateToEgk = {
 					navController.navigate(EGK)
@@ -69,6 +79,33 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				onCleanup = {
 					nfcDetected.value = false
 				},
+			)
+		}
+
+		composable<EacChat> {
+			EacChatSelectionScreen(
+				eacViewModel = eacViewModel,
+				navigateToPinEntry = {
+					navController.navigate(EacPin)
+				},
+			)
+		}
+
+		composable<EacPin> {
+			EacPinEntryScreen(
+				nfcDetected = {
+					nfcDetected.value = true
+				},
+				navigateToNfc = {
+					navController.navigate(NFC)
+				},
+				navigateToResult = { resultUrl ->
+					navController.navigate(EacResult(resultUrl))
+				},
+				navigateBack = {
+					navController.navigate(Start)
+				},
+				eacViewModel = eacViewModel,
 			)
 		}
 
@@ -160,7 +197,7 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 						}
 					}
 				},
-				eacResult = null,
+				eacUrl = null,
 				egkResult = null,
 			)
 			BackHandler(
@@ -177,29 +214,6 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				onCancel = {
 					navController.navigateUp()
 				},
-			)
-		}
-
-		composable<EAC> { backStackEntry ->
-			val eac = backStackEntry.toRoute<EAC>()
-
-			EacPinEntryScreen(
-				tokenUrlProvider = {
-					eac.tokenUrl
-				},
-				nfcDetected = {
-					nfcDetected.value = true
-				},
-				navigateToNfc = {
-					navController.navigate(NFC)
-				},
-				navigateToResult = { result ->
-					navController.navigate(EacResult(result))
-				},
-				navigateBack = {
-					navController.navigate(Start)
-				},
-				eacViewModel = eacViewModel,
 			)
 		}
 
@@ -233,7 +247,7 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 					}
 				},
 				navigateToOperation = {},
-				eacResult = eacResult.url,
+				eacUrl = eacResult.resultUrl,
 				egkResult = null,
 			)
 			BackHandler(
@@ -256,7 +270,7 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 					}
 				},
 				navigateToOperation = {},
-				eacResult = null,
+				eacUrl = null,
 				egkResult = egkResult.result,
 			)
 			BackHandler(
@@ -269,6 +283,7 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 	}
 }
 
+@Suppress("ktlint:standard:function-naming")
 @Composable
 fun BackHandler(
 	navController: NavController,

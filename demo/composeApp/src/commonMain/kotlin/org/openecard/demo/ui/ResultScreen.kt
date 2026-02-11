@@ -26,7 +26,7 @@ import org.openecard.demo.PinStatus
 @Composable
 fun ResultScreen(
 	pinStatus: PinStatus?,
-	eacResult: String?,
+	eacUrl: String?,
 	egkResult: String?,
 	navigateToStart: () -> Unit,
 	navigateToOperation: (PinStatus) -> Unit,
@@ -38,9 +38,9 @@ fun ResultScreen(
 			AppBar(
 				AppBarState(
 					title = "Process done",
-				)
+				),
 			)
-		}
+		},
 	) {
 		Column(
 			modifier =
@@ -90,9 +90,7 @@ fun ResultScreen(
 
 						Text(infoText)
 
-
 						Spacer(Modifier.height(24.dp))
-
 
 						Row(
 							horizontalArrangement = Arrangement.Center,
@@ -114,18 +112,17 @@ fun ResultScreen(
 					}
 
 					else -> {
-
 					}
 				}
-			} else if (eacResult != null) {
+			} else if (eacUrl != null) {
 				Text(
 					modifier = Modifier.padding(16.dp),
-					text = "Result: $eacResult",
+					text = "Result: $eacUrl",
 					fontSize = 24.sp,
 					style = MaterialTheme.typography.headlineMedium,
 				)
 
-				val isResultUrl = eacResult.startsWith("https")
+				val isResultUrl = eacUrl.startsWith("https")
 
 				if (isResultUrl) {
 					Spacer(Modifier.height(24.dp))
@@ -133,19 +130,16 @@ fun ResultScreen(
 					Button(
 						onClick = {
 							try {
-								uriHandler.openUri(eacResult)
-
+								uriHandler.openUri(eacUrl)
 							} catch (e: Exception) {
 								e.message
 							}
-
 						},
 					) {
 						Text("Open Result-URL")
 					}
 				}
 				Spacer(Modifier.height(24.dp))
-
 
 				BackToStartButton {
 					navigateToStart()
@@ -171,7 +165,6 @@ fun ResultScreen(
 
 				Spacer(Modifier.height(24.dp))
 
-
 				BackToStartButton {
 					navigateToStart()
 				}
@@ -180,6 +173,7 @@ fun ResultScreen(
 	}
 }
 
+@Suppress("ktlint:standard:function-naming")
 @Composable
 fun BackToStartButton(navigateToStart: () -> Unit) {
 	Button(
@@ -191,18 +185,37 @@ fun BackToStartButton(navigateToStart: () -> Unit) {
 	}
 }
 
-fun infoText(pinStatus: PinStatus)
-	: String {
-	return when (pinStatus) {
-		PinStatus.OK -> "Success"
-		PinStatus.WrongPIN -> "PIN was wrong. Please try again."
-		PinStatus.Retry -> ""
-		PinStatus.Suspended -> "PIN is suspended. Please click next to resolve this."
-		PinStatus.WrongCAN -> "CAN was wrong. Please try again."
-		PinStatus.Blocked -> "PIN is blocked. Please click next to resolve this."
-		PinStatus.WrongPUK -> "PUK was wrong."
+fun infoText(pinStatus: PinStatus): String =
+	when (pinStatus) {
+		PinStatus.OK -> {
+			"Success"
+		}
+
+		PinStatus.WrongPIN -> {
+			"PIN was wrong. Please try again."
+		}
+
+		PinStatus.Retry -> {
+			""
+		}
+
+		PinStatus.Suspended -> {
+			"PIN is suspended. Please click next to resolve this."
+		}
+
+		PinStatus.WrongCAN -> {
+			"CAN was wrong. Please try again."
+		}
+
+		PinStatus.Blocked -> {
+			"PIN is blocked. Please click next to resolve this."
+		}
+
+		PinStatus.WrongPUK -> {
+			"PUK was wrong."
+		}
+
 		else -> {
 			"Something went wrong."
 		}
 	}
-}

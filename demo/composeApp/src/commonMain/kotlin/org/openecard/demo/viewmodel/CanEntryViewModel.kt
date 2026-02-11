@@ -54,9 +54,7 @@ class CanEntryViewModel(
 			model = terminalFactory?.let { ConnectNpaPin.createPinModel(it, nfcDetected) }
 
 			if (model != null) {
-				val status = model.getPinStatus()
-
-				when (status) {
+				when (val status = model.getPinStatus()) {
 					PinStatus.Suspended -> {
 						if (!model.enterCan(can)) {
 							PinStatus.WrongCAN

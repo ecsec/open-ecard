@@ -28,17 +28,30 @@ import org.openecard.demo.SkidServer
 
 private val logger = KotlinLogging.logger { }
 
+// val auto = true
+
 @Suppress("ktlint:standard:function-naming")
 @Composable
 fun StartScreen(
 	navigateToPin: () -> Unit,
-	navigateToEac: (tokenUrl: String) -> Unit,
+	navigateToChatSelection: (tokenUrl: String) -> Unit,
 	navigateToEgk: () -> Unit,
 ) {
 	val scope = rememberCoroutineScope()
 
 	var showDialog by rememberSaveable { mutableStateOf(false) }
 	var dialogMessage by rememberSaveable { mutableStateOf("") }
+
+// 	if (auto) {
+// 		scope.launch {
+// 			delay(2.seconds)
+// 			try {
+// 				val url = GovernikusTestServer().loadTcTokenUrl()
+// 				navigateToEac(url)
+// 			} catch (e: Exception) {
+// 			}
+// 		}
+// 	}
 
 	Scaffold(
 		topBar = {
@@ -67,7 +80,7 @@ fun StartScreen(
 						try {
 							scope.launch {
 								val url = SkidServer.forStageSystem().loadTcTokenUrl()
-								navigateToEac(url)
+								navigateToChatSelection(url)
 							}
 						} catch (e: Exception) {
 							logger.error(e) { eacErrorText }
@@ -83,7 +96,7 @@ fun StartScreen(
 						try {
 							scope.launch {
 								val url = SkidServer.forProdSystem().loadTcTokenUrl()
-								navigateToEac(url)
+								navigateToChatSelection(url)
 							}
 						} catch (e: Exception) {
 							logger.error(e) { eacErrorText }
@@ -99,7 +112,7 @@ fun StartScreen(
 						try {
 							scope.launch {
 								val url = GovernikusTestServer().loadTcTokenUrl()
-								navigateToEac(url)
+								navigateToChatSelection(url)
 							}
 						} catch (e: Exception) {
 							logger.error(e) { eacErrorText }

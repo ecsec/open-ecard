@@ -5,15 +5,15 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.openecard.demo.data.ConnectNpaPin
 import org.openecard.demo.PinStatus
+import org.openecard.demo.data.ConnectNpaPin
 import org.openecard.demo.domain.PinOperations
 import org.openecard.sc.iface.TerminalFactory
 
 private val logger = KotlinLogging.logger { }
 
 class PukEntryViewModel(
-	private val terminalFactory: TerminalFactory?
+	private val terminalFactory: TerminalFactory?,
 ) : ViewModel() {
 	private val _pukUiState = MutableStateFlow(PukUiState())
 	val pukUiState = _pukUiState.asStateFlow()
@@ -43,9 +43,7 @@ class PukEntryViewModel(
 			model = terminalFactory?.let { ConnectNpaPin.createPinModel(it, nfcDetected) }
 
 			if (model != null) {
-				val status = model.getPinStatus()
-
-				when (status) {
+				when (val status = model.getPinStatus()) {
 					PinStatus.Blocked -> {
 						if (model.enterPuk(puk)) {
 							PinStatus.OK
@@ -79,6 +77,5 @@ class PukEntryViewModel(
 data class PukUiState(
 	val puk: String = "",
 	val isSubmitEnabled: Boolean = false,
-	val errorMessage: String? = null
+	val errorMessage: String? = null,
 )
-

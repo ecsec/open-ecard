@@ -31,10 +31,11 @@ import demo.composeapp.generated.resources.Res
 import demo.composeapp.generated.resources.contactless_200dp_E3E3E3
 import org.jetbrains.compose.resources.painterResource
 
+@Suppress("ktlint:standard:function-naming")
 @Composable
 fun NfcScreen(
 	nfcDetected: Boolean,
-	onCancel: () -> Unit
+	onCancel: () -> Unit,
 ) {
 	val progress by animateFloatAsState(
 		targetValue = if (nfcDetected) 1f else 0f,
@@ -43,9 +44,10 @@ fun NfcScreen(
 	)
 
 	Column(
-		modifier = Modifier
-			.fillMaxSize()
-			.padding(16.dp),
+		modifier =
+			Modifier
+				.fillMaxSize()
+				.padding(16.dp),
 		horizontalAlignment = Alignment.CenterHorizontally,
 		verticalArrangement = Arrangement.Center,
 	) {
@@ -71,9 +73,10 @@ fun NfcScreen(
 			Image(
 				painter = painterResource(Res.drawable.contactless_200dp_E3E3E3),
 				contentDescription = "",
-				modifier = Modifier
-					.size(200.dp)
-					.clip(CircleShape),
+				modifier =
+					Modifier
+						.size(200.dp)
+						.clip(CircleShape),
 				contentScale = ContentScale.Fit,
 			)
 		}
@@ -85,5 +88,3 @@ fun NfcScreen(
 		}
 	}
 }
-
-

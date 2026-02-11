@@ -5,15 +5,15 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.openecard.demo.data.ConnectNpaPin
 import org.openecard.demo.PinStatus
+import org.openecard.demo.data.ConnectNpaPin
 import org.openecard.demo.domain.PinOperations
 import org.openecard.sc.iface.TerminalFactory
 
 private val logger = KotlinLogging.logger { }
 
 class CanEntryViewModel(
-	private val terminalFactory: TerminalFactory?
+	private val terminalFactory: TerminalFactory?,
 ) : ViewModel() {
 	private val _canPinUiState = MutableStateFlow(CanPinUiState())
 
@@ -84,6 +84,15 @@ class CanEntryViewModel(
 		}
 	}
 
+	fun setDefaults() {
+		_canPinUiState.value =
+			CanPinUiState(
+				can = "123123",
+				pin = "123123",
+				isSubmitEnabled = true,
+			)
+	}
+
 	fun clear() {
 		_canPinUiState.value = CanPinUiState()
 	}
@@ -93,5 +102,4 @@ data class CanPinUiState(
 	val can: String = "",
 	val pin: String = "",
 	val isSubmitEnabled: Boolean = false,
-	val errorMessage: String? = null
 )

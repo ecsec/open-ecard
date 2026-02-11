@@ -13,7 +13,7 @@ import org.openecard.sc.iface.TerminalFactory
 private val logger = KotlinLogging.logger { }
 
 class PinChangeViewModel(
-	private val terminalFactory: TerminalFactory?
+	private val terminalFactory: TerminalFactory?,
 ) : ViewModel() {
 	private val _pinChangeState = MutableStateFlow(PinChangeUiState())
 	val pinChangeState = _pinChangeState.asStateFlow()
@@ -22,7 +22,7 @@ class PinChangeViewModel(
 		_pinChangeState.update {
 			it.copy(
 				oldPin = value,
-				isSubmitEnabled = value.isNotBlank() && it.newPin.isNotBlank() && it.repeatPin.isNotBlank()
+				isSubmitEnabled = value.isNotBlank() && it.newPin.isNotBlank() && it.repeatPin.isNotBlank(),
 			)
 		}
 	}
@@ -31,7 +31,7 @@ class PinChangeViewModel(
 		_pinChangeState.update {
 			it.copy(
 				newPin = value,
-				isSubmitEnabled = it.newPin.isNotBlank() && value.isNotBlank() && it.repeatPin.isNotBlank()
+				isSubmitEnabled = it.newPin.isNotBlank() && value.isNotBlank() && it.repeatPin.isNotBlank(),
 			)
 		}
 	}
@@ -40,7 +40,7 @@ class PinChangeViewModel(
 		_pinChangeState.update {
 			it.copy(
 				repeatPin = value,
-				isSubmitEnabled = it.newPin.isNotBlank() && it.repeatPin.isNotBlank() && value.isNotBlank()
+				isSubmitEnabled = it.newPin.isNotBlank() && it.repeatPin.isNotBlank() && value.isNotBlank(),
 			)
 		}
 	}
@@ -72,12 +72,11 @@ class PinChangeViewModel(
 
 				when (status) {
 					PinStatus.OK -> {
-
 						val success = model.changePin(oldPin, newPin)
 
-						if (success)
+						if (success) {
 							PinStatus.OK
-						else {
+						} else {
 							PinStatus.WrongPIN
 						}
 					}
@@ -85,9 +84,9 @@ class PinChangeViewModel(
 					PinStatus.Retry -> {
 						val success = model.changePin(oldPin, newPin)
 
-						if (success)
+						if (success) {
 							PinStatus.OK
-						else {
+						} else {
 							PinStatus.Suspended
 						}
 					}
@@ -96,7 +95,6 @@ class PinChangeViewModel(
 						status
 					}
 				}
-
 			} else {
 				logger.error { "Could not connect card." }
 				return PinStatus.Unknown
@@ -110,6 +108,16 @@ class PinChangeViewModel(
 		}
 	}
 
+	fun setDefaults() {
+		_pinChangeState.value =
+			PinChangeUiState(
+				oldPin = "123123",
+				newPin = "123123",
+				repeatPin = "123123",
+				isSubmitEnabled = true,
+			)
+	}
+
 	fun clear() {
 		_pinChangeState.value = PinChangeUiState()
 	}
@@ -119,5 +127,5 @@ data class PinChangeUiState(
 	val oldPin: String = "",
 	val newPin: String = "",
 	val repeatPin: String = "",
-	val isSubmitEnabled: Boolean = false
+	val isSubmitEnabled: Boolean = false,
 )

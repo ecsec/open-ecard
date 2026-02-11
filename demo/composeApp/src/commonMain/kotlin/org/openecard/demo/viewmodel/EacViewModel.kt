@@ -12,9 +12,8 @@ import org.openecard.sc.iface.TerminalFactory
 private val logger = KotlinLogging.logger { }
 
 class EacViewModel(
-	private val terminalFactory: TerminalFactory?
+	private val terminalFactory: TerminalFactory?,
 ) : ViewModel() {
-
 	private val _eacUiState = MutableStateFlow(EacUiState())
 	val eacUiState = _eacUiState.asStateFlow()
 
@@ -22,7 +21,7 @@ class EacViewModel(
 		_eacUiState.update {
 			it.copy(
 				pin = value,
-				isSubmitEnabled = value.isNotBlank()
+				isSubmitEnabled = value.isNotBlank(),
 			)
 		}
 	}
@@ -39,7 +38,7 @@ class EacViewModel(
 	suspend fun doEac(
 		nfcDetected: () -> Unit,
 		tokenUrl: String,
-		pin: String
+		pin: String,
 	): String? {
 		var model: EacOperations? = null
 
@@ -60,6 +59,14 @@ class EacViewModel(
 		}
 	}
 
+	fun setDefaults() {
+		_eacUiState.value =
+			EacUiState(
+				pin = "123123",
+				isSubmitEnabled = true,
+			)
+	}
+
 	fun clear() {
 		_eacUiState.value = EacUiState()
 	}
@@ -68,6 +75,4 @@ class EacViewModel(
 data class EacUiState(
 	val pin: String = "",
 	val isSubmitEnabled: Boolean = false,
-	val errorMessage: String? = null
 )
-

@@ -12,9 +12,8 @@ import org.openecard.sc.iface.TerminalFactory
 private val logger = KotlinLogging.logger { }
 
 class EgkViewModel(
-	private val terminalFactory: TerminalFactory?
+	private val terminalFactory: TerminalFactory?,
 ) : ViewModel() {
-
 	private val _egkUiState = MutableStateFlow(EgkUiState())
 	val egkUiState = _egkUiState.asStateFlow()
 
@@ -22,7 +21,7 @@ class EgkViewModel(
 		_egkUiState.update {
 			it.copy(
 				can = value,
-				isSubmitEnabled = value.isNotBlank()
+				isSubmitEnabled = value.isNotBlank(),
 			)
 		}
 	}
@@ -38,7 +37,7 @@ class EgkViewModel(
 
 	suspend fun readEgk(
 		nfcDetected: () -> Unit,
-		can: String
+		can: String,
 	): String? {
 		var model: EgkOperations? = null
 
@@ -65,6 +64,10 @@ class EgkViewModel(
 		}
 	}
 
+	fun setDefaults() {
+		_egkUiState.value = EgkUiState(can = "123123", isSubmitEnabled = true)
+	}
+
 	fun clear() {
 		_egkUiState.value = EgkUiState()
 	}
@@ -73,6 +76,4 @@ class EgkViewModel(
 data class EgkUiState(
 	val can: String = "",
 	val isSubmitEnabled: Boolean = false,
-	val errorMessage: String? = null
 )
-

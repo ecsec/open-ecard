@@ -32,9 +32,7 @@ import org.openecard.sc.iface.TerminalFactory
 @OptIn(ExperimentalComposeUiApi::class)
 @Suppress("ktlint:standard:function-naming")
 @Composable
-fun NavigationWrapper(
-	nfcTerminalFactory: TerminalFactory?,
-) {
+fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 	val navController = rememberNavController()
 	val nfcDetected = rememberSaveable { mutableStateOf(false) }
 	val pinChangeViewModel = remember { PinChangeViewModel(nfcTerminalFactory) }
@@ -43,17 +41,17 @@ fun NavigationWrapper(
 	val eacViewModel = remember { EacViewModel(nfcTerminalFactory) }
 	val egkViewModel = remember { EgkViewModel(nfcTerminalFactory) }
 
-	fun clearAll() {
-		pinChangeViewModel.clear()
-		canEntryViewModel.clear()
+	fun resetToDefault() {
+		pinChangeViewModel.setDefaults()
+		canEntryViewModel.setDefaults()
 		pukEntryViewModel.clear()
-		eacViewModel.clear()
-		egkViewModel.clear()
+		eacViewModel.setDefaults()
+		egkViewModel.setDefaults()
 	}
 
 	NavHost(navController = navController, startDestination = Start) {
 		composable<Start> {
-			clearAll()
+			resetToDefault()
 
 			StartScreen(
 				navigateToPin = {
@@ -61,7 +59,6 @@ fun NavigationWrapper(
 				},
 				navigateToEac = { url ->
 					navController.navigate(EAC(url))
-
 				},
 				navigateToEgk = {
 					navController.navigate(EGK)
@@ -71,7 +68,7 @@ fun NavigationWrapper(
 				navController = navController,
 				onCleanup = {
 					nfcDetected.value = false
-				}
+				},
 			)
 		}
 
@@ -170,7 +167,7 @@ fun NavigationWrapper(
 				navController = navController,
 				onCleanup = {
 					nfcDetected.value = false
-				}
+				},
 			)
 		}
 
@@ -179,7 +176,7 @@ fun NavigationWrapper(
 				nfcDetected = nfcDetected.value,
 				onCancel = {
 					navController.navigateUp()
-				}
+				},
 			)
 		}
 
@@ -202,7 +199,7 @@ fun NavigationWrapper(
 				navigateBack = {
 					navController.navigate(Start)
 				},
-				eacViewModel = eacViewModel
+				eacViewModel = eacViewModel,
 			)
 		}
 
@@ -219,9 +216,8 @@ fun NavigationWrapper(
 				},
 				navigateBack = {
 					navController.navigate(Start)
-
 				},
-				egkViewModel = egkViewModel
+				egkViewModel = egkViewModel,
 			)
 		}
 
@@ -238,13 +234,13 @@ fun NavigationWrapper(
 				},
 				navigateToOperation = {},
 				eacResult = eacResult.url,
-				egkResult = null
+				egkResult = null,
 			)
 			BackHandler(
 				navController = navController,
 				onCleanup = {
 					nfcDetected.value = false
-				}
+				},
 			)
 		}
 
@@ -267,7 +263,7 @@ fun NavigationWrapper(
 				navController = navController,
 				onCleanup = {
 					nfcDetected.value = false
-				}
+				},
 			)
 		}
 	}
@@ -276,7 +272,7 @@ fun NavigationWrapper(
 @Composable
 fun BackHandler(
 	navController: NavController,
-	onCleanup: () -> Unit
+	onCleanup: () -> Unit,
 ) {
 	NavigationBackHandler(
 		state = rememberNavigationEventState(NavigationEventInfo.None),
@@ -284,9 +280,6 @@ fun BackHandler(
 		onBackCompleted = {
 			onCleanup()
 			navController.navigate(Start)
-		}
+		},
 	)
 }
-
-
-

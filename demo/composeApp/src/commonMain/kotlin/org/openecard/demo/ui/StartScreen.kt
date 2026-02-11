@@ -5,20 +5,28 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.launch
 import org.openecard.demo.AppBar
 import org.openecard.demo.AppBarState
 import org.openecard.demo.GovernikusTestServer
 import org.openecard.demo.SkidServer
 
+private val logger = KotlinLogging.logger { }
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
@@ -29,14 +37,17 @@ fun StartScreen(
 ) {
 	val scope = rememberCoroutineScope()
 
+	var showDialog by rememberSaveable { mutableStateOf(false) }
+	var dialogMessage by rememberSaveable { mutableStateOf("") }
+
 	Scaffold(
 		topBar = {
 			AppBar(
 				AppBarState(
-					title = "Open eCard"
-				)
+					title = "Open eCard",
+				),
 			)
-		}
+		},
 	) {
 		Column(
 			modifier =
@@ -47,25 +58,37 @@ fun StartScreen(
 			horizontalAlignment = Alignment.CenterHorizontally,
 			verticalArrangement = Arrangement.SpaceEvenly,
 		) {
+			val eacErrorText = "Error occurred while loading token URL."
 
 			EacButton(
 				"EAC - SkidStaging",
 				onClick =
 					{
-						scope.launch {
-							val url = SkidServer.forStageSystem().loadTcTokenUrl()
-							navigateToEac(url)
+						try {
+							scope.launch {
+								val url = SkidServer.forStageSystem().loadTcTokenUrl()
+								navigateToEac(url)
+							}
+						} catch (e: Exception) {
+							logger.error(e) { eacErrorText }
+							dialogMessage = eacErrorText
+							showDialog = true
 						}
 					},
 			)
 			EacButton(
 				"EAC - SkidProd",
-
 				onClick =
 					{
-						scope.launch {
-							val url = SkidServer.forProdSystem().loadTcTokenUrl()
-							navigateToEac(url)
+						try {
+							scope.launch {
+								val url = SkidServer.forProdSystem().loadTcTokenUrl()
+								navigateToEac(url)
+							}
+						} catch (e: Exception) {
+							logger.error(e) { eacErrorText }
+							dialogMessage = eacErrorText
+							showDialog = true
 						}
 					},
 			)
@@ -73,27 +96,53 @@ fun StartScreen(
 				"EAC - Governikus",
 				onClick =
 					{
-						scope.launch {
-							val url = GovernikusTestServer().loadTcTokenUrl()
-							navigateToEac(url)
+						try {
+							scope.launch {
+								val url = GovernikusTestServer().loadTcTokenUrl()
+								navigateToEac(url)
+							}
+						} catch (e: Exception) {
+							logger.error(e) { eacErrorText }
+							dialogMessage = eacErrorText
+							showDialog = true
 						}
 					},
 			)
 			Button(onClick = {
 				try {
 					navigateToPin()
-
 				} catch (e: Exception) {
-					e.message
+					logger.error(e) { "Error" }
+					dialogMessage = "Some error occurred."
+					showDialog = true
 				}
 			}) {
 				Text("Change PIN")
 			}
 
 			Button(onClick = {
-				navigateToEgk()
+				try {
+					navigateToEgk()
+				} catch (e: Exception) {
+					logger.error(e) { "Error" }
+					dialogMessage = "Some error occurred."
+					showDialog = true
+				}
 			}) {
 				Text("eGK")
+			}
+
+			if (showDialog) {
+				AlertDialog(
+					onDismissRequest = { showDialog = false },
+					title = { Text("Error") },
+					text = { Text(dialogMessage) },
+					confirmButton = {
+						TextButton(onClick = { showDialog = false }) {
+							Text("OK")
+						}
+					},
+				)
 			}
 		}
 	}
@@ -114,4 +163,3 @@ fun EacButton(
 		Text(text)
 	}
 }
-

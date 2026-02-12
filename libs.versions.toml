@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.3.0"
+kotlin = "2.3.10"
 ktlint = "1.8.0"
 ktlint-githubreporter = "2.0.1"
 ktlint-plugin = "14.0.+"
@@ -13,7 +13,7 @@ kx-datetime = "0.7.1"
 gradle-versions = "0.53.0"
 gradle-jfx = "0.1.0"
 android-sdkloader = "3.1.0"
-moko = "0.25.2"
+moko = "0.26.0"
 swiftKlib = "0.6.4"
 spmForKmp = "1.4.6"
 
@@ -45,7 +45,7 @@ swiftNio="1.20.0"
 bouncycastle = "1.83"
 kotlin-pcsc = "1.1.0"
 apache-batik="1.19"
-proxy-vole = "1.1.8"
+proxy-vole = "2.0.+"
 pdfbox = "3.0.6"
 jfx = "24.0.2"
 jna = "5.18.1"
@@ -60,8 +60,8 @@ kotlinPoet = "2.2.0"
 # Testing
 junit = "6.0.+"
 wiremock = "3.13.+"
-mokkery = "3.1.1"
-kover = "0.9.4"
+mokkery = "3.2.0"
+kover = "0.9.7"
 
 
 [libraries]

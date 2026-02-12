@@ -61,7 +61,7 @@ kotlinPoet = "2.2.0"
 junit = "6.0.+"
 wiremock = "3.13.+"
 mokkery = "3.1.1"
-kover = "0.9.4"
+kover = "0.9.7"
 
 
 [libraries]

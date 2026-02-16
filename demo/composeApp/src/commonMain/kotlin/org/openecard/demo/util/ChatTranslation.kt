@@ -49,6 +49,6 @@ fun SpecialFunction.toLabel() =
 		SpecialFunction.PRIVILEGED_TERMINAL -> "Privileged Terminal"
 		SpecialFunction.RESTRICTED_IDENTIFICATION -> "Restricted Identification"
 		SpecialFunction.COMMUNITY_ID_VERIFICATION -> "Address verification"
-		SpecialFunction.AGE_VERIFICATION -> "Age verification (≥ %d)"
+		SpecialFunction.AGE_VERIFICATION -> "Age verification"
 		SpecialFunction.PSEUDONYMOUS_SIGNATURE_AUTHENTICATION -> "Pseudonymous Signature authentication"
 	}

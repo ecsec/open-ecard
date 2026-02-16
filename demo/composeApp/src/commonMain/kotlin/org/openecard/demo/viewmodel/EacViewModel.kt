@@ -5,7 +5,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.addons.tr03124.ClientInformation
 import org.openecard.addons.tr03124.EidActivation
 import org.openecard.addons.tr03124.UserAgent
@@ -16,6 +15,7 @@ import org.openecard.demo.util.ChatAttributeUi
 import org.openecard.demo.util.buildChatFromSelection
 import org.openecard.demo.util.toUiItem
 import org.openecard.sc.iface.TerminalFactory
+import org.openecard.sc.iface.feature.PaceError
 import org.openecard.sc.pace.cvc.AuthenticationTerminalChat
 
 private val logger = KotlinLogging.logger { }
@@ -46,20 +46,15 @@ class EacViewModel(
 
 	private val _chatItems = MutableStateFlow<List<ChatAttributeUi>>(emptyList())
 	val chatItems = _chatItems.asStateFlow()
-
 	private var serverRequestedChat: AuthenticationTerminalChat? = null
 	var userSelectedChat: AuthenticationTerminalChat? = null
-
-	// 	 state objects to avoid initializing twice
 	var eacOps: EacOperations? = null
 	var uiStep: UiStep? = null
 
-	// called when user toggles checkboxes
 	fun updateChatSelection(newList: List<ChatAttributeUi>) {
 		_chatItems.value = newList
 	}
 
-	// convert
 	fun confirmChatSelection() {
 		val base = serverRequestedChat ?: return
 
@@ -107,37 +102,6 @@ class EacViewModel(
 		}
 	}
 
-	@OptIn(ExperimentalUnsignedTypes::class)
-	suspend fun doEac(
-		pin: String,
-		nfcDetected: () -> Unit,
-	): String? {
-		val ops = eacOps ?: return null
-		val chat = userSelectedChat ?: return null
-		val step = uiStep ?: return null
-
-		ops.session.initializeStack()
-		ops.session.sal.terminals
-			.getTerminal("")
-			?.waitForCardPresent()
-
-		nfcDetected()
-
-		val paceResp =
-			step.getPaceDid("").establishChannel(
-				pin,
-				chat.asBytes,
-				step.guiData.certificateDescription.asBytes,
-			)
-
-		val serverStep = step.processAuthentication(paceResp)
-
-		return when (val result = serverStep.processEidServerLogic()) {
-			is BindingResponse.RedirectResponse -> result.redirectUrl
-			else -> "failed result ${result.status}"
-		}
-	}
-
 	suspend fun startEacProcess(
 		nfcDetected: () -> Unit,
 		pin: String,
@@ -150,11 +114,14 @@ class EacViewModel(
 				pin,
 				nfcDetected,
 			)
+		} catch (p: PaceError) {
+			logger.error(p) { "PACE error occurred." }
+			return "Wrong PIN or invalid card state."
 		} catch (e: Exception) {
-			logger.error(e) { "EAC operation failed." }
+			logger.error(e) { "EAC process failed." }
 			e.message
 		} finally {
-			ops.shutdownStack()
+			ops.session.shutdownStack()
 		}
 	}
 

@@ -88,6 +88,9 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				navigateToPinEntry = {
 					navController.navigate(EacPin)
 				},
+				navigateUp = {
+					navController.navigateUp()
+				},
 			)
 		}
 

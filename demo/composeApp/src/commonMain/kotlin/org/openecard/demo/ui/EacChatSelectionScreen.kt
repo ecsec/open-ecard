@@ -11,7 +11,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +23,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.openecard.demo.AppBar
+import org.openecard.demo.AppBarState
 import org.openecard.demo.util.ChatAttributeUi
 import org.openecard.demo.viewmodel.EacViewModel
 
@@ -33,17 +34,24 @@ import org.openecard.demo.viewmodel.EacViewModel
 fun EacChatSelectionScreen(
 	eacViewModel: EacViewModel,
 	navigateToPinEntry: () -> Unit,
+	navigateUp: () -> Unit,
 ) {
 	val items by eacViewModel.chatItems.collectAsState()
 
 	Scaffold(
 		topBar = {
-			CenterAlignedTopAppBar(
-				title = { Text("Select Data to Share") },
+			AppBar(
+				AppBarState(
+					title = "Select data to share",
+					canNavigateUp = true,
+					navigateUp = navigateUp,
+				),
 			)
 		},
 		bottomBar = {
-			Surface(tonalElevation = 3.dp) {
+			Surface(
+				tonalElevation = 3.dp,
+			) {
 				Button(
 					onClick = {
 						// build object

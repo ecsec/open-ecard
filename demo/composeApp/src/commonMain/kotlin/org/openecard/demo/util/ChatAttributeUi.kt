@@ -44,7 +44,7 @@ fun buildChatFromSelection(
 ): AuthenticationTerminalChat {
 	val chat = base.copy()
 
-	// set base attributes false
+	// set base attributes to false
 	chat.readAccess.clear()
 	chat.specialFunctions.clear()
 

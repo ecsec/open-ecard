@@ -1,5 +1,5 @@
 [versions]
-agp = "9.0.0"
+agp = "9.0.+"
 android-targetSdk = "36"
 androidx-activity = "1.12.3"
 androidx-appcompat = "1.7.1"

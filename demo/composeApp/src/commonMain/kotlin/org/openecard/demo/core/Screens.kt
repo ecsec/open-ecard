@@ -19,6 +19,12 @@ object PUK
 object NFC
 
 @Serializable
+object EacChat
+
+@Serializable
+object EacPin
+
+@Serializable
 object EGK
 
 @Serializable
@@ -40,19 +46,3 @@ data class EacResult(
 data class EgkResult(
 	val result: String,
 )
-
-// @Serializable
-// data class EacChat(
-// 	val tokenUrl: String,
-// )
-//
-// @Serializable
-// data class EacPin(
-// 	val tokenUrl: String,
-// )
-
-@Serializable
-object EacChat
-
-@Serializable
-object EacPin

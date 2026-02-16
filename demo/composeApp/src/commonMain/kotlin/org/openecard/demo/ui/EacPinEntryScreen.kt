@@ -42,7 +42,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.openecard.demo.AppBar
 import org.openecard.demo.AppBarState
-import org.openecard.demo.TokenUrlProvider
 import org.openecard.demo.viewmodel.EacViewModel
 
 @OptIn(ExperimentalUnsignedTypes::class)
@@ -133,10 +132,6 @@ fun EacPinEntryScreen(
 
 						CoroutineScope(Dispatchers.IO).launch {
 							val result =
-// 								eacViewModel.doEac(
-// 									state.pin,
-// 									nfcDetected,
-// 								)
 								eacViewModel.startEacProcess(
 									nfcDetected,
 									state.pin,

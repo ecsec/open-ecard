@@ -1,10 +1,15 @@
 package org.openecard.demo.core
 
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
@@ -46,6 +51,9 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 
 	val scope = rememberCoroutineScope()
 
+	var dialogMessage by rememberSaveable { mutableStateOf("") }
+	var showDialog by rememberSaveable { mutableStateOf(false) }
+
 	fun resetToDefault() {
 		pinChangeViewModel.setDefaults()
 		canEntryViewModel.setDefaults()
@@ -64,16 +72,28 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				},
 				navigateToChatSelection = { url ->
 					scope.launch {
-						val ok = eacViewModel.setChatItems(url)
-						if (ok) {
-							navController.navigate(EacChat)
+						try {
+							val ok = eacViewModel.setChatItems(url)
+							if (ok) {
+								navController.navigate(EacChat)
+							} else {
+								dialogMessage = "Could not load chat items"
+								showDialog = true
+							}
+						} catch (e: Exception) {
+							dialogMessage = "${e.message}"
+							showDialog = true
 						}
 					}
 				},
 				navigateToEgk = {
 					navController.navigate(EGK)
 				},
+				navigateUp = {
+					navController.navigate(Start)
+				},
 			)
+
 			BackHandler(
 				navController = navController,
 				onCleanup = {
@@ -89,7 +109,13 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 					navController.navigate(EacPin)
 				},
 				navigateUp = {
-					navController.navigateUp()
+					navController.navigate(Start)
+				},
+			)
+			BackHandler(
+				navController = navController,
+				onCleanup = {
+					nfcDetected.value = false
 				},
 			)
 		}
@@ -128,6 +154,12 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 					nfcDetected.value = true
 				},
 			)
+			BackHandler(
+				navController = navController,
+				onCleanup = {
+					nfcDetected.value = false
+				},
+			)
 		}
 
 		composable<CAN> {
@@ -146,6 +178,12 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 					nfcDetected.value = true
 				},
 			)
+			BackHandler(
+				navController = navController,
+				onCleanup = {
+					nfcDetected.value = false
+				},
+			)
 		}
 
 		composable<PUK> {
@@ -162,6 +200,12 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				},
 				nfcDetected = {
 					nfcDetected.value = true
+				},
+			)
+			BackHandler(
+				navController = navController,
+				onCleanup = {
+					nfcDetected.value = false
 				},
 			)
 		}
@@ -200,7 +244,7 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 						}
 					}
 				},
-				eacUrl = null,
+				eacResult = null,
 				egkResult = null,
 			)
 			BackHandler(
@@ -236,6 +280,12 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				},
 				egkViewModel = egkViewModel,
 			)
+			BackHandler(
+				navController = navController,
+				onCleanup = {
+					nfcDetected.value = false
+				},
+			)
 		}
 
 		composable<EacResult> { backStackEntry ->
@@ -250,7 +300,7 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 					}
 				},
 				navigateToOperation = {},
-				eacUrl = eacResult.resultUrl,
+				eacResult = eacResult.resultUrl,
 				egkResult = null,
 			)
 			BackHandler(
@@ -273,7 +323,7 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 					}
 				},
 				navigateToOperation = {},
-				eacUrl = null,
+				eacResult = null,
 				egkResult = egkResult.result,
 			)
 			BackHandler(
@@ -283,6 +333,18 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				},
 			)
 		}
+	}
+	if (showDialog) {
+		AlertDialog(
+			onDismissRequest = { showDialog = false },
+			title = { Text("Error") },
+			text = { Text(dialogMessage) },
+			confirmButton = {
+				TextButton(onClick = { showDialog = false }) {
+					Text("OK")
+				}
+			},
+		)
 	}
 }
 

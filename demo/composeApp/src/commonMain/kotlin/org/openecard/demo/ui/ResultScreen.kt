@@ -26,7 +26,7 @@ import org.openecard.demo.PinStatus
 @Composable
 fun ResultScreen(
 	pinStatus: PinStatus?,
-	eacUrl: String?,
+	eacResult: String?,
 	egkResult: String?,
 	navigateToStart: () -> Unit,
 	navigateToOperation: (PinStatus) -> Unit,
@@ -114,15 +114,15 @@ fun ResultScreen(
 					else -> {
 					}
 				}
-			} else if (eacUrl != null) {
+			} else if (eacResult != null) {
 				Text(
 					modifier = Modifier.padding(16.dp),
-					text = "Result: $eacUrl",
+					text = "Result: $eacResult",
 					fontSize = 24.sp,
 					style = MaterialTheme.typography.headlineMedium,
 				)
 
-				val isResultUrl = eacUrl.startsWith("https")
+				val isResultUrl = eacResult.startsWith("https")
 
 				if (isResultUrl) {
 					Spacer(Modifier.height(24.dp))
@@ -130,7 +130,7 @@ fun ResultScreen(
 					Button(
 						onClick = {
 							try {
-								uriHandler.openUri(eacUrl)
+								uriHandler.openUri(eacResult)
 							} catch (e: Exception) {
 								e.message
 							}

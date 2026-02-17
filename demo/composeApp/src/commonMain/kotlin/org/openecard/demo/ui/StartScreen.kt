@@ -54,6 +54,7 @@ fun StartScreen(
 	navigateToChatSelection: (String) -> Unit,
 	navigateToEgk: () -> Unit,
 	navigateUp: () -> Unit,
+	navigateToSettings: () -> Unit,
 ) {
 	var selectedDetail by remember { mutableStateOf<DetailType?>(null) }
 
@@ -68,17 +69,20 @@ fun StartScreen(
 		value = navigator.scaffoldValue,
 		listPane = {
 			StartListPane(
-				onEac = {
+				navigateToEac = {
 					selectedDetail = DetailType.EAC
 					scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail) }
 				},
-				onPin = {
+				navigateToPin = {
 					selectedDetail = DetailType.PIN
 					scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail) }
 				},
-				onEgk = {
+				navigateToEgk = {
 					selectedDetail = DetailType.EGK
 					scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail) }
+				},
+				navigateToSettings = {
+					navigateToSettings()
 				},
 			)
 		},
@@ -105,9 +109,10 @@ fun StartScreen(
 @Suppress("ktlint:standard:function-naming")
 @Composable
 fun StartListPane(
-	onEac: () -> Unit,
-	onPin: () -> Unit,
-	onEgk: () -> Unit,
+	navigateToEac: () -> Unit,
+	navigateToPin: () -> Unit,
+	navigateToEgk: () -> Unit,
+	navigateToSettings: () -> Unit,
 ) {
 	Scaffold(
 		topBar = {
@@ -115,6 +120,8 @@ fun StartListPane(
 				AppBarState(
 					title = "Open eCard",
 					canNavigateUp = false,
+					settingsEnabled = true,
+					navigateToSettings = navigateToSettings,
 				),
 			)
 		},
@@ -124,12 +131,18 @@ fun StartListPane(
 				Modifier
 					.fillMaxSize()
 					.padding(24.dp),
-			verticalArrangement = Arrangement.SpaceEvenly,
+			verticalArrangement = Arrangement.Center,
 			horizontalAlignment = Alignment.CenterHorizontally,
 		) {
-			FeatureCard("EAC with nPA", onClick = onEac)
-			FeatureCard("PIN Management", onClick = onPin)
-			FeatureCard("PACE with eGK", onClick = onEgk)
+			FeatureCard("EAC with nPA", onClick = navigateToEac)
+
+			Spacer(Modifier.height(16.dp))
+
+			FeatureCard("PIN Management", onClick = navigateToPin)
+
+			Spacer(Modifier.height(16.dp))
+			
+			FeatureCard("PACE with eGK", onClick = navigateToEgk)
 		}
 	}
 }

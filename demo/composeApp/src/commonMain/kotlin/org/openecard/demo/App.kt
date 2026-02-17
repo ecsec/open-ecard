@@ -1,21 +1,27 @@
 package org.openecard.demo
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import org.openecard.demo.core.NavigationWrapper
 import org.openecard.sc.iface.TerminalFactory
-
-typealias TokenUrlProvider = suspend () -> String
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
@@ -30,6 +36,8 @@ data class AppBarState(
 	val includeTopBar: Boolean = true,
 	val canNavigateUp: Boolean = false,
 	val navigateUp: () -> Unit = {},
+	val settingsEnabled: Boolean = false,
+	val navigateToSettings: () -> Unit = {},
 )
 
 @Suppress("ktlint:standard:function-naming")
@@ -40,6 +48,8 @@ fun AppBar(
 	modifier: Modifier = Modifier,
 ) {
 	if (state.includeTopBar) {
+		var menuExpanded by remember { mutableStateOf(false) }
+
 		TopAppBar(
 			title = {
 				if (state.title != null) {
@@ -60,8 +70,33 @@ fun AppBar(
 					IconButton(onClick = state.navigateUp) {
 						Icon(
 							imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-							contentDescription = "",
+							contentDescription = null,
 						)
+					}
+				}
+			},
+			actions = {
+				if (state.settingsEnabled) {
+					Box {
+						IconButton(onClick = { menuExpanded = true }) {
+							Icon(
+								imageVector = Icons.Default.Settings,
+								contentDescription = null,
+							)
+						}
+
+						DropdownMenu(
+							expanded = menuExpanded,
+							onDismissRequest = { menuExpanded = false },
+						) {
+							DropdownMenuItem(
+								text = { Text("Dev Options") },
+								onClick = {
+									menuExpanded = false
+									state.navigateToSettings()
+								},
+							)
+						}
 					}
 				}
 			},

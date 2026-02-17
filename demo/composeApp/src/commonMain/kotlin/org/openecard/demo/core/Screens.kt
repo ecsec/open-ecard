@@ -28,6 +28,9 @@ object EacPin
 object EGK
 
 @Serializable
+object Settings
+
+@Serializable
 data class PinResult(
 	val pinStatusString: String,
 ) {

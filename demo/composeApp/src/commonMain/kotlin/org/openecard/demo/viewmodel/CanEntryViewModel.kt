@@ -82,12 +82,15 @@ class CanEntryViewModel(
 		}
 	}
 
-	fun setDefaults() {
+	fun setDefaults(
+		can: String,
+		pin: String,
+	) {
 		_canPinUiState.value =
 			CanPinUiState(
-				can = "123123",
-				pin = "123123",
-				isSubmitEnabled = true,
+				can = can,
+				pin = pin,
+				isSubmitEnabled = can.isNotBlank() && pin.isNotBlank(),
 			)
 	}
 

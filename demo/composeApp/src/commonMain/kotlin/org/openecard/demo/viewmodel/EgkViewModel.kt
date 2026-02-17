@@ -64,8 +64,16 @@ class EgkViewModel(
 		}
 	}
 
-	fun setDefaults() {
-		_egkUiState.value = EgkUiState(can = "123123", isSubmitEnabled = true)
+// 	fun setDefaults() {
+// 		_egkUiState.value = EgkUiState(can = "123123", isSubmitEnabled = true)
+// 	}
+
+	fun setDefaults(can: String) {
+		_egkUiState.value =
+			EgkUiState(
+				can = can,
+				isSubmitEnabled = can.isNotBlank(),
+			)
 	}
 
 	fun clear() {

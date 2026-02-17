@@ -125,11 +125,11 @@ class EacViewModel(
 		}
 	}
 
-	fun setDefaults() {
+	fun setDefaults(pin: String) {
 		_eacUiState.value =
 			EacUiState(
-				pin = "123123",
-				isSubmitEnabled = true,
+				pin = pin,
+				isSubmitEnabled = pin.isNotBlank(),
 			)
 	}
 

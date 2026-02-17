@@ -106,13 +106,16 @@ class PinChangeViewModel(
 		}
 	}
 
-	fun setDefaults() {
+	fun setDefaults(
+		oldPin: String,
+		newPin: String,
+	) {
 		_pinChangeState.value =
 			PinChangeUiState(
-				oldPin = "123123",
-				newPin = "123123",
-				repeatPin = "123123",
-				isSubmitEnabled = true,
+				oldPin = oldPin,
+				newPin = newPin,
+				repeatPin = newPin,
+				isSubmitEnabled = oldPin.isNotBlank() && newPin.isNotBlank(),
 			)
 	}
 

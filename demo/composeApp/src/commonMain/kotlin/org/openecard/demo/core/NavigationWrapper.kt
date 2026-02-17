@@ -4,6 +4,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,12 +30,14 @@ import org.openecard.demo.ui.NfcScreen
 import org.openecard.demo.ui.PinChangeScreen
 import org.openecard.demo.ui.PukEntryScreen
 import org.openecard.demo.ui.ResultScreen
+import org.openecard.demo.ui.SettingsScreen
 import org.openecard.demo.ui.StartScreen
 import org.openecard.demo.viewmodel.CanEntryViewModel
 import org.openecard.demo.viewmodel.EacViewModel
 import org.openecard.demo.viewmodel.EgkViewModel
 import org.openecard.demo.viewmodel.PinChangeViewModel
 import org.openecard.demo.viewmodel.PukEntryViewModel
+import org.openecard.demo.viewmodel.SettingsViewModel
 import org.openecard.sc.iface.TerminalFactory
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalUnsignedTypes::class)
@@ -48,23 +51,25 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 	val pukEntryViewModel = remember { PukEntryViewModel(nfcTerminalFactory) }
 	val eacViewModel = remember { EacViewModel(nfcTerminalFactory) }
 	val egkViewModel = remember { EgkViewModel(nfcTerminalFactory) }
+	val settingsViewModel = remember { SettingsViewModel() }
 
 	val scope = rememberCoroutineScope()
+	val defaultState by settingsViewModel.state.collectAsState()
 
 	var dialogMessage by rememberSaveable { mutableStateOf("") }
 	var showDialog by rememberSaveable { mutableStateOf(false) }
 
-	fun resetToDefault() {
-		pinChangeViewModel.setDefaults()
-		canEntryViewModel.setDefaults()
-		pukEntryViewModel.clear()
-		eacViewModel.setDefaults()
-		egkViewModel.setDefaults()
+	fun setDefaults() {
+		pinChangeViewModel.setDefaults(defaultState.npaPin, defaultState.npaNewPin)
+		canEntryViewModel.setDefaults(defaultState.npaCan, defaultState.npaPin)
+		pukEntryViewModel.setDefaults(defaultState.npaPuk)
+		eacViewModel.setDefaults(defaultState.npaPin)
+		egkViewModel.setDefaults(defaultState.egkCan)
 	}
 
 	NavHost(navController = navController, startDestination = Start) {
 		composable<Start> {
-			resetToDefault()
+			setDefaults()
 
 			StartScreen(
 				navigateToPin = {
@@ -91,6 +96,9 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				},
 				navigateUp = {
 					navController.navigate(Start)
+				},
+				navigateToSettings = {
+					navController.navigate(Settings)
 				},
 			)
 
@@ -325,6 +333,21 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				navigateToOperation = {},
 				eacResult = null,
 				egkResult = egkResult.result,
+			)
+			BackHandler(
+				navController = navController,
+				onCleanup = {
+					nfcDetected.value = false
+				},
+			)
+		}
+
+		composable<Settings> {
+			SettingsScreen(
+				navigateToStart = {
+					navController.navigate(Start)
+				},
+				settingsViewModel = settingsViewModel,
 			)
 			BackHandler(
 				navController = navController,

@@ -69,6 +69,14 @@ class PukEntryViewModel(
 		}
 	}
 
+	fun setDefaults(puk: String) {
+		_pukUiState.value =
+			PukUiState(
+				puk = puk,
+				isSubmitEnabled = puk.isNotBlank(),
+			)
+	}
+
 	fun clear() {
 		_pukUiState.value = PukUiState()
 	}

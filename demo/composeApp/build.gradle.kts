@@ -49,10 +49,11 @@ kotlin {
 			implementation(appLibs.ktor.client.core)
 			implementation(appLibs.kotlin.logging)
 			implementation(appLibs.compose.navigationevent)
+			implementation(appLibs.compose.material3.adaptive.layout)
+			implementation(appLibs.compose.material3.adaptive.navigation)
 
 			implementation(appLibs.fleeksoft.charset)
 			implementation(appLibs.okio)
-
 
 			implementation("org.openecard.addons:tr03124")
 		}
@@ -74,4 +75,3 @@ kotlin {
 		}
 	}
 }
-

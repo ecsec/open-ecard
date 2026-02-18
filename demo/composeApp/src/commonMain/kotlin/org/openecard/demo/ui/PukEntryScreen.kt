@@ -51,6 +51,7 @@ fun PukEntryScreen(
 	navigateToNfc: () -> Unit,
 	navigateToResult: (PinStatus) -> Unit,
 	navigateBack: () -> Unit,
+	navigateToSettings: () -> Unit,
 	nfcDetected: () -> Unit,
 ) {
 	val state by pukEntryViewModel.pukUiState.collectAsState()
@@ -67,6 +68,8 @@ fun PukEntryScreen(
 					title = "Unblock your PIN",
 					canNavigateUp = true,
 					navigateUp = navigateBack,
+					settingsEnabled = true,
+					navigateToSettings = navigateToSettings,
 				),
 			)
 		},

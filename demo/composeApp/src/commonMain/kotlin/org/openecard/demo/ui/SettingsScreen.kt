@@ -36,7 +36,7 @@ import org.openecard.demo.viewmodel.SettingsViewModel
 @Suppress("ktlint:standard:function-naming")
 @Composable
 fun SettingsScreen(
-	navigateToStart: () -> Unit,
+	navigateUp: () -> Unit,
 	settingsViewModel: SettingsViewModel,
 ) {
 	var modified by remember { mutableStateOf(false) }
@@ -56,7 +56,7 @@ fun SettingsScreen(
 				AppBarState(
 					title = "Dev Options",
 					canNavigateUp = true,
-					navigateUp = navigateToStart,
+					navigateUp = navigateUp,
 				),
 			)
 		},

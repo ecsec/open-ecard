@@ -59,11 +59,11 @@ fun AppBar(
 			},
 			colors =
 				TopAppBarDefaults.topAppBarColors(
-					containerColor = MaterialTheme.colorScheme.primaryContainer,
+					containerColor = MaterialTheme.colorScheme.secondaryContainer,
 					scrolledContainerColor = Color.Unspecified,
-					navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-					titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-					actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+					navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+					titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+					actionIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
 				),
 			modifier = modifier,
 			navigationIcon = {

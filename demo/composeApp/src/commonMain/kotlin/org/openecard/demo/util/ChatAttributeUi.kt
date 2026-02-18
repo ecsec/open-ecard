@@ -24,13 +24,13 @@ fun AuthenticationTerminalChat.toUiItem(): List<ChatAttributeUi> {
 				selected = required,
 			)
 	}
-	specialFunctions.toMap().forEach { (sf, selected) ->
+	specialFunctions.toMap().forEach { (sf, required) ->
 		items +=
 			ChatAttributeUi(
 				id = sf.name,
 				label = sf.toLabel(),
-				required = selected,
-				selected = selected,
+				required = required,
+				selected = required,
 			)
 	}
 

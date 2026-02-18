@@ -28,7 +28,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import demo.composeapp.generated.resources.Res
-import demo.composeapp.generated.resources.contactless_200dp_E3E3E3
+import demo.composeapp.generated.resources.contactless
 import org.jetbrains.compose.resources.painterResource
 
 @Suppress("ktlint:standard:function-naming")
@@ -62,7 +62,10 @@ fun NfcScreen(
 			Canvas(modifier = Modifier.fillMaxSize()) {
 				val strokeWidth = 12.dp.toPx()
 				drawArc(
-					color = Color(0xFF007BFF),
+					// secondary
+					color = Color(0xFF006E24),
+					// tertiary
+// 					color = Color(0xFF7B4983),
 					startAngle = -90f,
 					sweepAngle = 360f * progress,
 					useCenter = false,
@@ -71,7 +74,7 @@ fun NfcScreen(
 			}
 
 			Image(
-				painter = painterResource(Res.drawable.contactless_200dp_E3E3E3),
+				painter = painterResource(Res.drawable.contactless),
 				contentDescription = "",
 				modifier =
 					Modifier

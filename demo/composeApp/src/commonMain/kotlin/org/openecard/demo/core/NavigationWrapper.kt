@@ -111,6 +111,8 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 		}
 
 		composable<EacChat> {
+			setDefaults()
+
 			EacChatSelectionScreen(
 				eacViewModel = eacViewModel,
 				navigateToPinEntry = {
@@ -118,6 +120,9 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				},
 				navigateUp = {
 					navController.navigate(Start)
+				},
+				navigateToSettings = {
+					navController.navigate(Settings)
 				},
 			)
 			BackHandler(
@@ -129,6 +134,8 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 		}
 
 		composable<EacPin> {
+			setDefaults()
+
 			EacPinEntryScreen(
 				nfcDetected = {
 					nfcDetected.value = true
@@ -142,11 +149,16 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				navigateBack = {
 					navController.navigate(Start)
 				},
+				navigateToSettings = {
+					navController.navigate(Settings)
+				},
 				eacViewModel = eacViewModel,
 			)
 		}
 
 		composable<PIN> {
+			setDefaults()
+
 			PinChangeScreen(
 				pinChangeViewModel = pinChangeViewModel,
 				navigateToNfc = {
@@ -161,6 +173,9 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				nfcDetected = {
 					nfcDetected.value = true
 				},
+				navigateToSettings = {
+					navController.navigate(Settings)
+				},
 			)
 			BackHandler(
 				navController = navController,
@@ -171,6 +186,8 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 		}
 
 		composable<CAN> {
+			setDefaults()
+
 			CanEntryScreen(
 				canEntryViewModel = canEntryViewModel,
 				navigateToNfc = {
@@ -185,6 +202,9 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				nfcDetected = {
 					nfcDetected.value = true
 				},
+				navigateToSettings = {
+					navController.navigate(Settings)
+				},
 			)
 			BackHandler(
 				navController = navController,
@@ -195,6 +215,8 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 		}
 
 		composable<PUK> {
+			setDefaults()
+
 			PukEntryScreen(
 				pukEntryViewModel = pukEntryViewModel,
 				navigateToNfc = {
@@ -209,6 +231,9 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				nfcDetected = {
 					nfcDetected.value = true
 				},
+				navigateToSettings = {
+					navController.navigate(Settings)
+				},
 			)
 			BackHandler(
 				navController = navController,
@@ -219,6 +244,7 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 		}
 
 		composable<PinResult> { backStackEntry ->
+
 			val pinResult = backStackEntry.toRoute<PinResult>()
 			ResultScreen(
 				pinResult.pinStatus,
@@ -273,6 +299,8 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 		}
 
 		composable<EGK> {
+			setDefaults()
+
 			EgkCanEntryScreen(
 				nfcDetected = {
 					nfcDetected.value = true
@@ -285,6 +313,9 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				},
 				navigateBack = {
 					navController.navigate(Start)
+				},
+				navigateToSettings = {
+					navController.navigate(Settings)
 				},
 				egkViewModel = egkViewModel,
 			)
@@ -344,16 +375,10 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 
 		composable<Settings> {
 			SettingsScreen(
-				navigateToStart = {
-					navController.navigate(Start)
+				navigateUp = {
+					navController.navigateUp()
 				},
 				settingsViewModel = settingsViewModel,
-			)
-			BackHandler(
-				navController = navController,
-				onCleanup = {
-					nfcDetected.value = false
-				},
 			)
 		}
 	}

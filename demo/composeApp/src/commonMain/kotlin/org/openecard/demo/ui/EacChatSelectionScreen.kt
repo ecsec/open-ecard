@@ -7,12 +7,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -35,8 +37,12 @@ fun EacChatSelectionScreen(
 	eacViewModel: EacViewModel,
 	navigateToPinEntry: () -> Unit,
 	navigateUp: () -> Unit,
+	navigateToSettings: () -> Unit,
 ) {
 	val items by eacViewModel.chatItems.collectAsState()
+
+	val readAccessItems = items.filter { it.id.startsWith("DG") }
+	val specialFunctionItems = items.filter { !it.id.startsWith("DG") }
 
 	Scaffold(
 		topBar = {
@@ -45,6 +51,8 @@ fun EacChatSelectionScreen(
 					title = "Select data to share",
 					canNavigateUp = true,
 					navigateUp = navigateUp,
+					settingsEnabled = true,
+					navigateToSettings = navigateToSettings,
 				),
 			)
 		},
@@ -77,19 +85,58 @@ fun EacChatSelectionScreen(
 					.fillMaxSize(),
 			verticalArrangement = Arrangement.spacedBy(12.dp),
 		) {
-			items(items.size) { index ->
-				val item = items[index]
+			if (readAccessItems.isNotEmpty()) {
+				item {
+					Text("Read access", style = MaterialTheme.typography.headlineSmall)
+				}
 
-				ChatSelectionItem(
-					item = item,
-					onToggle = { checked ->
-						if (!item.required) {
-							val updated = items.toMutableList()
-							updated[index] = item.copy(selected = checked)
-							eacViewModel.updateChatSelection(updated)
-						}
-					},
-				)
+				items(readAccessItems) { item ->
+					ChatSelectionItem(
+						item = item,
+						onToggle = { checked ->
+							if (!item.required) {
+								eacViewModel.updateChatSelection(
+									items.map {
+										if (it.id == item.id) {
+											it.copy(selected = checked)
+										} else {
+											it
+										}
+									},
+								)
+							}
+						},
+					)
+				}
+			}
+
+			if (readAccessItems.isNotEmpty() && specialFunctionItems.isNotEmpty()) {
+				item { HorizontalDivider() }
+			}
+
+			if (specialFunctionItems.isNotEmpty()) {
+				item {
+					Text("Special functions", style = MaterialTheme.typography.headlineSmall)
+				}
+
+				items(specialFunctionItems) { item ->
+					ChatSelectionItem(
+						item = item,
+						onToggle = { checked ->
+							if (!item.required) {
+								eacViewModel.updateChatSelection(
+									items.map {
+										if (it.id == item.id) {
+											it.copy(selected = checked)
+										} else {
+											it
+										}
+									},
+								)
+							}
+						},
+					)
+				}
 			}
 		}
 	}

@@ -52,6 +52,7 @@ fun CanEntryScreen(
 	navigateToNfc: () -> Unit,
 	navigateToResult: (PinStatus) -> Unit,
 	navigateBack: () -> Unit,
+	navigateToSettings: () -> Unit,
 	nfcDetected: () -> Unit,
 ) {
 	val state by canEntryViewModel.canPinUiState.collectAsState()
@@ -70,6 +71,8 @@ fun CanEntryScreen(
 					title = "Recover your PIN",
 					canNavigateUp = true,
 					navigateUp = navigateBack,
+					settingsEnabled = true,
+					navigateToSettings = navigateToSettings,
 				),
 			)
 		},

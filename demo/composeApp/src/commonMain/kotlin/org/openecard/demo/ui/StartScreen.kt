@@ -1,5 +1,6 @@
 package org.openecard.demo.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -30,9 +32,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import demo.composeapp.generated.resources.Res
+import demo.composeapp.generated.resources.oec
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
 import org.openecard.demo.AppBar
 import org.openecard.demo.AppBarState
 import org.openecard.demo.GovernikusTestServer
@@ -134,6 +140,15 @@ fun StartListPane(
 			verticalArrangement = Arrangement.Center,
 			horizontalAlignment = Alignment.CenterHorizontally,
 		) {
+			Image(
+				painter = painterResource(Res.drawable.oec),
+				contentDescription = "",
+				modifier =
+					Modifier
+						.size(200.dp),
+				contentScale = ContentScale.Fit,
+			)
+
 			FeatureCard("EAC with nPA", onClick = navigateToEac)
 
 			Spacer(Modifier.height(16.dp))
@@ -141,7 +156,7 @@ fun StartListPane(
 			FeatureCard("PIN Management", onClick = navigateToPin)
 
 			Spacer(Modifier.height(16.dp))
-			
+
 			FeatureCard("PACE with eGK", onClick = navigateToEgk)
 		}
 	}
@@ -186,7 +201,7 @@ fun EacDetailPane(
 
 			Spacer(Modifier.height(32.dp))
 
-			FeatureCard("EAC – SkidStaging") {
+			FeatureCard("SkIDentity Staging") {
 				scope.launch {
 					try {
 						val url = SkidServer.forStageSystem().loadTcTokenUrl()
@@ -201,7 +216,7 @@ fun EacDetailPane(
 
 			Spacer(Modifier.height(16.dp))
 
-			FeatureCard("EAC – SkidProd") {
+			FeatureCard("SkIDentity Production") {
 				scope.launch {
 					try {
 						val url = SkidServer.forProdSystem().loadTcTokenUrl()
@@ -216,7 +231,7 @@ fun EacDetailPane(
 
 			Spacer(Modifier.height(16.dp))
 
-			FeatureCard("EAC – Governikus") {
+			FeatureCard("Governikus") {
 				scope.launch {
 					try {
 						val url = GovernikusTestServer().loadTcTokenUrl()
@@ -273,7 +288,7 @@ fun PinDetailPane(
 
 			Spacer(Modifier.height(32.dp))
 
-			FeatureCard("nPA", onClick = navigateToPin)
+			FeatureCard("German identity card (nPA)", onClick = navigateToPin)
 		}
 	}
 }
@@ -307,7 +322,7 @@ fun EgkDetailPane(
 
 			Spacer(Modifier.height(32.dp))
 
-			FeatureCard("Read personal data from data set", onClick = navigateToEgk)
+			FeatureCard("Read personal data from PD data set", onClick = navigateToEgk)
 		}
 	}
 }

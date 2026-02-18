@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +43,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.openecard.demo.AppBar
 import org.openecard.demo.AppBarState
+import org.openecard.demo.ui.theme.AppTheme
 import org.openecard.demo.viewmodel.EgkViewModel
 
 @Suppress("ktlint:standard:function-naming")
@@ -51,6 +53,7 @@ fun EgkCanEntryScreen(
 	navigateToResult: (String) -> Unit,
 	navigateToNfc: () -> Unit,
 	navigateBack: () -> Unit,
+	navigateToSettings: () -> Unit,
 	nfcDetected: () -> Unit,
 ) {
 	val state by egkViewModel.egkUiState.collectAsState()
@@ -69,6 +72,8 @@ fun EgkCanEntryScreen(
 					title = "Enter your CAN",
 					canNavigateUp = true,
 					navigateUp = navigateBack,
+					settingsEnabled = true,
+					navigateToSettings = navigateToSettings,
 				),
 			)
 		},

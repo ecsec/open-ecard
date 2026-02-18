@@ -5,8 +5,9 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.openecard.demo.data.ConnectEgk
+import org.openecard.demo.data.EgkPace
 import org.openecard.demo.domain.EgkOperations
+import org.openecard.sal.sc.SmartcardDeviceConnection
 import org.openecard.sc.iface.TerminalFactory
 
 private val logger = KotlinLogging.logger { }
@@ -16,6 +17,9 @@ class EgkViewModel(
 ) : ViewModel() {
 	private val _egkUiState = MutableStateFlow(EgkUiState())
 	val egkUiState = _egkUiState.asStateFlow()
+
+	var egkOps: EgkOperations? = null
+	var connection: SmartcardDeviceConnection? = null
 
 	fun onCanChanged(value: String) {
 		_egkUiState.update {
@@ -39,19 +43,20 @@ class EgkViewModel(
 		nfcDetected: () -> Unit,
 		can: String,
 	): String? {
-		var model: EgkOperations? = null
-
 		return try {
-			model = terminalFactory?.let { ConnectEgk.createConnectedModel(it, nfcDetected) }
+			if (egkOps == null) {
+				egkOps = terminalFactory?.let { EgkPace.createEgkSession(it) }
+			}
+			val ops = egkOps
 
-			if (model != null) {
-				val paceOk = model.doPace(can)
+			if (ops != null) {
+				val paceOk = ops.doPace(this, nfcDetected, can)
 
 				if (!paceOk) {
 					return "Wrong CAN"
 				}
 
-				model.readPersonalData()
+				ops.readPersonalData(this)
 			} else {
 				logger.error { "Could not connect card." }
 				return null
@@ -60,13 +65,10 @@ class EgkViewModel(
 			logger.error(e) { "PACE operation failed." }
 			e.message
 		} finally {
-			model?.shutdownStack()
+			egkOps?.session?.shutdownStack()
+			egkOps = null
 		}
 	}
-
-// 	fun setDefaults() {
-// 		_egkUiState.value = EgkUiState(can = "123123", isSubmitEnabled = true)
-// 	}
 
 	fun setDefaults(can: String) {
 		_egkUiState.value =

@@ -4,17 +4,37 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.cif.bundled.EgkCifDefinitions
 import org.openecard.cif.definition.acl.DidStateReference
 import org.openecard.demo.util.toPersonalData
+import org.openecard.demo.viewmodel.EgkViewModel
 import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.dids.PaceDid
-import org.openecard.sal.sc.SmartcardDeviceConnection
+import org.openecard.sal.sc.SmartcardSalSession
 
 private val logger = KotlinLogging.logger { }
 
 class EgkOperations(
-	private val connection: SmartcardDeviceConnection,
+	val session: SmartcardSalSession,
 ) {
 	@OptIn(ExperimentalUnsignedTypes::class)
-	fun doPace(can: String): Boolean {
+	suspend fun doPace(
+		egkViewModel: EgkViewModel,
+		nfcDetected: () -> Unit,
+		can: String,
+	): Boolean {
+		val ops = egkViewModel.egkOps ?: return false
+
+		ops.session.initializeStack()
+
+		val terminal =
+			ops.session.sal.terminals
+				.getTerminal("") ?: return false
+
+		terminal.waitForCardPresent()
+
+		nfcDetected()
+
+		val connection = ops.session.connect(terminal.name)
+		egkViewModel.connection = connection
+
 		val eSignApp =
 			connection.applications
 				.find { it.name == EgkCifDefinitions.Apps.ESign.name }
@@ -59,7 +79,9 @@ class EgkOperations(
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
-	fun readPersonalData(): String? {
+	fun readPersonalData(egkViewModel: EgkViewModel): String? {
+		val connection = egkViewModel.connection ?: return null
+
 		val hcaApp =
 			connection.applications
 				.find { it.name == EgkCifDefinitions.Apps.Hca.name }
@@ -76,9 +98,5 @@ class EgkOperations(
 		val person = pd.toPersonalData()?.versicherter?.person
 
 		return person?.let { "Hello ${it.vorname} ${it.nachname}" }
-	}
-
-	fun shutdownStack() {
-		connection.session.shutdownStack()
 	}
 }

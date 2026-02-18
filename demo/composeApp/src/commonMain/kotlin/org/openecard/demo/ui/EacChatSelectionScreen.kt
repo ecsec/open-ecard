@@ -37,9 +37,11 @@ fun EacChatSelectionScreen(
 	eacViewModel: EacViewModel,
 	navigateToPinEntry: () -> Unit,
 	navigateUp: () -> Unit,
-	navigateToSettings: () -> Unit,
+	navigateToDefaults: () -> Unit,
+	navigateToConfig: () -> Unit,
 ) {
 	val items by eacViewModel.chatItems.collectAsState()
+	val mode by eacViewModel.uiMode.collectAsState()
 
 	val readAccessItems = items.filter { it.id.startsWith("DG") }
 	val specialFunctionItems = items.filter { !it.id.startsWith("DG") }
@@ -52,7 +54,8 @@ fun EacChatSelectionScreen(
 					canNavigateUp = true,
 					navigateUp = navigateUp,
 					settingsEnabled = true,
-					navigateToSettings = navigateToSettings,
+					navigateToDefaults = navigateToDefaults,
+					navigateToConfig = navigateToConfig,
 				),
 			)
 		},
@@ -93,18 +96,22 @@ fun EacChatSelectionScreen(
 				items(readAccessItems) { item ->
 					ChatSelectionItem(
 						item = item,
-						onToggle = { checked ->
+						enabled =
 							if (!item.required) {
-								eacViewModel.updateChatSelection(
-									items.map {
-										if (it.id == item.id) {
-											it.copy(selected = checked)
-										} else {
-											it
-										}
-									},
-								)
-							}
+								true
+							} else {
+								mode.requiredChatEnabled
+							},
+						onToggle = { checked ->
+							eacViewModel.updateChatSelection(
+								items.map {
+									if (it.id == item.id) {
+										it.copy(selected = checked)
+									} else {
+										it
+									}
+								},
+							)
 						},
 					)
 				}
@@ -122,18 +129,22 @@ fun EacChatSelectionScreen(
 				items(specialFunctionItems) { item ->
 					ChatSelectionItem(
 						item = item,
-						onToggle = { checked ->
+						enabled =
 							if (!item.required) {
-								eacViewModel.updateChatSelection(
-									items.map {
-										if (it.id == item.id) {
-											it.copy(selected = checked)
-										} else {
-											it
-										}
-									},
-								)
-							}
+								true
+							} else {
+								mode.requiredChatEnabled
+							},
+						onToggle = { checked ->
+							eacViewModel.updateChatSelection(
+								items.map {
+									if (it.id == item.id) {
+										it.copy(selected = checked)
+									} else {
+										it
+									}
+								},
+							)
 						},
 					)
 				}
@@ -147,6 +158,7 @@ fun EacChatSelectionScreen(
 fun ChatSelectionItem(
 	item: ChatAttributeUi,
 	onToggle: (Boolean) -> Unit,
+	enabled: Boolean,
 ) {
 	Card(
 		modifier = Modifier.fillMaxWidth(),
@@ -166,7 +178,7 @@ fun ChatSelectionItem(
 			Checkbox(
 				checked = item.selected,
 				onCheckedChange = onToggle,
-				enabled = !item.required,
+				enabled = enabled,
 			)
 
 			Column(modifier = Modifier.padding(start = 8.dp)) {

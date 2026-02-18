@@ -52,7 +52,8 @@ fun EacPinEntryScreen(
 	navigateToResult: (String) -> Unit,
 	navigateToNfc: () -> Unit,
 	navigateBack: () -> Unit,
-	navigateToSettings: () -> Unit,
+	navigateToDefaults: () -> Unit,
+	navigateToConfig: () -> Unit,
 	nfcDetected: () -> Unit,
 ) {
 	val state by eacViewModel.eacUiState.collectAsState()
@@ -72,7 +73,8 @@ fun EacPinEntryScreen(
 					canNavigateUp = true,
 					navigateUp = navigateBack,
 					settingsEnabled = true,
-					navigateToSettings = navigateToSettings,
+					navigateToDefaults = navigateToDefaults,
+					navigateToConfig = navigateToConfig,
 				),
 			)
 		},

@@ -52,7 +52,8 @@ fun CanEntryScreen(
 	navigateToNfc: () -> Unit,
 	navigateToResult: (PinStatus) -> Unit,
 	navigateBack: () -> Unit,
-	navigateToSettings: () -> Unit,
+	navigateToDefaults: () -> Unit,
+	navigateToConfig: () -> Unit,
 	nfcDetected: () -> Unit,
 ) {
 	val state by canEntryViewModel.canPinUiState.collectAsState()
@@ -72,7 +73,8 @@ fun CanEntryScreen(
 					canNavigateUp = true,
 					navigateUp = navigateBack,
 					settingsEnabled = true,
-					navigateToSettings = navigateToSettings,
+					navigateToDefaults = navigateToDefaults,
+					navigateToConfig = navigateToConfig,
 				),
 			)
 		},

@@ -38,7 +38,8 @@ data class AppBarState(
 	val canNavigateUp: Boolean = false,
 	val navigateUp: () -> Unit = {},
 	val settingsEnabled: Boolean = false,
-	val navigateToSettings: () -> Unit = {},
+	val navigateToDefaults: () -> Unit = {},
+	val navigateToConfig: () -> Unit = {},
 )
 
 @Suppress("ktlint:standard:function-naming")
@@ -91,10 +92,17 @@ fun AppBar(
 							onDismissRequest = { menuExpanded = false },
 						) {
 							DropdownMenuItem(
+								text = { Text("Defaults") },
+								onClick = {
+									menuExpanded = false
+									state.navigateToDefaults()
+								},
+							)
+							DropdownMenuItem(
 								text = { Text("Dev Options") },
 								onClick = {
 									menuExpanded = false
-									state.navigateToSettings()
+									state.navigateToConfig()
 								},
 							)
 						}

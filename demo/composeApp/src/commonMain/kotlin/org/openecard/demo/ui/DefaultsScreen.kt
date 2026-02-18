@@ -31,20 +31,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.openecard.demo.AppBar
 import org.openecard.demo.AppBarState
-import org.openecard.demo.viewmodel.SettingsViewModel
+import org.openecard.demo.viewmodel.DefaultsViewModel
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
-fun SettingsScreen(
+fun DefaultsScreen(
 	navigateUp: () -> Unit,
-	settingsViewModel: SettingsViewModel,
+	defaultsViewModel: DefaultsViewModel,
 ) {
 	var modified by remember { mutableStateOf(false) }
 
 	var showDialog by remember { mutableStateOf(false) }
 	var dialogMessage by remember { mutableStateOf("") }
 
-	val state by settingsViewModel.state.collectAsState()
+	val state by defaultsViewModel.state.collectAsState()
 
 	val isSubmitEnabled =
 		state.npaPin.isNotBlank() || state.npaNewPin.isNotBlank() ||
@@ -54,7 +54,7 @@ fun SettingsScreen(
 		topBar = {
 			AppBar(
 				AppBarState(
-					title = "Dev Options",
+					title = "Defaults",
 					canNavigateUp = true,
 					navigateUp = navigateUp,
 				),
@@ -78,7 +78,7 @@ fun SettingsScreen(
 			OutlinedTextField(
 				value = state.npaPin,
 				onValueChange = { newValue ->
-					settingsViewModel.update { it.copy(npaPin = newValue) }
+					defaultsViewModel.update { it.copy(npaPin = newValue) }
 				},
 				label = { Text("PIN") },
 				visualTransformation = VisualTransformation.None,
@@ -94,7 +94,7 @@ fun SettingsScreen(
 						.onFocusChanged { focusState ->
 							if (focusState.isFocused && !modified) {
 								modified = true
-								settingsViewModel.update { it.copy(npaPin = "") }
+								defaultsViewModel.update { it.copy(npaPin = "") }
 							}
 						},
 			)
@@ -104,7 +104,7 @@ fun SettingsScreen(
 			OutlinedTextField(
 				value = state.npaNewPin,
 				onValueChange = { newValue ->
-					settingsViewModel.update { it.copy(npaNewPin = newValue) }
+					defaultsViewModel.update { it.copy(npaNewPin = newValue) }
 				},
 				label = { Text("new PIN (only required for PIN change)") },
 				visualTransformation = VisualTransformation.None,
@@ -120,7 +120,7 @@ fun SettingsScreen(
 						.onFocusChanged { focusState ->
 							if (focusState.isFocused && !modified) {
 								modified = true
-								settingsViewModel.update { it.copy(npaNewPin = "") }
+								defaultsViewModel.update { it.copy(npaNewPin = "") }
 							}
 						},
 			)
@@ -130,7 +130,7 @@ fun SettingsScreen(
 			OutlinedTextField(
 				value = state.npaCan,
 				onValueChange = { newValue ->
-					settingsViewModel.update { it.copy(npaCan = newValue) }
+					defaultsViewModel.update { it.copy(npaCan = newValue) }
 				},
 				label = { Text("CAN") },
 				visualTransformation = VisualTransformation.None,
@@ -146,7 +146,7 @@ fun SettingsScreen(
 						.onFocusChanged { focusState ->
 							if (focusState.isFocused && !modified) {
 								modified = true
-								settingsViewModel.update { it.copy(npaCan = "") }
+								defaultsViewModel.update { it.copy(npaCan = "") }
 							}
 						},
 			)
@@ -156,7 +156,7 @@ fun SettingsScreen(
 			OutlinedTextField(
 				value = state.npaPuk,
 				onValueChange = { newValue ->
-					settingsViewModel.update { it.copy(npaPuk = newValue) }
+					defaultsViewModel.update { it.copy(npaPuk = newValue) }
 				},
 				label = { Text("PUK") },
 				visualTransformation = VisualTransformation.None,
@@ -172,7 +172,7 @@ fun SettingsScreen(
 						.onFocusChanged { focusState ->
 							if (focusState.isFocused && !modified) {
 								modified = true
-								settingsViewModel.update { it.copy(npaPuk = "") }
+								defaultsViewModel.update { it.copy(npaPuk = "") }
 							}
 						},
 			)
@@ -184,7 +184,7 @@ fun SettingsScreen(
 			OutlinedTextField(
 				value = state.egkCan,
 				onValueChange = { newValue ->
-					settingsViewModel.update { it.copy(egkCan = newValue) }
+					defaultsViewModel.update { it.copy(egkCan = newValue) }
 				},
 				label = { Text("CAN") },
 				visualTransformation = VisualTransformation.None,
@@ -200,7 +200,7 @@ fun SettingsScreen(
 						.onFocusChanged { focusState ->
 							if (focusState.isFocused && !modified) {
 								modified = true
-								settingsViewModel.update { it.copy(egkCan = "") }
+								defaultsViewModel.update { it.copy(egkCan = "") }
 							}
 						},
 			)
@@ -210,7 +210,7 @@ fun SettingsScreen(
 			Button(
 				enabled = isSubmitEnabled,
 				onClick = {
-					settingsViewModel.update {
+					defaultsViewModel.update {
 						it.copy(
 							npaPin = state.npaPin,
 							npaNewPin = state.npaNewPin,
@@ -220,7 +220,7 @@ fun SettingsScreen(
 						)
 					}
 
-					val invalid = settingsViewModel.validateInput()
+					val invalid = defaultsViewModel.validateInput()
 					if (invalid) {
 						dialogMessage = "Defaults updated successfully." +
 							"\nKeep in mind that the some of the entered values are not valid. Valid PINs must be 5 to 6 digits, valid CANs 6 digits and valid PUKs 10 digits long."

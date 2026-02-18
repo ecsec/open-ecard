@@ -52,7 +52,8 @@ fun PinChangeScreen(
 	navigateToResult: (PinStatus) -> Unit,
 	navigateToNfc: () -> Unit,
 	navigateBack: () -> Unit,
-	navigateToSettings: () -> Unit,
+	navigateToDefaults: () -> Unit,
+	navigateToConfig: () -> Unit,
 	nfcDetected: () -> Unit,
 ) {
 	val state by pinChangeViewModel.pinChangeState.collectAsState()
@@ -73,7 +74,8 @@ fun PinChangeScreen(
 					canNavigateUp = true,
 					navigateUp = navigateBack,
 					settingsEnabled = true,
-					navigateToSettings = navigateToSettings,
+					navigateToDefaults = navigateToDefaults,
+					navigateToConfig = navigateToConfig,
 				),
 			)
 		},

@@ -23,6 +23,8 @@ import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.launch
 import org.openecard.demo.PinStatus
 import org.openecard.demo.ui.CanEntryScreen
+import org.openecard.demo.ui.ConfigScreen
+import org.openecard.demo.ui.DefaultsScreen
 import org.openecard.demo.ui.EacChatSelectionScreen
 import org.openecard.demo.ui.EacPinEntryScreen
 import org.openecard.demo.ui.EgkCanEntryScreen
@@ -30,14 +32,13 @@ import org.openecard.demo.ui.NfcScreen
 import org.openecard.demo.ui.PinChangeScreen
 import org.openecard.demo.ui.PukEntryScreen
 import org.openecard.demo.ui.ResultScreen
-import org.openecard.demo.ui.SettingsScreen
 import org.openecard.demo.ui.StartScreen
 import org.openecard.demo.viewmodel.CanEntryViewModel
+import org.openecard.demo.viewmodel.DefaultsViewModel
 import org.openecard.demo.viewmodel.EacViewModel
 import org.openecard.demo.viewmodel.EgkViewModel
 import org.openecard.demo.viewmodel.PinChangeViewModel
 import org.openecard.demo.viewmodel.PukEntryViewModel
-import org.openecard.demo.viewmodel.SettingsViewModel
 import org.openecard.sc.iface.TerminalFactory
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalUnsignedTypes::class)
@@ -51,10 +52,10 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 	val pukEntryViewModel = remember { PukEntryViewModel(nfcTerminalFactory) }
 	val eacViewModel = remember { EacViewModel(nfcTerminalFactory) }
 	val egkViewModel = remember { EgkViewModel(nfcTerminalFactory) }
-	val settingsViewModel = remember { SettingsViewModel() }
+	val defaultsViewModel = remember { DefaultsViewModel() }
 
 	val scope = rememberCoroutineScope()
-	val defaultState by settingsViewModel.state.collectAsState()
+	val defaultState by defaultsViewModel.state.collectAsState()
 
 	var dialogMessage by rememberSaveable { mutableStateOf("") }
 	var showDialog by rememberSaveable { mutableStateOf(false) }
@@ -97,8 +98,11 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				navigateUp = {
 					navController.navigate(Start)
 				},
-				navigateToSettings = {
-					navController.navigate(Settings)
+				navigateToDefaults = {
+					navController.navigate(Defaults)
+				},
+				navigateToConfig = {
+					navController.navigate(Config)
 				},
 			)
 
@@ -121,8 +125,11 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				navigateUp = {
 					navController.navigate(Start)
 				},
-				navigateToSettings = {
-					navController.navigate(Settings)
+				navigateToDefaults = {
+					navController.navigate(Defaults)
+				},
+				navigateToConfig = {
+					navController.navigate(Config)
 				},
 			)
 			BackHandler(
@@ -149,8 +156,11 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				navigateBack = {
 					navController.navigate(Start)
 				},
-				navigateToSettings = {
-					navController.navigate(Settings)
+				navigateToDefaults = {
+					navController.navigate(Defaults)
+				},
+				navigateToConfig = {
+					navController.navigate(Config)
 				},
 				eacViewModel = eacViewModel,
 			)
@@ -173,8 +183,11 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				nfcDetected = {
 					nfcDetected.value = true
 				},
-				navigateToSettings = {
-					navController.navigate(Settings)
+				navigateToDefaults = {
+					navController.navigate(Defaults)
+				},
+				navigateToConfig = {
+					navController.navigate(Config)
 				},
 			)
 			BackHandler(
@@ -202,8 +215,11 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				nfcDetected = {
 					nfcDetected.value = true
 				},
-				navigateToSettings = {
-					navController.navigate(Settings)
+				navigateToDefaults = {
+					navController.navigate(Defaults)
+				},
+				navigateToConfig = {
+					navController.navigate(Config)
 				},
 			)
 			BackHandler(
@@ -231,8 +247,11 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				nfcDetected = {
 					nfcDetected.value = true
 				},
-				navigateToSettings = {
-					navController.navigate(Settings)
+				navigateToDefaults = {
+					navController.navigate(Defaults)
+				},
+				navigateToConfig = {
+					navController.navigate(Config)
 				},
 			)
 			BackHandler(
@@ -314,8 +333,11 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				navigateBack = {
 					navController.navigate(Start)
 				},
-				navigateToSettings = {
-					navController.navigate(Settings)
+				navigateToDefaults = {
+					navController.navigate(Defaults)
+				},
+				navigateToConfig = {
+					navController.navigate(Config)
 				},
 				egkViewModel = egkViewModel,
 			)
@@ -373,12 +395,21 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 			)
 		}
 
-		composable<Settings> {
-			SettingsScreen(
+		composable<Defaults> {
+			DefaultsScreen(
 				navigateUp = {
 					navController.navigateUp()
 				},
-				settingsViewModel = settingsViewModel,
+				defaultsViewModel = defaultsViewModel,
+			)
+		}
+
+		composable<Config> {
+			ConfigScreen(
+				navigateUp = {
+					navController.navigateUp()
+				},
+				eacViewModel = eacViewModel,
 			)
 		}
 	}

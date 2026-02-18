@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-data class SettingsState(
+data class DefaultsState(
 	val npaPin: String = "",
 	val npaNewPin: String = "",
 	val npaCan: String = "",
@@ -13,11 +13,11 @@ data class SettingsState(
 	val egkCan: String = "",
 )
 
-class SettingsViewModel : ViewModel() {
-	private val _state = MutableStateFlow(SettingsState())
+class DefaultsViewModel : ViewModel() {
+	private val _state = MutableStateFlow(DefaultsState())
 	val state = _state.asStateFlow()
 
-	fun update(block: (SettingsState) -> SettingsState) {
+	fun update(block: (DefaultsState) -> DefaultsState) {
 		_state.update(block)
 	}
 

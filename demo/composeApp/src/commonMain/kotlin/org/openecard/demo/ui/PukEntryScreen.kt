@@ -51,7 +51,8 @@ fun PukEntryScreen(
 	navigateToNfc: () -> Unit,
 	navigateToResult: (PinStatus) -> Unit,
 	navigateBack: () -> Unit,
-	navigateToSettings: () -> Unit,
+	navigateToDefaults: () -> Unit,
+	navigateToConfig: () -> Unit,
 	nfcDetected: () -> Unit,
 ) {
 	val state by pukEntryViewModel.pukUiState.collectAsState()
@@ -69,7 +70,8 @@ fun PukEntryScreen(
 					canNavigateUp = true,
 					navigateUp = navigateBack,
 					settingsEnabled = true,
-					navigateToSettings = navigateToSettings,
+					navigateToDefaults = navigateToDefaults,
+					navigateToConfig = navigateToConfig,
 				),
 			)
 		},

@@ -48,8 +48,28 @@ class EacViewModel(
 	val chatItems = _chatItems.asStateFlow()
 	private var serverRequestedChat: AuthenticationTerminalChat? = null
 	var userSelectedChat: AuthenticationTerminalChat? = null
+
 	var eacOps: EacOperations? = null
 	var uiStep: UiStep? = null
+
+	private val _uiMode = MutableStateFlow(Config())
+	val uiMode = _uiMode.asStateFlow()
+
+	fun updateConfig(mode: Config) {
+		_uiMode.value = mode
+
+		if (!mode.requiredChatEnabled) {
+			_chatItems.update { items ->
+				items.map { item ->
+					if (item.required) {
+						item.copy(selected = true)
+					} else {
+						item
+					}
+				}
+			}
+		}
+	}
 
 	fun updateChatSelection(newList: List<ChatAttributeUi>) {
 		_chatItems.value = newList
@@ -141,4 +161,8 @@ class EacViewModel(
 data class EacUiState(
 	val pin: String = "",
 	val isSubmitEnabled: Boolean = false,
+)
+
+data class Config(
+	val requiredChatEnabled: Boolean = false,
 )

@@ -60,7 +60,8 @@ fun StartScreen(
 	navigateToChatSelection: (String) -> Unit,
 	navigateToEgk: () -> Unit,
 	navigateUp: () -> Unit,
-	navigateToSettings: () -> Unit,
+	navigateToDefaults: () -> Unit,
+	navigateToConfig: () -> Unit,
 ) {
 	var selectedDetail by remember { mutableStateOf<DetailType?>(null) }
 
@@ -87,8 +88,11 @@ fun StartScreen(
 					selectedDetail = DetailType.EGK
 					scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail) }
 				},
-				navigateToSettings = {
-					navigateToSettings()
+				navigateToDefaults = {
+					navigateToDefaults()
+				},
+				navigateToConfig = {
+					navigateToConfig()
 				},
 			)
 		},
@@ -118,7 +122,8 @@ fun StartListPane(
 	navigateToEac: () -> Unit,
 	navigateToPin: () -> Unit,
 	navigateToEgk: () -> Unit,
-	navigateToSettings: () -> Unit,
+	navigateToDefaults: () -> Unit,
+	navigateToConfig: () -> Unit,
 ) {
 	Scaffold(
 		topBar = {
@@ -127,7 +132,8 @@ fun StartListPane(
 					title = "Open eCard",
 					canNavigateUp = false,
 					settingsEnabled = true,
-					navigateToSettings = navigateToSettings,
+					navigateToDefaults = navigateToDefaults,
+					navigateToConfig = navigateToConfig,
 				),
 			)
 		},

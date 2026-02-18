@@ -28,7 +28,10 @@ object EacPin
 object EGK
 
 @Serializable
-object Settings
+object Defaults
+
+@Serializable
+object Config
 
 @Serializable
 data class PinResult(

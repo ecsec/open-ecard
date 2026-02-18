@@ -21,7 +21,6 @@ class NpaEac {
 
 		private fun createSession(terminalFactory: TerminalFactory): SmartcardSalSession {
 			val ctx = terminalFactory.load()
-			ctx.establishContext()
 
 			val recognition =
 				DirectCardRecognition(

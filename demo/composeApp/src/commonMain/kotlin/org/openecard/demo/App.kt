@@ -21,12 +21,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import org.openecard.demo.core.NavigationWrapper
+import org.openecard.demo.ui.theme.AppTheme
 import org.openecard.sc.iface.TerminalFactory
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
 fun App(nfcTerminalFactory: TerminalFactory? = null) {
-	MaterialTheme {
+	AppTheme {
 		NavigationWrapper(nfcTerminalFactory)
 	}
 }

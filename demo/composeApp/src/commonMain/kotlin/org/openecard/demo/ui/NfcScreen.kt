@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,6 +31,8 @@ import androidx.compose.ui.unit.sp
 import demo.composeapp.generated.resources.Res
 import demo.composeapp.generated.resources.contactless
 import org.jetbrains.compose.resources.painterResource
+import org.openecard.demo.AppBar
+import org.openecard.demo.AppBarState
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
@@ -42,52 +45,58 @@ fun NfcScreen(
 		animationSpec = tween(durationMillis = 1500, easing = LinearEasing),
 		label = "",
 	)
-
-	Column(
-		modifier =
-			Modifier
-				.fillMaxSize()
-				.padding(16.dp),
-		horizontalAlignment = Alignment.CenterHorizontally,
-		verticalArrangement = Arrangement.Center,
+	Scaffold(
+		topBar = {
+			AppBar(
+				AppBarState(
+					title = "Waiting for card...",
+				),
+			)
+		},
 	) {
-		Text("Please bring card", fontSize = 24.sp)
-
-		Spacer(Modifier.height(32.dp))
-
-		Box(
-			modifier = Modifier.size(220.dp),
-			contentAlignment = Alignment.Center,
+		Column(
+			modifier =
+				Modifier
+					.fillMaxSize()
+					.padding(16.dp),
+			horizontalAlignment = Alignment.CenterHorizontally,
+			verticalArrangement = Arrangement.Center,
 		) {
-			Canvas(modifier = Modifier.fillMaxSize()) {
-				val strokeWidth = 12.dp.toPx()
-				drawArc(
-					// secondary
-					color = Color(0xFF006E24),
-					// tertiary
-// 					color = Color(0xFF7B4983),
-					startAngle = -90f,
-					sweepAngle = 360f * progress,
-					useCenter = false,
-					style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+			Text("Please bring card", fontSize = 24.sp)
+
+			Spacer(Modifier.height(32.dp))
+
+			Box(
+				modifier = Modifier.size(220.dp),
+				contentAlignment = Alignment.Center,
+			) {
+				Canvas(modifier = Modifier.fillMaxSize()) {
+					val strokeWidth = 12.dp.toPx()
+					drawArc(
+						color = Color(0xFF006E24),
+						startAngle = -90f,
+						sweepAngle = 360f * progress,
+						useCenter = false,
+						style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+					)
+				}
+
+				Image(
+					painter = painterResource(Res.drawable.contactless),
+					contentDescription = "",
+					modifier =
+						Modifier
+							.size(200.dp)
+							.clip(CircleShape),
+					contentScale = ContentScale.Fit,
 				)
 			}
 
-			Image(
-				painter = painterResource(Res.drawable.contactless),
-				contentDescription = "",
-				modifier =
-					Modifier
-						.size(200.dp)
-						.clip(CircleShape),
-				contentScale = ContentScale.Fit,
-			)
-		}
+			Spacer(Modifier.height(32.dp))
 
-		Spacer(Modifier.height(32.dp))
-
-		Button(onClick = onCancel) {
-			Text("Cancel")
+			Button(onClick = onCancel) {
+				Text("Cancel")
+			}
 		}
 	}
 }

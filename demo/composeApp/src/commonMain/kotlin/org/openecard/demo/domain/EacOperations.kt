@@ -1,6 +1,7 @@
 package org.openecard.demo.domain
 
 import org.openecard.addons.tr03124.BindingResponse
+import org.openecard.demo.data.Session
 import org.openecard.demo.viewmodel.EacViewModel
 import org.openecard.sal.sc.SmartcardSalSession
 
@@ -13,16 +14,10 @@ class EacOperations(
 		pin: String,
 		nfcDetected: () -> Unit,
 	): String? {
-		val ops = eacViewModel.eacOps ?: return null
 		val chat = eacViewModel.userSelectedChat ?: return null
 		val step = eacViewModel.uiStep ?: return null
 
-		ops.session.initializeStack()
-		ops.session.sal.terminals
-			.getTerminal("")
-			?.waitForCardPresent()
-
-		nfcDetected()
+		Session.initializeStack(session, nfcDetected)
 
 		val paceResp =
 			step.getPaceDid("").establishChannel(

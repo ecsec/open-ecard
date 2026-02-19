@@ -3,6 +3,7 @@ package org.openecard.demo.domain
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.cif.bundled.EgkCifDefinitions
 import org.openecard.cif.definition.acl.DidStateReference
+import org.openecard.demo.data.Session
 import org.openecard.demo.util.toPersonalData
 import org.openecard.demo.viewmodel.EgkViewModel
 import org.openecard.sal.iface.MissingAuthentications
@@ -22,15 +23,7 @@ class EgkOperations(
 	): Boolean {
 		val ops = egkViewModel.egkOps ?: return false
 
-		ops.session.initializeStack()
-
-		val terminal =
-			ops.session.sal.terminals
-				.getTerminal("") ?: return false
-
-		terminal.waitForCardPresent()
-
-		nfcDetected()
+		val terminal = Session.initializeStack(session, nfcDetected)
 
 		val connection = ops.session.connect(terminal.name)
 		egkViewModel.connection = connection

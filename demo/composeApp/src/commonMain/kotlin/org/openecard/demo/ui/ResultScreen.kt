@@ -215,7 +215,7 @@ fun infoText(pinStatus: PinStatus): String =
 			"PUK was wrong."
 		}
 
-		else -> {
+		PinStatus.Unknown -> {
 			"Something went wrong."
 		}
 	}

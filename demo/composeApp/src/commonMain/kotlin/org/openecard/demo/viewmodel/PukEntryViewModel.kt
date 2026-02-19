@@ -1,22 +1,25 @@
 package org.openecard.demo.viewmodel
 
-import androidx.lifecycle.ViewModel
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import org.openecard.cif.bundled.NpaDefinitions
 import org.openecard.demo.PinStatus
-import org.openecard.demo.data.ConnectNpaPin
-import org.openecard.demo.domain.PinOperations
+import org.openecard.demo.data.Session
+import org.openecard.sal.iface.dids.PaceDid
+import org.openecard.sal.sc.SmartcardApplication
 import org.openecard.sc.iface.TerminalFactory
 
 private val logger = KotlinLogging.logger { }
 
 class PukEntryViewModel(
 	private val terminalFactory: TerminalFactory?,
-) : ViewModel() {
+) : PinMgmtViewModel() {
 	private val _pukUiState = MutableStateFlow(PukUiState())
 	val pukUiState = _pukUiState.asStateFlow()
+
+	var pacePuk: PaceDid? = null
 
 	fun onPukChanged(value: String) {
 		_pukUiState.update {
@@ -37,15 +40,18 @@ class PukEntryViewModel(
 		nfcDetected: () -> Unit,
 		puk: String,
 	): PinStatus {
-		var model: PinOperations? = null
-
 		return try {
-			model = terminalFactory?.let { ConnectNpaPin.createPinModel(it, nfcDetected) }
+			if (pinOps == null) {
+				pinOps = terminalFactory?.let { Session.createPinSession(it) }
+			}
 
-			if (model != null) {
-				when (val status = model.getPinStatus()) {
+			val ops = pinOps
+			if (ops != null) {
+				ops.connectCard(this, nfcDetected)
+
+				when (val status = ops.getPinStatus(this.pacePin)) {
 					PinStatus.Blocked -> {
-						if (model.enterPuk(puk)) {
+						if (ops.enterPuk(this, puk)) {
 							PinStatus.OK
 						} else {
 							PinStatus.WrongPUK
@@ -65,7 +71,8 @@ class PukEntryViewModel(
 			e.message
 			PinStatus.Unknown
 		} finally {
-			model?.shutdownStack()
+			pinOps?.shutdownStack()
+			pinOps = null
 		}
 	}
 
@@ -79,6 +86,13 @@ class PukEntryViewModel(
 
 	fun clear() {
 		_pukUiState.value = PukUiState()
+	}
+
+	override fun setConnectionForOperation(mf: SmartcardApplication) {
+		this.pacePuk =
+			mf.dids.filterIsInstance<PaceDid>().find {
+				it.name == NpaDefinitions.Apps.Mf.Dids.pacePuk
+			} ?: throw IllegalStateException("PACE PUK DID not found")
 	}
 }
 

@@ -1,23 +1,25 @@
 package org.openecard.demo.viewmodel
 
-import androidx.lifecycle.ViewModel
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import org.openecard.cif.bundled.NpaDefinitions
 import org.openecard.demo.PinStatus
-import org.openecard.demo.data.ConnectNpaPin
-import org.openecard.demo.domain.PinOperations
+import org.openecard.demo.data.Session
+import org.openecard.sal.iface.dids.PaceDid
+import org.openecard.sal.sc.SmartcardApplication
 import org.openecard.sc.iface.TerminalFactory
 
 private val logger = KotlinLogging.logger { }
 
 class CanEntryViewModel(
 	private val terminalFactory: TerminalFactory?,
-) : ViewModel() {
+) : PinMgmtViewModel() {
 	private val _canPinUiState = MutableStateFlow(CanPinUiState())
-
 	val canPinUiState = _canPinUiState.asStateFlow()
+
+	var paceCan: PaceDid? = null
 
 	fun onCanChanged(value: String) {
 		_canPinUiState.update {
@@ -48,17 +50,20 @@ class CanEntryViewModel(
 		can: String,
 		pin: String,
 	): PinStatus {
-		var model: PinOperations? = null
-
 		return try {
-			model = terminalFactory?.let { ConnectNpaPin.createPinModel(it, nfcDetected) }
+			if (pinOps == null) {
+				pinOps = terminalFactory?.let { Session.createPinSession(it) }
+			}
 
-			if (model != null) {
-				when (val status = model.getPinStatus()) {
+			val ops = pinOps
+			if (ops != null) {
+				ops.connectCard(this, nfcDetected)
+
+				when (val status = ops.getPinStatus(this.pacePin)) {
 					PinStatus.Suspended -> {
-						if (!model.enterCan(can)) {
+						if (!ops.enterCan(this, can)) {
 							PinStatus.WrongCAN
-						} else if (model.enterPin(pin)) {
+						} else if (ops.enterPinForCan(this, pin)) {
 							PinStatus.OK
 						} else {
 							status
@@ -78,7 +83,8 @@ class CanEntryViewModel(
 			e.message
 			PinStatus.Unknown
 		} finally {
-			model?.shutdownStack()
+			pinOps?.shutdownStack()
+			pinOps = null
 		}
 	}
 
@@ -96,6 +102,13 @@ class CanEntryViewModel(
 
 	fun clear() {
 		_canPinUiState.value = CanPinUiState()
+	}
+
+	override fun setConnectionForOperation(mf: SmartcardApplication) {
+		this.paceCan =
+			mf.dids.filterIsInstance<PaceDid>().find {
+				it.name == NpaDefinitions.Apps.Mf.Dids.paceCan
+			} ?: throw IllegalStateException("PACE CAN DID not found")
 	}
 }
 

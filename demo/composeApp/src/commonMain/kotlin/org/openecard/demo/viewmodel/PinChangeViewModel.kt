@@ -1,22 +1,25 @@
 package org.openecard.demo.viewmodel
 
-import androidx.lifecycle.ViewModel
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import org.openecard.cif.bundled.NpaDefinitions
 import org.openecard.demo.PinStatus
-import org.openecard.demo.data.ConnectNpaPin
-import org.openecard.demo.domain.PinOperations
+import org.openecard.demo.data.Session
+import org.openecard.sal.iface.dids.PinDid
+import org.openecard.sal.sc.SmartcardApplication
 import org.openecard.sc.iface.TerminalFactory
 
 private val logger = KotlinLogging.logger { }
 
 class PinChangeViewModel(
 	private val terminalFactory: TerminalFactory?,
-) : ViewModel() {
+) : PinMgmtViewModel() {
 	private val _pinChangeState = MutableStateFlow(PinChangeUiState())
 	val pinChangeState = _pinChangeState.asStateFlow()
+
+	var pin: PinDid? = null
 
 	fun onOldPinChanged(value: String) {
 		_pinChangeState.update {
@@ -62,15 +65,18 @@ class PinChangeViewModel(
 		oldPin: String,
 		newPin: String,
 	): PinStatus {
-		var model: PinOperations? = null
-
 		return try {
-			model = terminalFactory?.let { ConnectNpaPin.createPinModel(it, nfcDetected) }
+			if (pinOps == null) {
+				pinOps = terminalFactory?.let { Session.createPinSession(it) }
+			}
 
-			if (model != null) {
-				when (val status = model.getPinStatus()) {
+			val ops = pinOps
+			if (ops != null) {
+				ops.connectCard(this, nfcDetected)
+
+				when (val status = ops.getPinStatus(this.pacePin)) {
 					PinStatus.OK -> {
-						val success = model.changePin(oldPin, newPin)
+						val success = ops.changePin(this, oldPin, newPin)
 
 						if (success) {
 							PinStatus.OK
@@ -80,7 +86,7 @@ class PinChangeViewModel(
 					}
 
 					PinStatus.Retry -> {
-						val success = model.changePin(oldPin, newPin)
+						val success = ops.changePin(this, oldPin, newPin)
 
 						if (success) {
 							PinStatus.OK
@@ -102,7 +108,8 @@ class PinChangeViewModel(
 			e.message
 			PinStatus.Unknown
 		} finally {
-			model?.shutdownStack()
+			pinOps?.shutdownStack()
+			pinOps = null
 		}
 	}
 
@@ -121,6 +128,13 @@ class PinChangeViewModel(
 
 	fun clear() {
 		_pinChangeState.value = PinChangeUiState()
+	}
+
+	override fun setConnectionForOperation(mf: SmartcardApplication) {
+		pin =
+			mf.dids.filterIsInstance<PinDid>().find {
+				it.name == NpaDefinitions.Apps.Mf.Dids.pin
+			} ?: throw IllegalStateException("PIN DID not found")
 	}
 }
 

@@ -9,7 +9,7 @@ import org.openecard.addons.tr03124.ClientInformation
 import org.openecard.addons.tr03124.EidActivation
 import org.openecard.addons.tr03124.UserAgent
 import org.openecard.addons.tr03124.eac.UiStep
-import org.openecard.demo.data.NpaEac
+import org.openecard.demo.data.Session
 import org.openecard.demo.domain.EacOperations
 import org.openecard.demo.util.ChatAttributeUi
 import org.openecard.demo.util.buildChatFromSelection
@@ -89,7 +89,7 @@ class EacViewModel(
 
 	suspend fun setChatItems(tokenUrl: String): Boolean {
 		if (eacOps == null) {
-			eacOps = terminalFactory?.let { NpaEac.createEacSession(it) } ?: return false
+			eacOps = terminalFactory?.let { Session.createEacSession(it) } ?: return false
 		}
 
 		val ops = eacOps

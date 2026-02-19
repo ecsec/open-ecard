@@ -1,26 +1,32 @@
 package org.openecard.demo.domain
 
 import org.openecard.demo.PinStatus
+import org.openecard.demo.data.Session
+import org.openecard.demo.viewmodel.CanEntryViewModel
+import org.openecard.demo.viewmodel.PinChangeViewModel
+import org.openecard.demo.viewmodel.PinMgmtViewModel
+import org.openecard.demo.viewmodel.PukEntryViewModel
 import org.openecard.sal.iface.dids.PaceDid
-import org.openecard.sal.iface.dids.PinDid
-import org.openecard.sal.sc.SmartcardApplication
+import org.openecard.sal.sc.SmartcardSalSession
 import org.openecard.sc.apdu.command.SecurityCommandFailure
 import org.openecard.sc.apdu.command.SecurityCommandSuccess
 import org.openecard.sc.iface.feature.PaceError
 
 class PinOperations(
-	private val application: SmartcardApplication,
+	val session: SmartcardSalSession,
 ) {
-	val pacePin: PaceDid =
-		application.dids.filterIsInstance<PaceDid>().find { it.name == "PACE_PIN" }
-			?: throw IllegalStateException("PACE PIN not found")
+	suspend fun connectCard(
+		pinMgmtViewModel: PinMgmtViewModel,
+		nfcDetected: () -> Unit,
+	) {
+		val terminal = Session.initializeStack(session, nfcDetected)
 
-	val paceCan: PaceDid? = application.dids.filterIsInstance<PaceDid>().find { it.name == "PACE_CAN" }
-	val pacePuk: PaceDid? = application.dids.filterIsInstance<PaceDid>().find { it.name == "PACE_PUK" }
-	val pin: PinDid? = application.dids.filterIsInstance<PinDid>().find { it.name == "PIN" }
+		val connection = session.connect(terminal.name)
+		pinMgmtViewModel.setConnection(connection)
+	}
 
-	fun getPinStatus(): PinStatus =
-		when (val status = pacePin.passwordStatus()) {
+	fun getPinStatus(pacePin: PaceDid?): PinStatus =
+		when (val status = pacePin?.passwordStatus()) {
 			is SecurityCommandSuccess -> {
 				PinStatus.OK
 			}
@@ -34,22 +40,36 @@ class PinOperations(
 					else -> PinStatus.Unknown
 				}
 			}
+
+			else -> {
+				PinStatus.Unknown
+			}
 		}
 
-	fun enterPin(pinValue: String): Boolean = pacePin.enterPassword(pinValue) == null
+	fun enterPinForCan(
+		canEntryViewModel: CanEntryViewModel,
+		pinValue: String,
+	): Boolean = canEntryViewModel.pacePin?.enterPassword(pinValue) == null
 
-	fun enterCan(canValue: String): Boolean = paceCan?.enterPassword(canValue) == null
+	fun enterCan(
+		canEntryViewModel: CanEntryViewModel,
+		canValue: String,
+	): Boolean = canEntryViewModel.paceCan?.enterPassword(canValue) == null
 
-	fun enterPuk(pukValue: String): Boolean = pacePuk?.enterPassword(pukValue) == null
+	fun enterPuk(
+		pukEntryViewModel: PukEntryViewModel,
+		pukValue: String,
+	): Boolean = pukEntryViewModel.pacePuk?.enterPassword(pukValue) == null
 
 	fun changePin(
+		pinChangeViewModel: PinChangeViewModel,
 		oldPin: String,
 		newPin: String,
 	): Boolean {
-		val result = pacePin.enterPassword(oldPin)
+		val result = pinChangeViewModel.pacePin?.enterPassword(oldPin)
 		return if (result == null) {
-			pin?.resetPassword(null, newPin)
-			pacePin.closeChannel()
+			pinChangeViewModel.pin?.resetPassword(null, newPin)
+			pinChangeViewModel.pacePin?.closeChannel()
 			true
 		} else {
 			false
@@ -72,6 +92,6 @@ class PinOperations(
 	}
 
 	fun shutdownStack() {
-		application.device.session.shutdownStack()
+		session.shutdownStack()
 	}
 }

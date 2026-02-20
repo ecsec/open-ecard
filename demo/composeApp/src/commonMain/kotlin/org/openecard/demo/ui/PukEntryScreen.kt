@@ -41,6 +41,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.openecard.demo.AppBar
 import org.openecard.demo.AppBarState
+import org.openecard.demo.PinOperationResult
 import org.openecard.demo.PinStatus
 import org.openecard.demo.viewmodel.PukEntryViewModel
 
@@ -49,7 +50,7 @@ import org.openecard.demo.viewmodel.PukEntryViewModel
 fun PukEntryScreen(
 	pukEntryViewModel: PukEntryViewModel,
 	navigateToNfc: () -> Unit,
-	navigateToResult: (PinStatus) -> Unit,
+	navigateToResult: (PinOperationResult) -> Unit,
 	navigateBack: () -> Unit,
 	navigateToDefaults: () -> Unit,
 	navigateToConfig: () -> Unit,

@@ -109,16 +109,20 @@ class EacViewModel(
 				)
 		}
 
-		if (uiStep != null) {
-			val chat = uiStep!!.guiData.requiredChat
-			serverRequestedChat = chat
+		when (val step = uiStep) {
+			null -> {
+				return false
+			}
 
-			// convert
-			_chatItems.value = chat.toUiItem()
+			else -> {
+				val chat = step.guiData.requiredChat
+				serverRequestedChat = chat
 
-			return true
-		} else {
-			return false
+				// convert
+				_chatItems.value = chat.toUiItem()
+
+				return true
+			}
 		}
 	}
 

@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.openecard.cif.bundled.NpaDefinitions
+import org.openecard.demo.PinOperationResult
 import org.openecard.demo.PinStatus
 import org.openecard.demo.data.Session
 import org.openecard.sal.iface.dids.PinDid
@@ -64,8 +65,8 @@ class PinChangeViewModel(
 		nfcDetected: () -> Unit,
 		oldPin: String,
 		newPin: String,
-	): PinStatus {
-		return try {
+	): PinOperationResult =
+		try {
 			if (pinOps == null) {
 				pinOps = terminalFactory?.let { Session.createPinSession(it) }
 			}
@@ -77,41 +78,43 @@ class PinChangeViewModel(
 				when (val status = ops.getPinStatus(this.pacePin)) {
 					PinStatus.OK -> {
 						val success = ops.changePin(this, oldPin, newPin)
-
 						if (success) {
-							PinStatus.OK
+							PinOperationResult(PinStatus.OK)
 						} else {
-							PinStatus.WrongPIN
+							PinOperationResult(PinStatus.WrongPIN)
 						}
 					}
 
 					PinStatus.Retry -> {
 						val success = ops.changePin(this, oldPin, newPin)
-
 						if (success) {
-							PinStatus.OK
+							PinOperationResult(PinStatus.OK)
 						} else {
-							PinStatus.Suspended
+							PinOperationResult(PinStatus.Suspended)
 						}
 					}
 
 					else -> {
-						status
+						PinOperationResult(status)
 					}
 				}
 			} else {
-				logger.error { "Could not connect card." }
-				return PinStatus.Unknown
+				logger.error { "Could not create session" }
+				PinOperationResult(
+					status = null,
+					errorMessage = "Could not create session",
+				)
 			}
 		} catch (e: Exception) {
 			logger.error(e) { "PIN operation failed." }
-			e.message
-			PinStatus.Unknown
+			PinOperationResult(
+				status = null,
+				errorMessage = "PIN operation failed: ${e.message}",
+			)
 		} finally {
 			pinOps?.shutdownStack()
 			pinOps = null
 		}
-	}
 
 	fun setDefaults(
 		oldPin: String,

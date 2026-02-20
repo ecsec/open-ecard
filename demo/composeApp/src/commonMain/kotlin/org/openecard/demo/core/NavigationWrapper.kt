@@ -21,6 +21,7 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.launch
+import org.openecard.demo.PinOperationResult
 import org.openecard.demo.PinStatus
 import org.openecard.demo.ui.CanEntryScreen
 import org.openecard.demo.ui.ConfigScreen
@@ -175,7 +176,12 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 					navController.navigate(NFC)
 				},
 				navigateToResult = { result ->
-					navController.navigate(PinResult(result))
+					navController.navigate(
+						PinResult(
+							result.status.toString(),
+							result.errorMessage,
+						),
+					)
 				},
 				navigateBack = {
 					navController.navigate(Start)
@@ -207,7 +213,7 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 					navController.navigate(NFC)
 				},
 				navigateToResult = { result ->
-					navController.navigate(PinResult(result))
+					navController.navigate(PinResult(result.status.toString(), result.errorMessage))
 				},
 				navigateBack = {
 					navController.navigate(Start)
@@ -239,7 +245,7 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 					navController.navigate(NFC)
 				},
 				navigateToResult = { result ->
-					navController.navigate(PinResult(result))
+					navController.navigate(PinResult(result.status.toString(), result.errorMessage))
 				},
 				navigateBack = {
 					navController.navigate(Start)
@@ -263,10 +269,14 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 		}
 
 		composable<PinResult> { backStackEntry ->
-
 			val pinResult = backStackEntry.toRoute<PinResult>()
+			val pinOperationResult =
+				PinOperationResult(
+					status = pinResult.status,
+					errorMessage = pinResult.errorMessage,
+				)
 			ResultScreen(
-				pinResult.pinStatus,
+				pinResult = pinOperationResult,
 				navigateToStart = {
 					nfcDetected.value = false
 
@@ -277,24 +287,28 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				navigateToOperation = {
 					nfcDetected.value = false
 
-					when (pinResult.pinStatus) {
-						PinStatus.WrongPIN -> {
-							pinChangeViewModel.clear()
+					if (pinResult.status != null) {
+						when (pinResult.status) {
+							PinStatus.WrongPIN -> {
+								pinChangeViewModel.clear()
 
-							navController.navigate(PIN)
-						}
+								navController.navigate(PIN)
+							}
 
-						PinStatus.Suspended, PinStatus.WrongCAN -> {
-							navController.navigate(CAN)
-						}
+							PinStatus.Suspended, PinStatus.WrongCAN -> {
+								navController.navigate(CAN)
+							}
 
-						PinStatus.Blocked, PinStatus.WrongPUK -> {
-							navController.navigate(PUK)
-						}
+							PinStatus.Blocked, PinStatus.WrongPUK -> {
+								navController.navigate(PUK)
+							}
 
-						else -> {
-							navController.navigate(Start)
+							else -> {
+								navController.navigate(Start)
+							}
 						}
+					} else {
+						navController.navigate(Start)
 					}
 				},
 				eacResult = null,

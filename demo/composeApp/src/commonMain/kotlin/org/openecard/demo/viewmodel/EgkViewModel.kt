@@ -9,6 +9,7 @@ import org.openecard.demo.data.Session
 import org.openecard.demo.domain.EgkOperations
 import org.openecard.sal.sc.SmartcardDeviceConnection
 import org.openecard.sc.iface.TerminalFactory
+import org.openecard.sc.iface.feature.PaceError
 
 private val logger = KotlinLogging.logger { }
 
@@ -50,19 +51,14 @@ class EgkViewModel(
 			val ops = egkOps
 
 			if (ops != null) {
-				val paceOk = ops.doPace(this, nfcDetected, can)
-
-				if (!paceOk) {
-					return "Wrong CAN"
-				}
-
-				ops.readPersonalData(this)
+				val result = ops.doPace(this, nfcDetected, can)
+				result ?: ops.readPersonalData(this)
 			} else {
-				logger.error { "Could not connect card." }
+				logger.error { "Could not create session" }
 				return null
 			}
 		} catch (e: Exception) {
-			logger.error(e) { "PACE operation failed." }
+			logger.error(e) { "PACE operation failed" }
 			e.message
 		} finally {
 			egkOps?.session?.shutdownStack()

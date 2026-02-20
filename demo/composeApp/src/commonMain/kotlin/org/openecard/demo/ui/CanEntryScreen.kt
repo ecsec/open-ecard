@@ -42,6 +42,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.openecard.demo.AppBar
 import org.openecard.demo.AppBarState
+import org.openecard.demo.PinOperationResult
 import org.openecard.demo.PinStatus
 import org.openecard.demo.viewmodel.CanEntryViewModel
 
@@ -50,7 +51,7 @@ import org.openecard.demo.viewmodel.CanEntryViewModel
 fun CanEntryScreen(
 	canEntryViewModel: CanEntryViewModel,
 	navigateToNfc: () -> Unit,
-	navigateToResult: (PinStatus) -> Unit,
+	navigateToResult: (PinOperationResult) -> Unit,
 	navigateBack: () -> Unit,
 	navigateToDefaults: () -> Unit,
 	navigateToConfig: () -> Unit,

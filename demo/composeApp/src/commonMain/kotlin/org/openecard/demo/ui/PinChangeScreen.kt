@@ -42,6 +42,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.openecard.demo.AppBar
 import org.openecard.demo.AppBarState
+import org.openecard.demo.PinOperationResult
 import org.openecard.demo.PinStatus
 import org.openecard.demo.viewmodel.PinChangeViewModel
 
@@ -49,7 +50,7 @@ import org.openecard.demo.viewmodel.PinChangeViewModel
 @Composable
 fun PinChangeScreen(
 	pinChangeViewModel: PinChangeViewModel,
-	navigateToResult: (PinStatus) -> Unit,
+	navigateToResult: (PinOperationResult) -> Unit,
 	navigateToNfc: () -> Unit,
 	navigateBack: () -> Unit,
 	navigateToDefaults: () -> Unit,

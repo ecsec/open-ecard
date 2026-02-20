@@ -35,12 +35,11 @@ object Config
 
 @Serializable
 data class PinResult(
-	val pinStatusString: String,
+	val statusString: String? = null,
+	val errorMessage: String? = null,
 ) {
-	constructor(pinStatus: PinStatus) : this(pinStatus.name)
-
-	val pinStatus: PinStatus
-		get() = PinStatus.valueOf(pinStatusString)
+	val status: PinStatus?
+		get() = statusString?.let { PinStatus.valueOf(it) }
 }
 
 @Serializable

@@ -10,3 +10,8 @@ enum class PinStatus {
 	WrongCAN,
 	WrongPUK,
 }
+
+data class PinOperationResult(
+	val status: PinStatus?,
+	val errorMessage: String? = null,
+)

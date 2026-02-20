@@ -20,18 +20,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.openecard.demo.AppBar
 import org.openecard.demo.AppBarState
+import org.openecard.demo.PinOperationResult
 import org.openecard.demo.PinStatus
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
 fun ResultScreen(
-	pinStatus: PinStatus?,
+	pinResult: PinOperationResult?,
 	eacResult: String?,
 	egkResult: String?,
 	navigateToStart: () -> Unit,
 	navigateToOperation: (PinStatus) -> Unit,
 ) {
 	val uriHandler = LocalUriHandler.current
+
+	val pinStatus = pinResult?.status
+	val pinError = pinResult?.errorMessage
 
 	Scaffold(
 		topBar = {
@@ -50,69 +54,80 @@ fun ResultScreen(
 			horizontalAlignment = Alignment.CenterHorizontally,
 			verticalArrangement = Arrangement.Center,
 		) {
-			if (pinStatus != null) {
-				Text(
-					text = "Result: $pinStatus",
-					fontSize = 24.sp,
-					style = MaterialTheme.typography.headlineMedium,
-				)
-				when (pinStatus) {
-					PinStatus.OK, PinStatus.Unknown -> {
-						val infoText = infoText(pinStatus)
+			if (pinResult != null) {
+				if (pinStatus != null) {
+					Text(
+						text = "Result: ${label(pinStatus)}",
+						fontSize = 24.sp,
+						style = MaterialTheme.typography.headlineMedium,
+					)
+					when (pinResult.status) {
+						PinStatus.OK, PinStatus.Unknown -> {
+							val infoText = infoText(pinStatus)
 
-						Text(infoText)
+							Text(infoText)
 
-						Spacer(Modifier.height(24.dp))
+							Spacer(Modifier.height(24.dp))
 
-						BackToStartButton {
-							navigateToStart()
-						}
-					}
-
-					PinStatus.WrongPIN, PinStatus.WrongCAN, PinStatus.WrongPUK -> {
-						val infoText = infoText(pinStatus)
-
-						Text(infoText)
-
-						Spacer(Modifier.height(24.dp))
-
-						Button(
-							onClick = {
-								navigateToOperation(pinStatus)
-							},
-						) {
-							Text("Try again")
-						}
-					}
-
-					PinStatus.Suspended, PinStatus.Blocked -> {
-						val infoText = infoText(pinStatus)
-
-						Text(infoText)
-
-						Spacer(Modifier.height(24.dp))
-
-						Row(
-							horizontalArrangement = Arrangement.Center,
-							verticalAlignment = Alignment.CenterVertically,
-						) {
 							BackToStartButton {
 								navigateToStart()
 							}
-							Spacer(Modifier.width(8.dp))
+						}
+
+						PinStatus.WrongPIN, PinStatus.WrongCAN, PinStatus.WrongPUK -> {
+							val infoText = infoText(pinStatus)
+
+							Text(infoText)
+
+							Spacer(Modifier.height(24.dp))
 
 							Button(
 								onClick = {
 									navigateToOperation(pinStatus)
 								},
 							) {
-								Text("Next")
+								Text("Try again")
 							}
 						}
-					}
 
-					else -> {
+						PinStatus.Suspended, PinStatus.Blocked -> {
+							val infoText = infoText(pinStatus)
+
+							Text(infoText)
+
+							Spacer(Modifier.height(24.dp))
+
+							Row(
+								horizontalArrangement = Arrangement.Center,
+								verticalAlignment = Alignment.CenterVertically,
+							) {
+								BackToStartButton {
+									navigateToStart()
+								}
+								Spacer(Modifier.width(8.dp))
+
+								Button(
+									onClick = {
+										navigateToOperation(pinStatus)
+									},
+								) {
+									Text("Next")
+								}
+							}
+						}
+
+						else -> {}
 					}
+				} else {
+					Text(
+						text = "$pinError",
+						fontSize = 24.sp,
+						style = MaterialTheme.typography.headlineMedium,
+					)
+
+					Spacer(Modifier.height(24.dp))
+
+					BackToStartButton { navigateToStart() }
 				}
 			} else if (eacResult != null) {
 				Text(
@@ -185,14 +200,14 @@ fun BackToStartButton(navigateToStart: () -> Unit) {
 	}
 }
 
-fun infoText(pinStatus: PinStatus): String =
+fun label(pinStatus: PinStatus): String =
 	when (pinStatus) {
 		PinStatus.OK -> {
 			"Success"
 		}
 
 		PinStatus.WrongPIN -> {
-			"PIN was wrong. Please try again."
+			"Wrong PIN"
 		}
 
 		PinStatus.Retry -> {
@@ -200,22 +215,57 @@ fun infoText(pinStatus: PinStatus): String =
 		}
 
 		PinStatus.Suspended -> {
-			"PIN is suspended. Please click next to resolve this."
+			"PIN is suspended"
 		}
 
 		PinStatus.WrongCAN -> {
-			"CAN was wrong. Please try again."
+			"CAN was wrong"
 		}
 
 		PinStatus.Blocked -> {
-			"PIN is blocked. Please click next to resolve this."
+			"PIN is blocked"
 		}
 
 		PinStatus.WrongPUK -> {
-			"PUK was wrong."
+			"PUK was wrong"
 		}
 
 		PinStatus.Unknown -> {
-			"Something went wrong."
+			"PIN state unknown"
+		}
+	}
+
+fun infoText(pinStatus: PinStatus): String =
+	when (pinStatus) {
+		PinStatus.OK -> {
+			"Pin operation was successful"
+		}
+
+		PinStatus.WrongPIN -> {
+			"Please try again."
+		}
+
+		PinStatus.Retry -> {
+			""
+		}
+
+		PinStatus.Suspended -> {
+			"Please click next to resolve this."
+		}
+
+		PinStatus.WrongCAN -> {
+			"Please try again."
+		}
+
+		PinStatus.Blocked -> {
+			"Please click next to resolve this."
+		}
+
+		PinStatus.WrongPUK -> {
+			"Please try again."
+		}
+
+		PinStatus.Unknown -> {
+			"Something went wrong. Please try again."
 		}
 	}

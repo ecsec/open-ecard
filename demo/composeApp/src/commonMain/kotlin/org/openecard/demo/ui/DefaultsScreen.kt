@@ -54,7 +54,7 @@ fun DefaultsScreen(
 		topBar = {
 			AppBar(
 				AppBarState(
-					title = "Defaults",
+					title = "Set your default values",
 					canNavigateUp = true,
 					navigateUp = navigateUp,
 				),
@@ -69,9 +69,7 @@ fun DefaultsScreen(
 			horizontalAlignment = Alignment.CenterHorizontally,
 			verticalArrangement = Arrangement.Center,
 		) {
-			Text("Set your default values", style = MaterialTheme.typography.headlineSmall)
-
-			Spacer(Modifier.height(32.dp))
+			Spacer(Modifier.height(8.dp))
 
 			Text(text = "nPA", style = MaterialTheme.typography.headlineSmall, fontSize = 18.sp)
 
@@ -99,7 +97,7 @@ fun DefaultsScreen(
 						},
 			)
 
-			Spacer(Modifier.height(16.dp))
+			Spacer(Modifier.height(8.dp))
 
 			OutlinedTextField(
 				value = state.npaNewPin,
@@ -125,7 +123,7 @@ fun DefaultsScreen(
 						},
 			)
 
-			Spacer(Modifier.height(16.dp))
+			Spacer(Modifier.height(8.dp))
 
 			OutlinedTextField(
 				value = state.npaCan,
@@ -151,7 +149,7 @@ fun DefaultsScreen(
 						},
 			)
 
-			Spacer(Modifier.height(16.dp))
+			Spacer(Modifier.height(8.dp))
 
 			OutlinedTextField(
 				value = state.npaPuk,
@@ -177,7 +175,7 @@ fun DefaultsScreen(
 						},
 			)
 
-			Spacer(Modifier.height(24.dp))
+			Spacer(Modifier.height(8.dp))
 
 			Text("eGK", style = MaterialTheme.typography.headlineSmall, fontSize = 18.sp)
 
@@ -205,7 +203,7 @@ fun DefaultsScreen(
 						},
 			)
 
-			Spacer(Modifier.height(24.dp))
+			Spacer(Modifier.height(8.dp))
 
 			Button(
 				enabled = isSubmitEnabled,
@@ -233,6 +231,8 @@ fun DefaultsScreen(
 			) {
 				Text("Submit")
 			}
+
+			Spacer(Modifier.height(200.dp))
 
 			if (showDialog) {
 				AlertDialog(

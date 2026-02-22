@@ -12,26 +12,40 @@ data class ChatAttributeUi(
 )
 
 // convert server data to ui items
-fun AuthenticationTerminalChat.toUiItem(): List<ChatAttributeUi> {
+fun chatToUi(
+	requiredChat: AuthenticationTerminalChat,
+	optionalChat: AuthenticationTerminalChat,
+): List<ChatAttributeUi> {
 	val items = mutableListOf<ChatAttributeUi>()
 
-	readAccess.toMap().forEach { (dg, required) ->
-		items +=
-			ChatAttributeUi(
-				id = dg.name,
-				label = dg.toLabel(),
-				required = required,
-				selected = required,
-			)
+	ReadAccess.entries.forEach { key ->
+		val required = requiredChat.readAccess[key]
+		val optional = optionalChat.readAccess[key]
+
+		if (required || optional) {
+			items +=
+				ChatAttributeUi(
+					id = key.name,
+					label = key.toLabel(),
+					required = required,
+					selected = required,
+				)
+		}
 	}
-	specialFunctions.toMap().forEach { (sf, required) ->
-		items +=
-			ChatAttributeUi(
-				id = sf.name,
-				label = sf.toLabel(),
-				required = required,
-				selected = required,
-			)
+
+	SpecialFunction.entries.forEach { key ->
+		val required = requiredChat.specialFunctions[key]
+		val optional = optionalChat.specialFunctions[key]
+
+		if (required || optional) {
+			items +=
+				ChatAttributeUi(
+					id = key.name,
+					label = key.toLabel(),
+					required = required,
+					selected = required,
+				)
+		}
 	}
 
 	return items

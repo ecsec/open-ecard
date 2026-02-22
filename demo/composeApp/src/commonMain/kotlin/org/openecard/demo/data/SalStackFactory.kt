@@ -17,7 +17,7 @@ import org.openecard.sc.iface.Terminal
 import org.openecard.sc.iface.TerminalFactory
 import org.openecard.sc.pace.PaceFeatureSoftwareFactory
 
-class Session {
+class SalStackFactory {
 	companion object {
 		fun createPinSession(terminalFactory: TerminalFactory): PinOperations {
 			val cardType = NpaDefinitions.cardType
@@ -41,7 +41,7 @@ class Session {
 			return EgkOperations(session)
 		}
 
-		suspend fun initializeStack(
+		suspend fun initializeNfcStack(
 			session: SmartcardSalSession,
 			nfcDetected: () -> Unit,
 		): Terminal {

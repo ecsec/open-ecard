@@ -5,11 +5,10 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.openecard.demo.data.Session
+import org.openecard.demo.data.SalStackFactory
 import org.openecard.demo.domain.EgkOperations
 import org.openecard.sal.sc.SmartcardDeviceConnection
 import org.openecard.sc.iface.TerminalFactory
-import org.openecard.sc.iface.feature.PaceError
 
 private val logger = KotlinLogging.logger { }
 
@@ -46,7 +45,7 @@ class EgkViewModel(
 	): String? {
 		return try {
 			if (egkOps == null) {
-				egkOps = terminalFactory?.let { Session.createEgkSession(it) }
+				egkOps = terminalFactory?.let { SalStackFactory.createEgkSession(it) }
 			}
 			val ops = egkOps
 

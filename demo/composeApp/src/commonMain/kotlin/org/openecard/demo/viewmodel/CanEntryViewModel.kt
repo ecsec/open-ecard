@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.update
 import org.openecard.cif.bundled.NpaDefinitions
 import org.openecard.demo.PinOperationResult
 import org.openecard.demo.PinStatus
-import org.openecard.demo.data.Session
+import org.openecard.demo.data.SalStackFactory
 import org.openecard.sal.iface.dids.PaceDid
 import org.openecard.sal.sc.SmartcardApplication
 import org.openecard.sc.iface.TerminalFactory
@@ -53,7 +53,7 @@ class CanEntryViewModel(
 	): PinOperationResult =
 		try {
 			if (pinOps == null) {
-				pinOps = terminalFactory?.let { Session.createPinSession(it) }
+				pinOps = terminalFactory?.let { SalStackFactory.createPinSession(it) }
 			}
 
 			val ops = pinOps
@@ -80,7 +80,7 @@ class CanEntryViewModel(
 				PinOperationResult(null, "Could not create session")
 			}
 		} catch (e: Exception) {
-			logger.error(e) { "PIN operation failed." }
+			logger.error(e) { "PIN operation failed" }
 			PinOperationResult(
 				status = null,
 				errorMessage = "PIN operation failed: ${e.message}",

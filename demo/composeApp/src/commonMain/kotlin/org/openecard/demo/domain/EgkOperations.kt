@@ -9,7 +9,6 @@ import org.openecard.demo.viewmodel.EgkViewModel
 import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.dids.PaceDid
 import org.openecard.sal.sc.SmartcardSalSession
-import org.openecard.sc.iface.feature.PaceError
 
 private val logger = KotlinLogging.logger { }
 
@@ -21,8 +20,8 @@ class EgkOperations(
 		egkViewModel: EgkViewModel,
 		nfcDetected: () -> Unit,
 		can: String,
-	): String? {
-		val ops = egkViewModel.egkOps ?: return "Session not initialized"
+	) {
+		val ops = egkViewModel.egkOps ?: throw IllegalStateException("Session not initialized")
 
 		val terminal = SalStackFactory.initializeNfcStack(session, nfcDetected)
 
@@ -32,11 +31,11 @@ class EgkOperations(
 		val eSignApp =
 			connection.applications
 				.find { it.name == EgkCifDefinitions.Apps.ESign.name }
-				?: return "ESIGN app not found"
+				?: throw IllegalStateException("ESIGN app not found")
 
 		val certDs =
 			eSignApp.datasets.find { it.name == "EF.C.CH.AUT.E256" }
-				?: return "EF.C.CH.AUT.E256 data set not found"
+				?: throw IllegalStateException("EF.C.CH.AUT.E256 data set not found")
 
 		val missing =
 			certDs.missingReadAuthentications.removeUnsupported(
@@ -45,9 +44,9 @@ class EgkOperations(
 				),
 			)
 
-		return when (missing) {
+		when (missing) {
 			MissingAuthentications.Unsolveable -> {
-				"Missing authentication unsolvable"
+				throw IllegalStateException("Missing authentication unsolvable")
 			}
 
 			is MissingAuthentications.MissingDidAuthentications -> {
@@ -57,19 +56,10 @@ class EgkOperations(
 						.first()
 						.authDid
 				if (did is PaceDid) {
-					try {
-						did.establishChannel(can, null, null)
-						return null
-					} catch (e: PaceError) {
-						logger.error(e) { "Could not establish channel" }
-						return "Wrong CAN or invalid card state"
-					} catch (e: Exception) {
-						logger.error(e) { "Could not establish channel" }
-						return e.message
-					}
+					did.establishChannel(can, null, null)
 				} else {
 					logger.error { "PACE DID not found" }
-					return "PACE DID not found"
+					throw IllegalStateException("PACE DID not found")
 				}
 			}
 		}
@@ -77,19 +67,19 @@ class EgkOperations(
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	fun readPersonalData(egkViewModel: EgkViewModel): String? {
-		val connection = egkViewModel.connection ?: return "Could not establish connection"
+		val connection = egkViewModel.connection ?: throw IllegalStateException("Could not establish connection")
 
 		val hcaApp =
 			connection.applications
 				.find { it.name == EgkCifDefinitions.Apps.Hca.name }
-				?: return "HCA app not found"
+				?: throw IllegalStateException("HCA app not found")
 
 		hcaApp.connect()
 
 		val pdDataSet =
 			hcaApp.datasets
 				.find { it.name == EgkCifDefinitions.Apps.Hca.Datasets.efPd }
-				?: return "EF.PD data set not found"
+				?: throw IllegalStateException("EF.PD data set not found")
 
 		val pd = pdDataSet.read()
 		val person = pd.toPersonalData()?.versicherter?.person

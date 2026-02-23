@@ -28,7 +28,7 @@ fun chatToUi(
 					id = key.name,
 					label = key.toLabel(),
 					required = required,
-					selected = required,
+					selected = true,
 				)
 		}
 	}
@@ -43,7 +43,7 @@ fun chatToUi(
 					id = key.name,
 					label = key.toLabel(),
 					required = required,
-					selected = required,
+					selected = true,
 				)
 		}
 	}

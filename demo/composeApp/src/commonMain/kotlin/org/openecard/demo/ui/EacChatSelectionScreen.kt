@@ -44,8 +44,7 @@ fun EacChatSelectionScreen(
 	val items by eacViewModel.chatItems.collectAsState()
 	val mode by eacViewModel.uiMode.collectAsState()
 
-	val readAccessItems = items.filter { it.id.startsWith("DG") }
-	val specialFunctionItems = items.filter { !it.id.startsWith("DG") }
+	val (readAccessItems, specialFunctionItems) = items.partition { it.id.startsWith("DG") }
 
 	Scaffold(
 		topBar = {
@@ -97,12 +96,7 @@ fun EacChatSelectionScreen(
 				items(readAccessItems) { item ->
 					ChatSelectionItem(
 						item = item,
-						enabled =
-							if (!item.required) {
-								true
-							} else {
-								mode.requiredChatEnabled
-							},
+						enabled = !item.required || mode.requiredChatEnabled,
 						onToggle = { checked ->
 							eacViewModel.updateChatSelection(
 								items.map {
@@ -130,12 +124,7 @@ fun EacChatSelectionScreen(
 				items(specialFunctionItems) { item ->
 					ChatSelectionItem(
 						item = item,
-						enabled =
-							if (!item.required) {
-								true
-							} else {
-								mode.requiredChatEnabled
-							},
+						enabled = !item.required || mode.requiredChatEnabled,
 						onToggle = { checked ->
 							eacViewModel.updateChatSelection(
 								items.map {

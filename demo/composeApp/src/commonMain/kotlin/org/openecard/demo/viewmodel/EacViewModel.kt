@@ -1,6 +1,5 @@
 package org.openecard.demo.viewmodel
 
-import androidx.compose.runtime.invalidateGroupsWithKey
 import androidx.lifecycle.ViewModel
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow

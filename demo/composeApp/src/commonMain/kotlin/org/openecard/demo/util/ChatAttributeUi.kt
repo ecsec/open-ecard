@@ -26,7 +26,7 @@ fun chatToUi(
 			items +=
 				ChatAttributeUi(
 					id = key.name,
-					label = key.toLabel(),
+					label = key.label,
 					required = required,
 					selected = true,
 				)
@@ -41,7 +41,7 @@ fun chatToUi(
 			items +=
 				ChatAttributeUi(
 					id = key.name,
-					label = key.toLabel(),
+					label = key.label,
 					required = required,
 					selected = true,
 				)

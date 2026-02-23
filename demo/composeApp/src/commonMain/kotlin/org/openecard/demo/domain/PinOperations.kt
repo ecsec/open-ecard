@@ -2,6 +2,7 @@ package org.openecard.demo.domain
 
 import org.openecard.demo.PinStatus
 import org.openecard.demo.data.SalStackFactory
+import org.openecard.demo.data.SalStackFactory.Companion.initializeNfcStack
 import org.openecard.demo.viewmodel.CanEntryViewModel
 import org.openecard.demo.viewmodel.PinChangeViewModel
 import org.openecard.demo.viewmodel.PinMgmtViewModel
@@ -19,8 +20,7 @@ class PinOperations(
 		pinMgmtViewModel: PinMgmtViewModel,
 		nfcDetected: () -> Unit,
 	) {
-		val terminal = SalStackFactory.initializeNfcStack(session, nfcDetected)
-
+		val terminal = session.initializeNfcStack { nfcDetected() }
 		val connection = session.connect(terminal.name)
 		pinMgmtViewModel.setConnection(connection)
 	}

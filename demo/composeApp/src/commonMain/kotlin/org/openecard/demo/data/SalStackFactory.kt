@@ -41,19 +41,15 @@ class SalStackFactory {
 			return EgkOperations(session)
 		}
 
-		suspend fun initializeNfcStack(
-			session: SmartcardSalSession,
-			nfcDetected: () -> Unit,
-		): Terminal {
-			session.initializeStack()
+		suspend fun SmartcardSalSession.initializeNfcStack(nfcDetected: () -> Unit): Terminal {
+			initializeStack()
 			val terminal =
-				session.sal.terminals
+				sal.terminals
 					.list()
 					.firstOrNull() ?: throw IllegalStateException("No terminal found")
 
 			terminal.waitForCardPresent()
 			nfcDetected()
-
 			return terminal
 		}
 

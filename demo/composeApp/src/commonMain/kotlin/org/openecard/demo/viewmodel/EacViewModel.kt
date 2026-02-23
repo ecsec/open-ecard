@@ -12,8 +12,8 @@ import org.openecard.addons.tr03124.eac.UiStep
 import org.openecard.demo.data.SalStackFactory
 import org.openecard.demo.domain.EacOperations
 import org.openecard.demo.util.ChatAttributeUi
-import org.openecard.demo.util.buildChatFromSelection
 import org.openecard.demo.util.chatToUi
+import org.openecard.demo.util.setUserSelection
 import org.openecard.sc.iface.TerminalFactory
 import org.openecard.sc.iface.feature.PaceError
 import org.openecard.sc.pace.cvc.AuthenticationTerminalChat
@@ -46,8 +46,6 @@ class EacViewModel(
 
 	private val _chatItems = MutableStateFlow<List<ChatAttributeUi>>(emptyList())
 	val chatItems = _chatItems.asStateFlow()
-	private var serverRequiredChat: AuthenticationTerminalChat? = null
-	private var serverRequestedChat: AuthenticationTerminalChat? = null
 	var userSelectedChat: AuthenticationTerminalChat? = null
 	var eacOps: EacOperations? = null
 	var uiStep: UiStep? = null
@@ -76,15 +74,13 @@ class EacViewModel(
 	}
 
 	fun confirmChatSelection() {
-		val base = serverRequestedChat ?: return
-
 		val selectedIds =
 			_chatItems.value
 				.filter { it.selected }
 				.map { it.id }
 				.toList()
 
-		userSelectedChat = buildChatFromSelection(base, selectedIds)
+		userSelectedChat?.setUserSelection(selectedIds)
 	}
 
 	suspend fun setChatItems(tokenUrl: String): Boolean {
@@ -115,16 +111,16 @@ class EacViewModel(
 			}
 
 			else -> {
-				val requiredChat = step.guiData.requiredChat
-				val optionalChat = step.guiData.optionalChat
-
-				serverRequiredChat = requiredChat
-				serverRequestedChat = optionalChat
+				userSelectedChat =
+					step.guiData.optionalChat.copy().apply {
+						readAccess.clear()
+						specialFunctions.clear()
+					}
 
 				_chatItems.value =
 					chatToUi(
-						requiredChat,
-						optionalChat,
+						step.guiData.requiredChat,
+						step.guiData.optionalChat,
 					)
 
 				return true

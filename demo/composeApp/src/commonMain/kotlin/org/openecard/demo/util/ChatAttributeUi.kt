@@ -52,24 +52,13 @@ fun chatToUi(
 }
 
 // convert user selection to chat
-fun buildChatFromSelection(
-	base: AuthenticationTerminalChat,
-	selectedIds: List<String>,
-): AuthenticationTerminalChat {
-	val chat = base.copy()
-
-	// set base attributes to false
-	chat.readAccess.clear()
-	chat.specialFunctions.clear()
-
+fun AuthenticationTerminalChat.setUserSelection(selectedIds: List<String>) {
 	selectedIds.forEach { id ->
 		ReadAccess.entries.firstOrNull { it.name == id }?.let {
-			chat.readAccess[it] = true
+			readAccess[it] = true
 		}
 		SpecialFunction.entries.firstOrNull { it.name == id }?.let {
-			chat.specialFunctions[it] = true
+			specialFunctions[it] = true
 		}
 	}
-
-	return chat
 }

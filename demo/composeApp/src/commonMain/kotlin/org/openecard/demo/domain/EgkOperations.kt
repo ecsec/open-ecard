@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.cif.bundled.EgkCifDefinitions
 import org.openecard.cif.definition.acl.DidStateReference
 import org.openecard.demo.data.SalStackFactory
+import org.openecard.demo.data.SalStackFactory.Companion.initializeNfcStack
 import org.openecard.demo.util.toPersonalData
 import org.openecard.demo.viewmodel.EgkViewModel
 import org.openecard.sal.iface.MissingAuthentications
@@ -23,7 +24,7 @@ class EgkOperations(
 	) {
 		val ops = egkViewModel.egkOps ?: throw IllegalStateException("Session not initialized")
 
-		val terminal = SalStackFactory.initializeNfcStack(session, nfcDetected)
+		val terminal = session.initializeNfcStack { nfcDetected() }
 
 		val connection = ops.session.connect(terminal.name)
 		egkViewModel.connection = connection

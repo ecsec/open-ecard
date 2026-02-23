@@ -80,13 +80,8 @@ fun NavigationWrapper(nfcTerminalFactory: TerminalFactory?) {
 				navigateToChatSelection = { url ->
 					scope.launch {
 						try {
-							val ok = eacViewModel.setChatItems(url)
-							if (ok) {
-								navController.navigate(EacChat)
-							} else {
-								dialogMessage = "Could not load chat items"
-								showDialog = true
-							}
+							eacViewModel.setChatItems(url)
+							navController.navigate(EacChat)
 						} catch (e: Exception) {
 							dialogMessage = "${e.message}"
 							showDialog = true

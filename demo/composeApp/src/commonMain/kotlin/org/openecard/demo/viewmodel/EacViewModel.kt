@@ -1,5 +1,6 @@
 package org.openecard.demo.viewmodel
 
+import androidx.compose.runtime.invalidateGroupsWithKey
 import androidx.lifecycle.ViewModel
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -83,73 +84,65 @@ class EacViewModel(
 		userSelectedChat?.setUserSelection(selectedIds)
 	}
 
-	suspend fun setChatItems(tokenUrl: String): Boolean {
-		if (eacOps == null) {
-			eacOps = terminalFactory?.let { SalStackFactory.createEacSession(it) } ?: return false
-		}
-
-		val ops = eacOps
+	suspend fun setChatItems(tokenUrl: String) {
+		// if set shutdown
+		eacOps?.session?.shutdownStack()
+		
+		val ops =
+			terminalFactory?.let { SalStackFactory.createEacSession(it) }
+				?: throw Exception("Error creating eacOperations")
+		
+		eacOps = ops
 
 		val clientInfo =
 			ClientInformation(
 				UserAgent("Open-eCard Test", UserAgent.Version(1, 0, 0)),
 			)
 
-		if (ops != null) {
-			uiStep =
-				EidActivation.startEacProcess(
-					clientInfo,
-					tokenUrl,
-					ops.session,
-					null,
-				)
-		}
+		val step =
+			EidActivation.startEacProcess(
+				clientInfo,
+				tokenUrl,
+				ops.session,
+				null,
+			)
+		uiStep = step
 
-		when (val step = uiStep) {
-			null -> {
-				return false
+		userSelectedChat =
+			step.guiData.optionalChat.copy().apply {
+				readAccess.clear()
+				specialFunctions.clear()
 			}
 
-			else -> {
-				userSelectedChat =
-					step.guiData.optionalChat.copy().apply {
-						readAccess.clear()
-						specialFunctions.clear()
-					}
-
-				_chatItems.value =
-					chatToUi(
-						step.guiData.requiredChat,
-						step.guiData.optionalChat,
-					)
-
-				return true
-			}
-		}
+		_chatItems.value =
+			chatToUi(
+				step.guiData.requiredChat,
+				step.guiData.optionalChat,
+			)
 	}
 
 	suspend fun startEacProcess(
 		nfcDetected: () -> Unit,
 		pin: String,
-	): String? {
-		val ops = eacOps ?: return null
-
-		return try {
-			ops.doEac(
-				this,
-				pin,
-				nfcDetected,
-			)
-		} catch (p: PaceError) {
-			logger.error(p) { "PACE error occurred." }
-			return "Wrong PIN or invalid card state."
-		} catch (e: Exception) {
-			logger.error(e) { "EAC process failed." }
-			e.message
-		} finally {
-			ops.session.shutdownStack()
+	): String? =
+		eacOps?.let {
+			try {
+				it.doEac(
+					userSelectedChat ?: throw Exception("A this time user must have selected Chat values."),
+					uiStep ?: throw Exception("We cannot be here without having a uiStep set."),
+					pin,
+					nfcDetected,
+				)
+			} catch (p: PaceError) {
+				logger.error(p) { "PACE error occurred." }
+				return "Wrong PIN or invalid card state."
+			} catch (e: Exception) {
+				logger.error(e) { "EAC process failed." }
+				e.message
+			} finally {
+				it.session.shutdownStack()
+			}
 		}
-	}
 
 	fun setDefaults(pin: String) {
 		_eacUiState.value =

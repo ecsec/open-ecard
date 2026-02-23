@@ -113,20 +113,7 @@ class Tr03124TrustManager(
 				is RSAPublicKey -> {
 					throwIf(pk.modulus.bitLength() <= 3000) { InvalidTlsParameter("RSA key of the server certificate is too small") }
 				}
-
-				is ECPublicKey -> {
-					throwIf(
-						pk.w.affineX.bitLength() <= 250,
-					) { InvalidTlsParameter("ECDSA key of the server certificate is too small") }
-				}
-
-				is EdECPublicKey -> {
-					throwIf(pk.point.y.bitLength() <= 250) { InvalidTlsParameter("EdDSA key of the server certificate is too small") }
-				}
-
-				else -> {
-					throw InvalidTlsParameter("Unsupported key type used in certificate")
-				}
+				// EC key sizes are checked with the named curves
 			}
 		}
 	}

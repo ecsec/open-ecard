@@ -42,7 +42,6 @@ import kotlinx.coroutines.withContext
 import org.openecard.demo.AppBar
 import org.openecard.demo.AppBarState
 import org.openecard.demo.PinOperationResult
-import org.openecard.demo.PinStatus
 import org.openecard.demo.viewmodel.PukEntryViewModel
 
 @Suppress("ktlint:standard:function-naming")

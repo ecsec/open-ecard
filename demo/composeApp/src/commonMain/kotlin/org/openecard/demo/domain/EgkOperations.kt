@@ -3,7 +3,6 @@ package org.openecard.demo.domain
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.cif.bundled.EgkCifDefinitions
 import org.openecard.cif.definition.acl.DidStateReference
-import org.openecard.demo.data.SalStackFactory
 import org.openecard.demo.data.SalStackFactory.Companion.initializeNfcStack
 import org.openecard.demo.util.toPersonalData
 import org.openecard.demo.viewmodel.EgkViewModel

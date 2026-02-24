@@ -1,7 +1,6 @@
 package org.openecard.demo.domain
 
 import org.openecard.demo.PinStatus
-import org.openecard.demo.data.SalStackFactory
 import org.openecard.demo.data.SalStackFactory.Companion.initializeNfcStack
 import org.openecard.demo.viewmodel.CanEntryViewModel
 import org.openecard.demo.viewmodel.PinChangeViewModel

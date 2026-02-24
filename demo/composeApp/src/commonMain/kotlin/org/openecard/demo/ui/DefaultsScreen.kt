@@ -46,10 +46,6 @@ fun DefaultsScreen(
 
 	val state by defaultsViewModel.state.collectAsState()
 
-	val isSubmitEnabled =
-		state.npaPin.isNotBlank() || state.npaNewPin.isNotBlank() ||
-			state.npaCan.isNotBlank() || state.npaPuk.isNotBlank() || state.egkCan.isNotBlank()
-
 	Scaffold(
 		topBar = {
 			AppBar(
@@ -206,7 +202,6 @@ fun DefaultsScreen(
 			Spacer(Modifier.height(8.dp))
 
 			Button(
-				enabled = isSubmitEnabled,
 				onClick = {
 					defaultsViewModel.update {
 						it.copy(

@@ -54,6 +54,7 @@ kotlin {
 
 			implementation(appLibs.fleeksoft.charset)
 			implementation(appLibs.okio)
+			implementation(appLibs.multiplatform.settings)
 
 			implementation("org.openecard.addons:tr03124")
 		}

@@ -156,6 +156,7 @@ fun ChatSelectionItem(
 			CardDefaults.cardColors(
 				containerColor = MaterialTheme.colorScheme.surfaceVariant,
 			),
+		onClick = { if (enabled) onToggle(!item.selected) },
 	) {
 		Row(
 			modifier =

@@ -3,12 +3,21 @@ plugins {
 	id("com.android.kotlin.multiplatform.library")
 }
 
+fun catalogVersion(ref: String) =
+	Integer.parseInt(
+		the<VersionCatalogsExtension>()
+			.named("libs")
+			.findVersion(ref)
+			.get()
+			.requiredVersion,
+	)
+
 kotlin {
 	androidLibrary {
-		namespace = "org.openecard"
+		namespace = "${project.group}.${project.name}".replace("-", "_")
 
-		minSdk = 21
-		compileSdk = 36
+		minSdk = catalogVersion("androidMinSdk")
+		compileSdk = catalogVersion("androidCompileSdk")
 
 		// kover has issue with variants if active
 		// https://github.com/Kotlin/kotlinx-kover/issues/772

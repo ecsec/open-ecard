@@ -26,13 +26,14 @@ kotlin {
 			implementation(libs.ktor.client.core)
 			implementation(libs.ktor.client.nego)
 			implementation(libs.ktor.serde.xml)
-			api(libs.ktor.client.logging)
+			implementation(libs.ktor.client.logging)
 		}
 
 		jvmMain.dependencies {
 			implementation(libs.ktor.client.okhttp)
 			implementation(libs.bc.tls)
 			implementation(libs.bc.prov)
+			implementation(libs.bc.pkix)
 		}
 
 		commonTest.dependencies {
@@ -58,11 +59,10 @@ kotlin {
 		iosArm64(),
 		iosSimulatorArm64(),
 	).forEach { target ->
-		val iosPlatformVersion: String by project
 		target.swiftPackageConfig(cinteropName = "SwiftNio") {
 			val path = "${project.layout.buildDirectory.dir("SPM").get().asFile.path}"
 
-			minIos = iosPlatformVersion
+			minIos = libs.versions.iosPlatformVersion.get()
 			spmWorkingPath = path
 			dependency {
 				remotePackageVersion(

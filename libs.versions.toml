@@ -9,6 +9,22 @@ kx-serde-xml = "0.91.3"
 kt-logging = "7.0.+"
 kx-datetime = "0.7.1"
 
+# richclient
+# necessary as long as kotlin does not support Java 25 in its compilation
+richclientJavaTargetVersion="25"
+
+# java
+javaTarget="17"
+
+# iOS
+iosPlatformVersion="15.0"
+
+# android
+androidCompileSdk="36"
+androidMinSdk="23"
+
+material3 = "1.4.0"     # Compose Material3 version
+
 # Plugins
 gradle-versions = "0.53.0"
 gradle-jfx = "0.1.0"
@@ -16,6 +32,7 @@ android-sdkloader = "3.1.0"
 moko = "0.26.0"
 swiftKlib = "0.6.4"
 spmForKmp = "1.4.6"
+compose = "1.10.1"
 
 # common
 ktor = "3.4.+"
@@ -27,6 +44,10 @@ kotlin-bignum = "0.3.10"
 # Android
 agp = "9.0.+"
 androidx-activityCompose = "1.12.+"
+
+androidx-lifecycle-viewmodelCompose  = "2.10.0"
+androidx-lifecycle-runtimeCompose  = "2.10.0"
+
 androidx-appcompat = "1.6.+"
 androidx-constraintlayout = "2.1.+"
 androidx-core-ktx = "1.16.+"
@@ -65,6 +86,13 @@ kover = "0.9.7"
 
 
 [libraries]
+compose-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "compose" }
+compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
+compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
+compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
+compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
+compose-components-resources = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "material3" }
+
 apache-batik-transcoder = {module = "org.apache.xmlgraphics:batik-transcoder", version.ref="apache-batik"}
 ktlint-githubreporter = { module = "io.github.tobi2k:ktlint-gitlab-reporter", version.ref = "ktlint-githubreporter" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -83,15 +111,11 @@ kotlin-serialization-xml = { module = "io.github.pdvrieze.xmlutil:serialization"
 
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kx-datetime" }
 
+
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-ktx" }
 androidx-test-core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "androidx-test-ktx" }
 androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-junit" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidx-test-runner" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidx-espresso-core" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
-androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidx-material" }
-androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "androidx-constraintlayout" }
-androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 
 moko-resources = { module = "dev.icerock.moko:resources", version.ref = "moko" }
 moko-resourcesTest = { module = "dev.icerock.moko:resources-test", version.ref = "moko" }
@@ -185,6 +209,8 @@ spmForKmp = {id = "io.github.frankois944.spmForKmp", version.ref = "spmForKmp"}
 androidKmpLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 androidSdkLoader = { id = "com.quittle.setup-android-sdk", version.ref = "android-sdkloader" }
 swiftKlib = {id = "io.github.ttypic.swiftklib", version.ref = "swiftKlib"}
+jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-plugin" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

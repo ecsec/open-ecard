@@ -1,0 +1,78 @@
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+plugins {
+	alias(appLibs.plugins.androidKmpLibrary)
+	alias(appLibs.plugins.kotlinMultiplatform)
+	alias(appLibs.plugins.composeMultiplatform)
+	alias(appLibs.plugins.composeCompiler)
+	alias(appLibs.plugins.composeHotReload)
+	alias(appLibs.plugins.kotlinSerialization)
+}
+
+kotlin {
+	android {
+		compileSdk { version = release(Integer.parseInt(appLibs.versions.androidCompileSdk.get())) }
+	}
+
+	androidLibrary {
+		namespace = "org.openecard.demo.composedemolibrary"
+		compilerOptions {
+			jvmTarget.set(JvmTarget.fromTarget(appLibs.versions.javaTarget.get()))
+		}
+		androidResources {
+			enable = true
+		}
+	}
+
+	listOf(
+		iosArm64(),
+	).forEach { iosTarget ->
+		iosTarget.binaries.framework {
+			baseName = "ComposeApp"
+			isStatic = true
+		}
+	}
+
+	sourceSets {
+		commonMain.dependencies {
+			implementation(appLibs.compose.material3)
+			implementation(appLibs.compose.components.resources)
+			implementation(appLibs.compose.materialIconsExtended)
+			implementation(appLibs.androidx.lifecycle.viewmodelCompose)
+			implementation(appLibs.androidx.lifecycle.runtimeCompose)
+			implementation(appLibs.composeNavigation)
+			implementation(appLibs.ktor.client.nego)
+			implementation(appLibs.ktor.client.logging)
+			implementation(appLibs.ktor.serde.json)
+			implementation(appLibs.ktor.serde.xml)
+			implementation(appLibs.ktor.client.core)
+			implementation(appLibs.kotlin.logging)
+			implementation(appLibs.compose.navigationevent)
+			implementation(appLibs.compose.material3.adaptive.layout)
+			implementation(appLibs.compose.material3.adaptive.navigation)
+
+			implementation(appLibs.fleeksoft.charset)
+			implementation(appLibs.okio)
+			implementation(appLibs.multiplatform.settings)
+
+			implementation("org.openecard.addons:tr03124")
+		}
+		commonTest.dependencies {
+			implementation(appLibs.kotlin.test)
+		}
+		androidMain.dependencies {
+			implementation(compose.preview)
+			implementation(appLibs.androidx.activity.compose)
+			implementation(appLibs.ktor.client.android)
+			implementation(appLibs.sfl4j.android)
+			api("org.openecard.smartcard:pcsc-android")
+		}
+
+		iosMain.dependencies {
+			implementation("org.openecard.utils:openssl-interop")
+			implementation("org.openecard.smartcard:pcsc-ios")
+			implementation(appLibs.ktor.client.darwin)
+		}
+	}
+}

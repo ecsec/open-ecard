@@ -4,7 +4,14 @@ plugins {
 	id("openecard.kmp-conventions")
 }
 
-val javaTarget: String by project
+fun catalogVersion(ref: String) =
+	the<VersionCatalogsExtension>()
+		.named("libs")
+		.findVersion(ref)
+		.get()
+		.requiredVersion
+
+val javaTarget = catalogVersion("javaTarget")
 
 kotlin {
 	jvm {

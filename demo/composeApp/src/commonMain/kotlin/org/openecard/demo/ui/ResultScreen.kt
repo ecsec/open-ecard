@@ -32,11 +32,6 @@ fun ResultScreen(
 	navigateToStart: () -> Unit,
 	navigateToOperation: (PinStatus) -> Unit,
 ) {
-	val uriHandler = LocalUriHandler.current
-
-	val pinStatus = pinResult?.status
-	val pinError = pinResult?.errorMessage
-
 	Scaffold(
 		topBar = {
 			AppBar(
@@ -55,122 +50,21 @@ fun ResultScreen(
 			verticalArrangement = Arrangement.Center,
 		) {
 			if (pinResult != null) {
-				if (pinStatus != null) {
-					Text(
-						text = "Result: ${label(pinStatus)}",
-						fontSize = 24.sp,
-						style = MaterialTheme.typography.headlineMedium,
-					)
-					when (pinResult.status) {
-						PinStatus.OK, PinStatus.Unknown -> {
-							val infoText = infoText(pinStatus)
-
-							Text(infoText)
-
-							Spacer(Modifier.height(24.dp))
-
-							BackToStartButton {
-								navigateToStart()
-							}
-						}
-
-						PinStatus.WrongPIN, PinStatus.WrongCAN, PinStatus.WrongPUK -> {
-							val infoText = infoText(pinStatus)
-
-							Text(infoText)
-
-							Spacer(Modifier.height(24.dp))
-
-							Button(
-								onClick = {
-									navigateToOperation(pinStatus)
-								},
-							) {
-								Text("Try again")
-							}
-						}
-
-						PinStatus.Suspended, PinStatus.Blocked -> {
-							val infoText = infoText(pinStatus)
-
-							Text(infoText)
-
-							Spacer(Modifier.height(24.dp))
-
-							Row(
-								horizontalArrangement = Arrangement.Center,
-								verticalAlignment = Alignment.CenterVertically,
-							) {
-								BackToStartButton {
-									navigateToStart()
-								}
-								Spacer(Modifier.width(8.dp))
-
-								Button(
-									onClick = {
-										navigateToOperation(pinStatus)
-									},
-								) {
-									Text("Next")
-								}
-							}
-						}
-
-						else -> {}
-					}
-				} else {
-					Text(
-						text = "$pinError",
-						fontSize = 24.sp,
-						style = MaterialTheme.typography.headlineMedium,
-					)
-
-					Spacer(Modifier.height(24.dp))
-
-					BackToStartButton { navigateToStart() }
-				}
+				PinResult(
+					pinResult,
+					navigateToStart,
+					navigateToOperation,
+				)
 			} else if (eacResult != null) {
-				Text(
-					modifier = Modifier.padding(16.dp),
-					text = "Result: $eacResult",
-					fontSize = 24.sp,
-					style = MaterialTheme.typography.headlineMedium,
+				EacResult(
+					eacResult,
+					navigateToStart,
 				)
-
-				val isResultUrl = eacResult.startsWith("https")
-
-				if (isResultUrl) {
-					Spacer(Modifier.height(24.dp))
-
-					Button(
-						onClick = {
-							try {
-								uriHandler.openUri(eacResult)
-							} catch (e: Exception) {
-								e.message
-							}
-						},
-					) {
-						Text("Open Result-URL")
-					}
-				}
-				Spacer(Modifier.height(24.dp))
-
-				BackToStartButton {
-					navigateToStart()
-				}
 			} else if (egkResult != null) {
-				Text(
-					text = egkResult,
-					fontSize = 24.sp,
-					style = MaterialTheme.typography.headlineMedium,
+				EgkResult(
+					egkResult,
+					navigateToStart,
 				)
-
-				Spacer(Modifier.height(24.dp))
-
-				BackToStartButton {
-					navigateToStart()
-				}
 			} else {
 				Text(
 					text = "Nothing to show",
@@ -190,6 +84,133 @@ fun ResultScreen(
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
+fun EgkResult(
+	egkResult: String,
+	navigateToStart: () -> Unit,
+) {
+	Text(
+		text = egkResult,
+		fontSize = 24.sp,
+		style = MaterialTheme.typography.headlineMedium,
+	)
+
+	Spacer(Modifier.height(24.dp))
+
+	BackToStartButton {
+		navigateToStart()
+	}
+}
+
+@Suppress("ktlint:standard:function-naming")
+@Composable
+fun EacResult(
+	eacResult: String,
+	navigateToStart: () -> Unit,
+) {
+	val uriHandler = LocalUriHandler.current
+	Text(
+		modifier = Modifier.padding(16.dp),
+		text = "Result: $eacResult",
+		fontSize = 24.sp,
+		style = MaterialTheme.typography.headlineMedium,
+	)
+
+	val isResultUrl = eacResult.startsWith("https")
+
+	if (isResultUrl) {
+		Spacer(Modifier.height(24.dp))
+
+		Button(
+			onClick = {
+				try {
+					uriHandler.openUri(eacResult)
+				} catch (e: Exception) {
+					e.message
+				}
+			},
+		) {
+			Text("Open Result-URL")
+		}
+	}
+	Spacer(Modifier.height(24.dp))
+
+	BackToStartButton {
+		navigateToStart()
+	}
+}
+
+@Suppress("ktlint:standard:function-naming")
+@Composable
+fun PinResult(
+	pinResult: PinOperationResult,
+	navigateToStart: () -> Unit,
+	navigateToOperation: (PinStatus) -> Unit,
+) {
+	Text(
+		text = "Result: ${pinResult.status?.label ?: pinResult.errorMessage}",
+		fontSize = 24.sp,
+		style = MaterialTheme.typography.headlineMedium,
+	)
+	when (val status = pinResult.status) {
+		null -> {
+			Spacer(Modifier.height(24.dp))
+			BackToStartButton { navigateToStart() }
+		}
+
+		PinStatus.OK, PinStatus.Unknown -> {
+			Text(status.infoText)
+
+			Spacer(Modifier.height(24.dp))
+
+			BackToStartButton {
+				navigateToStart()
+			}
+		}
+
+		PinStatus.WrongPIN, PinStatus.WrongCAN, PinStatus.WrongPUK -> {
+			Text(status.infoText)
+
+			Spacer(Modifier.height(24.dp))
+
+			Button(
+				onClick = {
+					navigateToOperation(status)
+				},
+			) {
+				Text("Try again")
+			}
+		}
+
+		PinStatus.Suspended, PinStatus.Blocked -> {
+			Text(status.infoText)
+
+			Spacer(Modifier.height(24.dp))
+
+			Row(
+				horizontalArrangement = Arrangement.Center,
+				verticalAlignment = Alignment.CenterVertically,
+			) {
+				BackToStartButton {
+					navigateToStart()
+				}
+				Spacer(Modifier.width(8.dp))
+
+				Button(
+					onClick = {
+						navigateToOperation(status)
+					},
+				) {
+					Text("Next")
+				}
+			}
+		}
+
+		else -> {}
+	}
+}
+
+@Suppress("ktlint:standard:function-naming")
+@Composable
 fun BackToStartButton(navigateToStart: () -> Unit) {
 	Button(
 		onClick = {
@@ -200,72 +221,74 @@ fun BackToStartButton(navigateToStart: () -> Unit) {
 	}
 }
 
-fun label(pinStatus: PinStatus): String =
-	when (pinStatus) {
-		PinStatus.OK -> {
-			"Success"
+val PinStatus.label: String
+	get() =
+		when (this) {
+			PinStatus.OK -> {
+				"Success"
+			}
+
+			PinStatus.WrongPIN -> {
+				"Wrong PIN"
+			}
+
+			PinStatus.Retry -> {
+				""
+			}
+
+			PinStatus.Suspended -> {
+				"PIN is suspended"
+			}
+
+			PinStatus.WrongCAN -> {
+				"CAN was wrong"
+			}
+
+			PinStatus.Blocked -> {
+				"PIN is blocked"
+			}
+
+			PinStatus.WrongPUK -> {
+				"PUK was wrong"
+			}
+
+			PinStatus.Unknown -> {
+				"PIN state unknown"
+			}
 		}
 
-		PinStatus.WrongPIN -> {
-			"Wrong PIN"
-		}
+val PinStatus.infoText: String
+	get() =
+		when (this) {
+			PinStatus.OK -> {
+				"Pin operation was successful"
+			}
 
-		PinStatus.Retry -> {
-			""
-		}
+			PinStatus.WrongPIN -> {
+				"Please try again."
+			}
 
-		PinStatus.Suspended -> {
-			"PIN is suspended"
-		}
+			PinStatus.Retry -> {
+				""
+			}
 
-		PinStatus.WrongCAN -> {
-			"CAN was wrong"
-		}
+			PinStatus.Suspended -> {
+				"Please click next to resolve this."
+			}
 
-		PinStatus.Blocked -> {
-			"PIN is blocked"
-		}
+			PinStatus.WrongCAN -> {
+				"Please try again."
+			}
 
-		PinStatus.WrongPUK -> {
-			"PUK was wrong"
-		}
+			PinStatus.Blocked -> {
+				"Please click next to resolve this."
+			}
 
-		PinStatus.Unknown -> {
-			"PIN state unknown"
-		}
-	}
+			PinStatus.WrongPUK -> {
+				"Please try again."
+			}
 
-fun infoText(pinStatus: PinStatus): String =
-	when (pinStatus) {
-		PinStatus.OK -> {
-			"Pin operation was successful"
+			PinStatus.Unknown -> {
+				"Something went wrong. Please try again."
+			}
 		}
-
-		PinStatus.WrongPIN -> {
-			"Please try again."
-		}
-
-		PinStatus.Retry -> {
-			""
-		}
-
-		PinStatus.Suspended -> {
-			"Please click next to resolve this."
-		}
-
-		PinStatus.WrongCAN -> {
-			"Please try again."
-		}
-
-		PinStatus.Blocked -> {
-			"Please click next to resolve this."
-		}
-
-		PinStatus.WrongPUK -> {
-			"Please try again."
-		}
-
-		PinStatus.Unknown -> {
-			"Something went wrong. Please try again."
-		}
-	}

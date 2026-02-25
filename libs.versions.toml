@@ -6,7 +6,7 @@ ktlint-plugin = "14.0.+"
 kx-co = "1.10.+"
 kx-serde = "1.10.+"
 kx-serde-xml = "0.91.3"
-kt-logging = "7.0.+"
+kt-logging = "8.0.+"
 kx-datetime = "0.7.1"
 
 # richclient

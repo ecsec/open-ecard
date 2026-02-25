@@ -61,6 +61,7 @@ nb-configuration.xml
 
 # Ignore local properties
 /local.properties
+/demo/composeApp/local.properties
 
 # Ignore Gradle GUI config
 gradle-app.setting

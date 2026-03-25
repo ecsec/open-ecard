@@ -13,7 +13,7 @@ deploy-mvn-artifacts:
       policy: pull
   script:
     - !reference [.versioning, script]
-    - ./gradlew publish
+    - ANDROID_HOME=/Users/florianotto/android-sdk-root/ KONAN_DATA_DIR=/Users/florianotto/.konan ./gradlew publish
   needs:
     - "compile"
     - "test"

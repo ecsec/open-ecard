@@ -3,7 +3,7 @@ deploy-mvn-artifacts:
   image: public.docker.ecsec.de/ecsec/tools/cimg-android-jdk25:2025.12
   #image: docker.io/cimg/android:2025.10
   tags:
-    - "podman"
+    - "mac"
   cache:
     - key: "$OEC_JAVA_CACHE_KEY"
       paths: !reference [ .cache-gradle-base, paths ]

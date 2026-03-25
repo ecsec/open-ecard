@@ -13,4 +13,4 @@ compile:
       policy: pull-push
   script:
     - !reference [.versioning, script]
-    - ./gradlew assemble
+    - ANDROID_HOME=/Users/florianotto/android-sdk-root/ ./gradlew assemble

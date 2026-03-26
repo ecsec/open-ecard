@@ -72,7 +72,7 @@ publish-to-github:
 # publish-ios-pod-spec:
 #   stage: publish
 #   tags:
-#     - "mac"
+#     - "mac_android_sdk"
 #     - "dev-cert"
 #   script:
 #     - VERSION=${CI_COMMIT_TAG##"richclient-v"}

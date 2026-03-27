@@ -13,6 +13,8 @@ deploy-mvn-artifacts:
       policy: pull
   script:
     - !reference [.versioning, script]
+    # unset is needed for mac builds in non sandboxed shell runner
+    - unset KONAN_DATA_DIR
     - ./gradlew publish
   needs:
     - "compile"

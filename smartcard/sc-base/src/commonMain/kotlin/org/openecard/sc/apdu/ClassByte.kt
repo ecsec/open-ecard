@@ -46,7 +46,7 @@ sealed interface ClassByte {
 	}
 }
 
-class InterIndustryClassByte(
+data class InterIndustryClassByte(
 	var channelNumber: Int,
 	var sm: SecureMessagingIndication,
 	var commandChaining: Boolean,

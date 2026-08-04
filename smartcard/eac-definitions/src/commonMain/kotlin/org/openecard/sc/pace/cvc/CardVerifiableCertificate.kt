@@ -4,6 +4,7 @@ import org.openecard.sc.pace.cvc.CardVerifiableCertificateBody.Companion.toCardV
 import org.openecard.sc.tlv.Tlv
 import org.openecard.sc.tlv.Tlv.Companion.tagAt
 import org.openecard.sc.tlv.TlvException
+import org.openecard.sc.tlv.TlvPrimitive
 import org.openecard.sc.tlv.toTlvBer
 
 /**
@@ -37,7 +38,7 @@ class CardVerifiableCertificate
 					tlv.childList().tagAt(0, CvcTags.body)?.toCardVerifiableCertificateBody()
 						?: throw IllegalArgumentException("CVC is missing the body element")
 				val signature =
-					tlv.childList().tagAt(1, CvcTags.signature)?.contentAsBytesBer
+					(tlv.childList().tagAt(1, CvcTags.signature) as? TlvPrimitive)?.value
 						?: throw IllegalArgumentException("CVC is missing the signature element")
 
 				return CardVerifiableCertificate(this.copyOf(), tlv, body, signature)

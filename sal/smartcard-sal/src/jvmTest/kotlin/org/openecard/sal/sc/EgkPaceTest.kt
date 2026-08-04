@@ -13,10 +13,17 @@ import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.dids.PaceDid
 import org.openecard.sal.sc.recognition.DirectCardRecognition
 import org.openecard.sal.sc.testutils.WhenPcscStack
+import org.openecard.sc.apdu.checkOk
+import org.openecard.sc.apdu.command.InternalAuthenticate
+import org.openecard.sc.apdu.command.Mse
 import org.openecard.sc.iface.withContext
 import org.openecard.sc.pace.PaceFeatureSoftwareFactory
 import org.openecard.sc.pcsc.PcscTerminalFactory
+import org.openecard.sc.tlv.Tag
+import org.openecard.sc.tlv.TlvPrimitive
+import org.openecard.utils.serialization.toPrintable
 import java.security.cert.CertificateFactory
+import kotlin.random.Random
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFails
@@ -95,6 +102,45 @@ class EgkPaceTest {
 			val efDirDs = assertNotNull(mf.datasets.find { it.name == "EF.DIR" })
 			val efDirData = efDirDs.read()
 			assertTrue { efDirData.isNotEmpty() }
+
+			// get certs needed for PoPP-Light protocol
+			val cvcAutDs = mf.datasets.find { it.name == EgkCifDefinitions.Apps.Mf.Datasets.ef_c_eGK_aut_cvc_e256 }
+			val cvcAut = cvcAutDs?.read()
+			// println("cvcAut: ${cvcAut?.toHexString()}")
+			val cvcCaDs = mf.datasets.find { it.name == EgkCifDefinitions.Apps.Mf.Datasets.ef_c_ca_cs_e256 }
+			val cvcCa = cvcCaDs?.read()
+			// println("cvcCa: ${cvcCa?.toHexString()}")
+			// println("x509: ${certs.first().encoded.toHexString()}")
+
+			// perform
+			val challenge = Random.nextBytes(24)
+			// println("challenge: ${challenge.toHexString()}")
+
+			val mse =
+				Mse.mseSet(
+					Mse.P1Flags(false, false, true, false),
+					Mse.Tag.CRT_EXTERNAL_AUTHENTICATE,
+					listOf(
+						TlvPrimitive(
+							Tag.forTagNumWithClass(0x84u),
+							"09".hexToUByteArray().toPrintable(),
+						),
+						TlvPrimitive(
+							Tag.forTagNumWithClass(0x80u),
+							"00".hexToUByteArray().toPrintable(),
+						),
+					),
+				)
+			// println("mse: ${mse.apdu}")
+			val mseRes = con.channel.transmit(mse.apdu)
+			// println("mseRes: $mseRes")
+			mseRes.checkOk()
+
+			val intAuth = InternalAuthenticate.withData(challenge.toUByteArray(), algorithm = 0x00u)
+			// println("intAuth: $intAuth")
+			val intAuthRes = con.channel.transmit(intAuth.apdu)
+			// println("intAuthRes: $intAuthRes")
+			intAuthRes.checkOk()
 		}
 	}
 }

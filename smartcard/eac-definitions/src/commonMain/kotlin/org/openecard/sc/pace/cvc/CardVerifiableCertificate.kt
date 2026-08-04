@@ -1,8 +1,8 @@
 package org.openecard.sc.pace.cvc
 
 import org.openecard.sc.pace.cvc.CardVerifiableCertificateBody.Companion.toCardVerifiableCertificateBody
-import org.openecard.sc.tlv.Tlv
 import org.openecard.sc.tlv.Tlv.Companion.tagAt
+import org.openecard.sc.tlv.TlvConstructed
 import org.openecard.sc.tlv.TlvException
 import org.openecard.sc.tlv.TlvPrimitive
 import org.openecard.sc.tlv.toTlvBer
@@ -14,17 +14,31 @@ class CardVerifiableCertificate
 	@OptIn(ExperimentalUnsignedTypes::class)
 	constructor(
 		private val original: UByteArray,
-		private val tlv: Tlv,
+		private val tlv: TlvConstructed,
 		body: CardVerifiableCertificateBody,
 		val signature: UByteArray,
 	) : CardVerifiableCertificateBody by body {
 		val isTerminalCertificate by lazy { chat.role.code == 0u }
 
+		/**
+		 * The complete CVC as bytes.
+		 */
 		@OptIn(ExperimentalUnsignedTypes::class)
 		val originalBytes: UByteArray get() = original.copyOf()
 
+		/**
+		 * The CVC body including the signature.
+		 */
 		@OptIn(ExperimentalUnsignedTypes::class)
 		val bodyBytes: UByteArray get() = tlv.contentAsBytesBer.copyOf()
+
+		/**
+		 * The CVC body without the signature
+		 */
+		@OptIn(ExperimentalUnsignedTypes::class)
+		val bodyBytesNoSig: UByteArray get() =
+			tlv.child?.toBer(false)
+				?: throw IllegalStateException("CVC body has no childs")
 
 		companion object {
 			@OptIn(ExperimentalUnsignedTypes::class)

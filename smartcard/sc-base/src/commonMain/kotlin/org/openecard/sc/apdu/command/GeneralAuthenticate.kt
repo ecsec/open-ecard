@@ -53,7 +53,7 @@ data class GeneralAuthenticate(
 	}
 }
 
-class SecurityCommandP2(
+data class SecurityCommandP2(
 	val globalReference: Boolean,
 	val qualifier: UByte,
 	val reserved: UByte = 0u,

@@ -23,12 +23,13 @@ package-win:
         -Path .\clients\richclient\build\dist\EXE
         -Include Open-eCard-App-*.exe
         -File -Recurse -ErrorAction SilentlyContinue | Format-Wide Name  | Out-String).Trim()
+    # list of TSAs, currently only ssl.com uses ec certs
     - signtool.exe sign 
         /debug 
         /k "${WIN_TOKEN_PW}"
         /f "${WIN_CERT_FILE}"
         /csp "eToken Base Cryptographic Provider"
-        /tr http://timestamp.acs.microsoft.com
+        /tr http://ts.ssl.com
         /td SHA256
         /fd SHA256
         .\clients\richclient\build\dist\EXE\$EXE_FILE_PATH

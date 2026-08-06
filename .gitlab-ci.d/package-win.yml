@@ -25,8 +25,9 @@ package-win:
         -File -Recurse -ErrorAction SilentlyContinue | Format-Wide Name  | Out-String).Trim()
     - signtool.exe sign 
         /debug 
-        /p ${WIN_KEYSTORE_PW}
-        /f "${WIN_KEYSTORE}"
+        /k "${WIN_TOKEN_PW}"
+        /f "${WIN_CERT_FILE}"
+        /csp "eToken Base Cryptographic Provider"
         /tr http://timestamp.acs.microsoft.com
         /td SHA256
         /fd SHA256

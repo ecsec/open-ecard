@@ -81,8 +81,8 @@ kotlinPoet = "2.2.0"
 # Testing
 junit = "6.0.+"
 wiremock = "3.13.+"
-mokkery = "3.2.0"
 kover = "0.9.7"
+mokkery = "3.3.0"
 
 
 [libraries]

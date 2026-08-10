@@ -20,7 +20,7 @@ javaTarget="17"
 iosPlatformVersion="15.0"
 
 # android
-androidCompileSdk="36"
+androidCompileSdk="37"
 androidMinSdk="23"
 
 material3 = "1.4.0"     # Compose Material3 version
@@ -42,7 +42,7 @@ kotlin-crypto = "0.5.0"
 kotlin-bignum = "0.3.10"
 
 # Android
-agp = "9.0.+"
+agp = "9.2.+"
 androidx-activityCompose = "1.12.+"
 
 androidx-lifecycle-viewmodelCompose  = "2.10.0"

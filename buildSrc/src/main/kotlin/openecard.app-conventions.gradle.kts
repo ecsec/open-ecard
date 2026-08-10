@@ -5,14 +5,14 @@ plugins {
 	id("dev.mokkery")
 }
 
-val javaToolchain: String by project
+val javaToolchain = project.property("javaToolchain") as String
 kotlin {
 	jvmToolchain {
 		languageVersion = JavaLanguageVersion.of(javaToolchain)
 	}
 }
 
-val testHeapSize: String by project
+val testHeapSize = project.property("testHeapSize") as String
 tasks {
 	test {
 		maxHeapSize = testHeapSize

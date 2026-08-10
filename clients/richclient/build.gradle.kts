@@ -119,7 +119,6 @@ dependencies {
 	// gui
 	api(libs.pdfbox)
 	api(libs.apache.batik.transcoder)
-	implementation(libs.ktor.client.core)
 
 	// addons
 	implementation(project(":addons:tr03124"))
@@ -170,25 +169,29 @@ val setAppVersion =
 	}
 val macSigningId: String? = System.getenv("MAC_SIGNING_ID")
 
-val copyJars by tasks.registering(Copy::class) {
-	from(configurations.runtimeClasspath) {
-		exclude { it.name.startsWith("javafx") }
-		rename("oec_smartcard_pcsc-native", "oec_smartcard_pcsc-nativelib")
-	}.into(layout.buildDirectory.dir("jars"))
-}
-val copyMods by tasks.registering(Copy::class) {
-	from(configurations.runtimeClasspath) {
-		include { it.name.startsWith("javafx") }
-	}.into(layout.buildDirectory.dir("jars/mods"))
-}
-val copyJar by tasks.registering(Copy::class) {
-	from(tasks.jar).into(layout.buildDirectory.dir("jars"))
-}
-val copyDependencies by tasks.registering {
-	dependsOn(copyJars)
-	dependsOn(copyMods)
-	dependsOn(copyJar)
-}
+val copyJars =
+	tasks.register<Copy>("copyJars") {
+		from(configurations.runtimeClasspath) {
+			exclude { it.name.startsWith("javafx") }
+			rename("oec_smartcard_pcsc-native", "oec_smartcard_pcsc-nativelib")
+		}.into(layout.buildDirectory.dir("jars"))
+	}
+val copyMods =
+	tasks.register<Copy>("copyMods") {
+		from(configurations.runtimeClasspath) {
+			include { it.name.startsWith("javafx") }
+		}.into(layout.buildDirectory.dir("jars/mods"))
+	}
+val copyJar =
+	tasks.register<Copy>("copyJar") {
+		from(tasks.jar).into(layout.buildDirectory.dir("jars"))
+	}
+val copyDependencies =
+	tasks.register("copyDependencies") {
+		dependsOn(copyJars)
+		dependsOn(copyMods)
+		dependsOn(copyJar)
+	}
 
 fun JPackageTask.applyDefaults(imageType: ImageType) {
 	verbose = false
@@ -289,55 +292,59 @@ fun JPackageTask.macConfigs() {
 
 // packaging jobs for debugging and manual operations
 
-val buildAppImage by tasks.registering(JPackageTask::class) {
-	group = "Distribution"
-	description = "Creates a AppImage artifact for further processing."
+val buildAppImage =
+	tasks.register<JPackageTask>("buildAppImage") {
+		group = "Distribution"
+		description = "Creates a AppImage artifact for further processing."
 
-	onlyIf("OS is not Linux") {
-		Platform.isLinux()
+		onlyIf("OS is not Linux") {
+			Platform.isLinux()
+		}
+		dependsOn(copyDependencies)
+
+		applyDefaults(ImageType.APP_IMAGE)
 	}
-	dependsOn(copyDependencies)
-
-	applyDefaults(ImageType.APP_IMAGE)
-}
 
 // linux packaging
 
-val packageDeb by tasks.registering(JPackageTask::class) {
-	group = "Distribution"
-	description = "Creates a DEB package for installation."
+val packageDeb =
+	tasks.register<JPackageTask>("packageDeb") {
+		group = "Distribution"
+		description = "Creates a DEB package for installation."
 
-	onlyIf("OS is not Linux") {
-		Platform.isLinux()
+		onlyIf("OS is not Linux") {
+			Platform.isLinux()
+		}
+		dependsOn(copyDependencies)
+
+		applyDefaults(ImageType.DEB)
+		linuxConfigs()
 	}
-	dependsOn(copyDependencies)
 
-	applyDefaults(ImageType.DEB)
-	linuxConfigs()
-}
+val packageRpm =
+	tasks.register<JPackageTask>("packageRpm") {
+		group = "Distribution"
+		description = "Creates a RPM package for installation."
 
-val packageRpm by tasks.registering(JPackageTask::class) {
-	group = "Distribution"
-	description = "Creates a RPM package for installation."
+		onlyIf("OS is not Linux") {
+			Platform.isLinux()
+		}
+		dependsOn(copyDependencies)
 
-	onlyIf("OS is not Linux") {
-		Platform.isLinux()
+		applyDefaults(ImageType.RPM)
+		linuxConfigs()
 	}
-	dependsOn(copyDependencies)
 
-	applyDefaults(ImageType.RPM)
-	linuxConfigs()
-}
+val packageLinux =
+	tasks.register("packageLinux") {
+		group = "Distribution"
+		description = "Creates DEB and RPM packages for linux systems."
 
-val packageLinux by tasks.registering {
-	group = "Distribution"
-	description = "Creates DEB and RPM packages for linux systems."
-
-	dependsOn(
-		packageDeb,
-		packageRpm,
-	)
-}
+		dependsOn(
+			packageDeb,
+			packageRpm,
+		)
+	}
 
 // mac packaging
 
@@ -430,66 +437,69 @@ abstract class MacSignLibrariesTask
 		}
 	}
 
-val prepareMacBundle by tasks.registering(MacSignLibrariesTask::class) {
-	onlyIf("OS is not Mac") {
-		Platform.isMac()
+val prepareMacBundle =
+	tasks.register<MacSignLibrariesTask>("prepareMacBundle") {
+		onlyIf("OS is not Mac") {
+			Platform.isMac()
+		}
+		dependsOn(copyDependencies)
+
+		// skip this task if no signingId is configured
+		if (macSigningId != null) {
+			signingId = macSigningId
+		} else {
+			enabled = false
+		}
+
+		jarFiles
+			.setDir(layout.buildDirectory.dir("jars"))
+			.include(
+				"jna-*.jar",
+				"jansi-*.jar",
+			)
+		jarFilesSignedOutputDir =
+			Path.of(
+				layout.buildDirectory
+					.dir("jars")
+					.get()
+					.asFile
+					.toURI(),
+			)
+		filesToSign =
+			listOf(
+				"com/sun/jna/darwin-.*/libjnidispatch.jnilib",
+				"org/fusesource/jansi/internal/native/Mac/.*/libjansi.jnilib",
+			)
+		compressionLevel = Deflater.BEST_COMPRESSION
 	}
-	dependsOn(copyDependencies)
 
-	// skip this task if no signingId is configured
-	if (macSigningId != null) {
-		signingId = macSigningId
-	} else {
-		enabled = false
+val packageDmg =
+	tasks.register<JPackageTask>("packageDmg") {
+		group = "Distribution"
+		description = "Creates a DMG package for installation."
+
+		onlyIf("OS is not Mac") {
+			Platform.isMac()
+		}
+		dependsOn(prepareMacBundle)
+
+		applyDefaults(ImageType.DMG)
+		macConfigs()
 	}
 
-	jarFiles
-		.setDir(layout.buildDirectory.dir("jars"))
-		.include(
-			"jna-*.jar",
-			"jansi-*.jar",
-		)
-	jarFilesSignedOutputDir =
-		Path.of(
-			layout.buildDirectory
-				.dir("jars")
-				.get()
-				.asFile
-				.toURI(),
-		)
-	filesToSign =
-		listOf(
-			"com/sun/jna/darwin-.*/libjnidispatch.jnilib",
-			"org/fusesource/jansi/internal/native/Mac/.*/libjansi.jnilib",
-		)
-	compressionLevel = Deflater.BEST_COMPRESSION
-}
+val packagePkg =
+	tasks.register<JPackageTask>("packagePkg") {
+		group = "Distribution"
+		description = "Creates a PKG package for installation."
 
-val packageDmg by tasks.registering(JPackageTask::class) {
-	group = "Distribution"
-	description = "Creates a DMG package for installation."
+		onlyIf("OS is not Mac") {
+			Platform.isMac()
+		}
+		dependsOn(prepareMacBundle)
 
-	onlyIf("OS is not Mac") {
-		Platform.isMac()
+		applyDefaults(ImageType.PKG)
+		macConfigs()
 	}
-	dependsOn(prepareMacBundle)
-
-	applyDefaults(ImageType.DMG)
-	macConfigs()
-}
-
-val packagePkg by tasks.registering(JPackageTask::class) {
-	group = "Distribution"
-	description = "Creates a PKG package for installation."
-
-	onlyIf("OS is not Mac") {
-		Platform.isMac()
-	}
-	dependsOn(prepareMacBundle)
-
-	applyDefaults(ImageType.PKG)
-	macConfigs()
-}
 
 tasks.register("packageMac") {
 	group = "Distribution"
@@ -503,67 +513,70 @@ tasks.register("packageMac") {
 
 // windows packaging
 
-val packageMsi by tasks.registering(JPackageTask::class) {
-	group = "Distribution"
-	description = "Creates a MSI package for installation."
+val packageMsi =
+	tasks.register<JPackageTask>("packageMsi") {
+		group = "Distribution"
+		description = "Creates a MSI package for installation."
 
-	// we need the following for the iscc task which reuses the exe-file from this task
-	// to keep it we put it in /build/jpfiles
-	// jp will however fail if this dir exists beforehand, so we make sure to delete it...
-	doFirst {
-		delete(project.layout.buildDirectory.dir("jpfiles"))
+		// we need the following for the iscc task which reuses the exe-file from this task
+		// to keep it we put it in /build/jpfiles
+		// jp will however fail if this dir exists beforehand, so we make sure to delete it...
+		doFirst {
+			delete(project.layout.buildDirectory.dir("jpfiles"))
+		}
+		temp = "/build/jpfiles"
+
+		onlyIf("OS is not Windows") {
+			Platform.isWindows()
+		}
+		dependsOn(copyDependencies)
+
+		applyDefaults(ImageType.MSI)
+		windowsConfigs()
 	}
-	temp = "/build/jpfiles"
-
-	onlyIf("OS is not Windows") {
-		Platform.isWindows()
-	}
-	dependsOn(copyDependencies)
-
-	applyDefaults(ImageType.MSI)
-	windowsConfigs()
-}
 
 val issWorkDir = layout.buildDirectory.dir("iscc")
-val prepareIsccFile by tasks.registering(Copy::class) {
+val prepareIsccFile =
+	tasks.register<Copy>("prepareIsccFile") {
 
-	val iconPath = projectDir.resolve("src/main/package/win/Open-eCard-App.ico").toString()
-	val bmpPath = projectDir.resolve("src/main/package/win/Open-eCard-App-setup-icon.bmp").toString()
+		val iconPath = projectDir.resolve("src/main/package/win/Open-eCard-App.ico").toString()
+		val bmpPath = projectDir.resolve("src/main/package/win/Open-eCard-App-setup-icon.bmp").toString()
 
-	from("src/main/package/win")
+		from("src/main/package/win")
 
-	include("Open-eCard-App.iss")
-	filter { line ->
-		line
-			.replace("\$appName", setAppName)
-			.replace("\$appVersion", setAppVersion)
-			.replace("\$vendor", setAppVendor)
-			.replace("\$appUrl", setAppAboutUrl)
-			.replace("\$identifier", setAppName)
-			.replace("\$licensePath", setAppLicenseFile.path)
-			.replace("\$outPath", "$projectDir\\build\\dist\\EXE")
-			.replace("\$iconFile", iconPath)
-			.replace("\$bmpPath", bmpPath)
-			.replace("\$msiPath", "$projectDir\\build\\jpfiles\\image\\Open-eCard-App")
+		include("Open-eCard-App.iss")
+		filter { line ->
+			line
+				.replace("\$appName", setAppName)
+				.replace("\$appVersion", setAppVersion)
+				.replace("\$vendor", setAppVendor)
+				.replace("\$appUrl", setAppAboutUrl)
+				.replace("\$identifier", setAppName)
+				.replace("\$licensePath", setAppLicenseFile.path)
+				.replace("\$outPath", "$projectDir\\build\\dist\\EXE")
+				.replace("\$iconFile", iconPath)
+				.replace("\$bmpPath", bmpPath)
+				.replace("\$msiPath", "$projectDir\\build\\jpfiles\\image\\Open-eCard-App")
+		}
+
+		into(issWorkDir)
+		outputs.upToDateWhen { false }
 	}
 
-	into(issWorkDir)
-	outputs.upToDateWhen { false }
-}
+val packageExe =
+	tasks.register<Exec>("packageExe") {
+		group = "Distribution"
+		description = "Creates a EXE for installation."
 
-val packageExe by tasks.registering(Exec::class) {
-	group = "Distribution"
-	description = "Creates a EXE for installation."
+		onlyIf("OS is not Windows") {
+			Platform.isWindows()
+		}
+		dependsOn(copyDependencies, packageMsi, prepareIsccFile)
 
-	onlyIf("OS is not Windows") {
-		Platform.isWindows()
+		workingDir(issWorkDir)
+		executable("iscc")
+		args("Open-eCard-App.iss")
 	}
-	dependsOn(copyDependencies, packageMsi, prepareIsccFile)
-
-	workingDir(issWorkDir)
-	executable("iscc")
-	args("Open-eCard-App.iss")
-}
 
 tasks.register("packageWindows") {
 	group = "Distribution"

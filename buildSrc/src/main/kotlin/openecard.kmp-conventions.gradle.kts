@@ -6,7 +6,7 @@ plugins {
 	kotlin("plugin.serialization")
 }
 
-val javaToolchain: String by project
+val javaToolchain = project.property("javaToolchain") as String
 kotlin {
 	jvmToolchain {
 		languageVersion = JavaLanguageVersion.of(javaToolchain)
@@ -15,7 +15,7 @@ kotlin {
 	applyDefaultHierarchyTemplate()
 }
 
-val testHeapSize: String by project
+val testHeapSize = project.property("testHeapSize") as String
 tasks.withType<Test> {
 	maxHeapSize = testHeapSize
 	useJUnitPlatform { }

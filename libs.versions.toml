@@ -35,7 +35,7 @@ spmForKmp = "1.4.6"
 compose = "1.10.1"
 
 # common
-ktor = "3.4.+"
+ktor = "3.5.+"
 semver = "3.0.0"
 jwtkt = "1.2.1"
 kotlin-crypto = "0.5.0"

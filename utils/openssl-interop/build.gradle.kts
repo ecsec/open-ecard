@@ -28,9 +28,10 @@ kotlin {
 		if (it is KotlinNativeTarget) {
 			it.compilations.forEach { comp ->
 				comp.cinterops {
-					val openssl by creating {
-						definitionFile.set(project.file("src/nativeInterop/cinterop/openssl.def"))
-					}
+					val openssl =
+						create("openssl") {
+							definitionFile.set(project.file("src/nativeInterop/cinterop/openssl.def"))
+						}
 				}
 			}
 		}

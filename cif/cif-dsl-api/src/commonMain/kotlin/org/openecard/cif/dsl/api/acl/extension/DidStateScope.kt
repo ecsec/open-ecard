@@ -41,27 +41,21 @@ class DidStateScopeBuilder : DidStateScope {
 		)
 }
 
-fun AclBoolTreeBuilder.didState(
-	@AclTreeMarker content: DidStateScope.() -> Unit,
-): CifAclOr {
+fun AclBoolTreeBuilder.didState(content: DidStateScope.() -> Unit): CifAclOr {
 	val builder = DidStateScopeBuilder()
 	content(builder)
 	val built = builder.build()
 	return didState(name = built.name, active = built.active, qualifier = built.stateQualifier)
 }
 
-fun AndOrScope.didState(
-	@AclTreeMarker content: DidStateScope.() -> Unit,
-): AndOrScopeResult.LeafResult {
+fun AndOrScope.didState(content: DidStateScope.() -> Unit): AndOrScopeResult.LeafResult {
 	val builder = DidStateScopeBuilder()
 	content(builder)
 	val built = builder.build()
 	return didState(name = built.name, active = built.active, qualifier = built.stateQualifier)
 }
 
-fun AndOrScope.activeDidState(
-	@AclTreeMarker content: DidStateScope.() -> Unit,
-): AndOrScopeResult.LeafResult {
+fun AndOrScope.activeDidState(content: DidStateScope.() -> Unit): AndOrScopeResult.LeafResult {
 	val builder = DidStateScopeBuilder()
 	builder.active = true
 	content(builder)
@@ -69,18 +63,14 @@ fun AndOrScope.activeDidState(
 	return didState(name = built.name, active = built.active, qualifier = built.stateQualifier)
 }
 
-fun OrAndScope.didState(
-	@AclTreeMarker content: DidStateScope.() -> Unit,
-): OrAndScopeResult.LeafResult {
+fun OrAndScope.didState(content: DidStateScope.() -> Unit): OrAndScopeResult.LeafResult {
 	val builder = DidStateScopeBuilder()
 	content(builder)
 	val built = builder.build()
 	return didState(name = built.name, active = built.active, qualifier = built.stateQualifier)
 }
 
-fun OrAndScope.activeDidState(
-	@AclTreeMarker content: DidStateScope.() -> Unit,
-): OrAndScopeResult.LeafResult {
+fun OrAndScope.activeDidState(content: DidStateScope.() -> Unit): OrAndScopeResult.LeafResult {
 	val builder = DidStateScopeBuilder()
 	builder.active = true
 	content(builder)

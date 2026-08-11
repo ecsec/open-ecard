@@ -8,10 +8,8 @@ plugins {
 
 kotlin {
 	sourceSets {
-		val commonMain by getting {
-			dependencies {
-				api(libs.moko.resources)
-			}
+		commonMain.dependencies {
+			api(libs.moko.resources)
 		}
 	}
 }

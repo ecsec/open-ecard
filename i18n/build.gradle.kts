@@ -10,22 +10,16 @@ plugins {
 
 kotlin {
 	sourceSets {
-		val commonMain by getting {
-			dependencies {
-				api(libs.moko.resources)
-			}
+		commonMain.dependencies {
+			api(libs.moko.resources)
 		}
-		val commonTest by getting {
-			dependencies {
-				implementation(libs.bundles.test.basics.kotlin)
-			}
+		commonTest.dependencies {
+			implementation(libs.bundles.test.basics.kotlin)
 		}
-		val jvmMain by getting {
-			dependencies {}
-		}
-		val jvmTest by getting {
-			dependencies {}
-		}
+
+		jvmMain.dependencies {}
+
+		jvmTest.dependencies {}
 	}
 }
 

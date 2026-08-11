@@ -1,12 +1,12 @@
 package org.openecard.addons.tr03124.eac
 
-import kotlinx.coroutines.CancellationException
 import org.openecard.addons.tr03124.BindingException
 import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.sal.iface.DeviceUnsupported
 import org.openecard.sal.iface.SalException
 import org.openecard.sal.iface.dids.PaceDid
 import org.openecard.sc.iface.feature.PaceEstablishChannelResponse
+import kotlin.coroutines.cancellation.CancellationException
 
 interface UiStep {
 	/**

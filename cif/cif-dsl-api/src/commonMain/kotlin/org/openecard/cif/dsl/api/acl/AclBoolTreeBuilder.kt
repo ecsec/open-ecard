@@ -19,7 +19,6 @@ object AclBoolTreeBuilder {
 	@OptIn(ExperimentalStdlibApi::class, ExperimentalUnsignedTypes::class)
 	fun paceQualifier(hex: String): PaceAclQualifier = PaceAclQualifier(hex.hexToUByteArray().toPrintable())
 
-	@AclTreeMarker
 	fun didState(
 		name: String,
 		active: Boolean,
@@ -50,8 +49,8 @@ object AclBoolTreeBuilder {
 	) = didState(name = name, active = false, qualifier = qualifier)
 
 	fun and(
-		@AclTreeMarker first: (AndOrScope.() -> AndOrScopeResult),
-		@AclTreeMarker vararg content: (AndOrScope.() -> AndOrScopeResult),
+		first: (AndOrScope.() -> AndOrScopeResult),
+		vararg content: (AndOrScope.() -> AndOrScopeResult),
 	): CifAclOr {
 		val candidates =
 			mutableListOf(
@@ -84,8 +83,8 @@ object AclBoolTreeBuilder {
 	}
 
 	fun or(
-		@AclTreeMarker first: (OrAndScope.() -> OrAndScopeResult),
-		@AclTreeMarker vararg content: (OrAndScope.() -> OrAndScopeResult),
+		first: (OrAndScope.() -> OrAndScopeResult),
+		vararg content: (OrAndScope.() -> OrAndScopeResult),
 	): CifAclOr {
 		val candidates =
 			mutableListOf(
@@ -105,7 +104,7 @@ object AclBoolTreeBuilder {
 	}
 
 	fun anyOf(
-		@AclTreeMarker first: (OrAndScope.() -> OrAndScopeResult),
-		@AclTreeMarker vararg content: (OrAndScope.() -> OrAndScopeResult),
+		first: (OrAndScope.() -> OrAndScopeResult),
+		vararg content: (OrAndScope.() -> OrAndScopeResult),
 	): CifAclOr = or(first, *content)
 }

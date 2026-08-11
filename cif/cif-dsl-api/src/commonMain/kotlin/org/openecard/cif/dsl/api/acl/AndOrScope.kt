@@ -12,7 +12,6 @@ object AndOrScope {
 
 	fun paceQualifier(hex: String): PaceAclQualifier = AclBoolTreeBuilder.paceQualifier(hex)
 
-	@AclTreeMarker
 	fun didState(
 		name: String,
 		active: Boolean,
@@ -26,7 +25,6 @@ object AndOrScope {
 			),
 		)
 
-	@AclTreeMarker
 	fun or(
 		first: AndOrScopeResult.LeafResult,
 		second: AndOrScopeResult.LeafResult,
@@ -39,13 +37,11 @@ object AndOrScope {
 		)
 	}
 
-	@AclTreeMarker
 	fun activeDidState(
 		name: String,
 		qualifier: AclQualifier? = null,
 	): AndOrScopeResult.LeafResult = didState(name = name, active = true, qualifier = qualifier)
 
-	@AclTreeMarker
 	fun inActiveDidState(
 		name: String,
 		qualifier: AclQualifier? = null,

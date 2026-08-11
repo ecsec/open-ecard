@@ -13,7 +13,7 @@ fun catalogVersion(ref: String) =
 	)
 
 kotlin {
-	androidLibrary {
+	android {
 		namespace = "${project.group}.${project.name}".replace("-", "_")
 
 		minSdk = catalogVersion("androidMinSdk")

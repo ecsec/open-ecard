@@ -17,7 +17,8 @@ kotlin {
 	jvm {
 		compilerOptions.jvmTarget = JvmTarget.fromTarget(javaTarget)
 		compilations {
-			val test by getting {
+			val test =
+				getByName("test") {
 // 				tasks.named<Test>("jvmTest") {
 // 					useTestNG {
 // 						excludeGroups("interactive", "broken")
@@ -36,7 +37,7 @@ kotlin {
 // 						includeGroups("interactive")
 // 					}
 // 				}
-			}
+				}
 		}
 	}
 }

@@ -42,7 +42,7 @@ kotlin-crypto = "0.6.0"
 kotlin-bignum = "0.3.10"
 
 # Android
-agp = "9.2.+"
+agp = "9.3.+"
 androidx-activityCompose = "1.12.+"
 
 androidx-lifecycle-viewmodelCompose  = "2.10.0"

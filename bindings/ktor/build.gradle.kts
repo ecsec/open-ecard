@@ -11,7 +11,7 @@ kotlin {
 		commonMain.dependencies {
 			api(libs.ktor.server.core)
 			implementation(libs.ktor.server.cio)
-			implementation(libs.ktor.server.cors)
+			api(libs.ktor.server.cors)
 			implementation(libs.ktor.server.content.negotiation)
 			implementation(libs.ktor.server.html.builder)
 			implementation(libs.ktor.server.status.pages)

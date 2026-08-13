@@ -15,7 +15,6 @@ import kotlinx.html.link
 import kotlinx.html.meta
 import kotlinx.html.p
 import kotlinx.html.title
-import kotlinx.serialization.json.JsonNull.content
 
 class ErrorTemplate : Template<HTML> {
 	val errorTitle = Placeholder<TITLE>()
@@ -34,11 +33,11 @@ class ErrorTemplate : Template<HTML> {
 				}
 				link {
 					rel = "SHORTCUT ICON"
-					href = "favicon.ico"
+					href = "/static/favicon.ico"
 				}
 				link {
 					rel = "stylesheet"
-					href = "./css/style.css"
+					href = "/static/css/style.css"
 					type = "text/css"
 				}
 			}

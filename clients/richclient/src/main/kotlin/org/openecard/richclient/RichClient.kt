@@ -34,6 +34,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.request.forms.submitForm
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.Url
 import io.ktor.http.parameters
 import javafx.application.Application
 import javafx.stage.Stage
@@ -194,10 +195,17 @@ class RichClient : Application() {
 						uiManager = uiManager,
 					)
 
+				// TODO: load from file and allow to update it when a new origin shows up
+				val allowedCorsOrigins =
+					setOf(
+						Url("https://service.skidentity.de"),
+						Url("https://electrologic.org"),
+					)
+
 				// start HTTP server
 				httpBinding =
 					HttpService.start(wait = false, port = port) {
-						registerTr03124Binding(tr03124Binding)
+						registerTr03124Binding(tr03124Binding, allowedCorsOrigins)
 					}
 
 				if (dispatcherMode) {

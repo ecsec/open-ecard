@@ -25,8 +25,12 @@ package org.openecard.richclient.tr03124
 import io.ktor.http.ContentType
 import io.ktor.http.HeaderValue
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.Url
 import io.ktor.http.withCharset
+import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.request.acceptItems
+import io.ktor.server.routing.ParameterRouteSelector
+import io.ktor.server.routing.RootRouteSelector
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import javafx.application.Platform
@@ -45,7 +49,10 @@ import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.addons.tr03124.ClientInformation
 import org.openecard.addons.tr03124.EcardStatus
 import org.openecard.addons.tr03124.Tr03124Binding
-import org.openecard.addons.tr03124.Tr03124Binding.Parameter.ShowUi.ShowUiModules.Companion.toUiModule
+import org.openecard.control.binding.ktor.CacheControlHeader
+import org.openecard.control.binding.ktor.RestrictToFetch
+import org.openecard.control.binding.ktor.RestrictToNavigation
+import org.openecard.control.binding.ktor.addAllowedHosts
 import org.openecard.richclient.gui.UiManager
 import org.openecard.richclient.processui.UserConsent
 import org.openecard.richclient.sc.CardWatcher
@@ -145,46 +152,74 @@ class RichclientTr03124Binding(
 	}
 }
 
-fun Routing.registerTr03124Binding(trBinding: Tr03124Binding) {
-	get(Tr03124Binding.Parameter.serverPath) {
-		val tokenUrl = call.queryParameters[Tr03124Binding.Parameter.Activate.tcTokenUrl]
-		val isStatusRequest = call.queryParameters.contains(Tr03124Binding.Parameter.Status.status)
-		val gui = call.queryParameters[Tr03124Binding.Parameter.ShowUi.showUi]
+fun Routing.registerTr03124Binding(
+	trBinding: Tr03124Binding,
+	allowedCorsOrigins: Set<Url>,
+) {
+	createChild(RootRouteSelector(Tr03124Binding.Parameter.serverPath)).apply {
+		install(CacheControlHeader)
 
-		val response: BindingResponse =
-			if (tokenUrl != null) {
-				trBinding.activate(tokenUrl)
-			} else if (isStatusRequest) {
-				val status = trBinding.status()
-				call.request
-					.acceptItems()
-					.ifEmpty { listOf(HeaderValue("text/plain")) }
-					.asSequence()
-					.mapNotNull {
-						if (ContentType.Application.Json.match(it.value)) {
-							status.asJson()
-						} else if (ContentType.Text.Plain.match(it.value)) {
-							status.asAusweisAppPlainText()
-						} else {
-							null
-						}
-					}.firstOrNull() ?: BindingResponse.ReferencedContentResponse(
-					status = HttpStatusCode.NotAcceptable.value,
-					BindingResponse.ContentCode.NO_ACCEPTABLE_FORMAT,
-				)
-			} else if (gui != null) {
-				trBinding.showUi(gui.toUiModule())
-				// the eID-testsuite (module A1) wants status code 200, however 204 is the right choice
-				// the spec does not demand to see 200, so this is fine
-				BindingResponse.NoContent()
-			} else {
+		createChild(ParameterRouteSelector(Tr03124Binding.Parameter.Activate.tcTokenUrl)).apply {
+			install(RestrictToNavigation)
+
+			get {
+				val tokenUrl = checkNotNull(call.queryParameters[Tr03124Binding.Parameter.Activate.tcTokenUrl])
+				val response: BindingResponse = trBinding.activate(tokenUrl)
+				response.toKtorResponse(call)
+			}
+		}
+
+		createChild(ParameterRouteSelector(Tr03124Binding.Parameter.Status.status)).apply {
+			install(CORS) {
+				addAllowedHosts(allowedCorsOrigins)
+			}
+			install(RestrictToFetch)
+
+			get {
+				val response: BindingResponse =
+					run {
+						val status = trBinding.status()
+						call.request
+							.acceptItems()
+							.ifEmpty { listOf(HeaderValue("text/plain")) }
+							.firstNotNullOfOrNull {
+								if (ContentType.Application.Json.match(it.value)) {
+									status.asJson()
+								} else if (ContentType.Text.Plain.match(it.value)) {
+									status.asAusweisAppPlainText()
+								} else {
+									null
+								}
+							} ?: BindingResponse.ReferencedContentResponse(
+							status = HttpStatusCode.NotAcceptable.value,
+							BindingResponse.ContentCode.NO_ACCEPTABLE_FORMAT,
+						)
+					}
+
+				response.toKtorResponse(call)
+			}
+		}
+
+		// disabled because its usefulness is unclear and it causes problems due to unwanted exposure in browsers
+// 		createChild(ParameterRouteSelector(Tr03124Binding.Parameter.ShowUi.showUi)).apply {
+// 			get {
+// 				val gui = checkNotNull(call.queryParameters[Tr03124Binding.Parameter.ShowUi.showUi])
+// 				trBinding.showUi(gui.toUiModule())
+// 				// the eID-testsuite (module A1) wants status code 200, however 204 is the right choice
+// 				// the spec does not demand to see 200, so this is fine
+// 				val response = BindingResponse.NoContent()
+// 				response.toKtorResponse(call)
+// 			}
+// 		}
+
+		get {
+			val response =
 				BindingResponse.ReferencedContentResponse(
 					HttpStatusCode.BadRequest.value,
 					BindingResponse.ContentCode.NO_SUITABLE_ACTIVATION_PARAMETERS,
 				)
-			}
-
-		response.toKtorResponse(call)
+			response.toKtorResponse(call)
+		}
 	}
 }
 

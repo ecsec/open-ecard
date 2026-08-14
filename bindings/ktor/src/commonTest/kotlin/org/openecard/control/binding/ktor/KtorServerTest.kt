@@ -31,17 +31,11 @@ data class SomeError(
 )
 
 fun Application.configureSut(
-	port: Int = 24727,
-	host: String = "localhost",
-	corsOrigins: Set<String> = setOf("service.skidentity.de"),
 	serverHeader: String? = "Unit Test",
 	configuration: Routing.() -> Unit = {},
 ) {
 	configureServer(
-		port = port,
-		host = host,
 		serverAgent = serverHeader,
-		corsOrigins = corsOrigins,
 	) {
 		configuration()
 	}

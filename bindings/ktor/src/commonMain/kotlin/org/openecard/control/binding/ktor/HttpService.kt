@@ -3,8 +3,10 @@ package org.openecard.control.binding.ktor
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.CacheControl
 import io.ktor.http.ContentType
+import io.ktor.http.HeaderValue
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.Url
 import io.ktor.http.charset
 import io.ktor.http.content.OutgoingContent
 import io.ktor.http.content.TextContent
@@ -14,6 +16,7 @@ import io.ktor.serialization.kotlinx.xml.xml
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.createApplicationPlugin
+import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.application.install
 import io.ktor.server.cio.CIO
 import io.ktor.server.cio.CIOApplicationEngine
@@ -22,9 +25,14 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.html.respondHtmlTemplate
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.server.plugins.cors.routing.CORS
+import io.ktor.server.plugins.cors.CORSConfig
 import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.request.acceptItems
+import io.ktor.server.request.header
+import io.ktor.server.response.respond
 import io.ktor.server.response.respondRedirect
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.RootRouteSelector
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
@@ -54,7 +62,7 @@ fun extractContent(content: OutgoingContent): String? =
 		}
 	}
 
-private fun generateErrorCodes(): List<HttpStatusCode> {
+private val defaultErrorCodes: List<HttpStatusCode> by lazy {
 	val result = mutableListOf<Int>()
 	for (i in 400..417) {
 		result.add(i)
@@ -67,7 +75,7 @@ private fun generateErrorCodes(): List<HttpStatusCode> {
 	for (i in 500..505) {
 		result.add(i)
 	}
-	return result.map { HttpStatusCode.fromValue(it) }
+	result.map { HttpStatusCode.fromValue(it) }
 }
 
 class ServerHeaderPluginConfig {
@@ -76,23 +84,21 @@ class ServerHeaderPluginConfig {
 
 val ServerHeader =
 	createApplicationPlugin<ServerHeaderPluginConfig>("ServerHeader", { ServerHeaderPluginConfig() }) {
-
 		val headerValue = pluginConfig.header
-
 		onCall { call ->
 			call.response.headers.append("Server", headerValue)
 		}
 	}
 
 val CacheControlHeader =
-	createApplicationPlugin("CacheControlHeader") {
+	createRouteScopedPlugin("CacheControlHeader") {
 		onCall { call ->
 			call.response.headers.append("Cache-Control", "no-store")
 		}
 	}
 
 val SecurityHeader =
-	createApplicationPlugin("SecurityHeader") {
+	createRouteScopedPlugin("SecurityHeader") {
 		onCall { call ->
 			val headers = call.response.headers
 			headers.append("X-XSS-Protection", "1")
@@ -104,6 +110,51 @@ val SecurityHeader =
 			headers.append("X-Frame-Options", "SAMEORIGIN")
 		}
 	}
+
+val RestrictToFetch =
+	createRouteScopedPlugin("RestrictToFetch") {
+		onCall { call ->
+			val mode = call.request.header("Sec-Fetch-Mode")
+			if (mode != null && mode !in setOf("cors", "navigate")) {
+				call.respond(HttpStatusCode.Forbidden)
+			}
+			val dest = call.request.header("Sec-Fetch-Dest")
+			if (dest != null && dest !in setOf("document", "empty")) {
+				call.respond(HttpStatusCode.Forbidden)
+			}
+		}
+	}
+
+val RestrictToNavigation =
+	createRouteScopedPlugin("RestrictToNavigation") {
+		onCall { call ->
+			val mode = call.request.header("Sec-Fetch-Mode")
+			if (mode != null && mode !in setOf("navigate")) {
+				call.respond(HttpStatusCode.Forbidden)
+			}
+			val dest = call.request.header("Sec-Fetch-Dest")
+			if (dest != null && dest !in setOf("document", "frame", "iframe", "fencedframe")) {
+				call.respond(HttpStatusCode.Forbidden)
+			}
+		}
+	}
+
+val RestrictToSameSite =
+	createRouteScopedPlugin("RestrictToSameSite") {
+		onCall { call ->
+			val site = call.request.header("Sec-Fetch-Site")
+			if (site != null && site !in setOf("none", "same-site", "same-origin")) {
+				call.respond(HttpStatusCode.Forbidden)
+			}
+		}
+	}
+
+fun CORSConfig.addAllowedHosts(corsOrigins: Set<Url>) {
+	for (origin in corsOrigins) {
+		allowHost("${origin.host}:${origin.port}", schemes = listOf(origin.protocol.name))
+	}
+	allowHeader(HttpHeaders.ContentType)
+}
 
 suspend fun ApplicationCall.respondOecHtmlError(
 	status: HttpStatusCode,
@@ -119,10 +170,7 @@ suspend fun ApplicationCall.respondOecHtmlError(
 	response.headers.append(HttpHeaders.ContentType, htmlUtf8ContentType.toString())
 }
 
-fun Application.configureServer(
-	port: Int,
-	host: String,
-	corsOrigins: Set<String>,
+internal fun Application.configureServer(
 	serverAgent: String?,
 	configuration: Routing.() -> Unit,
 ) {
@@ -131,19 +179,9 @@ fun Application.configureServer(
 			header = serverAgent
 		}
 	}
-	install(SecurityHeader)
-	install(CacheControlHeader)
-	install(CORS) {
-		allowHost("$host:$port")
-		for (origin in corsOrigins) {
-			allowHost(origin, schemes = listOf("https"))
-		}
-		allowHeader(HttpHeaders.ContentType)
-	}
-	install(StatusPages) {
-		val codes = generateErrorCodes().toTypedArray()
 
-		status(*codes) { statusCode ->
+	install(StatusPages) {
+		status(*defaultErrorCodes.toTypedArray()) { statusCode ->
 			val currentContentType = content.contentType
 			var message =
 				if (currentContentType != null && currentContentType.match("text/plain")) {
@@ -164,7 +202,18 @@ fun Application.configureServer(
 						else -> "no message"
 					}
 			}
-			call.respondOecHtmlError(statusCode, message = message)
+
+			for (nextMimeType in call.request.acceptItems() + HeaderValue("*/*")) {
+				if (ContentType.Text.Html.match(nextMimeType.value)) {
+					call.respondOecHtmlError(statusCode, message = message)
+					break
+				} else if (ContentType.Text.Plain.match(nextMimeType.value)) {
+					call.respondText(ContentType.Text.Plain, statusCode) { message }
+					break
+				} else if (ContentType.Application.Json.match(nextMimeType.value)) {
+					call.respond(statusCode, mapOf("error" to message))
+				}
+			}
 		}
 	}
 
@@ -172,14 +221,22 @@ fun Application.configureServer(
 		json()
 		xml()
 	}
+	install(SecurityHeader)
+
 	routing {
-		staticResources("/", "www") {
-			enableAutoHeadResponse()
-			cacheControl {
-				listOf(CacheControl.NoStore(null))
+		get("/") {
+			call.respondRedirect("/static/")
+		}
+		createChild(RootRouteSelector("/static")).apply {
+			install(RestrictToSameSite)
+
+			staticResources("/", "www", "index.html") {
+				enableAutoHeadResponse()
+				cacheControl {
+					listOf(CacheControl.NoStore(null))
+				}
 			}
 		}
-		get("/") { call.respondRedirect("index.html") }
 		configuration()
 	}
 }
@@ -209,7 +266,6 @@ class HttpService(
 			host: String = "localhost",
 			wait: Boolean = true,
 			serverAgent: UserAgent? = null,
-			corsOrigins: Set<String> = setOf("service.skidentity.de"),
 			configuration: Routing.() -> Unit,
 		): HttpService {
 			val inst =
@@ -219,9 +275,6 @@ class HttpService(
 					host = host,
 				) {
 					configureServer(
-						port = port,
-						host = host,
-						corsOrigins = corsOrigins,
 						serverAgent = serverAgent?.toHeaderValue(),
 						configuration = configuration,
 					)

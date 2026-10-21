@@ -9,6 +9,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.openecard.sc.iface.CancelledByUser
 import org.openecard.sc.iface.CommError
 import org.openecard.sc.iface.InternalSystemError
@@ -26,7 +27,9 @@ import platform.CoreNFC.NFCPollingISO14443
 import platform.CoreNFC.NFCTagReaderSession
 import platform.CoreNFC.NFCTagReaderSessionDelegateProtocol
 import platform.Foundation.NSError
+import platform.Foundation.NSOperationQueue
 import platform.darwin.NSObject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 private val logger = KotlinLogging.logger { }
@@ -102,13 +105,18 @@ internal class IosNfcTagReaderSession(
 						er?.let {
 							throw CommError(er.localizedDescription)
 						}
+						// 				runBlocking {
+						// 					withTimeout(1.seconds) {
+						// 						while (!it.available) {
+						// 							delay(10.milliseconds)
+						// 						}
+						// 					}
+						// 				}
+
 						nfcReaderSession.alertMessage = IosNfcAlertMessages.cardInsertedMessage
-						CoroutineScope(Dispatchers.Main).launch {
-							delay(1.seconds)
-							deferredTag.complete(it)
-						}
+						deferredTag.complete(it)
 					}
-				} ?: {
+				} ?: run {
 					// this does most probably not happen, since polling option searches for iso7816 only
 					nfcReaderSession.alertMessage = IosNfcAlertMessages.cardNotSupported
 				}
@@ -125,7 +133,7 @@ internal class IosNfcTagReaderSession(
 		NFCTagReaderSession(
 			NFCPollingISO14443,
 			nfcTagReaderSessionDelegate,
-			null,
+			NSOperationQueue(),
 		)
 
 	internal fun activate() {
@@ -231,7 +239,7 @@ class IosTerminal(
 	}
 
 	override suspend fun waitForCardPresent() {
-		currentSession?.deferredTag?.await()
+		val t = currentSession?.deferredTag?.await()
 	}
 
 	override suspend fun waitForCardAbsent() {

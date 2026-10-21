@@ -133,7 +133,9 @@ internal class IosNfcTagReaderSession(
 		NFCTagReaderSession(
 			NFCPollingISO14443,
 			nfcTagReaderSessionDelegate,
-			NSOperationQueue(),
+			NSOperationQueue().apply {
+				maxConcurrentOperationCount = 1
+			},
 		)
 
 	internal fun activate() {

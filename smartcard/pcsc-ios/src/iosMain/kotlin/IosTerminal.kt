@@ -97,9 +97,9 @@ internal class IosNfcTagReaderSession(
 						er?.let {
 							throw CommError(er.localizedDescription)
 						}
+						nfcReaderSession.alertMessage = IosNfcAlertMessages.cardInsertedMessage
+						deferredTag.complete(it)
 					}
-					nfcReaderSession.alertMessage = IosNfcAlertMessages.cardInsertedMessage
-					deferredTag.complete(it)
 				} ?: {
 					// this does most probably not happen, since polling option searches for iso7816 only
 					nfcReaderSession.alertMessage = IosNfcAlertMessages.cardNotSupported

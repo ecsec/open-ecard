@@ -3,7 +3,11 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.openecard.sc.iface.CancelledByUser
 import org.openecard.sc.iface.CommError
@@ -23,6 +27,7 @@ import platform.CoreNFC.NFCTagReaderSession
 import platform.CoreNFC.NFCTagReaderSessionDelegateProtocol
 import platform.Foundation.NSError
 import platform.darwin.NSObject
+import kotlin.time.Duration.Companion.seconds
 
 private val logger = KotlinLogging.logger { }
 
@@ -98,7 +103,10 @@ internal class IosNfcTagReaderSession(
 							throw CommError(er.localizedDescription)
 						}
 						nfcReaderSession.alertMessage = IosNfcAlertMessages.cardInsertedMessage
-						deferredTag.complete(it)
+						CoroutineScope(Dispatchers.Main).launch {
+							delay(1.seconds)
+							deferredTag.complete(it)
+						}
 					}
 				} ?: {
 					// this does most probably not happen, since polling option searches for iso7816 only
